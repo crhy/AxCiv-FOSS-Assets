@@ -1,23 +1,17 @@
 # About
 
-Civilization II (original/Multiplayer Gold Edition & Test of Time remake) clone in .NET 8.0 using [C# bindings](https://github.com/MrScautHD/Raylib-CSharp) of [Raylib](https://www.raylib.com/) for Win/Linux/Mac.
+Completely FOSS remake of the original Civilization II
+(original/Multiplayer Gold Edition & Test of Time remake) clone in .NET 8.0 using [C# bindings](https://github.com/MrScautHD/Raylib-CSharp) of [Raylib](https://www.raylib.com/) for Win/Linux/Mac.
 
 Folders:
 - Engine = the Civ2 logic (core) code
 - Civ2 (Civ2Gold + Civ2TOT) = interfaces with game-specific logic for MGE and Test of Time
-- RaylibUI = graphical implementation of the game
+- RaylibUI = graphical implementation of the game & FOSS art
 - EtoFormsUI = We're still transitioning from Eto to raylib UI. So Eto folder is there untill this process is over, then we'll remove it.
 
 # Requirements
 
-You need the original game with its assets (sounds, images, texts) to run this.
-
-To achieve this, download the version of Civ II you desire, install it (if you are on Windows 10+, you will need to create an XP VM), and point to where the files have been installed. Normally is where the Civ2.exe, Game.txt, etc. are located)
-
-[You can download the Civ II assets here](https://1drv.ms/u/s!Ary9ImGwIZdvsaFkzokff72aofn6QA?e=GM0fkZ) (It is already installed)
-
-You can also download it online; there are several sites that provide the installer, the above version is already installed to save time. There are also some save files (.sav) that will be necessary for you to load the game.
-
+You no longer need the original game with its assets (sounds, images, texts) to run this.
 
 # Status & goals
 
@@ -31,9 +25,10 @@ Goals:
 - rewrite the game, closely matching the original's functionalities and features
 - implement various improvements & QoL features (support more than 7 civs, graphical files with richer colours, etc.)
 - enable Lua scripting
+- Make the game completely stand alone and open source
 
 # Running the game
-
+( These instructions are old)
 Download the .NET 8.0 SDK. The easiest way is to run the game with Visual Studio or VSCode.
  
 You have to point to RaylibUI folder then build it.
