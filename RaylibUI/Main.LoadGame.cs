@@ -3,6 +3,7 @@ using Civ2engine.IO;
 using Civ2engine;
 using Civ2engine.Units;
 using Model;
+using Model.Core;
 using RaylibUI.RunGame;
 
 namespace RaylibUI
@@ -12,11 +13,21 @@ namespace RaylibUI
         private Unit _activeUnit;
 
         
-        public void StartGame(Game game)
+        public void StartGame(IGame game, IDictionary<string, string?>? viewData)
         {
             game.UpdatePlayerViewData();
             
-            _activeScreen = new GameScreen(this, game, Soundman);
+            _activeScreen = new GameScreen(this, game, Soundman, viewData);
+
+            if (game.TurnNumber == 0)
+            {
+                game.StartNextTurn();
+            }
+            else
+            {
+                // If we're not on turn one start with active player
+                game.StartPlayerTurn(game.ActivePlayer);
+            }
         }
 
         public IUserInterface SetActiveRulesetFromFile(string root, string subDirectory,
@@ -53,6 +64,8 @@ namespace RaylibUI
                 ActiveInterface = Interfaces[selected.InterfaceIndex];
             }
 
+            TextureCache.Clear();
+            ImageUtils.SetLook(ActiveInterface);
             return ActiveInterface;
         }
 

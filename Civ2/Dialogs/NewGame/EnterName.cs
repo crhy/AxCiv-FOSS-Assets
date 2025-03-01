@@ -1,6 +1,6 @@
 using Civ2.Rules;
 using Civ2engine;
-using Model;
+using Model.Dialog;
 using Model.Interface;
 using Model.InterfaceActions;
 
@@ -37,7 +37,9 @@ public class EnterName : BaseDialogHandler
         }
         else
         {
-            Dialog.TextBoxes[0].InitialValue = config.PlayerCiv.LeaderName;
+            Dialog.TextBoxes[0].InitialValue = config.IsScenario ?
+                config.LeaderNames[config.ScenPlayerCivId] :
+                config.PlayerCiv.LeaderName;
         }
 
         return base.Show(activeInterface);
@@ -67,9 +69,11 @@ public class EnterName : BaseDialogHandler
         
         if (Initialization.ConfigObject.IsScenario)
         {
-            var game = Game.UpdateScenarioChoices(Initialization.ConfigObject);
+            var game = Initialization.UpdateScenarioChoices();
+            
+            civ2Interface.ScenTitleImage = null;
             Initialization.Start(game);
-            return new StartGame(Initialization.GameInstance);
+            return new StartGame(Initialization.GameInstance, Initialization.ViewData);
         }
         else
         {

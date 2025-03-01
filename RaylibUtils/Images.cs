@@ -1,8 +1,13 @@
 ﻿using Civ2engine;
-using Raylib_cs;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Colors;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Unicode;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RaylibUtils;
 
@@ -11,9 +16,18 @@ public static partial class Images
     /// <summary>
     /// Load image from file and make colours transparent
     /// </summary>
-    public static Image_and_bpp LoadImageFromFile(string filename)
+    public static Image_and_bpp LoadImageFromFile(string filename, int dataStart = 0, int length = 0)
     {
-        byte[] bytes = File.ReadAllBytes(filename);
+        byte[] bytes;
+        if (length != 0)
+        {
+            bytes = new byte[length];
+            Array.Copy(File.ReadAllBytes(filename), dataStart, bytes, 0, length);
+        }
+        else
+        {
+            bytes = File.ReadAllBytes(filename);
+        }
         Image img = new();
         int bpp = 0; // colour depth
 
@@ -28,7 +42,7 @@ public static partial class Images
             int height = BitConverter.ToInt16(bytes, 8);
 
             // Let raylib deal with LZW decompression
-            img = Raylib.LoadImageFromMemory(Path.GetExtension(filename).ToLowerInvariant(), bytes);
+            img = Image.LoadFromMemory(".gif", bytes);
 
             // Get 3 transparent colours from palette and replace colours
             Color[] transparent = new Color[3];
@@ -42,8 +56,7 @@ public static partial class Images
                     B = bytes[13 + 3 * (253 + i) + 2],
                 };
 
-                Raylib.ImageColorReplace(ref img, transparent[i],
-                    new Color(transparent[i].R, transparent[i].G, transparent[i].B, (byte)0));
+                img.ReplaceColor(transparent[i], new Color(transparent[i].R, transparent[i].G, transparent[i].B, 0));
             }
         }
         // BMP
@@ -53,6 +66,10 @@ public static partial class Images
             var width = BitConverter.ToInt32(bytes, 18);
             var height = BitConverter.ToInt32(bytes, 22);
             bpp = BitConverter.ToInt16(bytes, 28);
+            var size = BitConverter.ToInt32(bytes, 34);
+            if (size == 0)
+                size = bytes.Length - dataOffset;
+            var extraBits = size / height - bpp / 8 * width;
             var imgData = new byte[4 * width * height];
             int flag1Color = Convert.ToInt32("0x0000FFFF", 16);
             int flag2Color = Convert.ToInt32("0xFF9C00FF", 16);
@@ -110,14 +127,15 @@ public static partial class Images
                                 if (bpp == 16)
                                 {
                                     var _15bitrgb = Get15BitRgb(bytes, dataOffset +
-                                                    2 * width * (height - 1 - row) + 2 * col);
+                                                    (2 * width + extraBits) * (height - 1 - row) + 2 * col);
                                     imgData[4 * (width * row + col) + 0] = (byte)(_15bitrgb[2] * 255 / 31);
                                     imgData[4 * (width * row + col) + 1] = (byte)(_15bitrgb[1] * 255 / 31);
                                     imgData[4 * (width * row + col) + 2] = (byte)(_15bitrgb[0] * 255 / 31);
+                                    imgData[4 * (width * row + col) + 3] = 255;
                                 }
                                 else
                                 {
-                                    var off = dataOffset + 3 * width * (height - 1 - row) + 3 * col;
+                                    var off = dataOffset + (3 * width + extraBits) * (height - 1 - row) + 3 * col;
                                     imgData[4 * (width * row + col) + 0] = bytes[off + 2];
                                     imgData[4 * (width * row + col) + 1] = bytes[off + 1];
                                     imgData[4 * (width * row + col) + 2] = bytes[off + 0];
@@ -136,16 +154,16 @@ public static partial class Images
                     break;
 
                 default: throw new ArgumentOutOfRangeException();
-
             };
 
+            Image img2; 
             unsafe
             {
                 fixed (byte* ptr = imgData)
                 {
-                    img = new Image
+                    img2 = new Image
                     {
-                        Data = ptr,
+                        Data = (nint)ptr,
                         Format = PixelFormat.UncompressedR8G8B8A8,
                         Width = width,
                         Height = height,
@@ -153,14 +171,14 @@ public static partial class Images
                     };
                 }
             }
+            img = img2.Copy();
         }
         // PNG
         else if (System.Text.Encoding.UTF8.GetString(bytes, 1, 3).Equals("PNG"))
         {
             bpp = 32;
-            img = Raylib.LoadImageFromMemory(Path.GetExtension(filename).ToLowerInvariant(), bytes);
-            Raylib.ImageColorReplace(ref img,
-                new Color(255, 0, 255, 255), new Color(255, 0, 255, 0));
+            img = Image.LoadFromMemory(Path.GetExtension(filename).ToLowerInvariant(), bytes);
+            img.ReplaceColor(new Color(255, 0, 255, 255), new Color(255, 0, 255, 0));
         }
 
         return new Image_and_bpp

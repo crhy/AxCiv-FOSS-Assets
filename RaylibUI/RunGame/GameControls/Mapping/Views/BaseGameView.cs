@@ -1,8 +1,16 @@
+using System.Diagnostics;
 using System.Numerics;
+using System.Xml.Serialization;
+using Civ2engine;
+using Civ2engine.Enums;
+using Civ2engine.Events;
 using Civ2engine.MapObjects;
 using Model;
 using Model.ImageSets;
-using Raylib_cs;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Textures;
+using Raylib_CSharp.Transformations;
 using RaylibUI.RunGame.GameControls.Mapping.Views.ViewElements;
 
 namespace RaylibUI.RunGame.GameControls.Mapping.Views;
@@ -38,15 +46,15 @@ public abstract class BaseGameView : IGameView
         ViewWidth = viewWidth;
         ViewHeight = viewHeight;
 
-        Dimensions = _gameScreen.TileCache.GetDimensions(location.Map);
-        
+        var map = location.Map;
+        Dimensions = _gameScreen.TileCache.GetDimensions(map, gameScreen.Zoom);
         
         var activeInterface = _gameScreen.Main.ActiveInterface;
         
         var cities = activeInterface.CityImages;
-        var civilizationId = _gameScreen.Player.Civilization.Id;
+        var civilizationId = _gameScreen.VisibleCivId;
         // Force redraw should be checked last as IsSameArea will set offsets 
-        if (previousView != null && IsInSameArea(previousView, location, Dimensions) && !forceRedraw)
+        if (previousView != null && IsInSameArea(previousView, location, Dimensions, forceRedraw) && !forceRedraw)
         {
             ActivePos = GetPosForTile(location);
             BaseImage = previousView.BaseImage;
@@ -59,7 +67,7 @@ public abstract class BaseGameView : IGameView
                 var pos = GetPosForTile(tile);
                 
                 var tileDetails = _gameScreen.TileCache.GetTileDetails(tile, civilizationId);
-                CalculateElementsAtTile(tile, newElements, activeInterface,cities,pos,tileDetails, civilizationId);
+                CalculateElementsAtTile(gameScreen, tile, newElements, activeInterface,cities,pos,tileDetails, civilizationId);
             }
             Elements = previousView.Elements.Where(e=> !previousAction.Contains(e.Tile)).Concat(newElements).ToArray();
             
@@ -76,14 +84,9 @@ public abstract class BaseGameView : IGameView
 
             var imageWidth = ViewWidth;
             var imageHeight = ViewHeight;
-            var image = Raylib.GenImageColor(imageWidth, imageHeight, new Color(0, 0, 0, 0));
-            var map = location.Map;
-            var dim = _gameScreen.TileCache.GetDimensions(map);
-
-            Raylib.ImageDrawRectangle(ref image, 0, 0, imageWidth, imageHeight, Color.Black);
-
+            var image = Image.GenColor(imageWidth, imageHeight, Color.Black);
+            var dim = _gameScreen.TileCache.GetDimensions(map, gameScreen.Zoom);
             var ypos = -_offsets.Y;
-
             var maxWidth = map.XDim * dim.TileWidth;
 
             for (var row = 0; row < map.YDim; row++)
@@ -121,12 +124,32 @@ public abstract class BaseGameView : IGameView
                             if (tile.IsVisible(civilizationId) || map.MapRevealed)
                             {
                                 var tileDetails = _gameScreen.TileCache.GetTileDetails(tile, civilizationId);
-                                Raylib.ImageDraw(ref image, tileDetails.Image,
-                                    MapImage.TileRec,
-                                    new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight), Color.White);
+                                if (gameScreen.Zoom == 0)
+                                {
+                                    image.Draw(tileDetails.Image, MapImage.TileRec,
+                                        new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight),
+                                        Color.White);
+                                }
+                                else
+                                {
+                                    var resizedImg = tileDetails.Image.Copy();
+                                    if (Settings.TextureFilter == 0)
+                                    {
+                                        resizedImg.ResizeNN(resizedImg.Width.ZoomScale(gameScreen.Zoom),
+                                            resizedImg.Height.ZoomScale(gameScreen.Zoom));
+                                    }
+                                    else
+                                    {
+                                        resizedImg.Resize(resizedImg.Width.ZoomScale(gameScreen.Zoom),
+                                            resizedImg.Height.ZoomScale(gameScreen.Zoom));
+                                    }
+                                    image.Draw(resizedImg, MapImage.TileRec.ZoomScale(gameScreen.Zoom),
+                                        new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight),
+                                        Color.White);
+                                }
 
                                 var posVector = new Vector2(xpos, ypos);
-                                CalculateElementsAtTile(tile, elements, activeInterface, cities, posVector, tileDetails, civilizationId);
+                                CalculateElementsAtTile(gameScreen, tile, elements, activeInterface, cities, posVector, tileDetails, civilizationId);
                             }
                         }
 
@@ -141,15 +164,20 @@ public abstract class BaseGameView : IGameView
                 }
             }
 
-            this.BaseImage = Raylib.LoadTextureFromImage(image);
+            this.BaseImage = Texture2D.LoadFromImage(image);
             this.Elements = elements.ToArray();
 
-            Raylib.UnloadImage(image);
+            image.Unload();
+
+            gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.MapViewChanged,
+                new[] { (int)_offsets.X / dim.HalfWidth, (int)_offsets.Y / dim.HalfHeight },
+                new[] { ViewWidth / dim.HalfWidth, ViewHeight / dim.HalfHeight }));
         }
     }
 
 
-    private void CalculateElementsAtTile(Tile tile, List<IViewElement> elements, IUserInterface activeInterface,
+    private void CalculateElementsAtTile(GameScreen gameScreen, Tile tile, List<IViewElement> elements,
+        IUserInterface activeInterface,
         CityImageSet cities,
         Vector2 posVector, TileDetails tileDetails, int civilizationId)
     {
@@ -163,11 +191,11 @@ public abstract class BaseGameView : IGameView
         if (playerKnowledge.CityHere != null)
         {
             var cityStyleIndex = _gameScreen.Game.Players[playerKnowledge.CityHere.OwnerId].Civilization.CityStyle;
-            if (tile.CityHere.Owner.Epoch == Civ2engine.Enums.EpochType.Industrial)
+            if (tile.CityHere.Owner.Epoch == (int)Civ2engine.Enums.EpochType.Industrial)
             {
                 cityStyleIndex = 4;
             }
-            else if (tile.CityHere.Owner.Epoch == Civ2engine.Enums.EpochType.Modern)
+            else if (tile.CityHere.Owner.Epoch == (int)Civ2engine.Enums.EpochType.Modern)
             {
                 cityStyleIndex = 5;
             }
@@ -175,8 +203,9 @@ public abstract class BaseGameView : IGameView
             var sizeIncrement =
                 _gameScreen.Main.ActiveInterface.GetCityIndexForStyle(cityStyleIndex,
                     tile.CityHere, playerKnowledge.CityHere.Size);
+            
             var cityImage = cities.Sets[cityStyleIndex][sizeIncrement];
-            var cityPos = posVector with{ Y = posVector.Y + Dimensions.TileHeight - TextureCache.GetImage(cityImage.Image).Height};
+            var cityPos = posVector with{ Y = posVector.Y + Dimensions.TileHeight - TextureCache.GetImage(cityImage.Image).Height.ZoomScale(gameScreen.Zoom) };
             elements.Add(new CityData(
                 color: activeInterface.PlayerColours[playerKnowledge.CityHere.OwnerId],
                 name: playerKnowledge.CityHere.Name,
@@ -186,10 +215,10 @@ public abstract class BaseGameView : IGameView
                 location: cityPos, tile: tile));
             if (tile.UnitsHere.Count > 0)
             {
-                var flagTexture = activeInterface.PlayerColours[playerKnowledge.CityHere.OwnerId].FlagTexture;
+                var flagTexture = TextureCache.GetImage(activeInterface.PlayerColours[playerKnowledge.CityHere.OwnerId].Image);
                 var flagOffset = cityImage.FlagLoc - new Vector2(0, flagTexture.Height - 5);
                 elements.Add(new TextureElement(texture: flagTexture,
-                    tile: tile, location: cityPos + flagOffset, offset: flagOffset)
+                    tile: tile, location: cityPos, offset: flagOffset)
                 );
             }
         }
@@ -204,7 +233,7 @@ public abstract class BaseGameView : IGameView
                     var impImage = ImageUtils.GetImpImage(activeInterface, unitImp.UnitImage,
                         tile.Owner);
                     elements.Add(new TextureElement(
-                        texture: impImage, location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height }, tile: tile, isTerrain: true));
+                        texture: impImage, location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height.ZoomScale(gameScreen.Zoom) }, tile: tile, isTerrain: true));
                 }
                 else
                 {
@@ -212,25 +241,25 @@ public abstract class BaseGameView : IGameView
                         tile.Owner);
                     elements.Add(new TextureElement(
                         texture: impImage,
-                        location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height },
+                        location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height.ZoomScale(gameScreen.Zoom) },
                         tile: tile, isTerrain: true));
 
                     
-                    ImageUtils.GetUnitTextures(unit, activeInterface, elements,
+                    ImageUtils.GetUnitTextures(unit, activeInterface, gameScreen.Game, elements,
                         posVector with
                         {
                             Y = posVector.Y + Dimensions.TileHeight -
-                                activeInterface.UnitImages.UnitRectangle.Height
+                                activeInterface.UnitImages.UnitRectangle.Height.ZoomScale(gameScreen.Zoom)
                         });
                 }
             }
             else
             {
-                ImageUtils.GetUnitTextures(unit, activeInterface, elements,
+                ImageUtils.GetUnitTextures(unit, activeInterface, gameScreen.Game, elements,
                     posVector with
                     {
                         Y = posVector.Y + Dimensions.TileHeight -
-                            activeInterface.UnitImages.UnitRectangle.Height
+                            activeInterface.UnitImages.UnitRectangle.Height.ZoomScale(gameScreen.Zoom)
                     });
                 if (tileDetails.ForegroundElement != null)
                 {
@@ -238,7 +267,8 @@ public abstract class BaseGameView : IGameView
                         tileDetails.ForegroundElement.Image, tile.Owner);
                     elements.Add(new TextureElement(
                         texture: impImage,
-                        location: posVector with{ Y = posVector.Y + Dimensions.TileHeight - impImage.Height}, tile: tile, isTerrain: true));
+                        location: posVector with{ Y = posVector.Y + Dimensions.TileHeight - impImage.Height.ZoomScale(gameScreen.Zoom)
+                        }, tile: tile, isTerrain: true));
                 }
             }
         }
@@ -248,7 +278,7 @@ public abstract class BaseGameView : IGameView
                 tileDetails.ForegroundElement.Image, tile.Owner);
             elements.Add(new TextureElement(
                 texture: impImage,
-                location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height },
+                location: posVector with { Y = posVector.Y + Dimensions.TileHeight - impImage.Height.ZoomScale(gameScreen.Zoom) },
                 tile: tile, isTerrain: true));
         }
     }
@@ -256,18 +286,17 @@ public abstract class BaseGameView : IGameView
     protected Vector2 GetPosForTile(Tile tile)
     {
         return new Vector2(tile.XIndex * Dimensions.TileWidth + tile.Odd * Dimensions.HalfWidth,
-                   tile.Y * Dimensions.HalfHeight) -
-               Offsets;
+                   tile.Y * Dimensions.HalfHeight) - _offsets;
     }
 
     public Texture2D BaseImage { get; set; }
 
-    private bool IsInSameArea(IGameView previousView, Tile location, MapDimensions dimensions)
+    private bool IsInSameArea(IGameView previousView, Tile location, MapDimensions dimensions, bool force = false)
     {
         if (previousView.Location.Map != location.Map) return false;
         if (previousView.ViewHeight != ViewHeight || previousView.ViewWidth != ViewWidth) return false;
 
-        return !CalculateOffsets(previousView, location, dimensions);
+        return !CalculateOffsets(previousView, location, dimensions, force);
     }
 
     private bool CalculateOffsets(IGameView? previousView, Tile location, MapDimensions dimensions, bool force = false)
@@ -276,75 +305,100 @@ public abstract class BaseGameView : IGameView
         {
             _offsets = previousView.Offsets;
         }
-        bool setOffsets;
+        bool setOffsetX, setOffsetY;
+        bool xShift = false;    // true when moving through edge of round earth
         int offsetY;
         int offsetX;
         if (ViewHeight >= dimensions.TotalHeight)
         {
             offsetY = (dimensions.TotalHeight - ViewHeight) /2;
-            setOffsets = offsetY != (int)_offsets.Y;
+            setOffsetY = offsetY != (int)_offsets.Y;
         }
         else
         {
             var tileTop = location.Y * dimensions.HalfHeight;
             offsetY = tileTop - (ViewHeight / 2);
-            if (offsetY < 0)
+            var currentOffsetYPos = tileTop - _offsets.Y;
+
+            setOffsetY = currentOffsetYPos < 0 || currentOffsetYPos + dimensions.TileHeight > ViewHeight;
+
+            if (offsetY < 0 && (currentOffsetYPos < 0 || previousView == null || force))
             {
-                offsetY = 0; setOffsets = offsetY != (int)_offsets.Y;
+                offsetY = 0;
+                setOffsetY = offsetY != (int)_offsets.Y;
             }
-            else if(offsetY > (dimensions.TotalHeight - ViewHeight))
+            else if (offsetY + ViewHeight > dimensions.TotalHeight && 
+                (currentOffsetYPos + dimensions.TileHeight > ViewHeight || previousView == null || force))
             {
                 offsetY = dimensions.TotalHeight - ViewHeight;
-                setOffsets = offsetY != (int)_offsets.Y;
-            }
-            else
-            {
-                var currentOffsetYPos = tileTop - _offsets.Y;
-                setOffsets = currentOffsetYPos < dimensions.TotalHeight || currentOffsetYPos + dimensions.TileHeight * 2 > ViewHeight;
+                setOffsetY = offsetY != (int)_offsets.Y;
             }
         }
 
-        if (location.Map.Flat && ViewWidth >= dimensions.TotalWidth)
+        if (ViewWidth >= dimensions.TotalWidth)
         {
             offsetX = (dimensions.TotalWidth - ViewWidth) /2;
-            setOffsets = setOffsets || offsetX != (int)_offsets.X;
+            setOffsetX = offsetX != (int)_offsets.X;
         }
         else
         {
             var tileLeft = location.XIndex * dimensions.TileWidth + location.Odd * dimensions.HalfWidth;
             offsetX = tileLeft - (ViewWidth / 2);
+            var currentOffsetXPos = tileLeft - _offsets.X;
+
             if (location.Map.Flat)
             {
-                if (offsetX < 0)
+                setOffsetX = currentOffsetXPos < 0 || currentOffsetXPos + dimensions.TileWidth > ViewWidth;
+
+                if (offsetX < 0 && (currentOffsetXPos < 0 || previousView == null || force))
                 {
                     offsetX = 0;
-                    setOffsets = setOffsets || offsetX != (int)_offsets.X;
-                }else if (offsetX > (dimensions.TotalWidth - ViewWidth + dimensions.HalfWidth))
-                {
-                    offsetX = dimensions.TotalWidth - ViewWidth + dimensions.HalfWidth;
-                    setOffsets = setOffsets || offsetX != (int)_offsets.X;
+                    setOffsetX = offsetX != (int)_offsets.X;
                 }
-                else
+                else if (offsetX + ViewWidth > dimensions.TotalWidth &&
+                    (currentOffsetXPos + dimensions.TileWidth > ViewWidth || previousView == null || force))
                 {
-                    var currentOffsetXPos = tileLeft - _offsets.X;
-                    setOffsets = setOffsets || currentOffsetXPos < dimensions.TileWidth ||
-                                 currentOffsetXPos +  dimensions.TileWidth * 2 > ViewWidth;
+                    offsetX = dimensions.TotalWidth - ViewWidth;
+                    setOffsetX = offsetX != (int)_offsets.X;
                 }
             }
             else
             {
-                var currentOffsetXPos = tileLeft - _offsets.X;
-                setOffsets = setOffsets || currentOffsetXPos < dimensions.TileWidth ||
-                             currentOffsetXPos + dimensions.TileWidth * 2 > ViewWidth;
+                if (_offsets.X < 0 && tileLeft - _offsets.X > dimensions.TotalWidth)
+                {
+                    offsetX = (int)_offsets.X + dimensions.TotalWidth;
+                    setOffsetX = true;
+                    xShift = true;
+                }
+                else if (_offsets.X > 0 && tileLeft >= 0 && dimensions.TotalWidth - _offsets.X + tileLeft < ViewWidth)
+                {
+                    offsetX = (int)_offsets.X - dimensions.TotalWidth;
+                    setOffsetX = true;
+                    xShift = true;
+                }
+                else
+                {
+                    setOffsetX = currentOffsetXPos < 0 ||
+                                currentOffsetXPos + dimensions.TileWidth > ViewWidth;
+                }
             }
         }
 
-        if (force || setOffsets)
+
+        if (force || setOffsetX)
         {
-            _offsets = new Vector2(offsetX, offsetY);
+            _offsets.X = offsetX;
         }
 
-        return setOffsets;
+        if (force || setOffsetY)
+        {
+            _offsets.Y = offsetY;
+        }
+
+        if (xShift && !setOffsetY)
+            return false;
+
+        return setOffsetX || setOffsetY;
     }
 
     public Tile Location { get; }
@@ -378,7 +432,7 @@ public abstract class BaseGameView : IGameView
     {
         if (!_preserve)
         {
-            Raylib.UnloadTexture(BaseImage);
+            BaseImage.Unload();
         }
     }
 

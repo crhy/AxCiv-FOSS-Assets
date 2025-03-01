@@ -1,27 +1,32 @@
 using Civ2engine;
 using Model;
+using Model.Core;
 using Model.InterfaceActions;
-using Raylib_cs;
 using RaylibUI.Forms;
 using RaylibUtils;
+using Civ2;
+using Model.Dialog;
+using Raylib_CSharp.Windowing;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Colors;
 
 namespace RaylibUI.Initialization;
 
 public class MainMenu : BaseScreen
 {
     private readonly Action _shutdownApp;
-    private readonly Action<Game> _startGame;
+    private readonly Action<IGame, IDictionary<string, string?>?> _startGame;
     private IInterfaceAction _currentAction;
     private List<ImagePanel> _imagePanels = new();
     private ScreenBackground? _background;
     
     private SoundData? _sndMenuLoop;
 
-    public MainMenu(Main main, Action shutdownApp, Action<Game> startGame, Sound soundManager) : base(main)
+    public MainMenu(Main main, Action shutdownApp, Action<IGame, IDictionary<string, string?>?> startGame, Sound soundManager) : base(main)
     {
         _shutdownApp = shutdownApp;
         _startGame = startGame;
-
+        
         InterfaceChanged(soundManager);
 
         _currentAction = main.ActiveInterface.GetInitialAction();
@@ -35,7 +40,7 @@ public class MainMenu : BaseScreen
         {
             case StartGame start:
                 _sndMenuLoop?.Stop();
-                _startGame(start.Game);
+                _startGame(start.Game, start.ViewData);
                 break;
             case ExitAction:
                 _shutdownApp();
@@ -44,14 +49,16 @@ public class MainMenu : BaseScreen
             {
                 var menu = menuAction.DialogElement;
                 UpdateDecorations(menu);
-
+                    
                 ShowDialog(new CivDialog(MainWindow, menu.Dialog, menu.DialogPos, HandleButtonClick,
                     optionsCols: menu.OptionsCols,
                     replaceStrings: menu.ReplaceStrings,
                     replaceNumbers: menu.ReplaceNumbers, 
                     checkboxStates: menu.CheckboxStates,
                     textBoxDefs: menu.TextBoxes, 
-                    icons: menu.OptionsImages));
+                    initSelectedOption: menu.SelectedOption,
+                    optionsIcons: menu.OptionsIcons,
+                    image: menu.Image));
                 break;
             }
             case FileAction fileAction:
@@ -119,21 +126,29 @@ public class MainMenu : BaseScreen
     {
         _sndMenuLoop?.MusicUpdateCall();
         
-        var screenWidth = Raylib.GetScreenWidth();
-        var screenHeight = Raylib.GetScreenHeight();
+        var screenWidth = Window.GetScreenWidth();
+        var screenHeight = Window.GetScreenHeight();
 
-        if (_background == null)
+        var titleImg = MainWindow.ActiveInterface.ScenTitleImage;
+        if (titleImg != null)
         {
-            Raylib.ClearBackground(new Color(143, 123, 99, 255));
+            var titleTexture = TextureCache.GetImage(titleImg, MainWindow.ActiveInterface);
+            Graphics.ClearBackground(_background.Background);
+            Graphics.DrawTexture(titleTexture, (screenWidth - titleTexture.Width) / 2, (screenHeight - titleTexture.Height) / 2, Color.White);
+        }
+        else if (_background == null)
+        {
+            Graphics.ClearBackground(new Color(143, 123, 99, 255));
         }
         else
         {
-            Raylib.ClearBackground(_background.Background);
-            Raylib.DrawTexture(_background.CentreImage, (screenWidth- _background.CentreImage.Width)/2, (screenHeight-_background.CentreImage.Height)/2, Color.White);
+            Graphics.ClearBackground(_background.Background);
+            Graphics.DrawTexture(_background.CentreImage, (screenWidth- _background.CentreImage.Width)/2, (screenHeight-_background.CentreImage.Height)/2, Color.White);
         }
         foreach (var panel in _imagePanels)
         {
-            panel.Draw();
+            if (titleImg == null)
+                panel.Draw();
         }
         
         base.Draw(pulse);
@@ -149,11 +164,11 @@ public class MainMenu : BaseScreen
 
     public ScreenBackground? CreateBackgroundImage()
     {
-        var backGroundImage = MainWindow.ActiveInterface.BackgroundImage;
+        var backGroundImage = MainWindow.ActiveInterface.PicSources["backgroundImage"][0];
         if (backGroundImage != null)
         {
-            var img = Images.ExtractBitmap(backGroundImage);
-            var colour = Raylib.GetImageColor(img, 0, 0);
+            var img = Images.ExtractBitmap(backGroundImage, MainWindow.ActiveInterface);
+            var colour = img.GetColor(0, 0);
             return new ScreenBackground(colour, TextureCache.GetImage(backGroundImage, MainWindow.ActiveInterface));
         }
 

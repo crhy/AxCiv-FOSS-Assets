@@ -1,25 +1,29 @@
 using Civ2engine;
 using Civ2engine.Enums;
 using Civ2engine.Events;
-using Raylib_cs;
 using RaylibUI.BasicTypes;
 using RaylibUI.Controls;
 using System.Numerics;
 using RaylibUI.BasicTypes.Controls;
 using Model;
+using Model.Core;
+using Raylib_CSharp.Textures;
+using Raylib_CSharp.Transformations;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Rendering;
 
 namespace RaylibUI.RunGame.GameControls;
 
 public class MinimapPanel : BaseControl
 {
-    private readonly Game _game;
+    private readonly IGame _game;
     private readonly GameScreen _gameScreen;
     private readonly IUserInterface _active;
     private readonly HeaderLabel _headerLabel;
     private Texture2D? _backgroundImage;
     private Padding _padding;
 
-    public MinimapPanel(GameScreen controller, Game game) : base(controller)
+    public MinimapPanel(GameScreen controller, IGame game) : base(controller)
     {
         _gameScreen = controller;
         _game = game;
@@ -39,8 +43,8 @@ public class MinimapPanel : BaseControl
         _headerLabel.Bounds = new Rectangle((int)Location.X, (int)Location.Y, Width, _padding.Top);
         _headerLabel.OnResize();
         
-        _offset = new[] { ( Width - 2 * _game.CurrentMap.XDim) / 2,
-            _padding.Top + ( Height - _padding.Top - _padding.Bottom - _game.CurrentMap.YDim) / 2 };
+        _offset = new[] { ( Width - 2 * _gameScreen.CurrentMap.XDim) / 2,
+            _padding.Top + ( Height - _padding.Top - _padding.Bottom - _gameScreen.CurrentMap.YDim) / 2 };
         base.OnResize();
     }
 
@@ -53,16 +57,18 @@ public class MinimapPanel : BaseControl
             return;
         }
 
+        var currentMap = _gameScreen.CurrentMap;
         var clickedTilePosition = clickPosition - new Vector2(_offset[0],_offset[1]) + new Vector2(GetCenterShift(), 0);
-        clickedTilePosition.X = WrapNumber((int)clickedTilePosition.X, 2 * _game.CurrentMap.XDim);
-        if (clickPosition.Y > _gameScreen.Game.CurrentMap.YDim)
+        clickedTilePosition.X = WrapNumber((int)clickedTilePosition.X, currentMap.XDim);
+        if (clickPosition.Y > currentMap.YDim)
         {
-            clickPosition.Y = _gameScreen.Game.CurrentMap.YDim-1;
+            clickPosition.Y = currentMap.YDim-1;
         }
-        _gameScreen.Game.ActiveTile =
-            _gameScreen.Game.CurrentMap.Tile[(int)clickedTilePosition.X / 2, (int)clickedTilePosition.Y];
+        
+        _gameScreen.Game.ActivePlayer.ActiveTile =
+            currentMap.Tile[(int)clickedTilePosition.X , (int)clickedTilePosition.Y];
         _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.MinimapViewChanged,
-                new[] { (int)clickedTilePosition.X / 2, (int)clickedTilePosition.Y }));
+                new[] { (int)clickedTilePosition.X, (int)clickedTilePosition.Y }));
     }
 
     private void MapEventTriggered(object sender, MapEventArgs e)
@@ -94,9 +100,9 @@ public class MinimapPanel : BaseControl
 
     public override void Draw(bool pulse)
     {
-        Raylib.DrawTexture(_backgroundImage.Value,(int)Location.X, (int)Location.Y, Color.White);
-        Raylib.DrawRectangle((int)Location.X + _padding.Left, (int)Location.Y + _padding.Top, Width - _padding.Left - _padding.Right, Height - _padding.Top - _padding.Bottom, Color.Black);
-        var map = _game.CurrentMap;
+        Graphics.DrawTexture(_backgroundImage.Value,(int)Location.X, (int)Location.Y, Color.White);
+        Graphics.DrawRectangle((int)Location.X + _padding.Left, (int)Location.Y + _padding.Top, Width - _padding.Left - _padding.Right, Height - _padding.Top - _padding.Bottom, Color.Black);
+        var map = _gameScreen.CurrentMap;
         // Draw map
         for (var row = 0; row < map.YDim; row++)
         {
@@ -105,7 +111,7 @@ public class MinimapPanel : BaseControl
                 var tileX = WrapNumber(2 * col + GetCenterShift(), 2 * map.XDim) / 2;
 
                 var tile = map.Tile[tileX, row];
-                if (!map.MapRevealed && !tile.IsVisible(_game.GetActiveCiv.Id)) continue;
+                if (!map.MapRevealed && !tile.IsVisible(_gameScreen.VisibleCivId)) continue;
 
                 var drawColor = tile.CityHere is not null
                     ? _active.PlayerColours[tile.CityHere.Owner.Id].TextColour
@@ -113,13 +119,13 @@ public class MinimapPanel : BaseControl
                         ? OceanColor
                         : LandColor;
 
-                Raylib.DrawRectangle((int)Location.X + _offset[0] + 2 * col + (row % 2),
+                Graphics.DrawRectangle((int)Location.X + _offset[0] + 2 * col + (row % 2),
                     (int)Location.Y + _offset[1] + row, 2, 1, drawColor);
             }
         }
 
         // Draw current view rectangle
-        Raylib.DrawRectangleLines((int)Location.X + _offset[0] + _mapStartXy[0] - GetCenterShift(),
+        Graphics.DrawRectangleLines((int)Location.X + _offset[0] + _mapStartXy[0] - GetCenterShift(),
             (int)Location.Y + _offset[1] + _mapStartXy[1],
             _mapDrawSq[0], _mapDrawSq[1], Color.White);
 
@@ -128,7 +134,7 @@ public class MinimapPanel : BaseControl
         base.Draw(pulse);
     }
 
-    private int GetCenterShift() => _game.CurrentMap.Flat ? 0 : _mapStartXy[0] + _mapDrawSq[0] / 2 - _game.CurrentMap.XDim;
+    private int GetCenterShift() => _gameScreen.CurrentMap.Flat ? 0 : _mapStartXy[0] + _mapDrawSq[0] / 2 - _gameScreen.CurrentMap.XDim;
 
     private static int WrapNumber(int number, int range) => (number % range + range) % range;
 }

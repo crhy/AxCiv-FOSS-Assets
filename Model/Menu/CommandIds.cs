@@ -2,7 +2,20 @@ namespace Model.Menu;
 
 public static class CommandIds
 {
+    public const string GameOptions = "GAME_OPTIONS";
+    public const string GraphicOptions = "GRAPHIC_OPTIONS";
+    public const string CityReportOptions = "CITY_REPORT_OPTIONS";
+    public const string SaveGame = "SAVE_GAME";
+    public const string LoadGame = "LOAD_GAME";
     public const string QuitGame = "GAME_QUIT";
+
+    public const string ZoomIn = "ZOOM_IN";
+    public const string ZoomOut = "ZOOM_OUT";
+    public const string MaxZoomIn = "MAX_ZOOM_IN";
+    public const string StandardZoom = "STANDARD_ZOOM";
+    public const string MediumZoomOut = "MEDIUM_ZOOM_OUT";
+    public const string MaxZoomOut = "MAX_ZOOM_OUT";
+    public const string MapLayoutToggle = "MAP_LAYOUT";
     
     public const string WaitOrder = "UNIT_ORDER_WAIT";
     public const string UnloadOrder = "UNIT_ORDER_UNLOAD";
@@ -24,4 +37,11 @@ public static class CommandIds
     public const string EndTurn = "END_PLAYER_TURN";
     
     public const string OpenLuaConsole = "OPEN_LUA_CONSOLE";
+    
+    public const string SaveScenario = "SAVE_SCENARIO";
+    public const string LoadScenario = "LOAD_SCENARIO";
+    public const string SaveMap = "SAVE_MAP";
+    public const string LoadMap = "LOAD_MAP";
+    
+    public const string CheatRevealMapCommand = "CHEAT_REVEAL_MAP";
 }

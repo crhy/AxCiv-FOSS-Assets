@@ -3,7 +3,7 @@ using Civ2engine.MapObjects;
 using Civ2engine.Units;
 using Model;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Interact;
 
 namespace RaylibUI.RunGame.GameModes.Orders;
 
@@ -22,7 +22,7 @@ public class SkipOrder : Order
 
     public override void Action()
     {
-        GameScreen.Game.ActiveUnit?.SkipTurn();
+        GameScreen.Game.ActivePlayer.ActiveUnit?.SkipTurn();
         GameScreen.Game.ChooseNextUnit();
     }
 }

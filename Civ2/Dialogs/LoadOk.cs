@@ -1,6 +1,7 @@
 using Civ2.Rules;
 using Civ2engine;
 using Model;
+using Model.Dialog;
 using Model.InterfaceActions;
 
 namespace Civ2.Dialogs;
@@ -25,7 +26,7 @@ public class LoadOk : ICivDialogHandler
     public IInterfaceAction HandleDialogResult(DialogResult result,
         Dictionary<string, ICivDialogHandler> civDialogHandlers, Civ2Interface civ2Interface)
     {
-        return new StartGame(Initialization.GameInstance);
+        return new StartGame(Initialization.GameInstance, Initialization.ViewData);
     }
 
     public IInterfaceAction Show(Civ2Interface activeInterface)

@@ -1,6 +1,6 @@
 using Civ2.Rules;
 using Civ2engine.NewGame;
-using Model;
+using Model.Dialog;
 using Model.ImageSets;
 using Model.InterfaceActions;
 
@@ -15,6 +15,8 @@ public class Init : BaseDialogHandler
 
     public override IInterfaceAction Show(Civ2Interface activeInterface)
     {
+        Dialog.Image = new(activeInterface.PicSources["backgroundImageSmall1"][0]);
+        
         var config = Initialization.ConfigObject;
         if (config.PlayerCiv.Id >= Initialization.ConfigObject.Civilizations.Count)
         {
@@ -37,6 +39,6 @@ public class Init : BaseDialogHandler
 
     public override IInterfaceAction HandleDialogResult(DialogResult result, Dictionary<string, ICivDialogHandler> civDialogHandlers, Civ2Interface civ2Interface)
     {
-        return new StartGame(Initialization.GameInstance);
+        return new StartGame(Initialization.GameInstance, Initialization.ViewData);
     }
 }

@@ -6,141 +6,246 @@ using Civ2engine.Events;
 using Civ2engine.MapObjects;
 using Civ2engine.Terrains;
 using Civ2engine.Units;
+using Model.Core;
 
-namespace Civ2engine.UnitActions.Move
+namespace Civ2engine.UnitActions
 {
     public static class MovementFunctions
     {
-        public static void TryMoveNorth()
+        public static void TryMoveNorth(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.X > 1)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                MoveC2(0, -2);
-            }
-
-            CheckForUnitTurnEnded(instance);
-        }
-
-        public static void TryMoveNorthEast()
-        {
-            var game = Game.Instance;
-            if (game.ActiveUnit.Y == 0)
-            {
+                //TODO: Handle error
                 return;
             }
-            if (game.ActiveUnit.X < game.CurrentMap.XDimMax-2)
+            
+            if (activeUnit!.Y - 2 >= 0)
             {
-                MoveC2(1, -1);
-            }else if (!game.Options.FlatEarth)
+                MoveC2(instance, activeUnit, 0, -2);
+            }
+            else
             {
-                MoveC2(-game.CurrentMap.XDimMax +2 , -1);
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
             }
 
-            CheckForUnitTurnEnded(game);
+            CheckForUnitTurnEnded(instance, activeUnit);
         }
 
-        private static void CheckForUnitTurnEnded(Game game)
+        public static void TryMoveNorthEast(IGame instance)
         {
-            if (game.ActiveUnit.MovePoints <= 0 || game.ActiveUnit.Dead)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
+            {
+                //TODO: Handle error
+                return;
+            }
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.Y - 1 >= 0 && (!map.Flat || activeUnit.X + 1 < map.XDimMax))
+            {
+                if (!map.Flat && activeUnit.X == map.XDimMax - 1)
+                {
+                    MoveC2(instance, activeUnit, -map.XDimMax + 2, -1);
+                }
+                else
+                {
+                    MoveC2(instance, activeUnit, 1, -1);
+                }
+            }
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance, activeUnit);
+        }
+
+        private static bool ActiveUnitCannotMove(Unit? activeUnit)
+        {
+            return activeUnit == null || activeUnit.Dead || activeUnit.CurrentLocation == null;
+        }
+
+        private static void CheckForUnitTurnEnded(IGame game, Unit activeUnit)
+        {
+            if (activeUnit.MovePoints <= 0 || activeUnit.Dead)
             {
                 game.ChooseNextUnit();
             }
         }
 
-        public static void TryMoveEast()
+        public static void TryMoveEast(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.X < instance.CurrentMap.XDimMax -2)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                MoveC2(2, 0);
-            }else if (!instance.Options.FlatEarth)
-            {
-                MoveC2(-instance.CurrentMap.XDimMax +2 , 0);
+                //TODO: Handle error
+                return;
             }
-            CheckForUnitTurnEnded(instance);
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.X + 2 < map.XDimMax)
+            {
+                MoveC2(instance, activeUnit, 2, 0);
+            }
+            else if (!map.Flat)
+            {
+                MoveC2(instance, activeUnit, -map.XDimMax + 2, 0);
+            }
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+            
+            CheckForUnitTurnEnded(instance,activeUnit);
         }
         
-        public static void TryMoveSouthEast()
+        public static void TryMoveSouthEast(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.Y < instance.CurrentMap.YDim - 1)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                if (instance.ActiveUnit.X < instance.CurrentMap.XDimMax - 1)
-                {
-                    MoveC2(1, 1);
-                }
-                else if (!instance.Options.FlatEarth)
-                {
-                    MoveC2(-instance.CurrentMap.XDimMax + 2, 1);
-                }
-
+                //TODO: Handle error
+                return;
             }
-            CheckForUnitTurnEnded(instance);
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.Y + 1 < map.YDim && (!map.Flat || activeUnit.X + 1 < map.XDimMax))
+            {
+                if (!map.Flat && activeUnit.X == map.XDimMax - 1)
+                {
+                    MoveC2(instance, activeUnit, -map.XDimMax + 2, 1);
+                }
+                else
+                {
+                    MoveC2(instance, activeUnit, 1, 1);
+                }
+            }
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance,activeUnit);
         }
         
-        public static void TryMoveSouth()
+        public static void TryMoveSouth(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.Y < instance.CurrentMap.YDim-2)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                MoveC2(0, 2);
+                //TODO: Handle error
+                return;
             }
-            CheckForUnitTurnEnded(instance);
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.Y + 2 < map.YDim)
+            {
+                MoveC2(instance, activeUnit, 0, 2);
+            }
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance,activeUnit);
         }
 
-        public static void TryMoveSouthWest()
+        public static void TryMoveSouthWest(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.Y < instance.CurrentMap.YDim - 1)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                if (instance.ActiveUnit.X > 0)
+                //TODO: Handle error
+                return;
+            }
+            
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.Y + 1 < map.YDim && (!map.Flat || activeUnit.X > 0))
+            {
+                if (!map.Flat && activeUnit.X == 0)
                 {
-                    MoveC2(-1, 1);
+                    MoveC2(instance, activeUnit, map.XDimMax - 2, 1);
                 }
-                else if (!instance.Options.FlatEarth)
+                else
                 {
-                    MoveC2(instance.CurrentMap.XDimMax - 2, 1);
+                    MoveC2(instance, activeUnit, -1, 1);
                 }
             }
-            CheckForUnitTurnEnded(instance);
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance, activeUnit);
         }
 
-        public static void TryMoveWest()
+        public static void TryMoveWest(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.X > 0)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                MoveC2(-2, 0);
+                //TODO: Handle error
+                return;
             }
-            else if(!instance.Options.FlatEarth)
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.X - 2 >= 0)
             {
-                MoveC2(instance.CurrentMap.XDimMax-2, 0);
+                MoveC2(instance, activeUnit, -2, 0);
             }
-            CheckForUnitTurnEnded(instance);
+            else if(!map.Flat)
+            {
+                MoveC2(instance, activeUnit, map.XDimMax-2, 0);
+            }
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance, activeUnit);
         }
 
-        public static void TryMoveNorthWest()
+        public static void TryMoveNorthWest(IGame instance)
         {
-            var instance = Game.Instance;
-            if (instance.ActiveUnit.Y != 0)
+            var activeUnit = instance.ActivePlayer.ActiveUnit;
+            if (ActiveUnitCannotMove(activeUnit))
             {
-                if (instance.ActiveUnit.X > 0)
+                //TODO: Handle error
+                return;
+            }
+
+            var map = activeUnit!.CurrentLocation!.Map;
+            if (activeUnit.Y - 1 >= 0 && (!map.Flat || (map.Flat && activeUnit.X > 0)))
+            {
+                if (!map.Flat && activeUnit.CurrentLocation.X == 0)
                 {
-                    MoveC2(-1, -1);
+                    MoveC2(instance, activeUnit, map.XDimMax - 1, -1);
                 }
-                else if (!instance.Options.FlatEarth)
+                else
                 {
-                    MoveC2(instance.CurrentMap.XDimMax - 1, -1);
+                    MoveC2(instance, activeUnit, -1, -1);
                 }
             }
-            CheckForUnitTurnEnded(instance);
+            else
+            {
+                instance.TriggerUnitEvent(UnitEventType.MovementBlocked, activeUnit, BlockedReason.EdgeOfMap);
+                return;
+            }
+
+            CheckForUnitTurnEnded(instance, activeUnit);
         }
 
-        public static void MoveC2(int deltaX, int deltaY)
+        public static void MoveC2(IGame game, Unit unit, int deltaX, int deltaY)
         {
-            var game = Game.Instance;
-            var unit = game.ActiveUnit;
             if (unit == null)
             {
                 throw new NotSupportedException("No unit selected");
@@ -149,7 +254,7 @@ namespace Civ2engine.UnitActions.Move
             var destX = unit.X + deltaX;
             var destY = unit.Y + deltaY;
 
-            var tileTo = game.CurrentMap.TileC2(destX, destY);
+            var tileTo = unit.CurrentLocation.Map.TileC2(destX, destY);
             if (tileTo.UnitsHere.Count > 0 && tileTo.UnitsHere[0].Owner != unit.Owner)
             {
                 if (!AttackAtTile(unit, game, tileTo)) return;
@@ -165,7 +270,7 @@ namespace Civ2engine.UnitActions.Move
             }
         }
 
-        internal static bool AttackAtTile(Unit unit, Game game, Tile tileTo)
+        internal static bool AttackAtTile(Unit unit, IGame game, Tile tileTo)
         {
             if (unit.AttackBase == 0)
             {
@@ -208,7 +313,7 @@ namespace Civ2engine.UnitActions.Move
             return true;
         }
 
-        private static void Attack(Game game, Unit attacker, Tile tile)
+        private static void Attack(IGame game, Unit attacker, Tile tile)
         {           
 
             // Primary defender is the unit with largest defense factor
@@ -314,10 +419,11 @@ namespace Civ2engine.UnitActions.Move
 
         }
 
-        private static void Moveto(Game game, Unit unit, int destX, int destY)
-        {  
-            var tileFrom = game.CurrentMap.TileC2(unit.X, unit.Y);
-            var tileTo = game.CurrentMap.TileC2(destX, destY);
+        private static void Moveto(IGame game, Unit unit, int destX, int destY)
+        {
+            var map = unit.CurrentLocation.Map;
+            var tileFrom =  map.TileC2(unit.X, unit.Y);
+            var tileTo = map.TileC2(destX, destY);
             if (!unit.IgnoreZonesOfControl && !IsFriendlyTile(tileTo, unit.Owner) && IsNextToEnemy(tileFrom, unit.Owner, unit.Domain) && IsNextToEnemy(tileTo, unit.Owner, unit.Domain))
             {
                 game.TriggerUnitEvent(UnitEventType.MovementBlocked, unit, BlockedReason.Zoc);
@@ -326,8 +432,8 @@ namespace Civ2engine.UnitActions.Move
 
             if (UnitMoved(game, unit, tileTo, tileFrom))
             {
-                game.ActiveTile = tileTo;
-                var neighbours = game.CurrentMap.Neighbours(tileTo).Where(n => !n.IsVisible(unit.Owner.Id)).ToList();
+                game.ActivePlayer.ActiveTile = tileTo;
+                var neighbours = map.Neighbours(tileTo, unit.TwoSpaceVisibility).Where(n => !n.IsVisible(unit.Owner.Id)).ToList();
                 if (neighbours.Count > 0)
                 {
                     neighbours.ForEach(n => n.SetVisible(unit.Owner.Id));
@@ -336,7 +442,7 @@ namespace Civ2engine.UnitActions.Move
             }
         }
 
-        internal static bool UnitMoved(Game game, Unit unit, Tile tileTo, Tile tileFrom)
+        internal static bool UnitMoved(IGame game, Unit unit, Tile tileTo, Tile tileFrom)
         {
             var isCity = tileTo.IsCityPresent;
             var unitMoved = isCity;
@@ -357,29 +463,19 @@ namespace Civ2engine.UnitActions.Move
                             moveCost = unit.MovePoints;
                             unit.InShip = availableShip;
                             unitMoved = true;
-                            unit.Order = OrderType.Sleep;
+                            unit.Order = (int)OrderType.Sleep;
                         }
 
                         break;
                     }
+                    
+                    moveCost *= tileTo.MoveCost;
+                    moveCost = MoveCost(tileTo, tileFrom, moveCost, cosmicRules);
 
-                    // Coming from Railroad and going to Railroad
-                    var comingFromRailroad = tileTo.Improvements.Any(e => e is { Improvement: 5, Level: 1 });
-                    var goingToRailroad = unit.CurrentLocation?.Improvements.Any(e => e is { Improvement: 5, Level: 1 }) ?? false;
-                    if (comingFromRailroad && goingToRailroad) 
+                    // If alpine movement could be less use that
+                    if (cosmicRules.AlpineMovement < moveCost && unit.Alpine)
                     {
-                        moveCost = 0;  
-                    }
-                    else
-                    {
-                        moveCost *= tileTo.MoveCost;
-                        moveCost = MoveCost(tileTo, tileFrom, moveCost, cosmicRules);
-
-                        // If alpine movement could be less use that
-                        if (cosmicRules.AlpineMovement < moveCost && unit.Alpine)
-                        {
-                            moveCost = cosmicRules.AlpineMovement;
-                        }
+                        moveCost = cosmicRules.AlpineMovement;
                     }
 
                     unitMoved = true;
@@ -394,7 +490,7 @@ namespace Civ2engine.UnitActions.Move
                             //Make landfall
                             unit.CarriedUnits.ForEach(u =>
                             {
-                                u.Order = OrderType.NoOrders;
+                                u.Order = (int)OrderType.NoOrders;
                                 UnitMoved(game, u, tileTo, tileFrom);
                                 u.InShip = null;
                             });
@@ -415,7 +511,7 @@ namespace Civ2engine.UnitActions.Move
                                 .Take(unit.ShipHold - unit.CarriedUnits.Count))
                             {
                                 unaccountedUnit.InShip = unit;
-                                unaccountedUnit.Order = OrderType.Sleep;
+                                unaccountedUnit.Order = (int)OrderType.Sleep;
                                 unit.CarriedUnits.Add(unaccountedUnit);
                             }
                         }
@@ -423,7 +519,7 @@ namespace Civ2engine.UnitActions.Move
                         {
                             foreach (var unaccountedUnit in tileFrom.UnitsHere
                                 .Where(u => u.InShip == null &&
-                                            u.Domain == UnitGas.Ground && u.Order == OrderType.Sleep)
+                                            u.Domain == UnitGas.Ground && u.Order == (int)OrderType.Sleep)
                                 .Take(unit.ShipHold - unit.CarriedUnits.Count))
                             {
                                 unaccountedUnit.InShip = unit;
@@ -493,16 +589,16 @@ namespace Civ2engine.UnitActions.Move
                     {
                         unit.CarriedUnits.ForEach(u =>
                         {
-                            u.Order = OrderType.NoOrders;
+                            u.Order = (int)OrderType.NoOrders;
                             u.InShip = null;
                         });
                         unit.CarriedUnits.Clear();
                     }
                 }
 
-                if (unit.Order != OrderType.GoTo)
+                if (unit.Order != (int)OrderType.GoTo)
                 {
-                    unit.Order = OrderType.NoOrders;
+                    unit.Order = (int)OrderType.NoOrders;
                 }
 
                 if (unit.CurrentLocation.IsVisible(game.GetPlayerCiv.Id))
@@ -520,8 +616,8 @@ namespace Civ2engine.UnitActions.Move
                          e.Target == ImprovementConstants.Movement)
                     )
             {
-                var matchingEffect = tileTo.EffectsList.FirstOrDefault(e =>
-                    e.Source == movementEffect.Source && e.Target == ImprovementConstants.Movement);
+                var matchingEffect = tileTo.EffectsList.Where(e =>
+                    e.Source == movementEffect.Source && e.Target == ImprovementConstants.Movement).MinBy(i=>i.Value);
                 if (matchingEffect == null) continue;
 
                 if (matchingEffect.Level < movementEffect.Level)
@@ -558,16 +654,17 @@ namespace Civ2engine.UnitActions.Move
 
         internal static bool IsNextToEnemy(Tile tile, Civilization civ, UnitGas domain)
         {
-            return tile.Neighbours().Any(t => t.UnitsHere.Any(u => u.Owner != civ && u.InShip == null && u.Domain == domain));
+            return tile.Neighbours().Any(t =>
+                t.UnitsHere.Any(u => u.Owner != civ && u.InShip == null && u.Domain == domain));
         }
 
-        public static IEnumerable<Tile> GetPossibleMoves(Game game, Tile tile, Unit unit)
+        public static IEnumerable<Tile> GetPossibleMoves(Tile tile, Unit unit)
         {
             var neighbours = unit.Domain switch
             {
-                UnitGas.Ground => game.CurrentMap.Neighbours(tile).Where(n => n.Type != TerrainType.Ocean || n.UnitsHere.Any(u=> u.Owner == unit.Owner && u.ShipHold > 0 && u.CarriedUnits.Count < u.ShipHold)),
-                UnitGas.Sea => game.CurrentMap.Neighbours(tile).Where(t=> t.CityHere != null || t.Terrain.Type == TerrainType.Ocean || (t.UnitsHere.Count > 0 && t.UnitsHere[0].Owner != unit.Owner)),
-                _ => game.CurrentMap.Neighbours(tile)
+                UnitGas.Ground => tile.Neighbours().Where(n => n.Type != TerrainType.Ocean || n.UnitsHere.Any(u=> u.Owner == unit.Owner && u.ShipHold > 0 && u.CarriedUnits.Count < u.ShipHold)),
+                UnitGas.Sea => tile.Neighbours().Where(t=> t.CityHere != null || t.Terrain.Type == TerrainType.Ocean || (t.UnitsHere.Count > 0 && t.UnitsHere[0].Owner != unit.Owner)),
+                _ => tile.Neighbours()
             };
             if (unit.IgnoreZonesOfControl || !IsNextToEnemy(tile, unit.Owner, unit.Domain))
             {
@@ -581,15 +678,13 @@ namespace Civ2engine.UnitActions.Move
         {
             if (unit.Domain == UnitGas.Sea)
             {
-                return unit.CurrentLocation.Type == TerrainType.Ocean
+                return unit.CurrentLocation!.Type == TerrainType.Ocean
                     ? new List<int> { unit.CurrentLocation.Island }
                     : unit.CurrentLocation.Neighbours().Where(t => t.Type == TerrainType.Ocean).Select(t => t.Island)
                         .Distinct().ToList();
-                
-                
             }
 
-            if (unit.CurrentLocation.Type == TerrainType.Ocean)
+            if (unit.CurrentLocation!.Type == TerrainType.Ocean)
             {
                 return unit.CurrentLocation.Neighbours().Where(n => n.Type != TerrainType.Ocean)
                     .Select(n => n.Island).Distinct().ToList();

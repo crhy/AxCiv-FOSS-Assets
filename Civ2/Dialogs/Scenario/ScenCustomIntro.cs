@@ -1,8 +1,10 @@
+using Civ2.Dialogs.FileDialogs;
 using Civ2.Dialogs.Scenario;
 using Civ2.Rules;
 using Civ2engine;
 using Civ2engine.Enums;
 using Model;
+using Model.Dialog;
 using Model.InterfaceActions;
 
 namespace Civ2.Dialogs;
@@ -31,16 +33,17 @@ public class ScenCustomIntro : ICivDialogHandler
     {
         if (result.SelectedButton == Labels.Cancel)
         {
-            return civDialogHandlers[MainMenu.Title].Show(civ2Interface);
+            civ2Interface.ScenTitleImage = null;
+            return civDialogHandlers[LoadScenario.DialogTitle].Show(civ2Interface);
         }
 
-        return civDialogHandlers[ScenChoseCiv.Title].Show(civ2Interface); ;
+        return civDialogHandlers[ScenChoseCiv.Title].Show(civ2Interface);
     }
 
     public IInterfaceAction Show(Civ2Interface activeInterface)
     {
         var config = Initialization.ConfigObject;
-        var date = new Date(config.StartingYear, config.TurnYearIncrement, (DifficultyType)config.DifficultyLevel);
+        var date = new Date(config.StartingYear, config.TurnYearIncrement, config.DifficultyLevel);
 
         Dialog.ReplaceNumbers = new List<int> { config.TechParadigm };
         Dialog.ReplaceStrings = new List<string>

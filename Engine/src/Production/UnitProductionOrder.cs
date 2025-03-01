@@ -1,8 +1,11 @@
 using System.Linq;
 using Civ2engine.Enums;
-using Civ2engine.Improvements;
 using Civ2engine.Statistics;
 using Civ2engine.Units;
+using Model;
+using Model.Constants;
+using Model.Images;
+using Model.Interface;
 
 namespace Civ2engine.Production
 {
@@ -16,9 +19,11 @@ namespace Civ2engine.Production
             _unitDefinition = unitDefinition;
         }
 
+        public override string Title => _unitDefinition.Name;
+
         public override bool CompleteProduction(City city, Rules rules)
         {
-            if (_unitDefinition.AIrole == AIroleType.Settle && city.Size == 1)
+            if (_unitDefinition.AIrole == AiRoleType.Settle && city.Size == 1)
             {
                 return false;
             }
@@ -37,31 +42,42 @@ namespace Civ2engine.Production
                 Owner = city.Owner,
                 TypeDefinition = _unitDefinition,
                 Veteran = veteran,
-                Order = OrderType.NoOrders
+                Order = (int)OrderType.NoOrders
             };
             unit.Owner.Units.Add(unit);
 
-            if (_unitDefinition.AIrole == AIroleType.Settle)
+            if (_unitDefinition.AIrole == AiRoleType.Settle)
             {
                 city.Size -= 1;
             }
 
-            if (!unit.FreeSupport(unit.Owner.Government == GovernmentType.Fundamentalism))
+            var government = rules.Governments[city.Owner.Government];
+            if (!unit.FreeSupport(government.UnitTypesAlwaysFree))
             {
-                city.SetUnitSupport(rules.Cosmic);
+                city.SetUnitSupport(government);
             }
 
             return true;
         }
 
+        public override IImageSource? GetIcon(IUserInterface activeInterface)
+        {
+            return activeInterface.UnitImages.Units[_unitDefinition.Type].Image;
+        }
+
         public override bool IsValidBuild(City city)
         {
-            return _unitDefinition.Domain != UnitGas.Sea || city.IsNextToOcean;
+            return _unitDefinition.Domain != UnitGas.Sea || city.IsNextToOcean();
         }
 
         public override string GetDescription()
         {
             return _unitDefinition.Name;
+        }
+
+        public override ListBoxEntry GetBuildListEntry(IUserInterface active)
+        {
+            return new ListBoxEntry { Icon = GetIcon(active), LeftText = _unitDefinition.Name };
         }
     }
 }

@@ -1,17 +1,18 @@
 ﻿using System;
 using Civ2engine.Enums;
+using Model.Core;
 
 namespace Civ2engine;
 
-public class Date
+public class Date : IGameDate
 {
-    public readonly int StartingYear;
-    public readonly int TurnYearIncrement;
+    public int StartingYear { get; }
+    public int TurnYearIncrement { get; }
     private readonly bool _monthlyTurnIncrement;
     private readonly bool _defaultTurnIncrement;
-    private readonly DifficultyType _difficulty;
+    private readonly int _difficulty;
 
-    public Date(int startingYear, int turnYearIncrement, DifficultyType difficulty)
+    public Date(int startingYear, int turnYearIncrement, int difficulty)
     {
         StartingYear = startingYear == 0 ? -4000 : startingYear;
         TurnYearIncrement = turnYearIncrement;
@@ -31,9 +32,9 @@ public class Date
         {
             gameYear = _difficulty switch
             {
-                DifficultyType.Chieftain or DifficultyType.Warlord => StartingYear + Math.Min(250, turnNo - 1) * 20 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 300)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 350)) * 2 + Math.Max(0, turnNo - 1 - 400),
-                DifficultyType.Prince => StartingYear + Math.Min(60, turnNo - 1) * 50 + Math.Min(40, Math.Max(0, turnNo - 1 - 60)) * 25 + Math.Min(150, Math.Max(0, turnNo - 1 - 100)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 300)) * 2 + Math.Max(0, turnNo - 1 - 350),
-                DifficultyType.King => StartingYear + Math.Min(60, turnNo - 1) * 50 + Math.Min(40, Math.Max(0, turnNo - 1 - 60)) * 25 + Math.Min(50, Math.Max(0, turnNo - 1 - 100)) * 20 + Math.Min(50, Math.Max(0, turnNo - 1 - 150)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 200)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 2 + Math.Max(0, turnNo - 1 - 300),
+                (int)DifficultyType.Chieftain or (int)DifficultyType.Warlord => StartingYear + Math.Min(250, turnNo - 1) * 20 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 300)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 350)) * 2 + Math.Max(0, turnNo - 1 - 400),
+                (int)DifficultyType.Prince => StartingYear + Math.Min(60, turnNo - 1) * 50 + Math.Min(40, Math.Max(0, turnNo - 1 - 60)) * 25 + Math.Min(150, Math.Max(0, turnNo - 1 - 100)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 300)) * 2 + Math.Max(0, turnNo - 1 - 350),
+                (int)DifficultyType.King => StartingYear + Math.Min(60, turnNo - 1) * 50 + Math.Min(40, Math.Max(0, turnNo - 1 - 60)) * 25 + Math.Min(50, Math.Max(0, turnNo - 1 - 100)) * 20 + Math.Min(50, Math.Max(0, turnNo - 1 - 150)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 200)) * 5 + Math.Min(50, Math.Max(0, turnNo - 1 - 250)) * 2 + Math.Max(0, turnNo - 1 - 300),
                 _ => StartingYear + Math.Min(60, turnNo - 1) * 50 + Math.Min(40, Math.Max(0, turnNo - 1 - 60)) * 25 + Math.Min(75, Math.Max(0, turnNo - 1 - 100)) * 20 + Math.Min(25, Math.Max(0, turnNo - 1 - 175)) * 10 + Math.Min(50, Math.Max(0, turnNo - 1 - 200)) * 2 + Math.Max(0, turnNo - 1 - 250),
             };
         }
@@ -45,7 +46,7 @@ public class Date
         return gameYear;
     }
 
-    public string GameYearString(int turnNo)
+    public string GameYearString(int turnNo, string separator = " ")
     {
         int gameYear = GameYear(turnNo);
 
@@ -71,13 +72,14 @@ public class Date
                 10 => Labels.For(LabelIndex.Nov),
                 _ => Labels.For(LabelIndex.Dec),
             };
-            return string.Join(" ", month, Math.Abs(Nyear));
+            return string.Join(separator, month, Math.Abs(Nyear));
         }
         else
         {
             return gameYear < 0 ?
-                string.Join(" ", Math.Abs(gameYear).ToString(), Labels.For(LabelIndex.BC)) :
-                string.Join(" ", Labels.For(LabelIndex.AD), gameYear.ToString());
+                string.Join(separator, Math.Abs(gameYear).ToString(), Labels.For(LabelIndex.BC)) :
+                string.Join(separator, Labels.For(LabelIndex.AD), gameYear.ToString());
         }
     }
+
 }

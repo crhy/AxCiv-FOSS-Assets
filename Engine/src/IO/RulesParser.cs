@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Civ2engine.Advances;
 using Civ2engine.Enums;
-using Civ2engine.Improvements;
 using Civ2engine.Terrains;
 using Civ2engine.Units;
+using Model.Constants;
+using Model.Core;
+using Model.Core.Advances;
+using Model.Core.Cities;
+using Raylib_CSharp;
 using Path = System.IO.Path;
 
 namespace Civ2engine.IO
@@ -17,8 +23,9 @@ namespace Civ2engine.IO
 
         private readonly Dictionary<string, Action<string[]>> _sectionHandlers = new();
 
-        private RulesParser()
+        private RulesParser(Rules rules)
         {
+            this.Rules = rules; 
             _sectionHandlers.Add("COSMIC", ProcessCosmicRules);
             _sectionHandlers.Add("COSMIC2", ProcessExtraMovementAdjustments);
             _sectionHandlers.Add("CIVILIZE", ProcessTech);
@@ -61,7 +68,7 @@ namespace Civ2engine.IO
             var rules = new Rules();
             _rulesetPaths = ruleset.Paths;
             var filePath = Utils.GetFilePath("RULES.txt", _rulesetPaths);
-            TextFileParser.ParseFile(filePath, new RulesParser {Rules = rules});
+            TextFileParser.ParseFile(filePath, new RulesParser(rules));
             return rules;
         }
 
@@ -166,7 +173,7 @@ namespace Civ2engine.IO
             }
         }
 
-        private IList<OrderType> _orders = new[]
+        private static readonly IList<OrderType> Orders = new[]
         {
             OrderType.Fortify, OrderType.Fortified, OrderType.Sleep, OrderType.BuildFortress, OrderType.BuildRoad,
             OrderType.BuildIrrigation, OrderType.BuildMine, OrderType.Transform, OrderType.CleanPollution,
@@ -182,83 +189,133 @@ namespace Civ2engine.IO
                     Id = id,
                     Name = parts[0],
                     Key = parts[1],
-                    Type = _orders[id]
+                    Type = (int)Orders[id]
                 };
             }).ToArray();
-            Rules.Orders[Rules.Orders.Length - 1].Type = OrderType.GoTo;
+            Rules.Orders[^1].Type = (int)OrderType.GoTo; //if TOT this is a NOOP otherwise it fixes mislabeling as Transport1
         }
 
         private void ProcessGoods(string[] values)
         {
             Rules.CaravanCommoditie =
-                values.Select((value => value.Split(',', StringSplitOptions.TrimEntries)[0])).ToArray();
+                values.Select((value, id) => new Commodity { Id = id, Name = value.Split(',', StringSplitOptions.TrimEntries)[0]}).ToArray();
         }
 
         private void ProcessLeaders(string[] values)
         {
-            Rules.Leaders = values.Select((value) =>
+            values = values[0..21];
+
+            Rules.Leaders = values.Select((value,id) =>
             {
                 var line = value.Split(',', StringSplitOptions.TrimEntries);
-                var titles = new List<LeaderTitle>(
-                );
+                var titles = new List<LeaderTitle>();
                 for(var i = 12; i < line.Length;i+=3)
                 {
                     titles.Add(new LeaderTitle
                     {
-                        Gov = int.Parse(line[i-2]),
+                        Gov = int.TryParse(line[i-2], out int val0) ? val0 : 0,
                         TitleMale = line[i-1],
                         TitleFemale = line[i],
                     });
                 }
                 return new LeaderDefaults()
                 {
+                    TribeId = id,
                     NameMale = line[0],
                     NameFemale = line[1],
                     Female = int.Parse(line[2]) == 1,
-                    Color = int.Parse(line[3]),
-                    CityStyle = int.Parse(line[4]),
+                    Color = int.TryParse(line[3], out int val) ? val : 0,
+                    CityStyle = int.TryParse(line[4], out val) ? val : 0,
                     Plural = line[5],
                     Adjective = line[6],
-                    Attack = int.Parse(line[7]),
-                    Expand = int.Parse(line[8]),
-                    Civilize = int.Parse(line[9]),
+                    Attack = int.TryParse(line[7], out val) ? val : 0,
+                    Expand = int.TryParse(line[8], out val) ? val : 0,
+                    Civilize = int.TryParse(line[9], out val) ? val : 0,
                     Titles = titles.ToArray()
                 };
             }).ToArray();
         }
 
+        private int SupportFromLevel(int level)
+        {
+            if (level == 0) return -1;
+            if (level == 2) return 0;
+            return _freeSupports[_nextGov++];
+        }
+
+        private int _nextGov;
+        private int[] _freeSupports;
+
         private void ProcessGovernments(string[] values)
         {
-            Rules.Governments = values.Select((value =>
+            _freeSupports = new [] { Rules.Cosmic.MonarchyPaysSupport, Rules.Cosmic.CommunismPaysSupport, Rules.Cosmic.FundamentalismPaysSupport };
+            
+            Rules.Governments = values.Select((value, idx) =>
             {
                 var line = value.Split(',', StringSplitOptions.TrimEntries);
+                var level = Math.Min((int)Math.Floor((idx+1)/3f),2);
                 return new Government
                 {
                     Name = line[0],
                     TitleMale = line[1],
-                    TitleFemale = line[2]
+                    TitleFemale = line[2],
+                    Level = level,
+                    NumberOfFreeUnitsPerCity = SupportFromLevel(level),
+                    UnitTypesAlwaysFree = idx == 4 ? this.Rules.UnitTypes.Where(u=>u.Flags[3] == '1').Select(u=>u.Type).ToArray() : Array.Empty<int>(),
+                    Distance = DefaultDistanceFromIndex(idx),
+                    SettlersConsumption = idx > 2 ? this.Rules.Cosmic.SettlersEatFromCommunism : Rules.Cosmic.SettlersEatTillMonarchy
                 };
-            })).ToArray();
+            }).ToArray();
         }
 
-        private void ProcessTerrain(IEnumerable<string> values)
+        private int DefaultDistanceFromIndex(int idx)
+        {
+            switch (idx)
+            {
+                case 4: //Fundamentalism
+                case 6: //Democracy
+                    return 0;
+                case 3: //Communism
+                    return Rules.Cosmic.CommunismEquivalentPalaceDistance;
+                default:
+                    return -1;
+            }
+        }
+
+        private void ProcessTerrain(IEnumerable<string>? values)
         {
             var terrains = new List<string>();
             var bonus = new List<string>();
             var mappings = new Dictionary<string, int> {{"yes", -1}, {"no", -2}};
-            foreach (var t in values)
+            for (int row = 0; row < 33; row++)
             {
-                var parts = t.Split(';', StringSplitOptions.TrimEntries);
-                if (parts.Length == 1)
+                var parts = values.ElementAt(row).Split(';', StringSplitOptions.TrimEntries);
+                if (row < 11)
                 {
-                    bonus.Add(parts[0]);
+                    if (!mappings.ContainsKey(parts[1]))
+                        mappings.Add(parts[1].Length > 3 ? parts[1][..3] : parts[1], terrains.Count);
+                    terrains.Add(parts[0]);
                 }
                 else
                 {
-                    mappings.Add(parts[1], terrains.Count);
-                    terrains.Add(parts[0]);
+                    bonus.Add(parts[0]);
                 }
             }
+
+            //foreach (var t in values)
+            //{
+            //    var parts = t.Split(';', StringSplitOptions.TrimEntries);
+            //    if (t.Split(',', StringSplitOptions.TrimEntries).Length < 8)
+            //    {
+            //        bonus.Add(parts[0]);
+            //    }
+            //    else
+            //    {
+            //        if (!mappings.ContainsKey(parts[1]))
+            //            mappings.Add(parts[1].Substring(0, 3), terrains.Count);
+            //        terrains.Add(parts[0]);
+            //    }
+            //}
 
             Rules.Terrains ??= new List<Terrain[]>();
 
@@ -269,19 +326,19 @@ namespace Civ2engine.IO
                 {
                     Type = (TerrainType) type,
                     Name = line[0],
-                    MoveCost = int.Parse(line[1]),
-                    Defense = int.Parse(line[2]),
-                    Food = int.Parse(line[3]),
-                    Shields = int.Parse(line[4]),
-                    Trade = int.Parse(line[5]),
+                    MoveCost = int.TryParse(line[1], out int val) ? val : 1,
+                    Defense = int.TryParse(line[2], out val) ? val : 1,
+                    Food = int.TryParse(line[3], out val) ? val : 0,
+                    Shields = int.TryParse(line[4], out val) ? val : 0,
+                    Trade = int.TryParse(line[5], out val) ? val : 0,
                     CanIrrigate = mappings[line[6]],
-                    IrrigationBonus = int.Parse(line[7]),
-                    TurnsToIrrigate = int.Parse(line[8]),
-                    MinGovrnLevelAItoPerformIrrigation = (GovernmentType) int.Parse(line[9]),
+                    IrrigationBonus = int.TryParse(line[7], out val) ? val : 0,
+                    TurnsToIrrigate = int.TryParse(line[8], out val) ? val : 0,
+                    MinGovrnLevelAItoPerformIrrigation = int.TryParse(line[9], out val) ? val : 0,
                     CanMine = mappings[line[10]],
-                    MiningBonus = int.Parse(line[11]),
-                    TurnsToMine = int.Parse(line[12]),
-                    MinGovrnLevelAItoPerformMining = (GovernmentType) int.Parse(line[13]),
+                    MiningBonus = int.TryParse(line[11], out val) ? val : 0,
+                    TurnsToMine = int.TryParse(line[12], out val) ? val : 0,
+                    MinGovrnLevelAItoPerformMining = int.TryParse(line[13], out val) ? val : 0,
                     Transform = mappings[line[14]],
                     Impassable = line[15] == "yes",
                     RoadBonus = type <= (int)TerrainType.Grassland ? 1:0, 
@@ -311,24 +368,24 @@ namespace Civ2engine.IO
                 var text = line.Split(',', StringSplitOptions.TrimEntries);
                 var unit = new UnitDefinition
                 {
-                    Type = (UnitType) type,
+                    Type = type,
                     Name = text[0],
-                    Until = Rules.AdvanceMappings[text[1]],
-                    Domain = (UnitGas) int.Parse(text[2]),
-                    Move = Rules.Cosmic.MovementMultiplier * int.Parse(text[3].Replace(".", string.Empty)),
-                    Range = int.Parse(text[4]),
-                    Attack = int.Parse(text[5].Replace("a", string.Empty)),
-                    Defense = int.Parse(text[6].Replace("d", string.Empty)),
-                    Hitp = 10 * int.Parse(text[7].Replace("h", string.Empty)),
-                    Firepwr = int.Parse(text[8].Replace("f", string.Empty)),
-                    Cost = int.Parse(text[9]),
-                    Hold = int.Parse(text[10]),
-                    AIrole = (AIroleType)int.Parse(text[11]),
-                    Prereq = Rules.AdvanceMappings[text[12]],
+                    Until = Rules.AdvanceMappings.TryGetValue(text[1], out int value) ? value : -1,
+                    Domain = (UnitGas) (int.TryParse(text[2], out value) ? value : 0),
+                    Move = Rules.Cosmic.MovementMultiplier * (int.TryParse(text[3].Replace(".", string.Empty), out value) ? value : 0),
+                    Range = int.TryParse(text[4], out value) ? value : 0,
+                    Attack = int.TryParse(text[5].Replace("a", string.Empty), out value) ? value : 0,
+                    Defense = int.TryParse(text[6].Replace("d", string.Empty), out value) ? value : 0,
+                    Hitp = 10 * (int.TryParse(text[7].Replace("h", string.Empty), out value) ? value : 0),
+                    Firepwr = int.TryParse(text[8].Replace("f", string.Empty), out value) ? value : 0,
+                    Cost = int.TryParse(text[9], out value) ? value : 0,
+                    Hold = int.TryParse(text[10], out value) ? value : 0,
+                    AIrole = (AiRoleType)(int.TryParse(text[11], out value) ? value : 0),
+                    Prereq = Rules.AdvanceMappings.ContainsKey(text[12]) ? Rules.AdvanceMappings[text[12]] : -1,    // temp
                     Flags = text[13],
                     AttackSound = defaultAttackSounds.FirstOrDefault(s=>s.Item1 == type)?.Item2
                 };
-                unit.IsSettler = unit.AIrole == AIroleType.Settle;
+                unit.IsSettler = unit.AIrole == AiRoleType.Settle;
                 
                 if (!unit.IsSettler) return unit;
                 
@@ -348,7 +405,6 @@ namespace Civ2engine.IO
         
         private void ProcessAdvancedUnitFlags(string[] values)
         {
-            
             var limit = values.Length < Rules.UnitTypes.Length ? values.Length : Rules.UnitTypes.Length;
             for (int i = 0; i < limit; i++)
             {
@@ -356,7 +412,7 @@ namespace Civ2engine.IO
                 var unit = Rules.UnitTypes[i];
                 unit.CivCanBuild = ReadBitsReversed(line[0]);
                 unit.CanBeOnMap = ReadBitsReversed(line[1]);
-                unit.MinBribe = int.Parse(line[2]);
+                unit.MinBribe = int.TryParse(line[2], out int val) ? val : 0;
                 var extraFlags = ReadBitsReversed(line[6]);
                 unit.Invisible = extraFlags[0];
                 unit.NonDispandable = extraFlags[1];
@@ -374,15 +430,20 @@ namespace Civ2engine.IO
 
         private void ProcessEndWonders(string[] values)
         {
-            var firstWonderIndex = Rules.Improvements.First(i => i.Type == ImprovementType.Pyramids).Id;
-            for (var i = 0; i < values.Length; i++)
+            var improvementIndex = Rules.Improvements.Length - 1;
+            for (var i = values.Length - 1; i >= 0 && improvementIndex >=0; i--)
             {
+                var wonder = Rules.Improvements[improvementIndex];
+                wonder.IsWonder = true;
                 if (!values[i].StartsWith("nil"))
                 {
-                    Rules.Improvements[firstWonderIndex + i].ExpiresAt =
-                        Rules.AdvanceMappings[values[i].Split(',', 2)[0]];
+                    wonder.ExpiresAt =
+                        Rules.AdvanceMappings.ContainsKey(values[i].Split(',', 2)[0]) ? Rules.AdvanceMappings[values[i].Split(',', 2)[0]] : -1; // temp
                 }
+                improvementIndex--;
             }
+
+            Rules.FirstWonderIndex = improvementIndex + 1;
         }
 
         private void ProcessImprovements(string[] values)
@@ -392,11 +453,11 @@ namespace Civ2engine.IO
                 var parts = value.Split(',', StringSplitOptions.TrimEntries);
                 return new Improvement
                 {
-                    Type = (ImprovementType) type,
+                    Type = type,
                     Name = parts[0],
-                    Cost = int.Parse(parts[1]),
-                    Upkeep = int.Parse(parts[2]),
-                    Prerequisite = Rules.AdvanceMappings[parts[3]]
+                    Cost = int.TryParse(parts[1], out int val) ? val : 1,
+                    Upkeep = int.TryParse(parts[2], out val) ? val : 0,
+                    Prerequisite = Rules.AdvanceMappings.TryGetValue(parts[3], out val) ? val : -1
                 };
             }).ToArray();
         }
@@ -451,7 +512,7 @@ namespace Civ2engine.IO
 
             if (Rules.Cosmic.MovementMultiplier == commonMultiplier) return;
 
-            if (Rules.UnitTypes != null)
+            if (Rules.UnitTypes is { Length: >0})
             {
                 foreach (var unitType in Rules.UnitTypes)
                 {
@@ -480,25 +541,25 @@ namespace Civ2engine.IO
                 {
                     Index = index,
                     Name = text[0],
-                    AIvalue = int.Parse(text[1]),
-                    Modifier = int.Parse(text[2]),
-                    Prereq1 = Rules.AdvanceMappings[text[3]],
-                    Prereq2 = Rules.AdvanceMappings[text[4]],
-                    Epoch = (EpochType) int.Parse(text[5]),
-                    KnowledgeCategory = (KnowledgeType) int.Parse((text[6]))
+                    AIvalue = int.TryParse(text[1], out int val) ? val : 1,
+                    Modifier = int.TryParse(text[2], out val) ? val : 0,
+                    Prereq1 = Rules.AdvanceMappings.TryGetValue(text[3], out val) ? val : -1,
+                    Prereq2 = Rules.AdvanceMappings.TryGetValue(text[4], out val) ? val : -1,
+                    Epoch = int.TryParse(text[5], out val) ? val : 0,
+                    KnowledgeCategory = int.TryParse(text[6], out val) ? val : 0
                 };
             }).ToArray();
         }
 
 
-        public void ProcessSection(string section, List<string> contents)
+        public void ProcessSection(string section, List<string>? contents)
         {
             if (section.StartsWith("TERRAIN"))
             {
                 ProcessTerrain(contents);
-            }else if (_sectionHandlers.ContainsKey(section))
+            }else if (_sectionHandlers.TryGetValue(section, out var handler))
             {
-                _sectionHandlers[section](contents.ToArray());
+                handler(contents.ToArray());
             }
         }
 
@@ -509,15 +570,13 @@ namespace Civ2engine.IO
             return new Special
             {
                 Name = line[0],
-                MoveCost = int.Parse(line[1]),
-                Defense = int.Parse(line[2]),
-                Food = int.Parse(line[3]),
-                Shields = int.Parse(line[4]),
-                Trade = int.Parse(line[5]),
+                MoveCost = int.TryParse(line[1], out int val) ? val : 1,
+                Defense = int.TryParse(line[2], out val) ? val : 1,
+                Food = int.TryParse(line[3], out val) ? val : 0,
+                Shields = int.TryParse(line[4], out val) ? val : 0,
+                Trade = int.TryParse(line[5], out val) ? val : 0,
             };
         }
-
-
     }
 }
 

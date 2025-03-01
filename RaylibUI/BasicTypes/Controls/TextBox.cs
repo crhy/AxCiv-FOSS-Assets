@@ -1,27 +1,35 @@
 using System.Numerics;
 using System.Xml;
-using Raylib_cs;
+using Raylib_CSharp;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Transformations;
+using Raylib_CSharp.Colors;
 using RaylibUI.BasicTypes;
 using Model;
+using Model.Interface;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Fonts;
 
 namespace RaylibUI.Controls;
 
 public class TextBox : BaseControl
 {
+    public event EventHandler<EventArgs> TextChanged; 
     public override bool CanFocus => true;
     
     private int _editPosition = 0;
 
     private string _text;
     private readonly IControlLayout _controller;
-    private readonly IUserInterface _active;
+    private readonly IUserInterface? _active;
     private readonly int _minWidth;
     private readonly Action<string>? _acceptAction;
     private bool _editMode = false;
     private int _editWidth;
 
     private readonly Vector2 _textOffsetV = new Vector2(5,5);
-    
+    private string _focusText;
+
     private const int TextMargin = 5;
 
     public string Text => _text;
@@ -38,24 +46,26 @@ public class TextBox : BaseControl
 
     public void SetText(string initialValue)
     {
+        if(_text == initialValue) return;
         _text = initialValue;
         _editPosition = _text.Length;
-        var size = Raylib.MeasureTextEx(_controller.MainWindow.ActiveInterface.Look.DefaultFont, _text, Styles.BaseFontSize, 1.0f);
+        var size = TextManager.MeasureTextEx(_active?.Look.DefaultFont ?? Fonts.Tnr, _text, Styles.BaseFontSize, 1.0f);
         _editWidth = (int)size.X;
         Height = (int)(size.Y + TextMargin * 2);
+        TextChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public override void Draw(bool pulse)
     {
-        Raylib.DrawRectangle((int)Location.X, (int)Location.Y+1, Width, Height -3, Color.White);
-        Raylib.DrawRectangleLines((int)Location.X, (int)Location.Y+1, Width, Height -3, Color.Black);
-        Raylib.DrawTextEx(_active.Look.DefaultFont, _text, Location + _textOffsetV, Styles.BaseFontSize,1.0f, Color.Black);
+        Graphics.DrawRectangle((int)Location.X, (int)Location.Y+1, Width, Height -3, Color.White);
+        Graphics.DrawRectangleLines((int)Location.X, (int)Location.Y+1, Width, Height -3, Color.Black);
+        Graphics.DrawTextEx(_active?.Look.DefaultFont ?? Fonts.Tnr, _text, Location + _textOffsetV, Styles.BaseFontSize,1.0f, Color.Black);
         
         if (_editMode)
         {
             if (pulse)
             {
-                Raylib.DrawRectangleRec(new Rectangle(Location.X + 5 + _editWidth + 1, Location.Y + 5, 1, 20), Color.Black);
+                Graphics.DrawRectangleRec(new Rectangle(Location.X + 5 + _editWidth + 1, Location.Y + 5, 1, 20), Color.Black);
             }
         }
 
@@ -72,12 +82,17 @@ public class TextBox : BaseControl
 
     public override void OnFocus()
     {
+        _focusText = _text;
         _editMode = true;
     }
 
     public override void OnBlur()
     {
         _editMode = false;
+        if (_text != _focusText)
+        {
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public override int GetPreferredHeight()
@@ -137,7 +152,7 @@ public class TextBox : BaseControl
 
                 break;
             default:
-                var charPressed = Raylib.GetCharPressed();
+                var charPressed = Input.GetCharPressed();
                 if (charPressed > 0)
                 {
                     _text = _text.Insert(_editPosition, Convert.ToChar(charPressed).ToString());
@@ -154,6 +169,6 @@ public class TextBox : BaseControl
     private void SetEditPosition(int newEditPosition)
     {
         _editPosition = newEditPosition;
-        _editWidth = (int)Raylib.MeasureTextEx(_active.Look.DefaultFont, _text.Substring(0,_editPosition), Styles.BaseFontSize, 1).X;
+        _editWidth = (int)TextManager.MeasureTextEx(_active?.Look.DefaultFont ?? Fonts.Tnr, _text.Substring(0,_editPosition), Styles.BaseFontSize, 1).X;
     }
 }

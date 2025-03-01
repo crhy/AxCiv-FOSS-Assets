@@ -9,56 +9,42 @@ using Civ2engine.OriginalSaves;
 using Civ2engine.Scripting;
 using Civ2engine.Statistics;
 using Civ2engine.Terrains;
+using Model.Core;
 
 namespace Civ2engine
 {
     public partial class Game
     {
-        public static Game Create(Rules rules, GameData gameData, LoadedGameObjects objects, Ruleset ruleset)
+        public static Game Create(Rules rules, IGameData gameData, ILoadedGameObjects objects, Ruleset ruleset, Options options)
         {
-            _instance = new Game(rules, gameData, objects, ruleset.Paths);
-            return _instance;
+            return new Game(rules, gameData, objects, ruleset.Paths, options);
         }
 
         public static Game StartNew(Map[] maps, GameInitializationConfig config, IList<Civilization> civilizations,
             string[] paths)
         {
-            _instance = new Game(maps, config.Rules, civilizations, new Options(config), paths, (DifficultyType)config.DifficultyLevel);
-            _instance.StartNextTurn();
-            return _instance;
-        }
-
-        public static void CreateScenario(Rules rules, GameData gameData, LoadedGameObjects objects, Ruleset ruleset)
-        {
-            _instance = new Game(rules, gameData, objects, ruleset.Paths);
-        }
-
-        public static Game UpdateScenarioChoices(GameInitializationConfig config)
-        {
-            _instance.SetHumanPlayer(config.ScenPlayerCivId);
-            _instance.DifficultyLevel = (DifficultyType)config.DifficultyLevel;
-            _instance.GetPlayerCiv.LeaderGender = config.Gender;
-            _instance.GetPlayerCiv.LeaderName = config.LeaderName;
-            _instance.StartNextTurn();
-            return _instance;
+            return new Game(maps, config.Rules, civilizations, new Options(config), paths, config.DifficultyLevel, config.BarbarianActivity);
         }
 
         private Game(Map[] maps, Rules configRules, IList<Civilization> civilizations, Options options,
-            string[] gamePaths, DifficultyType difficulty)
+            string[] gamePaths, int difficulty, int barbarianActivity)
         {
             Script = new ScriptEngine(this, gamePaths);
             _options = options;
             _maps = maps;
             _rules = configRules;
             TurnNumber = 0;
-            Date = new Date(0, 1, difficulty);
+            Date = new Date(0, 0, difficulty);
+            _barbarianActivity = (BarbarianActivityType)barbarianActivity;
             _difficultyLevel = difficulty;
+
+            var tile0 = _maps[0].Tile[0, 0];
             
             AllCivilizations.AddRange(civilizations);
 
             CityNames = NameLoader.LoadCityNames(gamePaths);
 
-            Players = civilizations.Select(c => new Player(_difficultyLevel, c)).Cast<IPlayer>().ToArray();
+            Players = civilizations.Select(c => new AiPlayer(_difficultyLevel, c, tile0, this)).Cast<IPlayer>().ToArray();
 
             TerrainImprovements = TerrainImprovementFunctions.GetStandardImprovements(Rules); 
             
@@ -66,53 +52,51 @@ namespace Civ2engine
 
             Script.RunScript("tile_improvements.lua");
             
-            
-            
             Script.RunScript("improvements.lua");
             Script.RunScript("advances.lua");
+            Script.RunScript("units.lua");
+
+            foreach (var player in Players)
+            {
+                Script.RunPlayerScript(player);
+            }
 
             AllCivilizations.ForEach((civ) =>
             {
                 OnCivEvent?.Invoke(this, new CivEventArgs(CivEventType.Created, civ));
             });
             
-
             this.SetupTech();
             
             Power.CalculatePowerRatings(this);
-            
-            
         }
 
-        private Game(Rules rules, GameData gameData, LoadedGameObjects objects, string[] rulesetPaths) 
-            : this(objects.Maps.ToArray(), rules,objects.Civilizations,new Options(gameData.OptionsArray), 
-                  rulesetPaths, (DifficultyType)gameData.DifficultyLevel)
+        private Game(Rules rules, IGameData gameData, ILoadedGameObjects objects, string[] rulesetPaths, Options options) 
+            : this(objects.Maps.ToArray(), rules,objects.Civilizations,options, 
+                  rulesetPaths, gameData.DifficultyLevel, gameData.BarbarianActivity)
         {
             _scenarioData = objects.Scenario;
 
             TurnNumber = gameData.TurnNumber;
-            Date = new Date(gameData.StartingYear, gameData.TurnYearIncrement, (DifficultyType)gameData.DifficultyLevel);
+            Date = new Date(gameData.StartingYear, gameData.TurnYearIncrement, gameData.DifficultyLevel);
 
-            _barbarianActivity = (BarbarianActivityType)gameData.BarbarianActivity;
             PollutionSkulls = gameData.NoPollutionSkulls;
             
             GlobalTempRiseOccured = gameData.GlobalTempRiseOccured;
             NoOfTurnsOfPeace = gameData.NoOfTurnsOfPeace;
 
             var playerCiv = GetPlayerCiv;
-            var activePlayer = Players.FirstOrDefault(p => p.Civilization == playerCiv);
+            var activePlayer = Players[playerCiv.Id];
+            
+            var firstUnit = objects.ActiveUnit is { Dead: false } ? objects.ActiveUnit : playerCiv.Units.FirstOrDefault(u=>u.AwaitingOrders);
 
-            if (objects.ActiveUnit is { Dead: false })
+            if (firstUnit == null)
             {
-                activePlayer.ActiveUnit = objects.ActiveUnit;
+                activePlayer.ActiveTile = playerCiv.Cities[0].Location;
             }
             else
             {
-                activePlayer.ActiveUnit = playerCiv.Units.FirstOrDefault(u => u.AwaitingOrders);
-                if (activePlayer.ActiveUnit == null)
-                {
-                    activePlayer.ActiveTile = playerCiv.Cities[0].Location;
-                }
+                activePlayer.SetUnitActive(firstUnit, false);
             }
 
             _activeCiv = playerCiv;
@@ -131,7 +115,7 @@ namespace Civ2engine
 
             foreach (var civilization in AllCivilizations)
             {
-                SetImprovementsForCities(civilization);
+                this.SetImprovementsForCities(civilization);
             }
 
             foreach (var map in _maps)
@@ -156,7 +140,8 @@ namespace Civ2engine
 
             foreach (var city in AllCities)
             {
-                city.SetUnitSupport(Rules.Cosmic);
+                var government = Rules.Governments[city.Owner.Government];
+                city.SetUnitSupport(government);
                 city.CalculateOutput(city.Owner.Government, this);
             }
         }

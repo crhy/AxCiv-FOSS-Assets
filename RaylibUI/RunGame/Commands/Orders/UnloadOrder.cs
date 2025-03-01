@@ -6,7 +6,7 @@ using Civ2engine.MapObjects;
 using Civ2engine.Units;
 using Model;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Interact;
 
 namespace RaylibUI.RunGame.GameModes.Orders;
 
@@ -38,7 +38,7 @@ public class UnloadOrder : Order
         Debug.Assert(player.ActiveUnit != null, "player.ActiveUnit != null");
         player.ActiveUnit.CarriedUnits.ForEach(u =>
         {
-            u.Order = OrderType.NoOrders;
+            u.Order = (int)OrderType.NoOrders;
             u.InShip = null;
         });
         var next = player.ActiveUnit.CarriedUnits.FirstOrDefault(u=>u.AwaitingOrders);

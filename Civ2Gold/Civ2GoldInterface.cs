@@ -9,9 +9,15 @@ using Model.Images;
 using Model.ImageSets;
 using Model.Interface;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Textures;
+using Raylib_CSharp.Transformations;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Rendering;
 using RaylibUtils;
 using static Model.Menu.CommandIds;
+using System.ComponentModel.Design;
 
 namespace Civ2Gold;
 
@@ -53,7 +59,6 @@ public class Civ2GoldInterface : Civ2Interface
         MenuFont = Fonts.Arial,
         MenuFontSize = 14,
         StatusPanelLabelFont = Fonts.TnRbold,
-        StatusPanelLabelFontSize = 18,
         StatusPanelLabelColor = new Color(51, 51, 51, 255),
         StatusPanelLabelColorShadow = new Color(191, 191, 191, 255),
         MovingUnitsViewingPiecesLabelColor = Color.White,
@@ -77,28 +82,7 @@ public class Civ2GoldInterface : Civ2Interface
     {
         base.Initialize();
 
-        DialogHandlers["MAINMENU"].Dialog.Decorations.Add(new Decoration(SinaiPic, new Point(0.08, 0.09)));
-        DialogHandlers["SIZEOFMAP"].Dialog.Decorations.Add(new Decoration(StPeterburgPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMSIZE"].Dialog.Decorations.Add(new Decoration(StPeterburgPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMLAND"].Dialog.Decorations.Add(new Decoration(StPeterburgPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMFORM"].Dialog.Decorations.Add(new Decoration(IslandPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMCLIMATE"].Dialog.Decorations.Add(new Decoration(DesertPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMTEMP"].Dialog.Decorations.Add(new Decoration(SnowPic, new Point(0, 0.09)));
-        DialogHandlers["CUSTOMAGE"].Dialog.Decorations.Add(new Decoration(CanyonPic, new Point(0, 0.09)));
-        DialogHandlers["DIFFICULTY"].Dialog.Decorations.Add(new Decoration(MingGeneralPic, new Point(-0.08, 0.09)));
-        DialogHandlers["ENEMIES"].Dialog.Decorations.Add(new Decoration(AncientPersonsPic, new Point(0.08, 0.09)));
-        DialogHandlers["BARBARITY"].Dialog.Decorations.Add(new Decoration(BarbariansPic, new Point(-0.08, 0.09)));
-        DialogHandlers["RULES"].Dialog.Decorations.Add(new Decoration(GalleyPic, new Point(0.08, 0.09)));
-        DialogHandlers["ADVANCED"].Dialog.Decorations.Add(new Decoration(GalleyPic, new Point(-0.08, 0.09)));
-        DialogHandlers["ACCELERATED"].Dialog.Decorations.Add(new Decoration(GalleyPic, new Point(0.08, 0.09)));
-        DialogHandlers["GENDER"].Dialog.Decorations.Add(new Decoration(PeoplePic1, new Point(0.0, 0.09)));
-        DialogHandlers["TRIBE"].Dialog.Decorations.Add(new Decoration(PeoplePic2, new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMTRIBE"].Dialog.Decorations.Add(new Decoration(PeoplePic2, new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMTRIBE2"].Dialog.Decorations.Add(new Decoration(PeoplePic2, new Point(0.0, 0.09)));
-        DialogHandlers["NAME"].Dialog.Decorations.Add(new Decoration(PeoplePic2, new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMCITY"].Dialog.Decorations.Add(new Decoration(TemplePic, new Point(0.08, 0.09)));
-
-        PicSources = new Dictionary<string, BitmapStorage[]>
+        PicSources = new()
         {
             { "unit", Enumerable.Range(0, 9 * UnitsRows).Select(i => new BitmapStorage("UNITS", new Rectangle(1 + 65 * (i % 9), 1 + (UnitsPxHeight + 1) * (i / 9), 64, UnitsPxHeight), searchFlagLoc: true)).ToArray() },
             { "HPshield", new[] { new BitmapStorage("UNITS", new Rectangle(597, 30, 12, 20)) } },
@@ -153,6 +137,26 @@ public class Civ2GoldInterface : Civ2Interface
                     new BitmapStorage("ICONS", new Rectangle(49 + 15 * col, 290, 14, 14))).ToArray() },
             { "globalWarming", Enumerable.Range(0, 4).Select(col =>
                     new BitmapStorage("ICONS", new Rectangle(49 + 15 * col, 305, 14, 14))).ToArray() },
+            { "zoomIn", new[] { new BitmapStorage("ICONS", new Rectangle(18, 389, 16, 16)) } },
+            { "zoomOut", new[] { new BitmapStorage("ICONS", new Rectangle(35, 389, 16, 16)) } },
+            { "backgroundImage", new[]{ new BinaryStorage("Tiles.dll", 0xF7454, 0x1389D) } },
+            { "backgroundImageSmall1", new[]{ new BinaryStorage("Tiles.dll", 0xED354, 0xA0FD, new Rectangle(332, 134, 64, 64)) } },
+            { "backgroundImageSmall2", new[]{ new BinaryStorage("Tiles.dll", 0xED354, 0xA0FD, new Rectangle(398, 134, 64, 64)) } },
+            { "cityBuiltAncient", new[]{ new BinaryStorage("Tiles.dll", 0xDEDA4, 0x46FF) } },
+            { "cityBuiltModern", new[]{ new BinaryStorage("Tiles.dll", 0xE34A4, 0x4A42) } },
+            { "sinaiPic", new[]{ new BinaryStorage("Intro.dll", 0x1E630, 0x9F78) } },
+            { "stPeterburgPic", new[]{ new BinaryStorage("Intro.dll", 0x285A8, 0x15D04) } },
+            { "desertPic", new[]{ new BinaryStorage("Intro.dll", 0xD0140, 0xA35A) } },
+            { "snowPic", new[]{ new BinaryStorage("Intro.dll", 0xE2E1C, 0xA925) } },
+            { "canyonPic", new[]{ new BinaryStorage("Intro.dll", 0xC51B8, 0xAF88) } },
+            { "mingGeneralPic", new[]{ new BinaryStorage("Intro.dll", 0x3E2AC, 0x1D183) } },
+            { "islandPic", new[]{ new BinaryStorage("Intro.dll", 0xDA49C, 0x8980) } },
+            { "ancientPersonsPic", new[]{ new BinaryStorage("Intro.dll", 0x5B430, 0x15D04) } },
+            { "barbariansPic", new[]{ new BinaryStorage("Intro.dll", 0x71134, 0x13D5B) } },
+            { "galleyPic", new[]{ new BinaryStorage("Intro.dll", 0xB6A3C, 0xE77A) } },
+            { "peoplePic1", new[]{ new BinaryStorage("Intro.dll", 0x84E90, 0x129CE) } },
+            { "peoplePic2", new[]{ new BinaryStorage("Intro.dll", 0x97860, 0x139A0) } },
+            { "templePic", new[]{ new BinaryStorage("Intro.dll", 0xAB200, 0xB839) } },
         };
 
         var src = new BitmapStorage[6 * 8];
@@ -175,6 +179,28 @@ public class Civ2GoldInterface : Civ2Interface
             src[4 * i + 3] = new BitmapStorage("TERRAIN2", new Rectangle(34 + 66 * i, 463, 32, 16));
         }
         PicSources.Add("coastline", src);
+
+
+        DialogHandlers["MAINMENU"].Dialog.Decorations.Add(new Decoration(PicSources["sinaiPic"][0], new Point(0.08, 0.09)));
+        DialogHandlers["SIZEOFMAP"].Dialog.Decorations.Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMSIZE"].Dialog.Decorations.Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMLAND"].Dialog.Decorations.Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMFORM"].Dialog.Decorations.Add(new Decoration(PicSources["islandPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMCLIMATE"].Dialog.Decorations.Add(new Decoration(PicSources["desertPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMTEMP"].Dialog.Decorations.Add(new Decoration(PicSources["snowPic"][0], new Point(0, 0.09)));
+        DialogHandlers["CUSTOMAGE"].Dialog.Decorations.Add(new Decoration(PicSources["canyonPic"][0], new Point(0, 0.09)));
+        DialogHandlers["DIFFICULTY"].Dialog.Decorations.Add(new Decoration(PicSources["mingGeneralPic"][0], new Point(-0.08, 0.09)));
+        DialogHandlers["ENEMIES"].Dialog.Decorations.Add(new Decoration(PicSources["ancientPersonsPic"][0], new Point(0.08, 0.09)));
+        DialogHandlers["BARBARITY"].Dialog.Decorations.Add(new Decoration(PicSources["barbariansPic"][0], new Point(-0.08, 0.09)));
+        DialogHandlers["RULES"].Dialog.Decorations.Add(new Decoration(PicSources["galleyPic"][0], new Point(0.08, 0.09)));
+        DialogHandlers["ADVANCED"].Dialog.Decorations.Add(new Decoration(PicSources["galleyPic"][0], new Point(-0.08, 0.09)));
+        DialogHandlers["ACCELERATED"].Dialog.Decorations.Add(new Decoration(PicSources["galleyPic"][0], new Point(0.08, 0.09)));
+        DialogHandlers["GENDER"].Dialog.Decorations.Add(new Decoration(PicSources["peoplePic1"][0], new Point(0.0, 0.09)));
+        DialogHandlers["TRIBE"].Dialog.Decorations.Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
+        DialogHandlers["CUSTOMTRIBE"].Dialog.Decorations.Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
+        DialogHandlers["CUSTOMTRIBE2"].Dialog.Decorations.Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
+        DialogHandlers["NAME"].Dialog.Decorations.Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
+        DialogHandlers["CUSTOMCITY"].Dialog.Decorations.Add(new Decoration(PicSources["templePic"][0], new Point(0.08, 0.09)));
     }
 
     protected override List<MenuDetails> MenuMap { get; } = new List<MenuDetails>
@@ -184,17 +210,17 @@ public class Civ2GoldInterface : Civ2Interface
             Key = "GAME", Defaults = new List<MenuElement>
             {
                 new MenuElement("&Game", Shortcut.None, KeyboardKey.G),
-                new MenuElement("Game &Options|Ctrl+O", new Shortcut(KeyboardKey.O, ctrl: true), KeyboardKey.O),
+                new MenuElement("Game &Options|Ctrl+O", new Shortcut(KeyboardKey.O, ctrl: true), KeyboardKey.O, commandId: GameOptions),
                 new MenuElement("Graphic O&ptions|Ctrl+P", new Shortcut(KeyboardKey.P, ctrl: true),
-                    KeyboardKey.P),
+                    KeyboardKey.P, commandId: GraphicOptions),
                 new MenuElement("&City Report Options|Ctrl+E", new Shortcut(KeyboardKey.E, ctrl: true),
-                    KeyboardKey.C),
+                    KeyboardKey.C, commandId: CityReportOptions),
                 new MenuElement("M&ultiplayer Options|Ctrl+Y", new Shortcut(KeyboardKey.Y, ctrl: true),
                     KeyboardKey.U),
                 new MenuElement("&Game Profile", Shortcut.None, KeyboardKey.G),
                 new MenuElement("Pick &Music", Shortcut.None, KeyboardKey.M),
-                new MenuElement("&Save Game|Ctrl+S", new Shortcut(KeyboardKey.S, ctrl: true), KeyboardKey.S),
-                new MenuElement("&Load Game|Ctrl+L", new Shortcut(KeyboardKey.L, ctrl: true), KeyboardKey.L),
+                new MenuElement("&Save Game|Ctrl+S", new Shortcut(KeyboardKey.S, ctrl: true), KeyboardKey.S, commandId: SaveGame),
+                new MenuElement("&Load Game|Ctrl+L", new Shortcut(KeyboardKey.L, ctrl: true), KeyboardKey.L, commandId: LoadGame),
                 new MenuElement("&Join Game|Ctrl+J", new Shortcut(KeyboardKey.J, ctrl: true), KeyboardKey.J),
                 new MenuElement("Set Pass&word|Ctrl+W", new Shortcut(KeyboardKey.W, ctrl: true), KeyboardKey.W),
                 new MenuElement("Change &Timer|Ctrl+T", new Shortcut(KeyboardKey.T, ctrl: true), KeyboardKey.T),
@@ -222,16 +248,16 @@ public class Civ2GoldInterface : Civ2Interface
                 new MenuElement("&View", Shortcut.None, KeyboardKey.V),
                 new MenuElement("&Move Pieces|v", new Shortcut(KeyboardKey.V), KeyboardKey.M),
                 new MenuElement("&View Pieces|v", new Shortcut(KeyboardKey.V), KeyboardKey.V),
-                new MenuElement("Zoom &In|z", new Shortcut(KeyboardKey.Z), KeyboardKey.I),
-                new MenuElement("Zoom &Out|X", new Shortcut(KeyboardKey.X), KeyboardKey.O),
+                new MenuElement("Zoom &In|z", new Shortcut(KeyboardKey.Z), KeyboardKey.I, commandId: ZoomIn),
+                new MenuElement("Zoom &Out|X", new Shortcut(KeyboardKey.X), KeyboardKey.O, commandId: ZoomOut),
                 new MenuElement("Max Zoom In|Ctrl+Z", new Shortcut(KeyboardKey.Z, ctrl: true),
-                    KeyboardKey.Null),
+                    KeyboardKey.Null, commandId: MaxZoomIn),
                 new MenuElement("Standard Zoom|Shift+Z", new Shortcut(KeyboardKey.Z, shift: true),
-                    KeyboardKey.Null),
+                    KeyboardKey.Null, commandId: StandardZoom),
                 new MenuElement("Medium Zoom Out|Shift+X", new Shortcut(KeyboardKey.X, shift: true),
-                    KeyboardKey.Null),
+                    KeyboardKey.Null, commandId: MediumZoomOut),
                 new MenuElement("Max Zoom Out|Ctrl+X", new Shortcut(KeyboardKey.X, ctrl: true),
-                    KeyboardKey.Null),
+                    KeyboardKey.Null, commandId: MaxZoomOut),
                 new MenuElement("Show Map Grid|Ctrl+G", new Shortcut(KeyboardKey.G, ctrl: true),
                     KeyboardKey.Null),
                 new MenuElement("Arrange Windows", Shortcut.None, KeyboardKey.Null),
@@ -314,7 +340,7 @@ public class Civ2GoldInterface : Civ2Interface
                 new MenuElement("Create &Unit|Shift+F1", new Shortcut(KeyboardKey.F1, shift: true),
                     KeyboardKey.U),
                 new MenuElement("Reveal &Map|Shift+F2", new Shortcut(KeyboardKey.F2, shift: true),
-                    KeyboardKey.M),
+                    KeyboardKey.M, CheatRevealMapCommand),
                 new MenuElement("Set &Human Player|Shift+F3", new Shortcut(KeyboardKey.F3, shift: true),
                     KeyboardKey.H),
                 new MenuElement("Set Game Year|Shift+F4", new Shortcut(KeyboardKey.F4, shift: true),
@@ -390,69 +416,24 @@ public class Civ2GoldInterface : Civ2Interface
         }
     };
 
-    private static readonly IImageSource SinaiPic = new BinaryStorage
-        { FileName = "Intro.dll", DataStart = 0x1E630, Length = 0x9F78 };
-
-    private static readonly IImageSource StPeterburgPic = new BinaryStorage
-        { FileName = "Intro.dll", DataStart = 0x285A8,  Length = 0x15D04 };
-
-    private static readonly IImageSource IslandPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xDA49C, Length = 0x8980 };
-
-    private static readonly IImageSource DesertPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xD0140, Length = 0xA35A };
-
-    private static readonly IImageSource SnowPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xE2E1C, Length = 0xA925 };
-
-    private static readonly IImageSource CanyonPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xC51B8, Length = 0xAF88 };
-
-    private static readonly IImageSource MingGeneralPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0x3E2AC, Length = 0x1D183 };
-
-    private static readonly IImageSource AncientPersonsPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0x5B430, Length = 0x15D04 };
-
-    private static readonly IImageSource BarbariansPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0x71134, Length = 0x13D5B };
-
-    private static readonly IImageSource GalleyPic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xB6A3C, Length = 0xE77A };
-
-    private static readonly IImageSource PeoplePic1 = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0x84E90, Length = 0x129CE };
-
-    private static readonly IImageSource PeoplePic2 = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0x97860, Length = 0x139A0 };
-
-    private static readonly IImageSource TemplePic = new BinaryStorage
-    { FileName = "Intro.dll", DataStart = 0xAB200, Length = 0xB839 };
-
-    
-
-    public override IImageSource BackgroundImage => new BinaryStorage
-        { FileName = "Tiles.dll", DataStart = 0xF7454, Length = 0x1389D };
-
     public override int UnitsRows => 7;
     public override int UnitsPxHeight => 48;
-    public override Dictionary<string, BitmapStorage[]> PicSources { get; set; }
+    public override Dictionary<string, IImageSource[]> PicSources { get; set; }
 
     public override void GetShieldImages()
     {
         Color shadowColour = new(51, 51, 51, 255);
         Color replacementColour = new(255, 0, 0, 255);
 
-        var shield = Images.ExtractBitmap(PicSources["backShield1"][0]);
-        var shieldFront = Raylib.ImageCopy(shield);
-        Raylib.ImageDrawRectangle(ref shieldFront, 0, 0, shieldFront.Width, 7, Color.Black);
-
-        var shadow = Images.ExtractBitmap(PicSources["backShield2"][0]);
-        Raylib.ImageColorReplace(ref shadow, replacementColour, shadowColour);
+        var shield = Images.ExtractBitmap(PicSources["backShield1"][0], this);
+        var shieldFront = shield.Copy();
+        var shieldBack = shield.Copy();
+        shieldFront.DrawRectangle(0, 0, shieldFront.Width, 7, Color.Black);
+        shield.ReplaceColor(replacementColour, shadowColour);
 
         UnitImages.Shields = new MemoryStorage(shieldFront, "Unit-Shield", replacementColour);
-        UnitImages.ShieldBack = new MemoryStorage(shield, "Unit-Shield-Back", replacementColour, true);
-        UnitImages.ShieldShadow = new MemoryStorage(shadow, "Unit-Shield-Shadow");
+        UnitImages.ShieldBack = new MemoryStorage(shieldBack, "Unit-Shield-Back", replacementColour, true);
+        UnitImages.ShieldShadow = new MemoryStorage(shield, "Unit-Shield-Shadow");
     }
 
     public override void LoadPlayerColours()
@@ -462,20 +443,19 @@ public class Civ2GoldInterface : Civ2Interface
         {
             unsafe
             {
-                var imageColours = Raylib.LoadImageColors(Images.ExtractBitmap(PicSources["textColours"][col]));
+                var imageColours = Images.ExtractBitmap(PicSources["textColours"][col], this).LoadColors();
                 var textColour = imageColours[0];
 
-                imageColours = Raylib.LoadImageColors(Images.ExtractBitmap(PicSources["flags"][col]));
-                var lightColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][col]).Width + 8];
+                imageColours = Images.ExtractBitmap(PicSources["flags"][col], this).LoadColors();
+                var lightColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][col], this).Width + 8];
 
-                imageColours = Raylib.LoadImageColors(Images.ExtractBitmap(PicSources["flags"][9 + col]));
-                var darkColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][9 + col]).Width + 5];
-                Raylib.UnloadImageColors(imageColours);
+                imageColours = Images.ExtractBitmap(PicSources["flags"][9 + col], this).LoadColors();
+                var darkColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][9 + col], this).Width + 5];
+                Image.UnloadColors(imageColours);
 
                 playerColours[col] = new PlayerColour
                 {
-                    Normal = Images.ExtractBitmap(PicSources["flags"][col]),
-                    FlagTexture = Raylib.LoadTextureFromImage(Images.ExtractBitmap(PicSources["flags"][col])),
+                    Image = PicSources["flags"][col],
                     TextColour = textColour,
                     LightColour = lightColour,
                     DarkColour = darkColour
@@ -496,8 +476,8 @@ public class Civ2GoldInterface : Civ2Interface
         HPbarSize = new(12, 3),
         HPbarColours = new[] { new Color(243, 0, 0, 255), new Color(255, 223, 79, 255), new Color(87, 171, 39, 255) },
         HPbarSizeForColours = new[] { 3, 8 },
-        OrderOffset = new(Images.ExtractBitmap(PicSources["backShield1"][0]).Width / 2f, 7),
-        OrderTextHeight = Images.ExtractBitmap(PicSources["backShield1"][0]).Height - 7,
+        OrderOffset = new(Images.ExtractBitmap(PicSources["backShield1"][0], this).Width / 2f, 7),
+        OrderTextHeight = Images.ExtractBitmap(PicSources["backShield1"][0], this).Height - 7,
     };
 
     /// <summary>
@@ -516,9 +496,8 @@ public class Civ2GoldInterface : Civ2Interface
         var headerSourceRec = new Rectangle { Height = padding.Top, Width = wallpaper.Outer.Width };
         for (int col = 0; col < columns; col++)
         {
-            Raylib.ImageDraw(ref destination, wallpaper.Outer, headerSourceRec,
-                new Rectangle(col * wallpaper.Outer.Width, 0, wallpaper.Outer.Width, padding.Top),
-                Color.White);
+            destination.Draw(wallpaper.Outer, headerSourceRec,
+                new Rectangle(col * wallpaper.Outer.Width, 0, wallpaper.Outer.Width, padding.Top), Color.White);
         }
         var leftSide = new Rectangle { Height = wallpaper.Outer.Height, Width = DialogPadding.Left };
 
@@ -528,12 +507,10 @@ public class Civ2GoldInterface : Civ2Interface
 
         for (int row = 0; row < rows; row++)
         {
-            Raylib.ImageDraw(ref destination, wallpaper.Outer, leftSide,
-                new Rectangle(0, row * wallpaper.Outer.Height, DialogPadding.Left, wallpaper.Outer.Height),
-                Color.White);
-            Raylib.ImageDraw(ref destination, wallpaper.Outer, rightSide,
-                new Rectangle(rightEdge, row * wallpaper.Outer.Height, DialogPadding.Right, wallpaper.Outer.Height),
-                Color.White);
+            destination.Draw(wallpaper.Outer, leftSide,
+                new Rectangle(0, row * wallpaper.Outer.Height, DialogPadding.Left, wallpaper.Outer.Height), Color.White);
+            destination.Draw(wallpaper.Outer, rightSide,
+                new Rectangle(rightEdge, row * wallpaper.Outer.Height, DialogPadding.Right, wallpaper.Outer.Height), Color.White);
         }
 
         var bottomEdge = height - padding.Bottom;
@@ -541,9 +518,8 @@ public class Civ2GoldInterface : Civ2Interface
         var bottomSource = new Rectangle { Y = bottomOffset, Height = padding.Bottom, Width = wallpaper.Outer.Width };
         for (int col = 0; col < columns; col++)
         {
-            Raylib.ImageDraw(ref destination, wallpaper.Outer, bottomSource,
-                new Rectangle(col * wallpaper.Outer.Width, bottomEdge, wallpaper.Outer.Width, padding.Bottom),
-                Color.White);
+            destination.Draw(wallpaper.Outer, bottomSource,
+                new Rectangle(col * wallpaper.Outer.Width, bottomEdge, wallpaper.Outer.Width, padding.Bottom), Color.White);
         }
 
         if (statusPanel)
@@ -552,9 +528,8 @@ public class Civ2GoldInterface : Civ2Interface
             var sourceRec = new Rectangle { Height = 4, Width = wallpaper.Outer.Width };
             for (int col = 0; col < columns; col++)
             {
-                Raylib.ImageDraw(ref destination, wallpaper.Outer, sourceRec,
-                    new Rectangle(col * wallpaper.Outer.Width, padding.Top + 62, wallpaper.Outer.Width, 4),
-                    Color.White);
+                destination.Draw(wallpaper.Outer, sourceRec,
+                    new Rectangle(col * wallpaper.Outer.Width, padding.Top + 62, wallpaper.Outer.Width, 4), Color.White);
             }
         }
     }
@@ -569,70 +544,70 @@ public class Civ2GoldInterface : Civ2Interface
         var pen5 = new Color(240, 240, 240, 255);
         var pen6 = new Color(223, 223, 223, 255);
         var pen7 = new Color(67, 67, 67, 255);
-        Raylib.ImageDrawLine(ref destination, 0, 0, width - 2, 0, pen1); // 1st layer of border
-        Raylib.ImageDrawLine(ref destination, 0, 0, width - 2, 0, pen1);
-        Raylib.ImageDrawLine(ref destination, 0, 0, 0, height - 2, pen1);
-        Raylib.ImageDrawLine(ref destination, width - 1, 0, width - 1, height - 1, pen2);
-        Raylib.ImageDrawLine(ref destination, 0, height - 1, width - 1, height - 1, pen2);
-        Raylib.ImageDrawLine(ref destination, 1, 1, width - 3, 1, pen3); // 2nd layer of border
-        Raylib.ImageDrawLine(ref destination, 1, 1, 1, height - 3, pen3);
-        Raylib.ImageDrawLine(ref destination, width - 2, 1, width - 2, height - 2, pen4);
-        Raylib.ImageDrawLine(ref destination, 1, height - 2, width - 2, height - 2, pen4);
-        Raylib.ImageDrawLine(ref destination, 2, 2, width - 4, 2, pen5); // 3rd layer of border
-        Raylib.ImageDrawLine(ref destination, 2, 2, 2, height - 4, pen5);
-        Raylib.ImageDrawLine(ref destination, width - 3, 2, width - 3, height - 3, pen5);
-        Raylib.ImageDrawLine(ref destination, 2, height - 3, width - 3, height - 3, pen5);
-        Raylib.ImageDrawLine(ref destination, 3, 3, width - 5, 3, pen6); // 4th layer of border
-        Raylib.ImageDrawLine(ref destination, 3, 3, 3, height - 5, pen6);
-        Raylib.ImageDrawLine(ref destination, width - 4, 3, width - 4, height - 4, pen7);
-        Raylib.ImageDrawLine(ref destination, 3, height - 4, width - 4, height - 4, pen7);
-        Raylib.ImageDrawLine(ref destination, 4, 4, width - 6, 4, pen6); // 5th layer of border
-        Raylib.ImageDrawLine(ref destination, 4, 4, 4, height - 6, pen6);
-        Raylib.ImageDrawLine(ref destination, width - 5, 4, width - 5, height - 5, pen7);
-        Raylib.ImageDrawLine(ref destination, 4, height - 5, width - 5, height - 5, pen7);
+        destination.DrawLine(0, 0, width - 2, 0, pen1); // 1st layer of border
+        destination.DrawLine(0, 0, width - 2, 0, pen1);
+        destination.DrawLine(0, 0, 0, height - 2, pen1);
+        destination.DrawLine(width - 1, 0, width - 1, height - 1, pen2);
+        destination.DrawLine(0, height - 1, width - 1, height - 1, pen2);
+        destination.DrawLine(1, 1, width - 3, 1, pen3); // 2nd layer of border
+        destination.DrawLine(1, 1, 1, height - 3, pen3);
+        destination.DrawLine(width - 2, 1, width - 2, height - 2, pen4);
+        destination.DrawLine(1, height - 2, width - 2, height - 2, pen4);
+        destination.DrawLine(2, 2, width - 4, 2, pen5); // 3rd layer of border
+        destination.DrawLine(2, 2, 2, height - 4, pen5);
+        destination.DrawLine(width - 3, 2, width - 3, height - 3, pen5);
+        destination.DrawLine(2, height - 3, width - 3, height - 3, pen5);
+        destination.DrawLine(3, 3, width - 5, 3, pen6); // 4th layer of border
+        destination.DrawLine(3, 3, 3, height - 5, pen6);
+        destination.DrawLine(width - 4, 3, width - 4, height - 4, pen7);
+        destination.DrawLine(3, height - 4, width - 4, height - 4, pen7);
+        destination.DrawLine(4, 4, width - 6, 4, pen6); // 5th layer of border
+        destination.DrawLine(4, 4, 4, height - 6, pen6);
+        destination.DrawLine(width - 5, 4, width - 5, height - 5, pen7);
+        destination.DrawLine(4, height - 5, width - 5, height - 5, pen7);
 
         // Inner panel
         if (!statusPanel)
         {
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top - 1, 9 + (width - 18 - 1), padding.Top - 1, pen7); // 1st layer of border
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top - 1, 10, height - padding.Bottom - 1, pen7);
-            Raylib.ImageDrawLine(ref destination, width - 11, padding.Top - 1, width - 11, height - padding.Bottom - 1, pen6);
-            Raylib.ImageDrawLine(ref destination, 9, height - padding.Bottom, width - 9 - 1, height - padding.Bottom, pen6);
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top - 2, 9 + (width - 18 - 2), padding.Top - 2, pen7); // 2nd layer of border
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top - 2, 9, height - padding.Bottom, pen7);
-            Raylib.ImageDrawLine(ref destination, width - 10, padding.Top - 2, width - 10, height - padding.Bottom, pen6);
-            Raylib.ImageDrawLine(ref destination, 9, height - padding.Bottom + 1, width - 9 - 1, height - padding.Bottom + 1, pen6);
+            destination.DrawLine(9, padding.Top - 1, 9 + (width - 18 - 1), padding.Top - 1, pen7); // 1st layer of border
+            destination.DrawLine(10, padding.Top - 1, 10, height - padding.Bottom - 1, pen7);
+            destination.DrawLine(width - 11, padding.Top - 1, width - 11, height - padding.Bottom - 1, pen6);
+            destination.DrawLine(9, height - padding.Bottom, width - 9 - 1, height - padding.Bottom, pen6);
+            destination.DrawLine(10, padding.Top - 2, 9 + (width - 18 - 2), padding.Top - 2, pen7); // 2nd layer of border
+            destination.DrawLine(9, padding.Top - 2, 9, height - padding.Bottom, pen7);
+            destination.DrawLine(width - 10, padding.Top - 2, width - 10, height - padding.Bottom, pen6);
+            destination.DrawLine(9, height - padding.Bottom + 1, width - 9 - 1, height - padding.Bottom + 1, pen6);
         }
         else
         {
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top - 1, 9 + (width - 18 - 1), padding.Top - 1, pen7); // 1st layer of border
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top + 67, 9 + (width - 18 - 1), padding.Top + 67, pen7);
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top - 1, 10, padding.Top + 59, pen7);
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top + 66, 10, height - padding.Bottom - 1, pen7);
-            Raylib.ImageDrawLine(ref destination, width - 11, padding.Top - 1, width - 11, padding.Top + 61, pen6);
-            Raylib.ImageDrawLine(ref destination, width - 11, padding.Top + 67, width - 11, height - padding.Bottom - 1, pen6);
-            Raylib.ImageDrawLine(ref destination, 10, height - padding.Bottom, width - 9 - 1, height - padding.Bottom, pen6);
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top + 60, width - 9 - 1, padding.Top + 60, pen6);
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top - 2, 9 + (width - 18 - 2), padding.Top - 2, pen7); // 2nd layer of border
-            Raylib.ImageDrawLine(ref destination, 10, padding.Top + 66, 9 + (width - 18 - 2), padding.Top + 66, pen7);
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top - 2, 9, padding.Top + 60, pen7);
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top + 66, 9, height - padding.Bottom, pen7);
-            Raylib.ImageDrawLine(ref destination, width - 10, padding.Top - 2, width - 10, padding.Top + 59, pen6);
-            Raylib.ImageDrawLine(ref destination, width - 10, padding.Top + 66, width - 10, height - padding.Bottom - 1, pen6);
-            Raylib.ImageDrawLine(ref destination, 9, height - padding.Bottom + 1, width - 9 - 1, height - padding.Bottom + 1, pen6);
-            Raylib.ImageDrawLine(ref destination, 9, padding.Top + 61, width - 9 - 1, padding.Top + 61, pen6);
+            destination.DrawLine(9, padding.Top - 1, 9 + (width - 18 - 1), padding.Top - 1, pen7); // 1st layer of border
+            destination.DrawLine(9, padding.Top + 67, 9 + (width - 18 - 1), padding.Top + 67, pen7);
+            destination.DrawLine(10, padding.Top - 1, 10, padding.Top + 59, pen7);
+            destination.DrawLine(10, padding.Top + 66, 10, height - padding.Bottom - 1, pen7);
+            destination.DrawLine(width - 11, padding.Top - 1, width - 11, padding.Top + 61, pen6);
+            destination.DrawLine(width - 11, padding.Top + 67, width - 11, height - padding.Bottom - 1, pen6);
+            destination.DrawLine(10, height - padding.Bottom, width - 9 - 1, height - padding.Bottom, pen6);
+            destination.DrawLine(10, padding.Top + 60, width - 9 - 1, padding.Top + 60, pen6);
+            destination.DrawLine(10, padding.Top - 2, 9 + (width - 18 - 2), padding.Top - 2, pen7); // 2nd layer of border
+            destination.DrawLine(10, padding.Top + 66, 9 + (width - 18 - 2), padding.Top + 66, pen7);
+            destination.DrawLine(9, padding.Top - 2, 9, padding.Top + 60, pen7);
+            destination.DrawLine(9, padding.Top + 66, 9, height - padding.Bottom, pen7);
+            destination.DrawLine(width - 10, padding.Top - 2, width - 10, padding.Top + 59, pen6);
+            destination.DrawLine(width - 10, padding.Top + 66, width - 10, height - padding.Bottom - 1, pen6);
+            destination.DrawLine(9, height - padding.Bottom + 1, width - 9 - 1, height - padding.Bottom + 1, pen6);
+            destination.DrawLine(9, padding.Top + 61, width - 9 - 1, padding.Top + 61, pen6);
         }
     }
 
     public override void DrawButton(Texture2D texture, int x, int y, int w, int h)
     {
-        Raylib.DrawRectangleLinesEx(new Rectangle(x, y, w, h), 1.0f, new Color(100, 100, 100, 255));
-        Raylib.DrawRectangleRec(new Rectangle(x + 1, y + 1, w - 2, h - 2), Color.White);
-        Raylib.DrawRectangleRec(new Rectangle(x + 3, y + 3, w - 6, h - 6), new Color(192, 192, 192, 255));
-        Raylib.DrawLine(x + 2, y + h - 2, x + w - 2, y + h - 2, new Color(128, 128, 128, 255));
-        Raylib.DrawLine(x + 3, y + h - 3, x + w - 2, y + h - 3, new Color(128, 128, 128, 255));
-        Raylib.DrawLine(x + w - 1, y + 2, x + w - 1, y + h - 1, new Color(128, 128, 128, 255));
-        Raylib.DrawLine(x + w - 2, y + 3, x + w - 2, y + h - 1, new Color(128, 128, 128, 255));
+        Graphics.DrawRectangleLinesEx(new Rectangle(x, y, w, h), 1.0f, new Color(100, 100, 100, 255));
+        Graphics.DrawRectangleRec(new Rectangle(x + 1, y + 1, w - 2, h - 2), Color.White);
+        Graphics.DrawRectangleRec(new Rectangle(x + 3, y + 3, w - 6, h - 6), new Color(192, 192, 192, 255));
+        Graphics.DrawLine(x + 2, y + h - 2, x + w - 2, y + h - 2, new Color(128, 128, 128, 255));
+        Graphics.DrawLine(x + 3, y + h - 3, x + w - 2, y + h - 3, new Color(128, 128, 128, 255));
+        Graphics.DrawLine(x + w - 1, y + 2, x + w - 1, y + h - 1, new Color(128, 128, 128, 255));
+        Graphics.DrawLine(x + w - 2, y + 3, x + w - 2, y + h - 1, new Color(128, 128, 128, 255));
     }
     
     protected override IEnumerable<Ruleset> GenerateRulesets(string path, string title)

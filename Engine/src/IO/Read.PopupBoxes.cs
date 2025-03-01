@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Civ2engine.IO;
 
 namespace Civ2engine
 {
@@ -16,7 +17,7 @@ namespace Civ2engine
 
         public Dictionary<string, PopupBox?> Boxes { get; set; }
 
-        public void ProcessSection(string section, List<string> contents)
+        public void ProcessSection(string section, List<string>? contents)
         {
             var popupBox = new PopupBox {Name = section, Checkbox = false};
             Action<string> contentHandler;
@@ -24,7 +25,7 @@ namespace Civ2engine
 
             void TextHandler(string line)
             {
-                if (string.IsNullOrWhiteSpace(line) && popupBox.Text?.Count > 0 && popupBox.Options == null)
+                if (string.IsNullOrWhiteSpace(line) && popupBox.Text?.Count > 0 && popupBox.Options == null && section != "SCENARIO")   // No options in scenario intro text
                 {
                     contentHandler = (line) =>
                     {

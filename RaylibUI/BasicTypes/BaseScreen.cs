@@ -1,7 +1,10 @@
 using System.Diagnostics;
 using System.Numerics;
 using Model;
-using Raylib_cs;
+using Raylib_CSharp;
+using Raylib_CSharp.Collision;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Windowing;
 
 namespace RaylibUI;
 
@@ -10,8 +13,8 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     public override void Draw(bool pulse)
     {
         var layoutController = _dialogs.LastOrDefault(this);
-        var width = Raylib.GetScreenWidth();
-        var height = Raylib.GetScreenHeight();
+        var width = Window.GetScreenWidth();
+        var height = Window.GetScreenHeight();
 
         if (_renderedWidth != width || _renderedHeight != height)
         {
@@ -58,22 +61,22 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     {
         foreach (var key in _keys)
         {
-            if (!Raylib.IsKeyPressed(key)) continue;
+            if (!Input.IsKeyPressed(key)) continue;
             if (layoutController.Focused == null || !layoutController.Focused.OnKeyPressed(key))
             {
                 layoutController.OnKeyPress(key);
             }
         }
 
-        var mousePos = Raylib.GetMousePosition();
+        var mousePos = Input.GetMousePosition();
         var control = layoutController.Hovered; 
         if (control != null)
         {
-            control.OnMouseMove(Raylib.GetMouseDelta());
+            control.OnMouseMove(Input.GetMouseDelta());
             if (control.Children != null)
             {
                 var hoverChild = FindControl(control.Children,
-                    child => Raylib.CheckCollisionPointRec(mousePos, child.Bounds));
+                    child => ShapeHelper.CheckCollisionPointRec(mousePos, child.Bounds));
                 if (hoverChild != null)
                 {
                     control.OnMouseLeave();
@@ -81,7 +84,7 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
                     hoverChild.OnMouseEnter();
                 }
             }
-            if (!Raylib.CheckCollisionPointRec(mousePos, control.Bounds))
+            if (!ShapeHelper.CheckCollisionPointRec(mousePos, control.Bounds))
             {
                 control.OnMouseLeave();
                 FindHovered(layoutController, mousePos);
@@ -101,13 +104,16 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     private static void FindHovered(IControlLayout layoutController, Vector2 mousePos)
     {
         layoutController.Hovered = FindControl(layoutController.Controls,
-            control => Raylib.CheckCollisionPointRec(mousePos, control.Bounds));
+            control => ShapeHelper.CheckCollisionPointRec(mousePos, control.Bounds));
         layoutController.Hovered?.OnMouseEnter();
     }
 
-    public void CloseDialog(IControlLayout dialog)
+    public void CloseDialog(IControlLayout? dialog)
     {
-        _dialogs.Remove(dialog);
+        if (dialog != null)
+        {
+            _dialogs.Remove(dialog);
+        }
     }
     
 
@@ -119,7 +125,10 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
         }
 
         _dialogs.Add(dialog);
-        dialog.Resize(_renderedWidth,_renderedHeight);
+        if (_renderedWidth > 0 && _renderedHeight > 0)
+        {
+            dialog.Resize(_renderedWidth, _renderedHeight);
+        }
     }
 
     private readonly List<IControlLayout> _dialogs = new();

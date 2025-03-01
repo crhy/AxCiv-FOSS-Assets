@@ -1,5 +1,4 @@
 using Civ2engine.Units;
-using Raylib_cs;
 using RaylibUI.RunGame.GameControls.Mapping.Views.ViewElements;
 
 namespace RaylibUI.RunGame.GameControls.Mapping.Views;
@@ -14,11 +13,11 @@ public class UnitReadyView : BaseGameView
         var activeInterface = gameScreen.Main.ActiveInterface;
 
         var elements = new List<IViewElement>();
-        ImageUtils.GetUnitTextures(unit, activeInterface, elements, ActivePos with{ Y = ActivePos.Y + Dimensions.TileHeight - activeInterface.UnitImages.UnitRectangle.Height});
+        ImageUtils.GetUnitTextures(unit, activeInterface, gameScreen.Game, elements, ActivePos with{ Y = ActivePos.Y + Dimensions.TileHeight - activeInterface.UnitImages.UnitRectangle.Height.ZoomScale(gameScreen.Zoom)});
 
         SetAnimation(elements);
 
-        SetAnimation(Array.Empty<TextureElement>());
+        SetAnimation([]);
     }
 
     public Unit Unit { get; set; }

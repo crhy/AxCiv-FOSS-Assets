@@ -5,8 +5,12 @@ using Model.ImageSets;
 using Model.InterfaceActions;
 using Model.Interface;
 using RaylibUI;
-using Raylib_cs;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Textures;
 using System.Numerics;
+using Model.Core;
+using Model.Core.Advances;
+using Model.Dialog;
 
 namespace Model;
 
@@ -19,7 +23,7 @@ public interface IUserInterface
     IInterfaceAction ProcessDialog(string dialogName, DialogResult dialogResult);
     IInterfaceAction GetInitialAction();
     
-    IImageSource? BackgroundImage { get; }
+    IImageSource? ScenTitleImage { get; set; }
     int GetCityIndexForStyle(int cityStyleIndex, City city, int citySize);
     void LoadPlayerColours();
 
@@ -32,6 +36,8 @@ public interface IUserInterface
     UnitSet UnitImages { get; }
 
     PlayerColour[] PlayerColours { get; }
+    
+    int ExpectedMaps { get; set; }
 
     CommonMapImageSet MapImages { get; }
     int DefaultDialogWidth { get; }
@@ -41,7 +47,7 @@ public interface IUserInterface
     
     CityWindowLayout GetCityWindowDefinition();
 
-    Dictionary<string, BitmapStorage[]> PicSources { get; }
+    Dictionary<string, IImageSource[]> PicSources { get; }
     IList<ResourceImage> ResourceImages { get; }
     PopupBox? GetDialog(string dialogName);
 
@@ -54,7 +60,10 @@ public interface IUserInterface
     
     IMain MainApp { get; }
     int InterfaceIndex { get; set; }
-    IInterfaceAction HandleLoadGame(GameData gameData);
-    IInterfaceAction HandleLoadScenario(GameData gameData, string scnName, string scnDirectory);
+    IInterfaceAction HandleLoadGame(IGame game, Rules rules, Ruleset ruleset, Dictionary<string, string?> viewData);
+    IInterfaceAction HandleLoadScenario(IGame game, string scnName, string scnDirectory);
     IInterfaceAction InitNewGame(bool quickStart);
+    IImageSource? GetImprovementImage(Improvement improvement, int firstWonderIndex);
+    IImageSource? GetAdvanceImage(Advance advance);
+    string GetScientistName(int civilizationEpoch);
 }

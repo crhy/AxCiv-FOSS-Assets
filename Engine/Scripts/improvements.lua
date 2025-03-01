@@ -23,8 +23,9 @@ civ.getImprovement(5).Effects.Add(civ.core.Effects.LuxMultiplier, 50)
 --Library,                  8,  1,    Wri,
 civ.getImprovement(6).Effects.Add(civ.core.Effects.ScienceMultiplier, 50)
 --Courthouse,               8,  1,    CoL,
+civ.getImprovement(7).Effects.Add(civ.core.Effects.ReduceCorruption, 50)
 --City Walls,               8,  0,    Mas,
-civ.getImprovement(8).Effects.Add(civ.core.Effects.Walled, 100);
+civ.getImprovement(8).Effects.Add(civ.core.Effects.Walled, 200);
 --Aqueduct,                 8,  2,    Cst,
 --Bank,                     12, 3,    Ban,
 civ.getImprovement(10).Effects.Add(civ.core.Effects.TaxMultiplier, 50)
@@ -38,6 +39,7 @@ civ.getImprovement(13).Effects.Add(civ.core.Effects.EliminatePopulationPollution
 --Factory,                  20, 4,    Ind,
 --Manufacturing Plant,      32, 6,    Rob,
 --SDI Defense,              20, 4,    Las,
+civ.getImprovement(17).Effects.Add(civ.core.Effects.MissileDefence, 100)
 --Recycling Center,         20, 2,    Rec,
 --Power Plant,              16, 4,    Ref,
 --Hydro Plant,              24, 4,    E2,
@@ -52,17 +54,23 @@ civ.getImprovement(24).addTerrainEffect({ Resource = civ.core.Resources.Food, Va
 --Research Lab,             16, 3,    Cmp,
 civ.getImprovement(26).Effects.Add(civ.core.Effects.ScienceMultiplier, 50)
 --SAM Missile Battery,      10, 2,    Roc,
+civ.getImprovement(27).Effects.Add(civ.core.Effects.AirDefence, 100)
 --Coastal Fortress,          8, 1,    Met,
+civ.getImprovement(28).Effects.Add(civ.core.Effects.SeaDefence, 100)
+civ.getImprovement(28).Effects.Add(civ.core.Effects.OceanRequired, 1)
 --Solar Plant,              32, 4,    Env,
 civ.getImprovement(29).Effects.Add(civ.core.Effects.PopulationPollutionModifier, -1)
 civ.getImprovement(29).Effects.Add(civ.core.Effects.EliminateIndustrialPollution, 1)
 --Harbor,                   6,  1,    Sea,
 civ.getImprovement(30).addTerrainEffect({ Resource = civ.core.Resources.Food, Value = 1, Terrain = 10 })
+civ.getImprovement(30).Effects.Add(civ.core.Effects.OceanRequired, 1)
 --Offshore Platform,        16, 3,    Min,
 civ.getImprovement(31).addTerrainEffect({ Resource = civ.core.Resources.Shields, Value = 1, Terrain = 10 })
+civ.getImprovement(31).Effects.Add(civ.core.Effects.OceanRequired, 1)
 --Airport,                  16, 3,    Rad,
 civ.getImprovement(32).Effects.Add(civ.core.Effects.Veteran, civ.core.UnitDomain.Air)
 --Police Station,           6,  2,    Cmn,
 --Port Facility,            8,  3,    Amp,
 civ.getImprovement(34).Effects.Add(civ.core.Effects.Veteran, civ.core.UnitDomain.Sea)
+civ.getImprovement(34).Effects.Add(civ.core.Effects.OceanRequired, 1)
 --Beyond this number TOT and MPG have different improvements!!! need to check which we're in before continuing

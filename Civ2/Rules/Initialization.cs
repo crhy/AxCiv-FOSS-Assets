@@ -4,6 +4,8 @@ using Civ2engine.Advances;
 using Civ2engine.Enums;
 using Civ2engine.IO;
 using Model;
+using Model.Core;
+using RaylibUtils;
 
 namespace Civ2.Rules;
 
@@ -11,6 +13,7 @@ public static class Initialization
 {
     private static GameInitializationConfig? _config;
     public static GameInitializationConfig ConfigObject => _config ??= GetConfig() ;
+    public static IDictionary<string,string?>? ViewData { get; set; }
 
     private static GameInitializationConfig GetConfig()
     {
@@ -20,9 +23,11 @@ public static class Initialization
         return config;
     }
 
-    internal static Game GameInstance = null;
+    public static GameInitializationConfig ClearInitializationConfig() => _config = null;
 
-    public static void Start(Game game)
+    internal static IGame GameInstance;
+
+    public static void Start(IGame game)
     {
         GameInstance = game;
     }
@@ -31,8 +36,8 @@ public static class Initialization
     {
         var ruleSet = civ2Interface.MainApp.ActiveRuleSet;
         ConfigObject.Rules = RulesParser.ParseRules(ruleSet);
-        
-        //TODO: Check is interface already hase initialized images and unload them
+
+        Images.ClearCache();
         TerrainLoader.LoadTerrain(ruleSet, civ2Interface);
         UnitLoader.LoadUnits(ruleSet, civ2Interface);
         CityLoader.LoadCities(ruleSet, civ2Interface.CityImages, civ2Interface);
@@ -50,11 +55,7 @@ public static class Initialization
 
         var civilizations = new List<Civilization>
         {
-            new()
-            {
-                Adjective = Labels.Items[17], LeaderName = Labels.Items[18], Alive = true, Id = 0,
-                PlayerType = PlayerType.Barbarians, Advances = new bool[ConfigObject.Rules.Advances.Length]
-            },
+            Barbarians.Civilization,
             ConfigObject.PlayerCiv
         };
 
@@ -84,9 +85,10 @@ public static class Initialization
         var gender = human ? config.Gender : ConfigObject.Random.Next(2);
         return new Civilization
         {
+            TribeId = tribe.TribeId,
             Adjective = tribe.Adjective,
             Alive = true,
-            Government = GovernmentType.Despotism,
+            Government = (int)GovernmentType.Despotism,
             Id = id,
             Money = 0,
             Advances = new bool[config.Rules.Advances.Length],
@@ -94,7 +96,6 @@ public static class Initialization
             LeaderGender = gender,
             LeaderName = gender == 0 ? tribe.NameMale : tribe.NameFemale,
             LeaderTitle = titles[(int)GovernmentType.Despotism],
-            LuxRate = 0,
             ScienceRate = 60,
             TaxRate = 40,
             TribeName = tribe.Plural,
@@ -108,5 +109,17 @@ public static class Initialization
     {
         var govt = tribe.Titles.FirstOrDefault(t=>t.Gov == governmentType) ?? (IGovernmentTitles)gov;
         return config.Gender == 0 ? govt.TitleMale : govt.TitleFemale;
+    }
+
+    public static IGame UpdateScenarioChoices()
+    {
+        var config = ConfigObject;
+        var instance = GameInstance;
+        
+        instance.SetHumanPlayer(config.ScenPlayerCivId);
+        instance.DifficultyLevel = config.DifficultyLevel;
+        instance.GetPlayerCiv.LeaderGender = config.Gender;
+        instance.GetPlayerCiv.LeaderName = config.LeaderName;
+        return instance;
     }
 }

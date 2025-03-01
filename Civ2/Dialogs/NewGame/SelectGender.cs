@@ -1,7 +1,7 @@
 using Civ2.Dialogs.Scenario;
 using Civ2.Rules;
 using Civ2engine;
-using Model;
+using Model.Dialog;
 using Model.InterfaceActions;
 
 namespace Civ2.Dialogs.NewGame;
@@ -12,6 +12,16 @@ public class SelectGender : BaseDialogHandler
 
     public SelectGender() : base(Title, 0, -0.03)
     {
+    }
+
+    public override IInterfaceAction Show(Civ2Interface activeInterface)
+    {
+        var config = Initialization.ConfigObject;
+
+        if (config.IsScenario) 
+            Dialog.SelectedOption = config.CivGenders[config.ScenPlayerCivId] == 0 ? 0 : 1;
+
+        return base.Show(activeInterface);
     }
 
     public override IInterfaceAction HandleDialogResult(DialogResult result,

@@ -1,7 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using Model;
+using Model.Dialog;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Interact;
 
 namespace RaylibUI.RunGame.Commands;
 
@@ -16,7 +16,7 @@ public class EndTurn : IGameCommand
 
     public string Id => CommandIds.EndTurn;
     
-    public Shortcut[] ActivationKeys { get; set; } = { new (KeyboardKey.Enter), new (KeyboardKey.KpEnter)};
+    public Shortcut[] ActivationKeys { get; set; } = { new (KeyboardKey.Enter), new (KeyboardKey.KpEnter), new(KeyboardKey.N, ctrl: true)};
     public CommandStatus Status { get; private set; }
 
     public bool Update()
@@ -37,5 +37,6 @@ public class EndTurn : IGameCommand
 
     public MenuCommand? Command { get; set; }
     public string ErrorDialog { get; } = string.Empty;
+    public DialogImageElements? ErrorImage { get; } = null;
     public string? Name { get; }
 }

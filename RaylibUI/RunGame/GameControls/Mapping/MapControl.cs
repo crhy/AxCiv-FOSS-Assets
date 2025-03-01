@@ -1,15 +1,21 @@
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
 using Civ2engine;
 using Civ2engine.Enums;
 using Civ2engine.Events;
 using Civ2engine.MapObjects;
-using Raylib_cs;
+using Raylib_CSharp.Transformations;
+using Raylib_CSharp.Textures;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.RunGame.GameControls.Mapping.Views;
-using RaylibUI.Controls;
 using Model;
+using Model.Core;
 using Model.Interface;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Fonts;
+using Raylib_CSharp.Interact;
+using RaylibUI.Controls;
+using Raylib_CSharp.Collision;
 
 namespace RaylibUI.RunGame.GameControls.Mapping;
 
@@ -17,18 +23,19 @@ public class MapControl : BaseControl
 {
     public override bool CanFocus => true;
     private readonly GameScreen _gameScreen;
-    private readonly Game _game;
+    private readonly IGame _game;
     private Texture2D? _backgroundImage;
-    private int _viewWidth;
-    private int _viewHeight;
+    private int _viewWidth,_viewHeight;
     private Padding _padding;
-    private HeaderLabel _headerLabel;
+    private HeaderLabel? _headerLabel;
     private IUserInterface _active;
-    
+    private Button _zoomInButton, _zoomOutButton;
+    private float _zoomBtnScale;
+
     private readonly Queue<IGameView> _animationQueue = new();
     private IGameView _currentView;
-
-    public MapControl(GameScreen gameScreen, Game game, Rectangle initialBounds) : base(gameScreen)
+    
+    public MapControl(GameScreen gameScreen, IGame game, Rectangle initialBounds) : base(gameScreen)
     {
         Bounds = initialBounds;
         _currentBounds = initialBounds;
@@ -38,37 +45,29 @@ public class MapControl : BaseControl
         
         _headerLabel = new HeaderLabel(gameScreen, _active.Look, $"{_game.GetPlayerCiv.Adjective} {Labels.For(LabelIndex.Map)}", fontSize: _active.Look.HeaderLabelFontSizeNormal);
         _padding = _active.GetPadding(_headerLabel?.TextSize.Y ?? 0, false);
+        _zoomBtnScale = _padding.Top > 30 ? 1.4f : 1.0f;   // MGE=1.4f, ToT=1.0f
+        _zoomInButton = new Button(Controller, String.Empty, backgroundImage: _active.PicSources["zoomIn"][0], imageScale: _zoomBtnScale);
+        _zoomOutButton = new Button(Controller, String.Empty, backgroundImage: _active.PicSources["zoomOut"][0], imageScale: _zoomBtnScale);
         SetDimensions();
 
         _currentView =
             _gameScreen.ActiveMode.GetDefaultView(gameScreen, null, _viewHeight, _viewWidth, ForceRedraw);
 
-        // Show initial view rectangle in minimap
-        var dim = _gameScreen.TileCache.GetDimensions(_game.CurrentMap);
-        _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.MapViewChanged,
-            new[] { (int)_currentView.Offsets.X / dim.HalfWidth, (int)_currentView.Offsets.Y / dim.HalfHeight },
-            new[] { _viewWidth / dim.HalfWidth, _viewHeight / dim.HalfHeight }));
-
         gameScreen.OnMapEvent += MapEventTriggered;
-        _game.OnUnitEvent += UnitEventHappened;
+        _game.OnUnitEvent += UnitEventTriggered;
         Click += OnClick;
         MouseDown += OnMouseDown;
 
-        _clickTimer = new Timer(_ => _longHold = true);
     }
-    
-    private bool _longHold;
-    private readonly Timer _clickTimer;
 
     private void OnMouseDown(object? sender, MouseEventArgs e)
     {
         var tile = GetTileAtMousePosition();
         if(tile == null) return;
-        _longHold = false;
-        _clickTimer.Change(500, -1);
+        _gameScreen.ActiveMode.MouseDown(tile);
     }
 
-    private void UnitEventHappened(object sender, UnitEventArgs e)
+    private void UnitEventTriggered(object sender, UnitEventArgs e)
     {
         switch (e.EventType)
         {
@@ -88,19 +87,15 @@ public class MapControl : BaseControl
                 {
                     _animationQueue.Enqueue(new AttackAnimation(_gameScreen, combatEventArgs, _animationQueue.LastOrDefault(_currentView), _viewHeight, _viewWidth, ForceRedraw));
                 }
-
-
-                // animationFrames = GetAnimationFrames.UnitAttack(e);
-                // StartAnimation(AnimationType.Attack);
                 break;
             }
-            // case UnitEventType.StatusUpdate:
-            //     {
-            //         animType = AnimationType.Waiting;
-            //         if (IsActiveSquareOutsideMapView) MapViewChange(Map.ActiveXY);
-            //         UpdateMap();
-            //         break;
-            //     }
+            case UnitEventType.NewUnitActivated:
+            {
+                //animType = AnimationType.Waiting;
+                //if (IsActiveSquareOutsideMapView) MapViewChange(Map.ActiveXY);
+                //UpdateMap();
+                break;
+            }
         }
     }
 
@@ -116,14 +111,30 @@ public class MapControl : BaseControl
 
     private void SetDimensions()
     {
+        if (_gameScreen.ToTPanelLayout)
+        {
+            _padding = _active.GetPadding(0, false);
+        }
+        else
+        {
+            _padding = _active.GetPadding(_headerLabel.TextSize.Y, false);
+        }
+
         if (_backgroundImage != null)
         {
-            Raylib.UnloadTexture(_backgroundImage.Value);
+            _backgroundImage.Value.Unload();
         }
         _backgroundImage = ImageUtils.PaintDialogBase(_gameScreen.Main.ActiveInterface, Width, Height, _padding, noWallpaper:true);
 
-        _headerLabel.Bounds = new Rectangle((int)Location.X, (int)Location.Y, Width, _padding.Top);
-        _headerLabel.OnResize();
+        if (!_gameScreen.ToTPanelLayout)
+        {
+            _headerLabel.Bounds = new Rectangle((int)Location.X, (int)Location.Y, Width, _padding.Top);
+            _zoomInButton.Bounds = new Rectangle((int)Location.X + 11, (int)Location.Y + 7, _zoomInButton.GetPreferredWidth(), _zoomInButton.GetPreferredHeight());
+            _zoomOutButton.Bounds = new Rectangle((int)Location.X + 11 + _zoomInButton.GetPreferredWidth() + 2, (int)Location.Y + 7, _zoomOutButton.GetPreferredWidth(), _zoomOutButton.GetPreferredHeight());
+            _headerLabel.OnResize();
+            _zoomInButton.OnResize();
+            _zoomOutButton.OnResize();
+        }
 
         _viewWidth = Width - _padding.Left - _padding.Right;
         _viewHeight = Height - _padding.Top - _padding.Bottom;
@@ -135,22 +146,34 @@ public class MapControl : BaseControl
     {
         try
         {
-            _clickTimer.Change(-1, -1);
             _gameScreen.Focused = this;
             var tile = GetTileAtMousePosition();
             if (tile == null)
             {
+                var clickPosition = GetRelativeMousePosition();
+                clickPosition.Y += Location.Y;
+                if (!_gameScreen.ToTPanelLayout && ShapeHelper.CheckCollisionPointRec(clickPosition, _zoomInButton.Bounds))
+                {
+                    if (_gameScreen.Zoom < 8)
+                        _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = _gameScreen.Zoom + 1 });
+                }
+                else if (!_gameScreen.ToTPanelLayout && ShapeHelper.CheckCollisionPointRec(clickPosition, _zoomOutButton.Bounds))
+                {
+                    if (_gameScreen.Zoom > -7)
+                        _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = _gameScreen.Zoom - 1 });
+                }
                 return;
             }
 
-            if (_gameScreen.ActiveMode.MapClicked(tile, mouseEventArgs.Button, _longHold))
+            if (_gameScreen.ActiveMode.MapClicked(tile, mouseEventArgs.Button))
             {
+                _gameScreen.ForceRedraw();
                 MapViewChange(tile);
             }
         }
         finally
         {
-            _longHold = false;
+            _gameScreen.ActiveMode.MouseClear();
         }
     }
 
@@ -162,14 +185,15 @@ public class MapControl : BaseControl
             return null;
         }
 
-        var dim = _gameScreen.TileCache.GetDimensions(_game.CurrentMap);
+        var map = _gameScreen.CurrentMap;
+        var dim = _gameScreen.TileCache.GetDimensions(map, _gameScreen.Zoom);
         var clickedTilePosition = clickPosition - new Vector2(_padding.Left + _padding.Right, _padding.Top) + _currentView.Offsets;
         var y = Math.DivRem((int)(clickedTilePosition.Y), dim.HalfHeight, out var yRemainder);
         var odd = y % 2 == 1;
         var clickX = (int)(odd ? clickedTilePosition.X - dim.HalfWidth : clickedTilePosition.X);
         if (clickX < 0)
         {
-            if (_game.CurrentMap.Flat)
+            if (map.Flat)
             {
                 clickX = 0;
             }
@@ -180,7 +204,7 @@ public class MapControl : BaseControl
         }
         else if (clickX > dim.TotalWidth)
         {
-            if (_game.CurrentMap.Flat)
+            if (map.Flat)
             {
                 clickX = dim.TotalWidth - 1;
             }
@@ -202,7 +226,7 @@ public class MapControl : BaseControl
                     x -= 1;
                     if (x < 0)
                     {
-                        x = _game.CurrentMap.Flat ? 0 : _game.CurrentMap.Tile.GetLength(0) - 1;
+                        x = map.Flat ? 0 : map.Tile.GetLength(0) - 1;
                     }
                 }
             }
@@ -215,9 +239,9 @@ public class MapControl : BaseControl
                 if (odd)
                 {
                     x += 1;
-                    if (x == _game.CurrentMap.Tile.GetLength(0))
+                    if (x == map.Tile.GetLength(0))
                     {
-                        if (_game.CurrentMap.Flat)
+                        if (map.Flat)
                         {
                             x -= 1;
                         }
@@ -230,9 +254,9 @@ public class MapControl : BaseControl
             }
         }
 
-        if (0 <= y && y < _game.CurrentMap.Tile.GetLength(1))
+        if (0 <= y && y < map.Tile.GetLength(1))
         {
-            return _game.CurrentMap.Tile[x, y];
+            return map.Tile[x, y];
         }
 
         return null;
@@ -244,10 +268,6 @@ public class MapControl : BaseControl
         {
             NextView();
         }
-        var dim = _gameScreen.TileCache.GetDimensions(_game.CurrentMap);
-        _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.MapViewChanged,
-            new[] { (int)_currentView.Offsets.X / dim.HalfWidth, (int)_currentView.Offsets.Y / dim.HalfHeight },
-            new[] { _viewWidth / dim.HalfWidth, _viewHeight / dim.HalfHeight }));   
     }
 
     private void MapEventTriggered(object sender, MapEventArgs e)
@@ -271,6 +291,13 @@ public class MapControl : BaseControl
 
                     break;
                 }
+            case MapEventType.ZoomChange:
+                {
+                    _gameScreen.Zoom = e.Zoom;
+                    _gameScreen.ForceRedraw();
+                    NextView();
+                }
+                break;
             default: break;
         }
     }
@@ -295,50 +322,58 @@ public class MapControl : BaseControl
         }
 
         var paddedLoc = new Vector2(Location.X + _padding.Left, Location.Y + _padding.Top);
-        Raylib.DrawTextureEx(_currentView.BaseImage, paddedLoc, 0f,1f,
+        Graphics.DrawTextureEx(_currentView.BaseImage, paddedLoc, 0f,1f,
             Color.White);
 
         var cityDetails = new List<CityData>();
 
+        var zoom = _gameScreen.Zoom;
         foreach (var element in _currentView.Elements)
         {
             if (element is CityData data)
             {
-                element.Draw(element.Location + paddedLoc);
+                element.Draw(element.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
                 cityDetails.Add(data);
 
                 var size = data.Size.ToString();
-                var textSize = Raylib.MeasureTextEx(Fonts.TnRbold, size, 14, 0);
-                var citySizeRectLoc = paddedLoc + data.Location + data.SizeRectLoc;
+                var fontSize = 14.ZoomScale(zoom);
+                var textSize = TextManager.MeasureTextEx(Fonts.TnRbold, size, fontSize, 0);
+                var citySizeRectLoc = paddedLoc + data.Location + data.SizeRectLoc.ZoomScale(zoom);
                 var textPosition = citySizeRectLoc;
-                Raylib.DrawRectangle((int)citySizeRectLoc.X, (int)citySizeRectLoc.Y, (int)textSize.X, (int)textSize.Y, data.Color.TextColour);
-                Raylib.DrawRectangleLines((int)citySizeRectLoc.X - 1, (int)citySizeRectLoc.Y, (int)textSize.X + 2, (int)textSize.Y, Color.Black);
-                Raylib.DrawTextEx(Fonts.TnRbold, size, textPosition, 14, 0, Color.Black);
+                Graphics.DrawRectangle((int)citySizeRectLoc.X, (int)citySizeRectLoc.Y, (int)textSize.X, (int)textSize.Y, data.Color.TextColour);
+                Graphics.DrawRectangleLines((int)citySizeRectLoc.X - 1, (int)citySizeRectLoc.Y, (int)textSize.X + 2, (int)textSize.Y, Color.Black);
+                Graphics.DrawTextEx(Fonts.TnRbold, size, textPosition, fontSize, 0, Color.Black);
             }
             else if (element.IsTerrain || !_currentView.ActionTiles.Contains(element.Tile) || element.Tile.IsCityPresent)
             {
-                element.Draw(element.Location + paddedLoc, isShaded: element.IsShaded);
+                element.Draw(element.Location + paddedLoc, isShaded: element.IsShaded, scale: ImageUtils.ZoomScale(zoom));
             }
         }
 
         foreach (var cityData in cityDetails)
         {
             var name = cityData.Name;
-            var textSize = Raylib.MeasureTextEx(_active.Look.DefaultFont, name, 20, 1);
-            var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.Texture.Width /2f , cityData.Texture.Height) - textSize /2f;
+            var fontSize = 20.ZoomScale(zoom);
+            var textSize = TextManager.MeasureTextEx(_active.Look.DefaultFont, name, fontSize, 1);
+            var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.Texture.Width.ZoomScale(zoom) / 2f , cityData.Texture.Height.ZoomScale(zoom)) - textSize /2f;
 
-            Raylib.DrawTextEx(_active.Look.DefaultFont, name, textPosition + new Vector2(1,1), 20, 1, Color.Black);
-            Raylib.DrawTextEx(_active.Look.DefaultFont, name, textPosition, 20, 1, cityData.Color.TextColour);
+            Graphics.DrawTextEx(_active.Look.DefaultFont, name, textPosition + new Vector2(1,1), fontSize, 1, Color.Black);
+            Graphics.DrawTextEx(_active.Look.DefaultFont, name, textPosition, fontSize, 1, cityData.Color.TextColour);
         }
 
         foreach (var animation in _currentView.CurrentAnimations)
         {
-            animation.Draw(animation.Location + paddedLoc);
+            animation.Draw(animation.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
         }
 
         if (_backgroundImage != null)
-            Raylib.DrawTextureEx(_backgroundImage.Value, Location, 0f, 1f, Color.White);
-        _headerLabel.Draw(pulse);
+            Graphics.DrawTextureEx(_backgroundImage.Value, Location, 0f, 1f, Color.White);
+        if (!_gameScreen.ToTPanelLayout)
+        {
+            _headerLabel.Draw(pulse);
+            _zoomInButton?.Draw(pulse);
+            _zoomOutButton?.Draw(pulse);
+        }
     }
 
     private void NextView()

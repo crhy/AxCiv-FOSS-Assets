@@ -5,18 +5,24 @@ using Civ2.Dialogs.NewGame;
 using Civ2.Menu;
 using Civ2.Rules;
 using Civ2engine;
-using Civ2engine.Improvements;
 using Civ2engine.IO;
 using Model;
 using Model.Images;
 using Model.ImageSets;
 using Model.InterfaceActions;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Transformations;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Textures;
 using RaylibUtils;
 using static Model.Menu.CommandIds;
 using Civ2.Dialogs.Scenario;
 using Civ2engine.OriginalSaves;
+using Model.Constants;
+using Model.Core;
+using Model.Core.Advances;
+using Model.Dialog;
 
 namespace Civ2;
 
@@ -29,7 +35,7 @@ public abstract class Civ2Interface : IUserInterface
     
     public bool CanDisplay(string? title)
     {
-        return title == Title;
+        return title != null && title.Contains(Title);
     }
 
     public abstract InterfaceStyle Look { get; }
@@ -51,7 +57,7 @@ public abstract class Civ2Interface : IUserInterface
             value.Width = (int)(value.Width * 1.5m);
         }
         Labels.UpdateLabels(null);
-
+        
         var handlerInterface = typeof(ICivDialogHandler);
         DialogHandlers = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
@@ -81,7 +87,7 @@ public abstract class Civ2Interface : IUserInterface
         return DialogHandlers[InitialMenu].Show(this);
     }
 
-    public virtual IImageSource? BackgroundImage => null;
+    public IImageSource? ScenTitleImage { get; set; } = null;
     
     public int GetCityIndexForStyle(int cityStyleIndex, City city, int citySize)
     {
@@ -332,7 +338,7 @@ public abstract class Civ2Interface : IUserInterface
 
     public abstract int UnitsRows { get; }
     public abstract int UnitsPxHeight { get; }
-    public abstract Dictionary<string, BitmapStorage[]> PicSources { get; set; }
+    public abstract Dictionary<string, IImageSource[]> PicSources { get; set; }
     public abstract void GetShieldImages();
     public abstract UnitShield UnitShield(int unitType);
     public abstract void DrawBorderWallpaper(Wallpaper wallpaper, ref Image destination, int height, int width, Padding padding, bool statusPanel);
@@ -367,33 +373,32 @@ public abstract class Civ2Interface : IUserInterface
     public abstract bool IsButtonInOuterPanel { get; }
     
     public int InterfaceIndex { get; set; }
-    public IInterfaceAction HandleLoadGame(GameData gameData)
+
+    public IInterfaceAction HandleLoadScenario(IGame game, string scnName, string scnDirectory)
     {
-        ExpectedMaps = gameData.MapNoSecondaryMaps + 1;
-        Initialization.LoadGraphicsAssets(this);
-
-        var game = ClassicSaveLoader.LoadSave(gameData, MainApp.ActiveRuleSet, Initialization.ConfigObject.Rules);
-
-        Initialization.Start(game);
-        return DialogHandlers[LoadOk.Title].Show(this);
-    }
-
-    public IInterfaceAction HandleLoadScenario(GameData gameData, string scnName, string scnDirectory)
-    {
-        ExpectedMaps = gameData.MapNoSecondaryMaps + 1;
+        ExpectedMaps = game.NoMaps;
         Initialization.LoadGraphicsAssets(this);
 
         var config = Initialization.ConfigObject;
-        config.TechParadigm = gameData.TechParadigm;
-        config.ScenarioName = gameData.ScenarioName;
-        config.CivNames = gameData.CivTribeName;
-        config.LeaderNames = gameData.CivLeaderName;
-        config.StartingYear = gameData.StartingYear;
-        config.TurnYearIncrement = gameData.TurnYearIncrement;
-        config.DifficultyLevel = gameData.DifficultyLevel;
-        config.MaxTurns = gameData.MaxTurns;
+        config.TechParadigm = game.ScenarioData.TechParadigm;
+        config.ScenarioName = game.ScenarioData.Name;
+        config.CivNames = game.AllCivilizations.Select(c => c.TribeName).ToArray();
+        config.CivGenders = game.AllCivilizations.Select(c => c.LeaderGender).ToArray();
+        config.LeaderNames = game.AllCivilizations.Select(c => c.LeaderName).ToArray();
+        config.StartingYear = game.ScenarioData.StartingYear;
+        config.TurnYearIncrement = game.ScenarioData.TurnYearIncrement;
+        config.DifficultyLevel = game.DifficultyLevel;
+        config.MaxTurns = game.ScenarioData.MaxTurns;
+        config.CivsInPlay = game.AllCivilizations.Select(c => c.Alive).ToArray(); ;
 
-        ClassicSaveLoader.LoadScn(gameData, MainApp.ActiveRuleSet, config.Rules);
+        Initialization.Start(game);
+
+        var titleImage = "Title.gif";
+        var foundTitleImage = Directory.EnumerateFiles(scnDirectory, titleImage, new EnumerationOptions { MatchCasing = MatchCasing.CaseInsensitive }).FirstOrDefault();
+        if (foundTitleImage != null)
+        {
+            ScenTitleImage = new BitmapStorage(foundTitleImage);
+        }
 
         // Load custom intro if it exists in txt file
         var introFile = Regex.Replace(scnName, ".scn", ".txt", RegexOptions.IgnoreCase);
@@ -417,6 +422,16 @@ public abstract class Civ2Interface : IUserInterface
         return DialogHandlers[ScenarioLoadedDialog.Title].Show(this);
     }
 
+    public IInterfaceAction HandleLoadGame(IGame game, Civ2engine.Rules rules, Ruleset ruleset,
+        Dictionary<string, string?> viewData)
+    {
+        ExpectedMaps = game.NoMaps;
+        Initialization.LoadGraphicsAssets(this);
+        Initialization.ViewData = viewData;
+        Initialization.Start(game);
+        return DialogHandlers[LoadOk.Title].Show(this);
+    }
+
     public IInterfaceAction InitNewGame(bool quickStart)
     {
         Initialization.LoadGraphicsAssets(this);
@@ -433,5 +448,43 @@ public abstract class Civ2Interface : IUserInterface
         }
 
         return DialogHandlers[WorldSizeHandler.Title].Show(this);
+    }
+
+    public IImageSource? GetImprovementImage(Improvement improvement, int firstWonderIndex)
+    {
+        var y = 1;
+        var x = 343;
+        var index = improvement.Type;
+        var columns = 8;
+        if (improvement.IsWonder)
+        {
+            y += 105;
+            index -= firstWonderIndex;
+            columns = 7;
+        }
+        else
+        {
+            index -= 1; //Remove nothing as it has no image
+        }
+
+        var (addRows, addColumns) = Math.DivRem(index, columns);
+
+        y += addRows * 21;
+        x += addColumns * 37;
+        
+        return new BitmapStorage("icons", x, y, 36, 20);
+    }
+
+    public IImageSource? GetAdvanceImage(Advance advance)
+    {
+        var x = 343 + (advance.KnowledgeCategory) * 37;
+        var y = 211 + (advance.Epoch) * 21;
+        
+        return new BitmapStorage("icons", x, y, 36, 20);
+    }
+
+    public string GetScientistName(int epoch)
+    {
+        return Labels.For(epoch < 3 ? LabelIndex.wisemen : LabelIndex.scientists);
     }
 }

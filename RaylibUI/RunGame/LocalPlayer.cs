@@ -3,6 +3,9 @@ using Civ2engine.Advances;
 using Civ2engine.MapObjects;
 using Civ2engine.Production;
 using Civ2engine.Units;
+using Model.Core;
+using Model.Core.Advances;
+using Model.Interface;
 
 namespace RaylibUI.RunGame;
 
@@ -18,101 +21,77 @@ public class LocalPlayer : IPlayer
 
     public Civilization Civilization { get; }
 
-    public Tile ActiveTile
-    {
-        get => _activeTile;
-        set
-        {
-            if (_activeTile != value)
-            {
-                _activeTile = value;
-            }
-        }
-    }
+    public Tile ActiveTile { get; set; }
 
     private Unit? _activeUnit;
-    
-    private Tile _activeTile;
 
     public Unit? ActiveUnit
     {
         get { return _activeUnit; }
         set
         {
-            switch (value)
+            if (value == null)
             {
-                case null:
-                    _activeUnit = null;
-                    break;
-                case { TurnEnded: false, Dead: false }:
-                    _activeTile = value.CurrentLocation;
-                    _activeUnit = value;
-                    break;
-                default:
+                _activeUnit = null;
+            }
+            else if (value is { TurnEnded: false, Dead: false } && value.Owner == Civilization)
+            {
+                if (value.CurrentLocation != null) ActiveTile = value.CurrentLocation;
+                _activeUnit = value;
+            }
+            else
+            {
 #if DEBUG
-                    //     throw new NotSupportedException("Tried to set ended unit to active");
+                //     throw new NotSupportedException("Tried to set ended unit to active");
 #endif
-                    break;
             }
         }
     }
 
     public void CivilDisorder(City city)
     {
-        _gameScreen.ShowCityDialog("DISORDER", new[] { city.Name });
+        _gameScreen.ShowCityDialog("DISORDER", city);
     }
 
     public void OrderRestored(City city)
     {
-        _gameScreen.ShowCityDialog("RESTORED", new[] { city.Name });
+        _gameScreen.ShowCityDialog("RESTORED", city);
     }
 
     public void WeLoveTheKingStarted(City city)
     {
-        _gameScreen.ShowCityDialog("WELOVEKING", new[] { city.Name, city.Owner.LeaderTitle });
+        _gameScreen.ShowCityDialog("WELOVEKING", city);
     }
 
     public void WeLoveTheKingCanceled(City city)
     {
-        _gameScreen.ShowCityDialog("WEDONTLOVEKING", new[] { city.Name, city.Owner.LeaderTitle });
+        _gameScreen.ShowCityDialog("WEDONTLOVEKING", city);
     }
 
     public void CantMaintain(City city, Improvement cityImprovement)
     {
-        throw new NotImplementedException();
+        _gameScreen.ShowCityDialog("INHOCK", city, new[] { city.Name, cityImprovement.Name },
+            new[] { cityImprovement.Cost });
     }
 
-    public void SelectNewAdvance(Game game, List<Advance> researchPossibilities)
+    public void SelectNewAdvance(IGame game, List<Advance> researchPossibilities)
     {
-        // var popup = _main.popupBoxList["RESEARCH"];
-        // var dialog = new Civ2dialog(_main, popup, new List<string> { "wise men" },
-        //     listbox: new ListboxDefinition { LeftText = researchPossibilities.Select(a => a.Name).ToList() });
-        // dialog.ShowModal();
-        // Civ.ReseachingAdvance = researchPossibilities[dialog.SelectedIndex].Index;
+        var activeInterface = _gameScreen.Main.ActiveInterface;
+        _gameScreen.ShowPopup("RESEARCH", (s, i, arg3, arg4) =>
+            {
+                Civilization.ReseachingAdvance = researchPossibilities[i].Index;
+            }, replaceStrings: new string [] { activeInterface.GetScientistName(Civilization.Epoch) },
+            listBox: new ListBoxDefinition { Vertical = false, Entries  =  researchPossibilities.Select(a => new ListBoxEntry { Icon = activeInterface.GetAdvanceImage(a), LeftText = a.Name}).ToList() } );
     }
 
-    public void CantProduce(City city, ProductionOrder newItem)
+    public void CantProduce(City city, IProductionOrder? newItem)
     {
-        ShowCityDialog(city, "BADBUILD");
+        _gameScreen.ShowCityDialog("BADBUILD", city);
     }
 
     public void CityProductionComplete(City city)
     {
-        ShowCityDialog(city, "BUILT");
-    }
-
-    private void ShowCityDialog(City city, string dialogName)
-    {
-        // var popup = _main.popupBoxList[dialogName];
-        // popup.Options ??= new List<string> { Labels.For(LabelIndex.ZoomToCity), Labels.For(LabelIndex.Continue) };
-        // var dialog = new Civ2dialog(_main, popup,
-        //     new List<string>
-        //         { city.Name, city.ItemInProduction.GetDescription(), city.Owner.Adjective, Labels.For(LabelIndex.builds) });
-        // dialog.ShowModal();
-        // if (dialog.SelectedIndex == 0)
-        // {
-        //     _main.mapPanel.ShowCityWindow(city);
-        // }
+        _gameScreen.ShowCityDialog("BUILT", city);
     }
 
     public IInterfaceCommands Ui { get; }
@@ -129,19 +108,56 @@ public class LocalPlayer : IPlayer
 
     public void MapChanged(List<Tile> tiles)
     {
+        // var t = tiles.SelectMany(t => t.Map.DirectNeighbours(t));
+
         var allTiles = tiles
-            .Concat(tiles.SelectMany(t => t.Map.DirectNeighbours(t).Where(n => n.IsVisible(Civilization.Id))))
+            .Concat(tiles.SelectMany(t => t.Map.DirectNeighbours(t).Where(n => n.IsVisible(_gameScreen.VisibleCivId))))
             .Distinct();
         foreach (var tile in allTiles)
         {
-            _gameScreen.TileCache.Redraw(tile, Civilization.Id);
+            _gameScreen.TileCache.Redraw(tile, _gameScreen.VisibleCivId);
         }
 
         _gameScreen.ForceRedraw();
     }
 
-    public void WaitingAtEndOfTurn()
+    public void WaitingAtEndOfTurn(IGame game)
     {
         _gameScreen.ActiveMode = _gameScreen.ViewPiece;
+    }
+
+    public void NotifyAdvanceResearched(int advance)
+    {
+        var activeInterface = _gameScreen.Main.ActiveInterface;
+        _gameScreen.ShowPopup("CIVADVANCE",
+            replaceStrings: new[]
+            {
+                Civilization.Adjective, activeInterface.GetScientistName(Civilization.Epoch),
+                _gameScreen.Game.Rules.Advances[advance].Name
+            });
+    }
+
+    public void FoodShortage(City city)
+    {
+        _gameScreen.ShowCityDialog("FOODSHORTAGE", city);
+    }
+
+    public void CityDecrease(City city)
+    {
+        _gameScreen.ShowCityDialog("DECREASE", city);
+    }
+
+    public void TurnStart(int turnNumber)
+    {
+        _gameScreen.TurnStarting(turnNumber);
+    }
+
+    public void SetUnitActive(Unit? unit, bool move)
+    {
+        ActiveUnit = unit;
+        if (_gameScreen.Game.GetActiveCiv == this.Civilization)
+        {
+            _gameScreen.ActiveMode = _gameScreen.Moving;
+        }
     }
 }

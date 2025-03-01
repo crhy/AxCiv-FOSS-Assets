@@ -2,7 +2,8 @@ using System.Diagnostics;
 using Civ2engine;
 using Civ2engine.MapObjects;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Transformations;
 using RaylibUI.RunGame.GameControls;
 using RaylibUI.RunGame.GameControls.Mapping.Views;
 
@@ -29,7 +30,7 @@ public class ProcessingMode : IGameMode
         return existing;
     }
 
-    public bool MapClicked(Tile tile, MouseButton mouseButton, bool longClick)
+    public bool MapClicked(Tile tile, MouseButton mouseButton)
     {
         return false;
     }
@@ -54,5 +55,15 @@ public class ProcessingMode : IGameMode
     public IList<IControl> GetSidePanelContents (Rectangle bounds)
     {
         return Array.Empty<IControl>();
+    }
+
+    public void MouseDown(Tile tile)
+    {
+        // Don't care
+    }
+
+    public void MouseClear()
+    {
+        
     }
 }

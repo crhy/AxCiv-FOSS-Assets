@@ -4,7 +4,7 @@ using Civ2engine.IO;
 using Model;
 using Model.Images;
 using Model.ImageSets;
-using Raylib_cs;
+using Raylib_CSharp.Transformations;
 using RaylibUtils;
 
 namespace Civ2.ImageLoader
@@ -18,7 +18,7 @@ namespace Civ2.ImageLoader
 
             for (int i = 0; i < units.Length; i++)
             {
-                var props = Images.ExtractBitmapData(active.PicSources["unit"][i]); // put into cache
+                var props = Images.ExtractBitmapData(active.PicSources["unit"][i], active); // put into cache
 
                 units[i] = new UnitImage
                 {

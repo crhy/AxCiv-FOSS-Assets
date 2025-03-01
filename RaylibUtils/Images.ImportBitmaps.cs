@@ -1,13 +1,15 @@
 ﻿using System.IO;
 using System.Net.Mime;
 using System.Text;
-using Raylib_cs;
+using Raylib_CSharp.Images;
+using Raylib_CSharp.Transformations;
 using Civ2engine;
 using Civ2engine.MapObjects;
 using Civ2engine.Terrains;
 using Model;
 using Model.Images;
 using System.Numerics;
+using Raylib_CSharp.Colors;
 
 namespace RaylibUtils
 {
@@ -70,27 +72,35 @@ namespace RaylibUtils
         private static Dictionary<string, Image> _imageCache = new();
         private static Dictionary<string, int> _sourceBpp = new();
 
-        private const string TempPath = "temp";
-
-        public static ImageProps ExtractBitmapData(IImageSource imageSource)
+        public static ImageProps ExtractBitmapData(IImageSource imageSource, string[]? searchPaths)
         {
-            return ExtractBitmapData(imageSource, null);
+            return ExtractBitmapData(imageSource, null, searchPaths: searchPaths);
+        }
+
+        public static Image ExtractBitmap(IImageSource imageSource, IUserInterface active)
+        {
+            return ExtractBitmapData(imageSource, active).Image;
         }
 
         public static Image ExtractBitmap(IImageSource imageSource)
         {
-            return ExtractBitmapData(imageSource, null).Image;
+            return ExtractBitmapData(imageSource, active: null).Image;
         }
 
-        public static ImageProps ExtractBitmapData(IImageSource imageSource, IUserInterface? active, int owner = -1)
+        public static int GetImageWidth(IImageSource? imageSource, IUserInterface active, float scale = 1f) 
+        { 
+            return imageSource == null ? 0 : (int)(ExtractBitmap(imageSource, active).Width * scale);
+        }
+
+        public static int GetImageHeight(IImageSource? imageSource, IUserInterface active, float scale = 1f)
+        {
+            return imageSource == null ? 0 : (int)(ExtractBitmap(imageSource, active).Height * scale);
+        }
+
+        public static ImageProps ExtractBitmapData(IImageSource imageSource, IUserInterface? active, int owner = -1, string[]? searchPaths = null)
         {
             var imageProps = new ImageProps();
             int flag1X = 0, flag1Y = 0, flag2X = 0, flag2Y = 0;
-
-            if (!Directory.Exists(TempPath))
-            {
-                Directory.CreateDirectory(TempPath);
-            }
 
             var key = imageSource.GetKey(owner);
             if (_imageCache.TryGetValue(key, out var bitmap))
@@ -101,16 +111,36 @@ namespace RaylibUtils
             
             switch (imageSource)
             {
-
                 case BinaryStorage binarySource:
-                    _imageCache[key] = ExtractBitmap(binarySource.FileName, binarySource.DataStart, binarySource.Length, key);
-                    break;
+                    {
+                        var sourceKey = $"Binary-{binarySource.Filename}-{binarySource.DataStart}-Source";
+                        if (!_imageCache.ContainsKey(sourceKey))
+                        {
+                            var path = Utils.GetFilePath(binarySource.Filename);
+                            var source_img_bpp = Images.LoadImageFromFile(path, binarySource.DataStart, binarySource.Length);
+                            _imageCache[sourceKey] = source_img_bpp.Image;
+                            _sourceBpp[sourceKey] = source_img_bpp.ColourDepth;
+                        }
+
+                        var sourceImage = _imageCache[sourceKey];
+                        var rect = binarySource.Location;
+                        if (rect.Width == 0)
+                        {
+                            rect = new Rectangle(0, 0, sourceImage.Width, sourceImage.Height);
+                        }
+                        var image = Image.FromImage(sourceImage, rect);
+                        _imageCache[binarySource.Key] = image;
+                        break;
+                    }
                 case BitmapStorage bitmapStorage:
                     {
                         var sourceKey = $"{bitmapStorage.Filename}-Source";
                         if (!_imageCache.ContainsKey(sourceKey))
                         {
-                            var path = Utils.GetFilePath(bitmapStorage.Filename, Settings.SearchPaths, bitmapStorage.Extension);
+                            string[] _paths = active != null ?
+                                active.MainApp.ActiveRuleSet.Paths : searchPaths ?? Settings.SearchPaths;
+                            var path = Utils.GetFilePath(bitmapStorage.Filename, _paths, bitmapStorage.Extension);
+                            path ??= Utils.GetFilePath(bitmapStorage.Filename, Settings.SearchPaths, bitmapStorage.Extension);
                             var source_img_bpp = Images.LoadImageFromFile(path);
                             _imageCache[sourceKey] = source_img_bpp.Image;
                             _sourceBpp[sourceKey] = source_img_bpp.ColourDepth;
@@ -122,14 +152,13 @@ namespace RaylibUtils
                         {
                             rect = new Rectangle(0, 0, sourceImage.Width, sourceImage.Height);
                         }
-                        var image = Raylib.ImageFromImage(sourceImage, rect);
+                        var image = Image.FromImage(sourceImage, rect);
 
                         // Upper-left pixel transparency (not for 8bpp gif/bmp)
                         if (_sourceBpp[sourceKey] > 8 && bitmapStorage.TransparencyPixel)
                         {
-                            var transparent = Raylib.GetImageColor(image, 0, 0);
-                            Raylib.ImageColorReplace(ref image, transparent,
-                                new Color(transparent.R, transparent.G, transparent.B, (byte)0));
+                            var transparent = image.GetColor(0, 0);
+                            image.ReplaceColor(transparent, new Color(transparent.R, transparent.G, transparent.B, 0));
                         }
 
                         // Get location of shields/city flags
@@ -139,7 +168,7 @@ namespace RaylibUtils
                             var orangePixel = new Color(255, 155, 0, 255);
                             for (var col = 0; col < rect.Width; col++)
                             {
-                                var pixelColour = Raylib.GetImageColor(sourceImage, (int)rect.X + col, (int)rect.Y - 1);
+                                var pixelColour = sourceImage.GetColor((int)rect.X + col, (int)rect.Y - 1);
                                 if (bluePixel.R == pixelColour.R && bluePixel.G == pixelColour.G && bluePixel.B == pixelColour.B)
                                 {
                                     flag1X = col;
@@ -151,7 +180,7 @@ namespace RaylibUtils
                             }
                             for (var row = 0; row < rect.Height; row++)
                             {
-                                var pixelColour = Raylib.GetImageColor(sourceImage, (int)rect.X - 1, (int)rect.Y + row);
+                                var pixelColour = sourceImage.GetColor((int)rect.X - 1, (int)rect.Y + row);
                                 if (bluePixel.R == pixelColour.R && bluePixel.G == pixelColour.G && bluePixel.B == pixelColour.B)
                                 {
                                     flag1Y = row;
@@ -170,8 +199,8 @@ namespace RaylibUtils
                 {
                     if (owner != -1 && memoryStorage.ReplacementColour != null && active != null)
                     {
-                        var image = Raylib.ImageCopy(memoryStorage.Image);
-                        Raylib.ImageColorReplace(ref image, memoryStorage.ReplacementColour.Value,
+                        var image = memoryStorage.Image.Copy();
+                        image.ReplaceColor(memoryStorage.ReplacementColour.Value,
                             memoryStorage.Dark
                                 ? active.PlayerColours[owner].DarkColour
                                 : active.PlayerColours[owner].LightColour);
@@ -194,48 +223,12 @@ namespace RaylibUtils
             return imageProps;
         }
         
-        public static Image ExtractBitmap(string filename, int start, int length, string key)
-        {
-            if (!Files.ContainsKey(filename))
-            {
-                var path = Utils.GetFilePath(filename);
-                if (string.IsNullOrEmpty(path))
-                {
-                    Console.Error.WriteLine("Failed to load file " + filename + " please check value");
-                    return Raylib.GenImageColor(1, 1, new Color(0, 0, 0, 0));
-                }
-                Files[filename] = File.ReadAllBytes(path);
-            }
-
-            return ExtractBitmap(Files[filename], start, length, key);
-        }
-
         public static void ClearCache()
         {
-            _imageCache.Clear();
-            Files.Clear();
-        }
-
-        public static Dictionary<string, byte[]> Files { get; } = new();
-
-        static byte[] _extn = Encoding.ASCII.GetBytes("Gif\0");
-
-        private static Image ExtractBitmap(byte[] byteArray, int start, int length, string key)
-        {
-            // Make empty byte array to hold GIF bytes
-            byte[] newBytesRange = new byte[length];
-
-            // Copy GIF bytes in DLL byte array into empty array
-            Array.Copy(byteArray, start, newBytesRange, 0, length);
-            var fileName = Path.Combine(TempPath, key + ".gif");
-            using (var file = File.Create(fileName))
+            foreach (var image in _imageCache.Where(t => !t.Key.StartsWith("Binary")))
             {
-                file.Write(newBytesRange);
-                file.Flush();
+                _imageCache.Remove(image.Key);
             }
-
-            return Raylib.LoadImage(fileName);
-
         }
     }
 }

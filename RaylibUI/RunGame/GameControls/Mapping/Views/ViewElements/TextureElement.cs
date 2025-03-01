@@ -1,6 +1,8 @@
 using System.Numerics;
 using Civ2engine.MapObjects;
-using Raylib_cs;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Textures;
 
 namespace RaylibUI.RunGame.GameControls.Mapping.Views.ViewElements;
 
@@ -28,31 +30,28 @@ public class TextureElement : IViewElement
     public Tile Tile { get; set; }
     public bool IsTerrain { get; }
     public bool IsShaded { get; }
-
-
+    
     public void Draw(Vector2 adjustedLocation, float scale = 1f, bool isShaded = false)
     {
-        var loc = adjustedLocation - Offset + Offset * scale;
-
         if (isShaded)
         {
-            Raylib.BeginShaderMode(Shaders.Grayscale);
+            Graphics.BeginShaderMode(Shaders.Grayscale);
         }
 
-        Raylib.DrawTextureEx(Texture,
-            loc,
+        Graphics.DrawTextureEx(Texture,
+            adjustedLocation + Offset * scale,
             0f,
             scale,
             Color.White);
 
         if (isShaded)
         {
-            Raylib.EndShaderMode();
+            Graphics.EndShaderMode();
         }
     }
 
     public IViewElement CloneForLocation(Vector2 newLocation)
     {
-        return new TextureElement(Texture, newLocation, Tile, IsTerrain);
+        return new TextureElement(Texture, newLocation, Tile, IsTerrain, offset: Offset);
     }
 }

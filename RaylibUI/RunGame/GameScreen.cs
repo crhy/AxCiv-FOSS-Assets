@@ -6,9 +6,13 @@ using Civ2engine.IO;
 using Civ2engine.MapObjects;
 using Civ2engine.Units;
 using Model;
+using Model.Core;
+using Model.Dialog;
+using Model.Images;
 using Model.Interface;
 using Model.Menu;
-using Raylib_cs;
+using Raylib_CSharp.Windowing;
+using Raylib_CSharp.Transformations;
 using RaylibUI.RunGame.Commands.Orders;
 using RaylibUI.RunGame.GameControls;
 using RaylibUI.RunGame.GameControls.CityControls;
@@ -16,13 +20,14 @@ using RaylibUI.RunGame.GameControls.Mapping;
 using RaylibUI.RunGame.GameControls.Menu;
 using RaylibUI.RunGame.GameModes;
 using RaylibUI.RunGame.GameModes.Orders;
+using Raylib_CSharp.Interact;
 
 namespace RaylibUI.RunGame;
 
 public class GameScreen : BaseScreen
 {
     public Main Main { get; }
-    public Game Game { get; }
+    public IGame Game { get; }
     public Sound Soundman { get; }
 
     private readonly MinimapPanel _minimapPanel;
@@ -30,6 +35,7 @@ public class GameScreen : BaseScreen
     private readonly StatusPanel _statusPanel;
     private readonly LocalPlayer _player;
     private readonly GameMenu _menu;
+    private bool _ToTPanelLayout;
 
     public IGameMode ActiveMode
     {
@@ -42,13 +48,18 @@ public class GameScreen : BaseScreen
             }
         }
     }
-
+    
+    public int Zoom     // -7 (min) ... 8 (max), 0=std.
+    {
+        get => _zoom;
+        set => _zoom = Math.Max(Math.Min(value, 8), -7);
+    }
     public TileTextureCache TileCache { get; }
     
     public LocalPlayer Player => _player;
 
     public StatusPanel StatusPanel => _statusPanel;
-
+    public bool ToTPanelLayout => _ToTPanelLayout;
     public GameMenu MenuBar => _menu;
     public IGameMode Moving { get; }
     public IGameMode ViewPiece { get; }
@@ -60,30 +71,40 @@ public class GameScreen : BaseScreen
     private CivDialog _currentPopupDialog;
     private Action<string,int,IList<bool>?,IDictionary<string,string>?>? _popupClicked;
 
+    private int _zoom;
+
     public event EventHandler<MapEventArgs>? OnMapEvent = null;
 
-    public GameScreen(Main main, Game game, Sound soundman): base(main)
+    public GameScreen(Main main, IGame game, Sound soundman, IDictionary<string, string?>? viewData): base(main)
     {
         TileCache = new TileTextureCache(this);
         Main = main;
         Game = game;
         Soundman = soundman;
 
-        _miniMapHeight = Math.Max(100, game.CurrentMap.YDim) + 38 + 11;
+        if (viewData != null && viewData.TryGetValue("Zoom", out var value) && int.TryParse(value, out var zoom))
+        {
+            //Use the property to ensure range validation is run
+            Zoom = zoom;
+        }
+        
+        Moving = new MovingPieces(this);
+        ViewPiece = new ViewPiece(this);
+        Processing = new ProcessingMode(this);
 
         var civ = game.GetPlayerCiv;
         _player = new LocalPlayer(this, civ);
+        VisibleCivId = _player.Civilization.Id;
         game.ConnectPlayer(_player);
+
+        _ToTPanelLayout = false;
+        _miniMapHeight = Math.Max(100, game.Maps[_player.ActiveTile.Z].YDim) + 38 + 11;
 
         var commands = SetupCommands(game);
         var menuElements = main.ActiveInterface.ConfigureGameCommands(commands);
         _menu = new GameMenu(this, menuElements);
         _menu.GetPreferredWidth();
 
-        Moving = new MovingPieces(this);
-        ViewPiece = new ViewPiece(this);
-        Processing = new ProcessingMode(this);
-               
         if (Game.GetActiveCiv == Game.GetPlayerCiv)
         {
             ActiveMode = _player.ActiveUnit is not {MovePoints: > 0} ? ViewPiece : Moving;
@@ -93,16 +114,22 @@ public class GameScreen : BaseScreen
             ActiveMode = Processing;
         }
         
-        var width = Raylib.GetScreenWidth();
-        var height = Raylib.GetScreenHeight();
+        var width = Window.GetScreenWidth();
+        var height = Window.GetScreenHeight();
         
         var menuHeight = _menu.GetPreferredHeight();
-        var mapWidth = width - MiniMapWidth;
         
         _statusPanel = new StatusPanel(this, game);
-        
         _minimapPanel = new MinimapPanel(this, game);
-        _mapControl = new MapControl(this, game, new Rectangle(0, menuHeight, mapWidth, height - menuHeight));
+
+        var mapWidth = width - MiniMapWidth;
+        var mapRect = new Rectangle(0, menuHeight, mapWidth, height - menuHeight);
+        if (_ToTPanelLayout)
+        {
+            mapWidth = width;
+            mapRect = new Rectangle(0, menuHeight + _miniMapHeight, mapWidth, height - menuHeight - _miniMapHeight);
+        }
+        _mapControl = new MapControl(this, game, mapRect);
 
         // The order of these is important as MapControl can overdraw so must be drawn first
         Controls.Add(_mapControl);
@@ -150,11 +177,19 @@ public class GameScreen : BaseScreen
         }
         else
         {
-            ShowPopup(activeCommand.ErrorDialog);
+            ShowPopup(activeCommand.ErrorDialog, dialogImage: activeCommand.ErrorImage);
         }
     }
 
     public ProcessingMode Processing { get; }
+    public Map CurrentMap => Player.ActiveTile.Map;
+
+    /// <summary>
+    /// The CivId of the currently displayed map normally the same as the player civId but can be changed via reveal map
+    /// </summary>
+    public int VisibleCivId { get; set; }
+
+    public MapControl MapControl => _mapControl;
 
     public override void OnKeyPress(KeyboardKey key)
     {
@@ -163,10 +198,10 @@ public class GameScreen : BaseScreen
             Focused = MenuBar.Children!.First();
             return;
         }
-        var command = new Shortcut(key, Raylib.IsKeyDown(KeyboardKey.RightShift) ||
-                                        Raylib.IsKeyDown(KeyboardKey.LeftShift)
-            , Raylib.IsKeyDown(KeyboardKey.LeftControl) ||
-              Raylib.IsKeyDown(KeyboardKey.RightControl)
+        var command = new Shortcut(key, Input.IsKeyDown(KeyboardKey.RightShift) ||
+                                        Input.IsKeyDown(KeyboardKey.LeftShift)
+            , Input.IsKeyDown(KeyboardKey.LeftControl) ||
+              Input.IsKeyDown(KeyboardKey.RightControl)
         );
 
         if (!ActiveMode.HandleKeyPress(command) && GameCommands.ContainsKey(command))
@@ -183,26 +218,51 @@ public class GameScreen : BaseScreen
 
     public override void Resize(int width, int height)
     {
-        _menu.GetPreferredWidth();
-        var menuHeight = _menu.GetPreferredHeight();
-        var mapWidth = width - MiniMapWidth;
-        _menu.Bounds = new Rectangle(0, 0, width, menuHeight);
-        _mapControl.Bounds = new Rectangle(0, menuHeight, mapWidth, height - menuHeight);
-        _minimapPanel.Bounds = new Rectangle( mapWidth, menuHeight, MiniMapWidth, _miniMapHeight);
-        _statusPanel.Bounds = new Rectangle(mapWidth, _miniMapHeight + menuHeight, MiniMapWidth, height - _miniMapHeight - menuHeight);
-        
+        GetPanelBounds(width, height);
         base.Resize(width, height);
     }
 
-    public void ShowCityDialog(string dialog, IList<string> replaceStrings)
+    private void GetPanelBounds(int width, int height)
     {
-        // var dialogBox = new CivDialog(this, popupBoxList[dialog], replaceStrings);
-        // this.ShowDialog(dialogBox, true);
+        _menu.GetPreferredWidth();
+        var menuHeight = _menu.GetPreferredHeight();
+        var mapWidth = width - MiniMapWidth;
+        var mapControlRect = new Rectangle(0, menuHeight, mapWidth, height - menuHeight);
+        var minimapRect = new Rectangle(mapWidth, menuHeight, MiniMapWidth, _miniMapHeight);
+        var statusRect = new Rectangle(mapWidth, _miniMapHeight + menuHeight, MiniMapWidth, height - _miniMapHeight - menuHeight);
+        if (_ToTPanelLayout)
+        {
+            mapWidth = width;
+            mapControlRect = new Rectangle(0, menuHeight + _miniMapHeight, mapWidth, height - menuHeight - _miniMapHeight);
+            minimapRect = new Rectangle(mapWidth - MiniMapWidth, menuHeight, MiniMapWidth, _miniMapHeight);
+            statusRect = new Rectangle(0, menuHeight, mapWidth - MiniMapWidth, _miniMapHeight);
+        }
+        _menu.Bounds = new Rectangle(0, 0, width, menuHeight);
+        _mapControl.Bounds = mapControlRect;
+        _minimapPanel.Bounds = minimapRect;
+        _statusPanel.Bounds = statusRect;
+    }
+
+    public void ShowCityDialog(string dialog, City city, IList<string>? replaceStrings = null,
+        IList<int>? replaceNumbers = null)
+    {
+        replaceStrings ??= new List<string>
+            { city.Name, city.ItemInProduction.GetDescription(), city.Owner.Adjective, Labels.For(LabelIndex.builds) };
+        ShowPopup(dialog,
+            handleButtonClick: (s, i, arg3, arg4) =>
+            {
+                if (i == 0)
+                {
+                    ShowCityWindow(city);
+                }
+            },
+            replaceNumbers: replaceNumbers,
+            options: new List<string> { Labels.For(LabelIndex.ZoomToCity), Labels.For(LabelIndex.Continue) },
+            replaceStrings: replaceStrings);
     }
 
     public void ShowCityWindow(City city)
     {
-        //TODO: City window
         var cityDialog = new CityWindow(this, city);
         ShowDialog(cityDialog);
     }
@@ -217,7 +277,7 @@ public class GameScreen : BaseScreen
         var unitsHere = tile.UnitsHere;
         if (unitsHere.Count == 0)
         {
-            Game.ActiveTile = tile;
+            Game.ActivePlayer.ActiveTile = tile;
             return true;
         }
 
@@ -243,7 +303,7 @@ public class GameScreen : BaseScreen
             _player.ActiveUnit = unit;
         }
 
-        unit.Order = OrderType.NoOrders; // Always clear order when clicked, no matter if the unit is activated
+        unit.Order = (int)OrderType.NoOrders; // Always clear order when clicked, no matter if the unit is activated
         ActiveMode = Moving;
         return true;
     }
@@ -253,7 +313,7 @@ public class GameScreen : BaseScreen
         _mapControl.ForceRedraw = true;
     }
 
-    private IList<IGameCommand> SetupCommands(Game game)
+    private IList<IGameCommand> SetupCommands(IGame game)
     {
         var commandInterface = typeof(IGameCommand);
         var improvementCommand = typeof(ImprovementOrder);
@@ -273,14 +333,22 @@ public class GameScreen : BaseScreen
 
     public void ShowPopup(string dialogName,
         Action<string, int, IList<bool>?, IDictionary<string, string>?>? handleButtonClick = null,
-        List<TextBoxDefinition>? textBoxes = null)
+        IList<int>? replaceNumbers = null,
+        IList<bool>? checkboxStates = null,
+        List<string>? options = null,
+        List<TextBoxDefinition>? textBoxes = null,
+        DialogImageElements? dialogImage = null,
+        IList<string>? replaceStrings = null,
+        ListBoxDefinition? listBox = null)
     {
         var popupBox = MainWindow.ActiveInterface.GetDialog(dialogName);
         if (popupBox != null)
         {
+            popupBox.Options ??= options;
             _popupClicked = handleButtonClick;
             _currentPopupDialog = new CivDialog(MainWindow, popupBox, new Point(0, 0),
-                ClosePopup, textBoxDefs: textBoxes);
+                ClosePopup, textBoxDefs: textBoxes, image: dialogImage, replaceStrings: replaceStrings,
+                replaceNumbers: replaceNumbers, listBox: listBox, checkboxStates: checkboxStates);
             ShowDialog(_currentPopupDialog, stack: true);
         }
     }
@@ -289,5 +357,16 @@ public class GameScreen : BaseScreen
     {
         CloseDialog(_currentPopupDialog);
         _popupClicked?.Invoke(arg1, arg2, arg3, arg4);
+    }
+
+    public void ToggleMapLayout()
+    {
+        _ToTPanelLayout = !_ToTPanelLayout;
+        Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+    }
+
+    public void TurnStarting(int turnNumber)
+    {
+        _statusPanel.Update();
     }
 }

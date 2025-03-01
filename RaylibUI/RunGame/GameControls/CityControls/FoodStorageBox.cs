@@ -1,9 +1,11 @@
 using System.Numerics;
 using Civ2engine;
-using Civ2engine.Improvements;
 using Model;
 using Model.Images;
-using Raylib_cs;
+using Raylib_CSharp.Colors;
+using Raylib_CSharp.Fonts;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Textures;
 
 namespace RaylibUI.RunGame.GameControls.CityControls;
 
@@ -28,7 +30,7 @@ public class FoodStorageBox : BaseControl
             .LargeImage);
         
         _text = Labels.For(LabelIndex.FoodStorage);
-        _textDim = Raylib.MeasureTextEx(_active.Look.CityWindowFont, _text, _active.Look.CityWindowFontSize, 1);
+        _textDim = TextManager.MeasureTextEx(_active.Look.CityWindowFont, _text, _active.Look.CityWindowFontSize, 1);
     }
     
 
@@ -36,8 +38,7 @@ public class FoodStorageBox : BaseControl
     {
         base.Draw(pulse);
     
-
-    var foodPerRow = _cityWindow.City.Size + 1;
+        var foodPerRow = _cityWindow.City.Size + 1;
         var spacing = _foodIcon.Width;
         var boxWidth = _foodIcon.Width * foodPerRow + 6;
         
@@ -48,17 +49,17 @@ public class FoodStorageBox : BaseControl
         }
         var posX = Location.X + Width / 2f - boxWidth / 2f;
         var posY = Location.Y + 16;
-        Raylib.DrawLineEx(new Vector2( posX, posY),new Vector2(posX + boxWidth, posY), 1f, _pen1);
+        Graphics.DrawLineEx(new Vector2( posX, posY),new Vector2(posX + boxWidth, posY), 1f, _pen1);
         // 2nd horizontal line
         posY = Location.Y + 160;
-        Raylib.DrawLineEx(new Vector2( posX, posY),new Vector2(posX + boxWidth, posY), 1f, _pen2);
+        Graphics.DrawLineEx(new Vector2( posX, posY),new Vector2(posX + boxWidth, posY), 1f, _pen2);
         // 1st vertical line
         posY = Location.Y + 15;
         int lineHeight = 144;
-        Raylib.DrawLineEx(new Vector2( posX, posY),new Vector2(posX , posY + lineHeight), 1f, _pen1);
+        Graphics.DrawLineEx(new Vector2( posX, posY),new Vector2(posX , posY + lineHeight), 1f, _pen1);
             ;
         // 2nd vertical line
-        Raylib.DrawLineEx(new Vector2( posX + boxWidth, posY),new Vector2(posX + boxWidth, posY + lineHeight), 1f, _pen2);
+        Graphics.DrawLineEx(new Vector2( posX + boxWidth, posY),new Vector2(posX + boxWidth, posY + lineHeight), 1f, _pen2);
 
         var storage = _cityWindow.City.GetFoodStorage();
         if (storage > 0)
@@ -66,7 +67,7 @@ public class FoodStorageBox : BaseControl
             var lineWidth = boxWidth- 10;
             var startingX = posX + 5;
             var startingY = posY + lineHeight * storage / 100f;
-            Raylib.DrawLineEx(new Vector2( startingX, startingY),new Vector2(startingX + lineWidth, startingY), 1f, _pen1);
+            Graphics.DrawLineEx(new Vector2( startingX, startingY),new Vector2(startingX + lineWidth, startingY), 1f, _pen1);
         }
         
         var foodStore = _cityWindow.City.FoodInStorage;
@@ -77,12 +78,12 @@ public class FoodStorageBox : BaseControl
         {
             for (int col = 0; col < foodPerRow && count < foodStore; col++)
             {
-                Raylib.DrawTexture(_foodIcon, (int)posX + spacing * col, (int)Location.Y +  15 + 3 + _foodIcon.Height * row,Color.White);
+                Graphics.DrawTexture(_foodIcon, (int)posX + spacing * col, (int)Location.Y +  15 + 3 + _foodIcon.Height * row,Color.White);
                 count++;
             }
         }
         
-        Raylib.DrawTextEx(_active.Look.CityWindowFont, _text,
+        Graphics.DrawTextEx(_active.Look.CityWindowFont, _text,
             new Vector2(Location.X + Width / 2f - _textDim.X / 2, Location.Y), 
             _active.Look.CityWindowFontSize, 1, new Color(70,127,47,255));
     }

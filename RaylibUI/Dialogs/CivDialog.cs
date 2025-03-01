@@ -1,15 +1,22 @@
 using Civ2engine;
 using Model;
+using Model.Dialog;
+using Model.Images;
 using Model.Interface;
-using Raylib_cs;
+using Raylib_CSharp.Windowing;
+using Raylib_CSharp.Interact;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.Controls;
 using RaylibUI.Dialogs;
 using RaylibUI.Forms;
+using RaylibUtils;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection.Emit;
+using Model.Core;
 using Button = RaylibUI.Controls.Button;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Fonts;
 
 namespace RaylibUI;
 
@@ -22,7 +29,7 @@ public class CivDialog : DynamicSizingDialog
     private readonly IList<LabeledTextBox> _textBoxes;
     private readonly List<OptionControl>? _optionControls;
     private readonly Action<string, int, IList<bool>?, IDictionary<string, string>?> _handleButtonClick;
-    private readonly int _optionsCols;
+    private readonly int _optionsCols, _initSelectedOption;
     private readonly IUserInterface _active;
     private readonly Vector2 _innerSize;
 
@@ -32,6 +39,7 @@ public class CivDialog : DynamicSizingDialog
         newSelection.Checked = true;
         _selectedOption?.Clear();
         _selectedOption = newSelection;
+        _selectedIndex = newSelection.Index;
         this.Focused = newSelection;
     }
 
@@ -56,15 +64,24 @@ public class CivDialog : DynamicSizingDialog
         IList<bool>? checkboxStates = null,
         List<TextBoxDefinition>? textBoxDefs = null,
         int optionsCols = 1,
-        Image[]? icons = null) :
-        base(host,
+        int initSelectedOption = 0,
+        IImageSource[]? optionsIcons = null,
+        DialogImageElements? image = null,
+        ListBoxDefinition? listBox = null) :
+        base(host, 
             DialogUtils.ReplacePlaceholders(popupBox.Title, replaceStrings, replaceNumbers),
-             relatDialogPos, requestedWidth: popupBox.Width == 0 ? host.ActiveInterface.DefaultDialogWidth : popupBox.Width)
+            popupBox.X != null || popupBox.Y != null ? new Point(popupBox.X ?? 0 / Window.GetScreenWidth(), popupBox.Y ?? 0 / Window.GetScreenHeight()) : relatDialogPos,
+            requestedWidth: popupBox.Width == 0 ? host.ActiveInterface.DefaultDialogWidth: popupBox.Width)
     {
         _active = host.ActiveInterface;
         _handleButtonClick = handleButtonClick;
         _optionsCols = optionsCols;
-        _managedTextures = new List<Texture2D>();
+        _initSelectedOption = popupBox.Default != 0 ? popupBox.Default : initSelectedOption;
+
+        if (image != null && image.Image.All(n => n != null))
+        {
+            Controls.Add(new ImageBox(this, image));
+        }
 
         if (popupBox.Text?.Count > 0)
         {
@@ -78,6 +95,13 @@ public class CivDialog : DynamicSizingDialog
         }
 
         var options = popupBox.Options;
+
+        if (listBox is not null)
+        {
+            var civDialogListBox = new CivDialogListBox(this, listBox);
+            Controls.Add(civDialogListBox);
+            civDialogListBox.ItemSelected += ListBoxOnItemSelected;
+        }
 
         if (textBoxDefs is { Count: > 0 })
         {
@@ -94,7 +118,7 @@ public class CivDialog : DynamicSizingDialog
                     DialogUtils.ReplacePlaceholders(t.Description, replaceStrings, replaceNumbers)).ToList();
             }
 
-            var labelSize = (int)textBoxLabels.Max(l => Raylib.MeasureTextEx(host.ActiveInterface.Look.DefaultFont, l, 20, 1.0f).X) +24;
+            var labelSize = (int)textBoxLabels.Max(l => TextManager.MeasureTextEx(host.ActiveInterface.Look.DefaultFont, l, 20, 1.0f).X) +24;
 
             for (int i = 0; i < textBoxDefs.Count; i++)
             {
@@ -115,21 +139,16 @@ public class CivDialog : DynamicSizingDialog
 
             var optionAction = popupBox.Checkbox ? (Action<OptionControl>)TogggleCheckBox : SetSelectedOption;
 
-            var iconTextures =
-                icons?.Select(Raylib.LoadTextureFromImage).ToArray()
-                ?? Array.Empty<Texture2D>();
-            _managedTextures.AddRange(iconTextures);
-
-            var images = ImageUtils.GetOptionImages(popupBox.Checkbox);
+            var images = popupBox.Checkbox ? _active.Look.CheckBoxes : _active.Look.RadioButtons;
 
             _optionControls = options.Select((o, i) =>
                 new OptionControl(this, o, i, checkboxStates?[i] ?? false,
-                    i < iconTextures.Length ? new[] { iconTextures[i] } : images)).ToList();
+                    i < (optionsIcons?.Length ?? 0) ? new[] { optionsIcons[i] } : images)).ToList();
             _optionControls.ForEach(c=>c.Click += (_,_) =>optionAction(c));
             if (!popupBox.Checkbox)
             {
-                _optionControls[popupBox.Default].Checked = true;
-                SetSelectedOption(_optionControls[popupBox.Default]);
+                _optionControls[_initSelectedOption].Checked = true;
+                SetSelectedOption(_optionControls[_initSelectedOption]);
             }
 
             if (optionsCols < 2)
@@ -172,7 +191,12 @@ public class CivDialog : DynamicSizingDialog
         Controls.Add(menuBar);
         SetButtons(menuBar);
     }
-    
+
+    private void ListBoxOnItemSelected(object? sender, ScrollBoxSelectionEventArgs e)
+    {
+        _selectedIndex = e.Index;
+    }
+
     private void OnActionButtonOnClick(object? sender, MouseEventArgs mouseEventArgs)
     {
         if (sender is not Button button) return;
@@ -182,8 +206,7 @@ public class CivDialog : DynamicSizingDialog
 
     private void CloseDialog(string buttonText)
     {
-        _managedTextures.ForEach(Raylib.UnloadTexture);
-        _handleButtonClick(buttonText, _selectedOption?.Index ?? -1, _checkboxes, FormatTextBoxReturn());
+        _handleButtonClick(buttonText, _selectedIndex, _checkboxes, FormatTextBoxReturn());
     }
 
     private readonly KeyboardKey[] _navKeys = {
@@ -191,7 +214,7 @@ public class CivDialog : DynamicSizingDialog
         KeyboardKey.Kp8, KeyboardKey.Kp2, KeyboardKey.Kp4, KeyboardKey.Kp6,
     };
 
-    private readonly List<Texture2D> _managedTextures;
+     private int _selectedIndex = -1;
 
     public override void OnKeyPress(KeyboardKey key)
     {
@@ -272,14 +295,9 @@ public class CivDialog : DynamicSizingDialog
                 }
             }
         }
-
-       
-
         base.OnKeyPress(key);
     }
-
- 
-
+    
     private int GetRows()
     {
         var rows = Math.DivRem(_optionControls.Count, _optionsCols, out var rem);
@@ -296,7 +314,7 @@ public class CivDialog : DynamicSizingDialog
             .ToDictionary(k => k.Name, v => v.Value);
     }
 
-    private List<LabelControl> GetTextLabels(IControlLayout controller, IList<string> texts, IList<TextStyles> styles, IList<string> replaceStrings, IList<int> replaceNumbers)
+    private List<LabelControl> GetTextLabels(IControlLayout controller, IList<string>? texts, IList<TextStyles>? styles, IList<string> replaceStrings, IList<int> replaceNumbers)
     {
         // Group left-aligned texts
         int j = 0;
@@ -325,7 +343,7 @@ public class CivDialog : DynamicSizingDialog
                         false,
                         alignment: styles[i] == TextStyles.Centered ? TextAlignment.Center : TextAlignment.Left,
                         wrapText: styles[i] == TextStyles.Left,
-                        font: _active.Look.LabelFont, colorFront: _active.Look.LabelColour, colorShadow: _active.Look.LabelShadowColour, shadowOffset: new Vector2(1, 1), fontSize: _active.Look.LabelFontSize));
+                        font: _active.Look.LabelFont, fontSize: _active.Look.LabelFontSize, colorFront: _active.Look.LabelColour, colorShadow: _active.Look.LabelShadowColour, shadowOffset: new Vector2(1, 1)));
         }
 
         return labels;
@@ -341,7 +359,7 @@ public class CivDialog : DynamicSizingDialog
                                    select label).ToList().FirstOrDefault().TextSize.X;
 
         if (popupbox.Width != 0)
-            return (int)Math.Ceiling(Math.Max(centredTextMaxWidth, popupbox.Width * 1.5));
+            return (int)Math.Ceiling(Math.Max(centredTextMaxWidth, popupbox.Width));
         else
             return (int)Math.Ceiling(Math.Max(centredTextMaxWidth, 660.0));    // 660=440*1.5
     }

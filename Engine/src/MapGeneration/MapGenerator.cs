@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Civ2engine.Enums;
 using Civ2engine.MapObjects;
+using Model.Core;
 
 namespace Civ2engine
 {
@@ -42,11 +43,6 @@ namespace Civ2engine
                         {
                             var terra = config.TerrainData[index++];
                             var tile = new Tile(2 * x + odd, y, terrains[0][terra & 0xF], mainMap.ResourceSeed, mainMap, x,
-                                new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                                new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                                new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                                new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                                new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
                                 new bool[config.NumberOfCivs + 1])
                             {
                                 River = terra > 100
@@ -123,11 +119,6 @@ namespace Civ2engine
                 for (int x = 0; x < mainMap.Tile.GetLength(0); x++)
                 {
                     var tile = new Tile(2 * x + odd, y, defaultTerrain, mainMap.ResourceSeed, mainMap, x, 
-                        new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                        new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                        new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                        new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
-                        new bool[config.NumberOfCivs + 1], new bool[config.NumberOfCivs + 1],
                         new bool[config.NumberOfCivs + 1])
                     {
                         Island = -1

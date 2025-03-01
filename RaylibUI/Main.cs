@@ -1,13 +1,14 @@
-﻿using Raylib_cs;
-using System.Numerics;
+﻿using System.Numerics;
 using Civ2engine;
-using Civ2engine.IO;
 using Civ2engine.MapObjects;
 using Model;
 using RaylibUI.Initialization;
-using RaylibUI.Forms;
-using JetBrains.Annotations;
-using System.Diagnostics;
+using Raylib_CSharp;
+using Raylib_CSharp.Windowing;
+using Raylib_CSharp.Interact;
+using Raylib_CSharp.Audio;
+using Raylib_CSharp.Rendering;
+using Raylib_CSharp.Colors;
 
 namespace RaylibUI
 {
@@ -27,15 +28,16 @@ namespace RaylibUI
             var hasCivDir = Settings.LoadConfigSettings();
 
             //========= RAYLIB WINDOW SETTINGS
-            Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint | ConfigFlags.VSyncHint |
+            Raylib.SetConfigFlags(ConfigFlags.Msaa4XHint| ConfigFlags.VSyncHint |
                                   ConfigFlags.ResizableWindow);
-            Raylib.InitWindow(1280, 800, "raylib - civ2");
+            Window.Init(1280, 800, "raylib - civ2");
             //Raylib.SetTargetFPS(60);
-            Raylib.InitAudioDevice();
+            AudioDevice.Init();
 
-            Raylib.SetExitKey(KeyboardKey.F12);
+            Input.SetExitKey(KeyboardKey.F12);
 
             Shaders.Load();
+            Helpers.LoadFonts();
 
             if (hasCivDir)
             {
@@ -47,7 +49,7 @@ namespace RaylibUI
                 {
                     hasCivDir = true;
                     _activeScreen = SetupMainScreen();
-                });
+                }, ShutdownApp);
             }
 
             //============ LOAD SOUNDS
@@ -56,23 +58,38 @@ namespace RaylibUI
 
         }
 
+        private const float pulseTime = 30;
+        
+        private List<TimedEvent> _events = new List<TimedEvent>();
+        
         public void RunLoop()
         {
-            var counter = 0;
+            var counter = pulseTime;
             var pulse = false;
 
-            while (!Raylib.WindowShouldClose() && !_shouldClose)
+            while (!Window.ShouldClose() && !_shouldClose)
             {
+                var frameTime = Time.GetFrameTime();
+                Graphics.BeginDrawing();
 
-                Raylib.BeginDrawing();
+                for (int i = 0; i < _events.Count; i++)
+                {
+                    _events[i].Remaining -= frameTime;
+                    if (_events[i].Remaining < 0)
+                    {
+                        _events[i].Action();
+                        _events.RemoveAt(i);
+                        i--;
+                    }
+                }
 
-                int screenHeight = Raylib.GetScreenHeight();
+                int screenHeight = Window.GetScreenHeight();
 
-                _activeScreen.Draw(pulse);
+                 _activeScreen.Draw(pulse);
 
-                Raylib.DrawText($"{Raylib.GetFPS()} FPS", 5, screenHeight - 20, 20, Color.Magenta);
+                Graphics.DrawText($"{Time.GetFPS()} FPS", 5, screenHeight - 20, 20, Color.Magenta);
 
-                Raylib.EndDrawing();
+                Graphics.EndDrawing();
                 if (counter++ >= 30)
                 {
                     pulse = !pulse;
@@ -85,7 +102,7 @@ namespace RaylibUI
 
         private MainMenu SetupMainScreen()
         {    
-            Helpers.LoadFonts();
+            //Helpers.LoadFonts();
             Interfaces = Helpers.LoadInterfaces(this);
             AllRuleSets =  Interfaces.SelectMany((userInterface, idx) =>
                 {
@@ -132,13 +149,41 @@ namespace RaylibUI
         {
             Shaders.Unload();
             Soundman?.Dispose();
-            Raylib.CloseWindow();
-            Raylib.CloseAudioDevice();
+            Window.Close();
+            AudioDevice.Close();
         }
 
         public void ReloadMain()
         {
+            ActiveRuleSet = AllRuleSets.First(r => r.InterfaceIndex == _activeInterface.InterfaceIndex);
+            TextureCache.Clear();
+            ImageUtils.SetLook(_activeInterface);
             _activeScreen = new MainMenu(this,() => _shouldClose= true, StartGame, Soundman);
         }
+
+        public void Schedule(string eventName, TimeSpan delay, Action action)
+        {
+            for (int i = 0; i < _events.Count; i++)
+            {
+                if (_events[i].Name == eventName)
+                {
+                    _events[i] = new TimedEvent(name: eventName, remaining: (float)delay.TotalSeconds, action: action);
+                    return;
+                }
+            }
+            _events.Add(new TimedEvent(name: eventName, remaining: (float)delay.TotalSeconds, action: action));
+        }
+
+        public void ClearSchedule(string eventName)
+        {
+            _events.RemoveAll(e => e.Name == eventName);
+        }
+    }
+
+    internal class TimedEvent(string name, float remaining, Action action)
+    {
+        public float Remaining { get; set; } = remaining;
+        public string Name { get; set; } = name;
+        public Action Action { get; set; } = action;
     }
 }
