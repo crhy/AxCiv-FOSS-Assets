@@ -38,9 +38,6 @@ Once you build and run the game, a dialog should automatically open so you can l
 
 # Screenshots
 
-![civ2](https://github.com/user-attachments/assets/48372674-e978-431c-a9ef-2927c0b5e203)
-![tot](https://github.com/user-attachments/assets/0e776c19-be01-4bdc-868b-13e31424bd7f)
-
 Alhabet Advance
 ![alphabet](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Advances/alphabet.jpg)
 
@@ -48,4 +45,9 @@ Spy Unit
 ![spy](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Units/spy.gif)
 
 Iron Mine
-![mine]()
+![mine](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Other/looking-down-on-an-iron-mine-in-the-side-of-a-snowy-mountain-peak-766986932.jpg)
+
+Game Play Shots (old)
+![civ2](https://github.com/user-attachments/assets/48372674-e978-431c-a9ef-2927c0b5e203)
+
+![tot](https://github.com/user-attachments/assets/0e776c19-be01-4bdc-868b-13e31424bd7f)
