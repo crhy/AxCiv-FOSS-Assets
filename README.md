@@ -42,5 +42,5 @@ Once you build and run the game, a dialog should automatically open so you can l
 
 ![alphabet](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Advances/alphabet.jpg).
 
-![spy]().
+![spy](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Units/spy.gif).
 
