@@ -26,6 +26,7 @@ Goals:
 - implement various improvements & QoL features (support more than 7 civs, graphical files with richer colours, etc.)
 - enable Lua scripting
 - Make the game completely stand alone and open source
+- Incorporate the New FOSS art into the gameplay replacing original assets 
 
 # Running the game
 ( These instructions are old)
@@ -40,7 +41,11 @@ Once you build and run the game, a dialog should automatically open so you can l
 ![civ2](https://github.com/user-attachments/assets/48372674-e978-431c-a9ef-2927c0b5e203)
 ![tot](https://github.com/user-attachments/assets/0e776c19-be01-4bdc-868b-13e31424bd7f)
 
-![alphabet](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Advances/alphabet.jpg).
+Alhabet Advance
+![alphabet](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Advances/alphabet.jpg)
 
-![spy](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Units/spy.gif).
+Spy Unit
+![spy](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Units/spy.gif)
 
+Iron Mine
+![mine]()
