@@ -38,7 +38,7 @@ Once you build and run the game, a dialog should automatically open so you can l
 
 # Screenshots
 
-Alhabet Advance
+Alphabet Advance
 ![alphabet](https://github.com/crhy/Civ2-clone/blob/master/RaylibUI/FOSS%20art/Advances/alphabet.jpg)
 
 Spy Unit
