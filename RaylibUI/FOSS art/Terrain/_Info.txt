@@ -1,0 +1,37 @@
+Better Terrain Graphics for Civilization 2 Mod v1.0 (MGE)
+by Blake
+
+Contents:
+_Info.txt			- This file
+_README.pdf			- Read me file
+Icons.gif			- Darker GUI graphics
+Terrain1.gif			- New terrain 1 graphics
+Terrain1-AltMountains.gif	- New terrain 1 graphics with alternative mountain special resources 
+Terrain2.gif			- New terrain 2 graphics
+Terrain2-AltDarkWater.gif	- New terrain 2 graphics with alternative dark ocean
+
+Mod discussions, comments, bug reports, feedback can be found here:
+https://forums.civfanatics.com/threads/better-terrain-graphics-for-mge.667221/
+
+Blake's lost scenario/mod files restoration & cataloging project which can be found here:
+https://forums.civfanatics.com/threads/civ2-mge-tot-scenario-mod-preservation-project-log.671035/
+
+Browse other Civilization 2 scenarios & mods in the collection here:
+https://archive.org/search.php?query=subject:Civ2ModCollection&sort=titleSorter
+https://www.moddb.com/tags/civilization-2-mod
+https://forums.civfanatics.com/tags/civilization-2-mod/
+
+Vote for Civilization 2 to be added to Good Old Games & Steam here:
+https://forums.civfanatics.com/threads/vote-for-civilization-i-ii-to-be-added-to-gog.675301/
+
+Join the Civilization 2 Scenario League at CivFanatics here:
+https://forums.civfanatics.com/forums/civ2-scenario-league.428/
+
+Blake's Sanctum Civilization Series Page:
+https://blakessanctum.x10.mx/Games/CivColSeries/
+
+
+Authors notes and rules:
+---------------------------------------------------------------------------------------------
+
+Please see _README.pdf file for more information and installation instructions.
