@@ -76,6 +76,37 @@ public class CityHappinessTests
     }
 
     [Fact]
+    public void SpecialistKindsAffectTheirMatchingCityOutputs()
+    {
+        var (game, city, civ) = CreateCity(DifficultyType.Chieftain, size: 4);
+        civ.TaxRate = 0;
+        civ.ScienceRate = 0;
+        city.NoOfSpecialistsx4 = 12;
+        city.SpecialistTypes =
+        [
+            (int)PeopleType.Elvis,
+            (int)PeopleType.Taxman,
+            (int)PeopleType.Scientist
+        ];
+
+        Assert.Equal(3, city.GetTax());
+        Assert.Equal(3, city.GetScience());
+        Assert.Equal(
+            [PeopleType.Happy, PeopleType.Elvis, PeopleType.Taxman, PeopleType.Scientist],
+            city.GetPeopleTypes(game.Object));
+    }
+
+    [Fact]
+    public void MissingSpecialistKindsDefaultToEntertainers()
+    {
+        var (_, city, _) = CreateCity(DifficultyType.Chieftain, size: 3);
+        city.NoOfSpecialistsx4 = 8;
+
+        Assert.Equal([PeopleType.Elvis, PeopleType.Elvis], city.GetSpecialistTypes());
+        Assert.Equal([(int)PeopleType.Elvis, (int)PeopleType.Elvis], city.SpecialistTypes);
+    }
+
+    [Fact]
     public void TempleEffectIncreasesAfterMysticism()
     {
         var (game, city, civ) = CreateCity(DifficultyType.Deity, size: 3);

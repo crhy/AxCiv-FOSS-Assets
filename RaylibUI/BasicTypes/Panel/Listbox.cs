@@ -309,6 +309,18 @@ public class Listbox : BaseControl
         return base.OnKeyPressed(key);
     }
 
+    public override bool OnMouseWheel(float amount)
+    {
+        var scrollbar = _def.VerticalScrollbar ? _VscrollBar : _HscrollBar;
+        if (scrollbar is not { Visible: true, Maximum: > 0 })
+        {
+            return false;
+        }
+
+        scrollbar.ScrollBy(amount > 0 ? -1 : 1);
+        return true;
+    }
+
     public override void Draw(bool pulse)
     {
         Graphics.DrawRectangleRec(Bounds, _def.Looks.BoxBackgroundColor);

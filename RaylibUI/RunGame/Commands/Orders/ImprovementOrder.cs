@@ -32,6 +32,7 @@ public class ImprovementOrder(TerrainImprovement improvement, GameScreen gameScr
 
     public override void Action()
     {
+        _player.ActiveUnit?.TransferConstructionProgress(improvement);
         _player.ActiveUnit?.Build(improvement);
         game.CheckConstruction(_player.ActiveTile, improvement);
         game.ChooseNextUnit();

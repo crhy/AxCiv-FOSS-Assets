@@ -192,6 +192,13 @@ public class GameScreen : BaseScreen
 
     public ProcessingMode Processing { get; }
     public Map CurrentMap => Player.ActiveTile.Map;
+    public Tile? ViewAnchor { get; private set; }
+
+    public void SetViewAnchor(Tile? tile)
+    {
+        ViewAnchor = tile;
+        ForceRedraw();
+    }
 
     /// <summary>
     /// The CivId of the currently displayed map normally the same as the player civId but can be changed via reveal map
@@ -306,21 +313,69 @@ public class GameScreen : BaseScreen
             return true;
         }
 
-        var unit = unitsHere.FirstOrDefault(u => u.Owner == _player.Civilization) ?? unitsHere[0];
-        if (unitsHere.Count > 1)
+        var friendlyUnits = unitsHere.Where(u => u.Owner == _player.Civilization).ToList();
+        var unit = friendlyUnits.FirstOrDefault() ?? unitsHere[0];
+        if (friendlyUnits.Count > 1)
         {
-            //TODO: Multiple units on this square => open unit selection dialogBox
-            //
-            // var selectUnitDialog = new SelectUnitDialog(main, unitsHere);
-            // selectUnitDialog.ShowModal(main);
-            //
-            // if (selectUnitDialog.SelectedIndex < 0)
-            // {
-            //     return false;
-            // }
-            //
-            // unit = unitsHere[selectUnitDialog.SelectedIndex];
+            ShowUnitSelection(tile, friendlyUnits);
+            return false;
         }
+
+        return ActivateUnit(tile, unit);
+    }
+
+    private void ShowUnitSelection(Tile tile, IList<Unit> units)
+    {
+        var movementMultiplier = Math.Max(1, Game.Rules.Cosmic.MovementMultiplier);
+        var listbox = new ListboxDefinition
+        {
+            Rows = Math.Min(9, units.Count),
+            VerticalScrollbar = true,
+            ImageShift = false,
+            Groups = units.Select(unit => new ListboxGroup
+            {
+                Elements =
+                [
+                    new() { Unit = unit, Game = Game, Width = 64, ScaleIcon = 0.75f },
+                    new()
+                    {
+                        Text = $"{unit.Name}{(unit.Veteran ? " (Veteran)" : "")}  " +
+                               $"HP {unit.RemainingHitpoints}/{unit.HitpointsBase}  " +
+                               $"Moves {unit.MovePoints / (decimal)movementMultiplier:0.##}/" +
+                               $"{unit.MaxMovePoints / (decimal)movementMultiplier:0.##}",
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                ],
+                Height = 40
+            }).ToList()
+        };
+
+        var elements = new DialogElements
+        {
+            Name = "ACTIVATE_UNITS_DYNAMIC",
+            Title = "Activate Unit",
+            Width = 420,
+            Button = [Labels.Ok, Labels.Cancel],
+            Text = ["Choose the unit to activate."],
+            LineStyles = [TextStyles.Left],
+            Listbox = listbox
+        };
+
+        CivDialog? dialog = null;
+        dialog = new CivDialog(Main, elements, (button, selectedIndex, _, _) =>
+        {
+            CloseDialog(dialog);
+            if (button == Labels.Ok && selectedIndex >= 0 && selectedIndex < units.Count)
+            {
+                ActivateUnit(tile, units[selectedIndex]);
+            }
+        });
+        ShowDialog(dialog, stack: true);
+    }
+
+    private bool ActivateUnit(Tile tile, Unit unit)
+    {
+        SetViewAnchor(null);
 
         Game.ActivePlayer.ActiveTile = tile;
 

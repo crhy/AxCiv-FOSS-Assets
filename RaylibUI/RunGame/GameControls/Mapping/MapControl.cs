@@ -18,6 +18,8 @@ using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
 using RaylibUI.Controls;
 using Raylib_CSharp.Collision;
+using Raylib_CSharp.Windowing;
+using Path = Civ2engine.Units.Path;
 
 namespace RaylibUI.RunGame.GameControls.Mapping;
 
@@ -33,6 +35,8 @@ public class MapControl : BaseControl
     private IUserInterface _active;
     private Button _zoomInButton, _zoomOutButton;
     private float _zoomBtnScale;
+    private bool _middlePanning, _middleMoved, _middleReset;
+    private Vector2 _middleDrag;
 
     private readonly Queue<IGameView> _animationQueue = new();
     private IGameView _currentView;
@@ -108,6 +112,7 @@ public class MapControl : BaseControl
             }
             case UnitEventType.NewUnitActivated:
             {
+                _gameScreen.SetViewAnchor(null);
                 //animType = AnimationType.Waiting;
                 //if (IsActiveSquareOutsideMapView) MapViewChange(Map.ActiveXY);
                 //UpdateMap();
@@ -168,6 +173,8 @@ public class MapControl : BaseControl
             {
                 return;
             }
+
+            _gameScreen.SetViewAnchor(null);
 
             if (_gameScreen.ActiveMode.MapClicked(tile, mouseEventArgs.Button))
             {
@@ -281,6 +288,7 @@ public class MapControl : BaseControl
         {
             case MapEventType.MinimapViewChanged:
                 {
+                    _gameScreen.SetViewAnchor(null);
                     ForceRedraw = true;
                     if (_currentView.IsDefault)
                     {
@@ -313,6 +321,12 @@ public class MapControl : BaseControl
     private DateTime _animationStart;
     public override void Draw(bool pulse)
     {
+        if (_middlePanning && !Input.IsMouseButtonDown(MouseButton.Middle))
+        {
+            _middlePanning = false;
+            _middleReset = false;
+        }
+
         if (!Input.IsMouseButtonDown(MouseButton.Left))
         {
             _gameScreen.ActiveMode.MouseClear();
@@ -376,17 +390,172 @@ public class MapControl : BaseControl
             animation.Draw(animation.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
         }
 
+        DrawUnitPathPreview(paddedLoc);
+
         if (_backgroundImage != null)
             Graphics.DrawTextureEx(_backgroundImage.Value, Location, 0f, 1f, Color.White);
 
         base.Draw(pulse);
+        DrawQuickInfo();
     }
+
+    public override bool OnMouseWheel(float amount)
+    {
+        if (!IsControlDown())
+        {
+            return false;
+        }
+
+        var nextZoom = Math.Clamp(_gameScreen.Zoom + (amount > 0 ? 1 : -1), -7, 8);
+        if (nextZoom != _gameScreen.Zoom)
+        {
+            _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = nextZoom });
+        }
+        return true;
+    }
+
+    public override void OnMouseMove(Vector2 moveAmount)
+    {
+        base.OnMouseMove(moveAmount);
+
+        if (Input.IsMouseButtonPressed(MouseButton.Middle))
+        {
+            _middleReset = IsControlDown();
+            _middlePanning = !_middleReset && GetTileAtMousePosition() != null;
+            _middleMoved = false;
+            _middleDrag = Vector2.Zero;
+            if (_middleReset)
+            {
+                _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = 0 });
+            }
+        }
+
+        if (_middlePanning && Input.IsMouseButtonDown(MouseButton.Middle))
+        {
+            _middleDrag += moveAmount;
+            PanByAccumulatedDrag();
+        }
+
+        if (Input.IsMouseButtonReleased(MouseButton.Middle))
+        {
+            if (_middlePanning && !_middleMoved && GetTileAtMousePosition() is { } tile)
+            {
+                _gameScreen.SetViewAnchor(tile);
+                NextView();
+            }
+            _middlePanning = false;
+            _middleReset = false;
+        }
+    }
+
+    private void PanByAccumulatedDrag()
+    {
+        var map = _gameScreen.CurrentMap;
+        var dimensions = _gameScreen.TileCache.GetDimensions(map, _gameScreen.Zoom);
+        var columnStep = (int)(_middleDrag.X / Math.Max(1, dimensions.TileWidth));
+        var rowStep = (int)(_middleDrag.Y / Math.Max(1, dimensions.HalfHeight));
+        if (columnStep == 0 && rowStep == 0)
+        {
+            return;
+        }
+
+        var anchor = _gameScreen.ViewAnchor ?? _currentView.Location;
+        var column = anchor.XIndex - columnStep;
+        column = map.Flat
+            ? Math.Clamp(column, 0, map.XDim - 1)
+            : Utils.WrapNumber(column, map.XDim);
+        var row = Math.Clamp(anchor.Y - rowStep, 0, map.YDim - 1);
+        var nextAnchor = map.Tile[column, row];
+
+        _middleDrag.X -= columnStep * dimensions.TileWidth;
+        _middleDrag.Y -= rowStep * dimensions.HalfHeight;
+        _middleMoved = true;
+        _gameScreen.SetViewAnchor(nextAnchor);
+        NextView();
+    }
+
+    private void DrawQuickInfo()
+    {
+        if (!IsControlDown() || GetTileAtMousePosition() is not { } tile)
+        {
+            return;
+        }
+
+        var lines = new List<string> { tile.Name };
+        if (tile.CityHere is { } city)
+        {
+            lines.Add($"{city.Name} — size {city.Size}");
+            lines.Add($"Food {city.SurplusHunger:+#;-#;0}  Shields {city.Production}  Trade {city.Trade}");
+        }
+        else if (tile.UnitsHere.FirstOrDefault(unit => !unit.Dead) is { } unit)
+        {
+            lines.Add($"{unit.Owner.Adjective} {unit.Name}{(unit.Veteran ? " (Veteran)" : "")}");
+            lines.Add($"HP {unit.RemainingHitpoints}/{unit.HitpointsBase}  Moves {unit.MovePoints}/{unit.MaxMovePoints}");
+        }
+
+        var fontSize = 16;
+        var lineHeight = 20;
+        var width = lines.Max(line => TextManager.MeasureTextEx(_active.Look.DefaultFont, line, fontSize, 1).X) + 18;
+        var mouse = Input.GetMousePosition();
+        var x = Math.Min(mouse.X + 14, Window.GetScreenWidth() - width - 6);
+        var y = Math.Min(mouse.Y + 14, Window.GetScreenHeight() - lines.Count * lineHeight - 12);
+        Graphics.DrawRectangle((int)x, (int)y, (int)width, lines.Count * lineHeight + 8,
+            new Color(255, 255, 224, 245));
+        Graphics.DrawRectangleLines((int)x, (int)y, (int)width, lines.Count * lineHeight + 8, Color.Black);
+        for (var i = 0; i < lines.Count; i++)
+        {
+            global::RaylibUI.TextRendering.Draw(_active.Look.DefaultFont, lines[i],
+                new Vector2(x + 8, y + 4 + i * lineHeight), fontSize, 1, Color.Black);
+        }
+    }
+
+    private void DrawUnitPathPreview(Vector2 paddedLocation)
+    {
+        if (!IsShiftDown() || _gameScreen.Player.ActiveUnit is not { } unit ||
+            GetTileAtMousePosition() is not { } destination || destination == unit.CurrentLocation)
+        {
+            return;
+        }
+
+        var path = Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
+            unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl);
+        if (path == null)
+        {
+            return;
+        }
+
+        var dimensions = _gameScreen.TileCache.GetDimensions(_gameScreen.CurrentMap, _gameScreen.Zoom);
+        var previous = TileCenter(unit.CurrentLocation, dimensions) + paddedLocation;
+        foreach (var tile in path.Tiles)
+        {
+            var next = TileCenter(tile, dimensions) + paddedLocation;
+            Graphics.DrawLineEx(previous, next, 3f, Color.Black);
+            Graphics.DrawLineEx(previous, next, 1f, Color.White);
+            previous = next;
+        }
+    }
+
+    private Vector2 TileCenter(Tile tile, MapDimensions dimensions)
+    {
+        var column = Utils.WrapNumber(tile.XIndex - _currentView.Xshift / 2, tile.Map.XDim);
+        return new Vector2(
+            column * dimensions.TileWidth + tile.Odd * dimensions.HalfWidth + dimensions.HalfWidth,
+            tile.Y * dimensions.HalfHeight + dimensions.HalfHeight) - _currentView.Offsets;
+    }
+
+    private static bool IsControlDown() =>
+        Input.IsKeyDown(KeyboardKey.LeftControl) || Input.IsKeyDown(KeyboardKey.RightControl);
+
+    private static bool IsShiftDown() =>
+        Input.IsKeyDown(KeyboardKey.LeftShift) || Input.IsKeyDown(KeyboardKey.RightShift);
 
     private void NextView()
     {
         var nextView = _animationQueue.Count > 0
             ? _animationQueue.Dequeue()
-            : _gameScreen.ActiveMode.GetDefaultView(_gameScreen, _currentView, _viewHeight, _viewWidth, ForceRedraw);
+            : _gameScreen.ViewAnchor is { } anchor
+                ? new StaticView(_gameScreen, _currentView, _viewHeight, _viewWidth, ForceRedraw, anchor)
+                : _gameScreen.ActiveMode.GetDefaultView(_gameScreen, _currentView, _viewHeight, _viewWidth, ForceRedraw);
         if (nextView != _currentView)
         {
             _currentView.Dispose();

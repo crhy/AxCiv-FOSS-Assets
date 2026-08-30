@@ -125,7 +125,9 @@ public class GameSerializerTests
             Y = cityTile.Y, 
             MapIndex = 0, 
             Name = "Rome", 
-            Size = 1 
+            Size = 3,
+            NoOfSpecialistsx4 = 8,
+            SpecialistTypes = [(int)PeopleType.Taxman, (int)PeopleType.Scientist]
         };
         civ.Cities.Add(city);
         game.Setup(g => g.AllCities).Returns(new List<City> { city });
@@ -178,5 +180,7 @@ public class GameSerializerTests
         Assert.Equal(map.YDim, loadedGame.Maps[0].YDim);
         Assert.Single(loadedGame.AllCivilizations[1].Units);
         Assert.Single(loadedGame.AllCities);
+        Assert.Equal(8, loadedGame.AllCities[0].NoOfSpecialistsx4);
+        Assert.Equal(city.SpecialistTypes, loadedGame.AllCities[0].SpecialistTypes);
     }
 }

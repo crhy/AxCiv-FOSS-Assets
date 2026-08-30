@@ -287,6 +287,7 @@ namespace Civ2engine
             if (city.NoOfSpecialistsx4 >= 4)
             {
                 city.NoOfSpecialistsx4 -= 4;
+                city.SpecialistTypes = city.SpecialistTypes.Take(city.NoOfSpecialistsx4 / 4).ToArray();
                 return;
             }
 

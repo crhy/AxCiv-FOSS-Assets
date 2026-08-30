@@ -387,6 +387,13 @@ public static class ImageUtils
         viewElements.Add(new TextElement(shieldText, loc, shield.OrderTextHeight,
             tile, shield.Offset + shield.OrderOffset));
 
+        // UI Additions-style exact work counter for settlers and engineers.
+        if (useMapArt && unit is Unit { Counter: > 0, AiRole: Model.Constants.AiRoleType.Settle } worker)
+        {
+            viewElements.Add(new TextElement(worker.Counter.ToString(), loc, 12, tile,
+                new Vector2(logicalSize.X / 2f, 3), Color.White, new Color(0, 0, 0, 210)));
+        }
+
         if (!shield.ShieldInFrontOfUnit)
         {
             // Unit

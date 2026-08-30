@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using Model.Constants;
 using Model.Core.Cities;
+using Civ2engine.Enums;
 
 namespace Civ2engine;
 
@@ -23,7 +24,8 @@ public static class CityResourcesExtensions
 
     public static int GetScience(this City city)
     {
-        return (int)(city.GetBaseScience() * city.GetMultiplier(Effects.ScienceMultiplier));
+        var specialistScience = 3 * city.CountSpecialists(PeopleType.Scientist);
+        return (int)((city.GetBaseScience() + specialistScience) * city.GetMultiplier(Effects.ScienceMultiplier));
     }
 
     private static int GetBaseLuxury(this City city)
@@ -47,7 +49,8 @@ public static class CityResourcesExtensions
     /// </summary>
     public static int GetTax(this City city)
     {
-        return (int)((city.Trade - GetBaseLuxury(city) - GetBaseScience(city)) *
+        var specialistTax = 3 * city.CountSpecialists(PeopleType.Taxman);
+        return (int)((city.Trade - GetBaseLuxury(city) - GetBaseScience(city) + specialistTax) *
                      GetMultiplier(city, Effects.TaxMultiplier));
     }
 

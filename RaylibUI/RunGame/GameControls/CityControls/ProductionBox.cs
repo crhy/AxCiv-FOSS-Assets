@@ -76,7 +76,7 @@ public class ProductionBox : BaseControl
                         SelectedTextColorFront = Color.White,
                         SelectedTextColorShadow = Color.Black
                     },
-                    Groups = _canProduce.Select(p => p.GetBuildListEntry(_active, _city)).ToList(),
+                    Groups = _canProduce.Select(p => p.GetBuildListEntry(_active, _city, _shieldBoxRows)).ToList(),
                     SelectedId = _canProduce.IndexOf(_city.ItemInProduction)
                 });
         };

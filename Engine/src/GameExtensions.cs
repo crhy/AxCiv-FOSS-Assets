@@ -14,6 +14,19 @@ namespace Civ2engine;
 
 public static class GameExtensions
 {
+    public static void TransferConstructionProgress(this Unit worker, TerrainImprovement improvement)
+    {
+        foreach (var coworker in worker.CurrentLocation.UnitsHere
+                     .Where(unit => unit != worker && unit.Owner == worker.Owner &&
+                                    unit.Building == improvement.Id).ToList())
+        {
+            worker.Counter += coworker.Counter;
+            coworker.Counter = 0;
+            coworker.Building = 0;
+            coworker.Order = (int)OrderType.NoOrders;
+        }
+    }
+
     public static void SetImprovementsForCity(this IGame game,City city)
     {
         SetImprovementsForCities(game,city.Owner, city);

@@ -110,6 +110,16 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
         {
             layoutController.MouseOutsideControls(mousePos);
         }
+
+        var wheel = Input.GetMouseWheelMove();
+        if (wheel != 0 && layoutController.Hovered != null)
+        {
+            IControl? wheelTarget = layoutController.Hovered;
+            while (wheelTarget != null && !wheelTarget.OnMouseWheel(wheel))
+            {
+                wheelTarget = wheelTarget.Parent as IControl;
+            }
+        }
     }
 
     private static void FindHovered(IControlLayout layoutController, Vector2 mousePos)

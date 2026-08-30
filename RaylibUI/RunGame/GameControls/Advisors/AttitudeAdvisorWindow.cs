@@ -59,8 +59,28 @@ public class AttitudeAdvisorWindow : BaseDialog
             List<ListboxGroupElement> lists =
             [
                 new ListboxGroupElement { Icon = cityImage.Image, Xoffset = (i % 2 == 0) ? cityImgWidth : 0 },
-                new ListboxGroupElement { Text = city.Name, Xoffset = 138, VerticalAlignment = VerticalAlignment.Center },
+                new ListboxGroupElement
+                {
+                    Text = city.Name,
+                    Xoffset = 138,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FrontColorOverride = city.WeLoveKingDay ? Color.Yellow : null,
+                    ShadowColorOverride = city.WeLoveKingDay ? Color.Black : null
+                }
             ];
+            if (city.SurplusHunger != 0)
+            {
+                lists.Add(new ListboxGroupElement
+                {
+                    Text = $"{city.SurplusHunger:+#;-#}",
+                    Xoffset = 220,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FrontColorOverride = city.SurplusHunger > 0 ? Color.Green : Color.Red,
+                    ShadowColorOverride = Color.Black
+                });
+                lists.Add(new ListboxGroupElement
+                    { Icon = _active.ResourceImages.First(r => r.Name == "Food").LargeImage });
+            }
             for (var j = 0; j < city.Size; j++)
             {
                 lists.Add(new ListboxGroupElement { Icon = _active.PicSources["people"][0], Xoffset = 248 + 5 * j });

@@ -88,9 +88,10 @@ namespace Civ2engine.Production
             return unitDefinition.Name;
         }
 
-        public override ListboxGroup GetBuildListEntry(IUserInterface activeInterface, City city)
+        public override ListboxGroup GetBuildListEntry(IUserInterface activeInterface, City city, int shieldRows = 10)
         {
-            var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, 10 * unitDefinition.Cost - city.ShieldsProgress) /
+            var shieldCost = Math.Max(1, shieldRows) * unitDefinition.Cost;
+            var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, shieldCost - city.ShieldsProgress) /
                                                       (decimal)Math.Max(1, city.Production)));
             return new ListboxGroup
             {
@@ -100,7 +101,7 @@ namespace Civ2engine.Production
                     new() { Text = unitDefinition.Name, Width = 200, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
                     new()
                     {
-                        Text = $"({turns} Turns, ADM: {unitDefinition.Attack}/{unitDefinition.Defense}/{unitDefinition.Move / 3} " +
+                        Text = $"({turns} Turns, {shieldCost} Shields, ADM: {unitDefinition.Attack}/{unitDefinition.Defense}/{unitDefinition.Move / 3} " +
                                $"HP: {unitDefinition.Hitp / 10}/{unitDefinition.Firepwr})",
                         TextSizeOverride = 16,
                         HorizontalAlignment = HorizontalAlignment.Right,

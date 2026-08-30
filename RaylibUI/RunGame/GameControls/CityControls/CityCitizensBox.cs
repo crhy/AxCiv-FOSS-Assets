@@ -2,6 +2,9 @@ using Civ2engine;
 using Model;
 using Model.Controls;
 using Model.Core.Cities;
+using Civ2engine.Enums;
+using Raylib_CSharp.Collision;
+using Raylib_CSharp.Interact;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUtils;
 
@@ -32,7 +35,11 @@ public class CityCitizensBox : BaseControl
         {
             if (i >= _specialistsStart)
             {
-                _citizenIndex[i] = 8;    // initialize specialists icon. This is probably read from somewhere in sav file.
+                var specialistIndex = i - _specialistsStart;
+                var specialists = _city.GetSpecialistTypes();
+                _citizenIndex[i] = specialistIndex < specialists.Length
+                    ? (int)specialists[specialistIndex]
+                    : (int)PeopleType.Elvis;
             }
 
             _icons[i] = new ImageBox(_cityWindow, _active.PicSources["people"][0], eventTransparent: false);
@@ -63,6 +70,10 @@ public class CityCitizensBox : BaseControl
             {
                 _citizenIndex[i] = (int)people[i] + i % 2;
             }
+            else
+            {
+                _citizenIndex[i] = (int)_city.GetSpecialistTypes()[i - _specialistsStart];
+            }
             _icons[i].Image = [_active.PicSources["people"][_citizenIndex[i] + 11 * _epoch]];
 
             _icons[i].Location = new((2 + i * spacing) * _cityWindow.Scale, 7 * _cityWindow.Scale);
@@ -81,12 +92,47 @@ public class CityCitizensBox : BaseControl
         var index = Array.IndexOf(_icons, sender);
         if (index >= _specialistsStart)
         {
-            _citizenIndex[index]++;
-            if (_citizenIndex[index] > 10)
+            ChangeSpecialist(index, 1, IsShiftDown());
+        }
+    }
+
+    public override bool OnMouseWheel(float amount)
+    {
+        var mouse = Input.GetMousePosition();
+        var index = Array.FindIndex(_icons,
+            icon => ShapeHelper.CheckCollisionPointRec(mouse, icon.Bounds));
+        if (index < _specialistsStart)
+        {
+            return false;
+        }
+
+        ChangeSpecialist(index, amount > 0 ? 1 : -1, IsShiftDown());
+        return true;
+    }
+
+    private void ChangeSpecialist(int citizenIndex, int direction, bool changeAll)
+    {
+        var specialistIndex = citizenIndex - _specialistsStart;
+        var current = (int)_city.GetSpecialistTypes()[specialistIndex];
+        var next = (int)PeopleType.Elvis +
+                   ((current - (int)PeopleType.Elvis + direction + 3) % 3);
+
+        if (changeAll)
+        {
+            for (var i = 0; i < _city.NoOfSpecialistsx4 / 4; i++)
             {
-                _citizenIndex[index] = 8;
+                _city.SetSpecialistType(i, (PeopleType)next);
             }
         }
+        else
+        {
+            _city.SetSpecialistType(specialistIndex, (PeopleType)next);
+        }
+
+        _cityWindow.UpdateProduction();
         OnResize();
     }
+
+    private static bool IsShiftDown() =>
+        Input.IsKeyDown(KeyboardKey.LeftShift) || Input.IsKeyDown(KeyboardKey.RightShift);
 }

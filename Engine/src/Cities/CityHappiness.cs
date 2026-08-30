@@ -42,9 +42,9 @@ public static class CityHappinessExtensions
         ApplyBaseMood(city, game, ref state);
         state.Normalize();
 
-        // Entertainers provide two luxuries. Specialist types are not persisted yet,
-        // so all specialists currently created by the city screen are entertainers.
-        state.Happy = city.GetLuxury(specialists * 2) / 2;
+        // Entertainers provide two luxuries; taxmen and scientists contribute to
+        // their respective city outputs instead.
+        state.Happy = city.GetLuxury(city.CountSpecialists(PeopleType.Elvis) * 2) / 2;
         state.Normalize();
 
         ApplyImprovements(city, ref state);
@@ -76,8 +76,41 @@ public static class CityHappinessExtensions
         people.AddRange(Enumerable.Repeat(PeopleType.Unhappy,
             mood.UnhappyCitizens - mood.AngryCitizens));
         people.AddRange(Enumerable.Repeat(PeopleType.Angry, mood.AngryCitizens));
-        people.AddRange(Enumerable.Repeat(PeopleType.Elvis, mood.Specialists));
+        people.AddRange(city.GetSpecialistTypes());
         return people.ToArray();
+    }
+
+    public static PeopleType[] GetSpecialistTypes(this City city)
+    {
+        var count = Math.Clamp(city.NoOfSpecialistsx4 / 4, 0, Math.Max(0, city.Size));
+        var normalized = new PeopleType[count];
+        for (var i = 0; i < count; i++)
+        {
+            normalized[i] = i < city.SpecialistTypes.Length &&
+                            city.SpecialistTypes[i] is >= (int)PeopleType.Elvis and <= (int)PeopleType.Scientist
+                ? (PeopleType)city.SpecialistTypes[i]
+                : PeopleType.Elvis;
+        }
+
+        city.SpecialistTypes = normalized.Select(type => (int)type).ToArray();
+        return normalized;
+    }
+
+    public static int CountSpecialists(this City city, PeopleType type) =>
+        city.GetSpecialistTypes().Count(specialist => specialist == type);
+
+    public static void SetSpecialistType(this City city, int index, PeopleType type)
+    {
+        var specialists = city.GetSpecialistTypes();
+        if (index < 0 || index >= specialists.Length)
+        {
+            return;
+        }
+
+        specialists[index] = type is >= PeopleType.Elvis and <= PeopleType.Scientist
+            ? type
+            : PeopleType.Elvis;
+        city.SpecialistTypes = specialists.Select(specialist => (int)specialist).ToArray();
     }
 
     private static void ApplyBaseMood(City city, IGame game, ref MoodState state)

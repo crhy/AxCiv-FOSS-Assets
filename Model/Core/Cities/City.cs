@@ -31,6 +31,9 @@ namespace Model.Core.Cities
         public int NetTrade { get; set; }
         public string Name { get; set; } = string.Empty;
         public int NoOfSpecialistsx4 { get; set; }
+        // Civ II stores specialist kind separately from the quarter-citizen count.
+        // Values use the classic people indexes: 8 entertainer, 9 taxman, 10 scientist.
+        public int[] SpecialistTypes { get; set; } = [];
         public IProductionOrder ItemInProduction { get; set; } = null!;
         public int ActiveTradeRoutes { get; set; }
         public Commodity[]? CommoditySupplied { get; set; }

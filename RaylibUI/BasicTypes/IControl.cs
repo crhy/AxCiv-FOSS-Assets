@@ -36,6 +36,7 @@ public interface IControl : IComponent
      * This is used by textboxes; most Controls should hook into OnKeyPressed rather than OnCharPressed.
      */
     bool OnCharPressed(char charPressed);
+    bool OnMouseWheel(float amount);
     void OnMouseMove(Vector2 moveAmount);
     void OnMouseLeave();
     void OnMouseEnter();

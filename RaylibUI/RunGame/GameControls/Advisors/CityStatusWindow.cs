@@ -1,9 +1,11 @@
 ﻿using Civ2engine;
 using Civ2engine.IO;
+using Civ2engine.Production;
 using Model;
 using Model.Controls;
 using Model.Core;
 using Model.Core.Production;
+using Model.Constants;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Interact;
 using RaylibUI.BasicTypes;
@@ -41,7 +43,8 @@ public class CityStatusWindow : BaseDialog
         var tribeLabel = new AdvisorsHeaderLabel(this, $"{game.GetRealmName(_civ.Government)} {Labels.For(LabelIndex.of)}" +
             $" {LabelIndex.the} {_civ.TribeName}")
         { Location = new(LayoutPadding.Left, LayoutPadding.Top + 4 + headerLabel.Height), Width = _width - PaddingSide };
-        var titleLabel = new AdvisorsHeaderLabel(this, $"{_civ.LeaderTitle} {_civ.LeaderName}: {game.Date.GameYearString(game.TurnNumber)}")
+        var titleLabel = new AdvisorsHeaderLabel(this,
+            $"{_civ.LeaderTitle} {_civ.LeaderName}: {game.Date.GameYearString(game.TurnNumber)} — {_civ.Cities.Count} cities")
         { Location = new(LayoutPadding.Left, LayoutPadding.Top + 6 + headerLabel.Height + tribeLabel.Height), Width = _width - PaddingSide };
         Controls.Add(headerLabel);
         Controls.Add(tribeLabel);
@@ -63,7 +66,12 @@ public class CityStatusWindow : BaseDialog
                 frontColor = new Color(63, 187, 199, 255);
                 shadowColor = Color.Black;
             }
-            // TODO: wonders have seperate color
+            else if (city.ItemInProduction is BuildingProductionOrder building &&
+                     building.Improvement.Effects.ContainsKey(Effects.Unique))
+            {
+                frontColor = new Color(255, 223, 79, 255);
+                shadowColor = Color.Black;
+            }
 
             var group = new ListboxGroup()
             {
@@ -78,7 +86,7 @@ public class CityStatusWindow : BaseDialog
                             new ListboxGroupElement { Text = city.ItemInProduction.Title, Xoffset = 363, 
                                 VerticalAlignment = VerticalAlignment.Center, FrontColorOverride = frontColor, 
                                 ShadowColorOverride = shadowColor },
-                            new ListboxGroupElement { Text = $"   ({city.ShieldsProgress}/{10 * city.ItemInProduction.Cost})", 
+                            new ListboxGroupElement { Text = $"   ({city.ShieldsProgress}/{game.Rules.Cosmic.RowsShieldBox * city.ItemInProduction.Cost})",
                                 VerticalAlignment = VerticalAlignment.Center, FrontColorOverride = new Color(191, 191, 191, 255) }
                             ],
                 Height = 24

@@ -1,4 +1,5 @@
 using Civ2engine;
+using Civ2engine.Enums;
 using Civ2engine.MapObjects;
 using Model.Constants;
 using Model.Core;
@@ -341,5 +342,35 @@ public class CityExtensionsTests
         var improvement = new Improvement { Cost = 4 };
 
         Assert.Equal(48, improvement.GetSaleValue(rules));
+    }
+
+    [Fact]
+    public void TransferConstructionProgress_MovesProgressAndWakesCoworker()
+    {
+        var (_, _, civ, map) = SetupGame();
+        var tile = map.Tile[1, 1];
+        var improvement = new TerrainImprovement { Id = 4 };
+        var coworker = new Unit
+        {
+            Owner = civ,
+            CurrentLocation = tile,
+            Building = improvement.Id,
+            Counter = 6,
+            Order = (int)OrderType.BuildRoad
+        };
+        var worker = new Unit
+        {
+            Owner = civ,
+            CurrentLocation = tile,
+            Building = improvement.Id,
+            Counter = 2
+        };
+
+        worker.TransferConstructionProgress(improvement);
+
+        Assert.Equal(8, worker.Counter);
+        Assert.Equal(0, coworker.Counter);
+        Assert.Equal(0, coworker.Building);
+        Assert.Equal((int)OrderType.NoOrders, coworker.Order);
     }
 }

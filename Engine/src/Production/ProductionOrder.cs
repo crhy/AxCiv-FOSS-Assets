@@ -53,7 +53,7 @@ namespace Civ2engine.Production
         public abstract bool IsValidBuild(City city);
 
         public abstract string GetDescription();
-        public abstract ListboxGroup GetBuildListEntry(IUserInterface active, City city);
+        public abstract ListboxGroup GetBuildListEntry(IUserInterface active, City city, int shieldRows = 10);
 
         public static IProductionOrder[] GetAll(Rules rules)
         {

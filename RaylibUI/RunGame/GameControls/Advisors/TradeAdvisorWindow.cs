@@ -53,7 +53,7 @@ public class TradeAdvisorWindow : BaseDialog
         foreach (var improvement in game.Rules.Improvements)
         {
             var citiesWithImprovement = _civ.Cities.Count(c => c.Improvements.Any(i => i == improvement));
-            if (improvement.Upkeep > 0 && citiesWithImprovement > 0)
+            if (citiesWithImprovement > 0)
             {
                 upkeepList.Add((improvement, citiesWithImprovement));
                 totalCost += improvement.Upkeep * citiesWithImprovement;

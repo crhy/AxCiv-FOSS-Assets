@@ -39,6 +39,7 @@ public class OptionControl : BaseControl
     }
 
     public int Index { get; }
+    public string Text => _text;
     public bool Checked { get; set; }
 
     private int _width;

@@ -133,6 +133,11 @@ public abstract class BaseControl : IControl
         return false;
     }
 
+    public virtual bool OnMouseWheel(float amount)
+    {
+        return false;
+    }
+
     public virtual void OnMouseMove(Vector2 moveAmount)
     {
         if (!Visible) return;

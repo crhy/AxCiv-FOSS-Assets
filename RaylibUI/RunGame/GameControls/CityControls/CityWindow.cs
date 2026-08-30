@@ -34,6 +34,9 @@ public class CityWindow : BaseDialog
     private const float _scaleDelta = 0.5f;
     private readonly UnitSupportBox _unitSupportBox;
     private readonly CityLabel _supportLabel;
+    private readonly CityLabel _citizensLabel;
+    private readonly Color _citizensLabelColor;
+    private readonly Color _citizensLabelShadow;
 
     public CityWindow(GameScreen gameScreen, City city) : base(gameScreen.Main)
     {
@@ -104,8 +107,12 @@ public class CityWindow : BaseDialog
         Controls.Add(_unitSupportBox);
         Controls.Add(new CityLabel(this, _cityWindowProps.Labels["CityImprovements"]));
         Controls.Add(new ImprovementsBox(this));
-        Controls.Add(new CityLabel(this, _cityWindowProps.Labels["Citizens"]));
+        _citizensLabel = new CityLabel(this, _cityWindowProps.Labels["Citizens"]);
+        _citizensLabelColor = _citizensLabel.ColorFront;
+        _citizensLabelShadow = _citizensLabel.ColorShadow;
+        Controls.Add(_citizensLabel);
         Controls.Add(new CityCitizensBox(this));
+        UpdateAttitudeLabel();
 
         _iconW = Images.GetImageWidth(_active.PicSources["zoomIn"][0], _active);
         _iconH = Images.GetImageHeight(_active.PicSources["zoomIn"][0], _active);
@@ -168,7 +175,8 @@ public class CityWindow : BaseDialog
             control.OnResize();
         }
 
-        _supportLabel.Visible = _unitSupportBox.Definition.Groups.Count <= _unitSupportBox.Definition.Columns;
+        _supportLabel.Visible = true;
+        _supportLabel.Text = $"{Labels.For(LabelIndex.UnitsSupported)}: {City.SupportedUnits.Count}";
 
     }
 
@@ -184,7 +192,23 @@ public class CityWindow : BaseDialog
     public void UpdateProduction()
     {
         City.CalculateOutput(City.Owner.Government, CurrentGameScreen.Game);
+        UpdateAttitudeLabel();
         ResourceProductionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void UpdateAttitudeLabel()
+    {
+        var mood = City.CalculateHappiness(CurrentGameScreen.Game);
+        var celebrating = mood.UnhappyCitizens == 0 &&
+                          City.Size - mood.HappyCitizens <= City.Size / 2;
+        _citizensLabel.ColorFront = celebrating
+            ? new Color(255, 223, 79, 255)
+            : mood.IsInDisorder
+                ? new Color(255, 79, 63, 255)
+                : _citizensLabelColor;
+        _citizensLabel.ColorShadow = celebrating || mood.IsInDisorder
+            ? Color.Black
+            : _citizensLabelShadow;
     }
 
     public event EventHandler? ResourceProductionChanged;

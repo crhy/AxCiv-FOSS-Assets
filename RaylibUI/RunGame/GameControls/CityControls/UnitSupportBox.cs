@@ -1,5 +1,6 @@
 using Model;
 using Model.Controls;
+using Model.Constants;
 using Raylib_CSharp.Colors;
 using RaylibUI.BasicTypes;
 
@@ -35,7 +36,8 @@ public class UnitSupportBox : Listbox
 
     static ListboxDefinition MakeListbox(CityWindow cityWindow)
     {
-        var units = cityWindow.City.SupportedUnits;
+        var units = GetSortedUnits(cityWindow)
+            .ToList();
         var active = cityWindow.MainWindow.ActiveInterface;
         var properties = cityWindow.CityWindowProps.UnitSupport;
 
@@ -67,9 +69,17 @@ public class UnitSupportBox : Listbox
         };
     }
 
+    private static IEnumerable<Model.Core.Units.Unit> GetSortedUnits(CityWindow cityWindow) =>
+        cityWindow.City.SupportedUnits
+            .OrderBy(unit => unit.AiRole == AiRoleType.Settle ? 0 : unit.AttackBase > 0 ? 1 : 2)
+            .ThenBy(unit => unit.Domain)
+            .ThenByDescending(unit => unit.DefenseBase)
+            .ThenByDescending(unit => unit.AttackBase)
+            .ThenBy(unit => unit.Type);
+
     private void OpenPopup(object? sender, ListboxSelectionEventArgs args)
     {
-        var units = _cityWindow.City.SupportedUnits;
+        var units = GetSortedUnits(_cityWindow).ToList();
         if (args.Index < 0 || args.Index >= units.Count)
         {
             return;

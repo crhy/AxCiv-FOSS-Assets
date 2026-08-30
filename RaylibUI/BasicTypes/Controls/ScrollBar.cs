@@ -59,10 +59,29 @@ public class ScrollBar : BaseControl
 
     public void SetScrollPosition(int position)
     {
-        _increment = _vertical ? (Height - 3 * ScrollbarDimDefault) / (double)Maximum : 
-            (Width - 3 * ScrollbarDimDefault) / (double)Maximum;
-        _scrollPos = position;
+        _scrollPos = Math.Clamp(position, 0, Math.Max(0, Maximum));
+        _increment = Maximum <= 0
+            ? 0
+            : _vertical
+                ? (Height - 3 * _scrollbarDim) / (double)Maximum
+                : (Width - 3 * _scrollbarDim) / (double)Maximum;
         _scrollAction(_scrollPos);
+    }
+
+    public void ScrollBy(int amount)
+    {
+        SetScrollPosition(_scrollPos + amount);
+    }
+
+    public override bool OnMouseWheel(float amount)
+    {
+        if (!Visible || Maximum <= 0)
+        {
+            return false;
+        }
+
+        ScrollBy(amount > 0 ? -1 : 1);
+        return true;
     }
 
     public override void Draw(bool pulse)

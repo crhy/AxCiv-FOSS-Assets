@@ -230,7 +230,36 @@ public class OptionsPanel : BaseControl
                 return true;
         }
 
+        var shortcut = key.ToString();
+        var shortcutIndex = _optionControls.FindIndex(option =>
+            !string.IsNullOrWhiteSpace(option.Text) &&
+            string.Equals(option.Text.TrimStart()[0].ToString(), shortcut, StringComparison.OrdinalIgnoreCase));
+        if (shortcutIndex >= 0)
+        {
+            if (_def.IsCheckbox)
+            {
+                ToggleCheckBox(_optionControls[shortcutIndex]);
+            }
+            else
+            {
+                SetSelectedOption(_optionControls[shortcutIndex]);
+            }
+            return true;
+        }
+
         return base.OnKeyPressed(key);
+    }
+
+    public override bool OnMouseWheel(float amount)
+    {
+        var scrollbar = _VscrollBar.Visible ? _VscrollBar : _HscrollBar.Visible ? _HscrollBar : null;
+        if (scrollbar == null)
+        {
+            return false;
+        }
+
+        scrollbar.ScrollBy(amount > 0 ? -1 : 1);
+        return true;
     }
 
     private int GetRows()

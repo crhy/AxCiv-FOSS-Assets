@@ -1019,6 +1019,14 @@ public class Read
                 NetTrade = netTrade,
                 Name = name,
                 NoOfSpecialistsx4 = noOfSpecialistsx4,
+                SpecialistTypes = specialists.Where(value => value > 0)
+                    .Take(noOfSpecialistsx4 / 4)
+                    .Select(value => value switch
+                    {
+                        2 => (int)PeopleType.Taxman,
+                        3 => (int)PeopleType.Scientist,
+                        _ => (int)PeopleType.Elvis
+                    }).ToArray(),
                 ItemInProduction = itemInProduction >= 0 ? productionItems[itemInProduction] :
                         productionItems[totalUnitOrders - itemInProduction - 1],
                 ActiveTradeRoutes = activeTradeRoutes,

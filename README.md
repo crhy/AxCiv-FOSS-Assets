@@ -21,3 +21,16 @@ dotnet run --project RaylibUI/RaylibUI.csproj
 On first launch, select a local Civilization II data directory containing
 `RULES.TXT`. The bundled FOSS artwork is used where replacements exist, but it
 does not yet include a complete standalone ruleset.
+
+### Enhanced map controls
+
+- `Ctrl` + mouse wheel: zoom the map
+- `Ctrl` + middle click: reset to 1:1 zoom
+- Middle click: center the map; middle drag: pan
+- Hold `Ctrl`: show quick information for the tile under the pointer
+- Hold `Shift`: preview the active unit's path
+- `Shift` + right click: move eligible units of the active unit's type
+- Mouse wheel: scroll lists and tax sliders; over a specialist it changes type
+- `Shift` + click/wheel on a specialist: change all specialists
+
+See [Civ2 UI Additions compatibility](docs/CIV2-UI-ADDITIONS.md) for the complete upstream feature matrix.

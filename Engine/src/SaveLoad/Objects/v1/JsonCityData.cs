@@ -32,6 +32,8 @@ public class JsonCityData
         ProductionOrder = Array.IndexOf(productionOrders, city.ItemInProduction);
         FoodStorage = city.FoodInStorage;
         SheildsProgress = city.ShieldsProgress;
+        NoOfSpecialistsx4 = city.NoOfSpecialistsx4;
+        SpecialistTypes = city.SpecialistTypes.Clamp();
         CommoditySupplied = city.CommoditySupplied?.Select(c=>c.Id).ToArray();
         CommodityDemanded = city.CommodityDemanded?.Select(c=>c.Id).ToArray();
         TradeRoutePartnerCity = city.TradeRoutePartnerCity;
@@ -54,6 +56,8 @@ public class JsonCityData
     public int ProductionOrder { get; set; }
     public int FoodStorage { get; set; }
     public int SheildsProgress { get; set; }
+    public int NoOfSpecialistsx4 { get; set; }
+    public int[]? SpecialistTypes { get; set; }
     
     public int[]? CommoditySupplied { get; set; }
     public int[]? CommodityDemanded { get; set; }

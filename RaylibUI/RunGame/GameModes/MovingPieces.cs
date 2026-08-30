@@ -76,6 +76,12 @@ public class MovingPieces : IGameMode
 
     public bool MapClicked(Tile tile, MouseButton mouseButton)
     {
+        if (mouseButton == MouseButton.Right && IsShiftDown())
+        {
+            MassMoveSameType(tile);
+            return true;
+        }
+
         if (mouseButton == MouseButton.Left)
         {
             // GOTO support
@@ -113,6 +119,45 @@ public class MovingPieces : IGameMode
 
         return true;
     }
+
+    private void MassMoveSameType(Tile destination)
+    {
+        var activeUnit = _gameScreen.Player.ActiveUnit;
+        if (activeUnit == null || destination == activeUnit.CurrentLocation)
+        {
+            return;
+        }
+
+        var units = activeUnit.CurrentLocation.UnitsHere
+            .Where(unit => !unit.Dead && unit.Owner == activeUnit.Owner && unit.Type == activeUnit.Type &&
+                           unit.MovePoints > 0 && unit.Order == (int)OrderType.NoOrders)
+            .ToList();
+        var movedAny = false;
+        foreach (var unit in units)
+        {
+            var path = Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
+                unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl);
+            if (path == null)
+            {
+                continue;
+            }
+
+            unit.GoToX = destination.X;
+            unit.GoToY = destination.Y;
+            unit.GoToMapIndex = destination.Z;
+            unit.Order = (int)OrderType.GoTo;
+            path.Follow(_gameScreen.Game, unit);
+            movedAny = true;
+        }
+
+        if (movedAny)
+        {
+            _gameScreen.Game.ChooseNextUnit();
+        }
+    }
+
+    private static bool IsShiftDown() =>
+        Input.IsKeyDown(KeyboardKey.LeftShift) || Input.IsKeyDown(KeyboardKey.RightShift);
 
     public bool HandleKeyPress(Shortcut command)
     {

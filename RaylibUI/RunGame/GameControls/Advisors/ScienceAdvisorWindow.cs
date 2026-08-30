@@ -1,5 +1,6 @@
 ﻿using Civ2engine;
 using Civ2engine.IO;
+using Civ2engine.Advances;
 using Model;
 using Model.Controls;
 using Model.Core;
@@ -47,10 +48,12 @@ public class ScienceAdvisorWindow : BaseDialog
         Controls.Add(tribeLabel);
         Controls.Add(titleLabel);
 
-        if (_civ.ReseachingAdvance != -1)
+        if (_civ.ReseachingAdvance >= 0 && _civ.ReseachingAdvance < game.Rules.Advances.Length)
         {
             var advance = game.Rules.Advances[_civ.ReseachingAdvance];
-            Controls.Add(new AdvisorsHeaderLabel(this, $"{Labels.For(LabelIndex.Researching)}: {advance.Name}")
+            var cost = AdvanceFunctions.CalculateScienceCost(game, _civ);
+            Controls.Add(new AdvisorsHeaderLabel(this,
+                $"{Labels.For(LabelIndex.Researching)}: {advance.Name} — {_civ.Science}/{Math.Max(0, cost)}")
             { Location = new(LayoutPadding.Left, titleLabel.Location.Y + 27), Width = _width - PaddingSide });
         }
 

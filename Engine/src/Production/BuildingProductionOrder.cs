@@ -132,15 +132,16 @@ namespace Civ2engine.Production
             return Improvement.Name;
         }
 
-        public override ListboxGroup GetBuildListEntry(IUserInterface active, City city)
+        public override ListboxGroup GetBuildListEntry(IUserInterface active, City city, int shieldRows = 10)
         {
-            var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, 10 * Improvement.Cost - city.ShieldsProgress) /
+            var shieldCost = Math.Max(1, shieldRows) * Improvement.Cost;
+            var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, shieldCost - city.ShieldsProgress) /
                                                       (decimal)Math.Max(1, city.Production)));
             return new ListboxGroup
             {
                 Elements = [ new() { Icon = GetIcon(active), Width = 70, ScaleIcon = HasFossArtIcon() ? 0.028f : 0.48f },
                              new() { Text = Improvement.Name, Width = 260, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
-                             new() { Text = $"({turns} Turns)", TextSizeOverride = 16,
+                             new() { Text = $"({turns} Turns, {shieldCost} Shields, {Improvement.Upkeep} Gold)", TextSizeOverride = 16,
                                  HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center } ],
                 Height = 38,
             };

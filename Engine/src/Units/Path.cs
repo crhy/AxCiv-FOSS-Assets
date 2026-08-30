@@ -180,14 +180,19 @@ public class Path
         {
             var tileTo = Tiles[pos++];
             MovementFunctions.ExecuteUnitMove(game, unit, tileTo, unit.CurrentLocation);
-        } while (unit.MovePoints > 0 && pos < Tiles.Length &&
-                 !MovementFunctions.IsNextToEnemy(unit.CurrentLocation!, unit.Owner, unit.Domain));
+        } while (unit.MovePoints > 0 && pos < Tiles.Length && CanContinueThroughZoneOfControl(unit, Tiles[pos]));
 
         if (unit.MovePoints > 0)
         {
             unit.Order = (int)OrderType.NoOrders;
         }
     }
+
+    private static bool CanContinueThroughZoneOfControl(Unit unit, Tile destination) =>
+        unit.IgnoreZonesOfControl ||
+        MovementFunctions.IsFriendlyTile(destination, unit.Owner) ||
+        !MovementFunctions.IsNextToEnemy(unit.CurrentLocation, unit.Owner, unit.Domain) ||
+        !MovementFunctions.IsNextToEnemy(destination, unit.Owner, unit.Domain);
 }
 
 public class Route

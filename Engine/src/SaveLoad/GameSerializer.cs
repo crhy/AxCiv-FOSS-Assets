@@ -190,6 +190,12 @@ public class GameSerializer
         var mapNo = cityData.Z;
         var tile = maps[mapNo].TileC2(x, y);
         var owner = civilizations[cityData.OwnerId];
+        var specialistQuarterCount = cityData.NoOfSpecialistsx4;
+        if (specialistQuarterCount == 0 && cityData.Workers is { Length: > 0 })
+        {
+            specialistQuarterCount = System.Math.Max(0,
+                cityData.Size + 1 - cityData.Workers.Count(worked => worked)) * 4;
+        }
         var city = new City
         {
             X = x,
@@ -205,6 +211,8 @@ public class GameSerializer
             WhoBuiltIt = civilizations[cityData.Builder],
             FoodInStorage = cityData.FoodStorage,
             ShieldsProgress = cityData.SheildsProgress,
+            NoOfSpecialistsx4 = specialistQuarterCount,
+            SpecialistTypes = cityData.SpecialistTypes ?? [],
             Name = cityData.Name,
             ItemInProduction = cityData.ProductionOrder != -1 ? productionOrders[cityData.ProductionOrder] : null,
             CommoditySupplied = cityData.CommoditySupplied?.Where(c => c < rules.CaravanCommoditie.Length)
