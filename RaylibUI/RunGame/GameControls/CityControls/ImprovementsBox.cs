@@ -100,14 +100,17 @@ public class ImprovementsBox : Listbox
                 {
                     if (i == 0 && button == Labels.Ok)
                     {
-                        city.SellImprovement(improvement);
-                        Definition = MakeListbox(_cityWindow);
-                        OnResize();
+                        if (city.SellImprovement(improvement))
+                        {
+                            city.Owner.Money += improvement.GetSaleValue(screen.Game.Rules);
+                            Definition = MakeListbox(_cityWindow);
+                            OnResize();
+                        }
                     }
                 },
                 dialogImage: new([improvementImage]),
                 replaceStrings: [improvement.Name],
-                replaceNumbers: [improvement.Cost * 10]);
+                replaceNumbers: [improvement.GetSaleValue(screen.Game.Rules)]);
         }
     }
 }

@@ -71,6 +71,16 @@ namespace Civ2engine
             : this(objects.Maps.ToArray(), rules, objects.Civilizations, objects.Options,
                   rulesetPaths, objects.GameData.DifficultyLevel, objects.GameData.BarbarianActivity)
         {
+            // The shared constructor records an initial power sample for new games.
+            // Loaded games already contain their history, so discard that synthetic sample.
+            foreach (var civilization in AllCivilizations)
+            {
+                if (civilization.PowerRating.Count > 0)
+                {
+                    civilization.PowerRating.RemoveAt(civilization.PowerRating.Count - 1);
+                }
+            }
+
             _scenarioData = objects.Scenario;
 
             var gameData = objects.GameData;
@@ -161,6 +171,7 @@ namespace Civ2engine
                 city.CalculateOutput(city.Owner.Government, this);
             }
 
+            Power.AssignPowerRanks(this);
             History = HistoryUtils.ReconstructHistory(this);
         }
     }

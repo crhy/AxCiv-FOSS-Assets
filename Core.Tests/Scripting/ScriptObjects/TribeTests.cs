@@ -176,6 +176,7 @@ public class TribeTests
     {
         var (game, _, civ) = ApiTestHarness.CreateGameAndAi();
         var tribe = new Tribe(civ, game);
+        civ.ReseachingAdvance = 0;
 
         // Research cost should be calculated
         var cost = tribe.researchCost;
@@ -204,5 +205,23 @@ public class TribeTests
         Assert.NotNull(tribe.attitude);
         Assert.NotNull(tribe.reputation);
         Assert.NotNull(tribe.treaties);
+    }
+
+    [Fact]
+    public void Tribe_ProxiesGrowWhenWritingAtArrayBoundary()
+    {
+        var (game, _, civ) = ApiTestHarness.CreateGameAndAi();
+        var tribe = new Tribe(civ, game);
+        civ.Attitude = [];
+        civ.Reputation = [];
+        civ.Relations = [];
+
+        tribe.attitude[0] = 11;
+        tribe.reputation[0] = 22;
+        tribe.treaties[0] = 5;
+
+        Assert.Equal(11, civ.Attitude[0]);
+        Assert.Equal(22, civ.Reputation[0]);
+        Assert.Equal(5, civ.Relations[0]!.Summary);
     }
 }

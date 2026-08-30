@@ -22,7 +22,7 @@ public class AttitudeProxy(Civilization civ)
         {
             if(tribeId < 0) return;
             
-            if (tribeId > civ.Attitude.Length)
+            if (tribeId >= civ.Attitude.Length)
             {
                 var newArray = new int[tribeId + 1];
                 Array.Copy(civ.Attitude, newArray, civ.Attitude.Length);

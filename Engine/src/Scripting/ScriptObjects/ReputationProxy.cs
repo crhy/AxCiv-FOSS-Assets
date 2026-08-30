@@ -22,7 +22,7 @@ public class ReputationProxy(Civilization civ)
         {
             if(tribeId < 0) return;
             
-            if (tribeId > civ.Reputation.Length)
+            if (tribeId >= civ.Reputation.Length)
             {
                 var newArray = new int[tribeId + 1];
                 Array.Copy(civ.Reputation, newArray, civ.Reputation.Length);

@@ -190,6 +190,9 @@ namespace Civ2engine
             return true;
         }
 
+        public static int GetSaleValue(this Improvement improvement, Rules rules) =>
+            improvement.Cost * rules.Cosmic.RowsShieldBox;
+
         public static void AddImprovement(this City city, Improvement improvement) =>
             city.OrderedImprovements.Add(improvement.Type, improvement);
 
@@ -280,8 +283,18 @@ namespace Civ2engine
 
         public static void AutoRemoveWorkersDistribution(this City city, Rules gameRules)
         {
-            //TODO: remove scuentists & taxmen first
-            var tiles = city.WorkedTiles.Where(t => t != city.Location);
+            // Civ II removes a specialist before taking a citizen off the map.
+            if (city.NoOfSpecialistsx4 >= 4)
+            {
+                city.NoOfSpecialistsx4 -= 4;
+                return;
+            }
+
+            var tiles = city.WorkedTiles.Where(t => t != city.Location).ToList();
+            if (tiles.Count == 0)
+            {
+                return;
+            }
 
             var organization = city.GetOrganizationLevel(gameRules);
 
@@ -295,7 +308,12 @@ namespace Civ2engine
         public static void AutoAddDistributionWorkers(this City city, Rules gameRules)
         {
             // First determine how many workers are to be added
-            int workersToBeAdded = city.Size + 1 - city.WorkedTiles.Count;
+            var specialists = Math.Clamp(city.NoOfSpecialistsx4 / 4, 0, city.Size);
+            int workersToBeAdded = city.Size + 1 - specialists - city.WorkedTiles.Count;
+            if (workersToBeAdded <= 0)
+            {
+                return;
+            }
 
             var organization = city.GetOrganizationLevel(gameRules);
             

@@ -71,6 +71,7 @@ public class LoadGameTests
         Assert.Equal("Romans", player.TribeName);
         Assert.Equal(PlayerType.Local, player.PlayerType);
         Assert.Equal(0, player.Money);
+        Assert.InRange(player.ReseachingAdvance, -2, -1);
     }
 
     [Fact]

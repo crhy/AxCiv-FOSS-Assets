@@ -398,6 +398,19 @@ public class Read
             if (civId != 0 && civId != playersCivIndex) cityStyle = tribe.CityStyle;
 
             var gov = rules.Governments[governmentId];
+            var normalizedResearchingAdvance = researchingAdvance < rules.Advances.Length
+                ? researchingAdvance
+                : AdvancesConstants.Nil;
+            var relations = Enumerable.Range(0, 8).Select(otherCivId => (Relation?)new Relation
+            {
+                Contact = treatyContact[otherCivId],
+                CeaseFire = treatyCeaseFire[otherCivId],
+                Peace = treatyPeace[otherCivId],
+                Alliance = treatyAlliance[otherCivId],
+                Vendetta = treatyVendetta[otherCivId],
+                Embassy = treatyEmbassy[otherCivId],
+                War = treatyWar[otherCivId]
+            }).ToArray();
             objects.Civilizations.Add(new Civilization
             {
                 TribeId = tribeId,
@@ -410,12 +423,17 @@ public class Read
                 TribeName = tribeName,
                 Adjective = adjective,
                 Money = money,
-                ReseachingAdvance = researchingAdvance,
+                Science = science,
+                ReseachingAdvance = normalizedResearchingAdvance,
                 Advances = advances,
                 ScienceRate = scienceRate * 10,
                 TaxRate = taxRate * 10,
                 Government = governmentId,
                 AllowedAdvanceGroups = tribe.AdvanceGroups ?? [AdvanceGroupAccess.CanResearch],
+                FutureTechCount = numberFutureTechsResearched,
+                Patience = patience,
+                Attitude = attitudes,
+                Relations = relations,
                 PowerRating = new List<int> (new int[turnNumber / 2]),
                 ThroneRoom = new()
                 {

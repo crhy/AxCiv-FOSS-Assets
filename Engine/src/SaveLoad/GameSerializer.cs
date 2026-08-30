@@ -278,6 +278,12 @@ public class GameSerializer
         
         var gov = rules.Governments[jsonCivData.GovernmentId];
         var leaderTitle = tribe.Titles.FirstOrDefault(t=>t.Gov == jsonCivData.GovernmentId) as IGovernmentTitles ?? gov;
+        var researchingAdvance = jsonCivData.ResearchingAdvance;
+        if (researchingAdvance < 0 || researchingAdvance >= rules.Advances.Length)
+        {
+            researchingAdvance = AdvancesConstants.Nil;
+        }
+
         return new Civilization
         {
             TribeId = jsonCivData.TribeId,
@@ -290,13 +296,38 @@ public class GameSerializer
             TribeName = string.IsNullOrWhiteSpace(jsonCivData.TribeName) ? tribe.Plural : jsonCivData.TribeName,
             Adjective = string.IsNullOrWhiteSpace(jsonCivData.Adjective) ? tribe.Adjective : jsonCivData.Adjective,
             Money = jsonCivData.Money,
-            ReseachingAdvance = jsonCivData.ResearchingAdvance,
+            Science = jsonCivData.Science,
+            ReseachingAdvance = researchingAdvance,
             Advances = jsonCivData.Advances ?? [],
             ScienceRate = jsonCivData.SciRate,
             PlayerType = jsonCivData.PlayerType,
             TaxRate = jsonCivData.TaxRate,
             Government = jsonCivData.GovernmentId,
-            AllowedAdvanceGroups = tribe.AdvanceGroups ?? [AdvanceGroupAccess.CanResearch]
+            AllowedAdvanceGroups = tribe.AdvanceGroups ?? [AdvanceGroupAccess.CanResearch],
+            FutureTechCount = jsonCivData.FutureTechCount,
+            Patience = jsonCivData.Patience,
+            Betrayals = jsonCivData.Betrayals,
+            CasualtiesPerUnitType = jsonCivData.CasualtiesPerUnitType ?? [],
+            Attitude = jsonCivData.Attitude ?? [],
+            Reputation = jsonCivData.Reputation ?? [],
+            Relations = HydrateRelations(jsonCivData.Relations),
+            PowerRating = jsonCivData.PowerRating?.ToList() ?? [],
+            ThroneRoom = jsonCivData.ThroneRoom ?? new ThroneRoom()
         };
+    }
+
+    private static Relation?[] HydrateRelations(int[]? summaries)
+    {
+        if (summaries == null)
+        {
+            return [];
+        }
+
+        return summaries.Select(summary =>
+        {
+            var relation = new Relation();
+            relation.UpdateFrom(summary);
+            return (Relation?)relation;
+        }).ToArray();
     }
 }

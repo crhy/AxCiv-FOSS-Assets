@@ -13,6 +13,7 @@ using Raylib_CSharp.Rendering;
 using Raylib_CSharp.Colors;
 using Model.Controls;
 using RaylibUI.Controls;
+using Civ2engine.Advances;
 
 namespace RaylibUI.RunGame.GameControls;
 
@@ -77,7 +78,9 @@ public class StatusPanel : BaseControl
         turnsLabel.Width = infoWidth;
         turnsLabel.Height = turnsLabel.GetPreferredHeight();
 
-        var iconNo = 0; // TODO: determine one of 4 icons based on current research progress (0...25%, 25...50%, 50...75%, 75...100%)
+        var playerCiv = _game.GetPlayerCiv;
+        var scienceCost = AdvanceFunctions.CalculateScienceCost(_game, playerCiv);
+        var iconNo = AdvanceFunctions.CalculateResearchProgressQuarter(playerCiv.Science, scienceCost);
         var iconScale = _gameScreen.ToTPanelLayout ? 1.0f : 1.0f;
         var researchIconLoc = new Vector2(
             _infoPanelRect.X + _infoPanelRect.Width - 58,

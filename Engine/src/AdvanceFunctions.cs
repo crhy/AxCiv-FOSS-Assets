@@ -171,7 +171,7 @@ namespace Civ2engine.Advances
             ProductionPossibilities.RemoveItems(targetCiv, orders.Where(o => o.ExpiresTech == advanceIndex));
         }
 
-        public static int TotalAdvances(this Game game, int targetCiv)
+        public static int TotalAdvances(this IGame game, int targetCiv)
         {
             return game.AllCivilizations[targetCiv].Advances.Count(a => a);
         }
@@ -182,7 +182,7 @@ namespace Civ2engine.Advances
         /// <param name="game"></param>
         /// <param name="civ"></param>
         /// <returns></returns>
-        public static int CalculateScienceCost(Game game, Civilization civ)
+        public static int CalculateScienceCost(IGame game, Civilization civ)
         {
             if (civ.ReseachingAdvance < 0) return -1;
             var techParadigm = game.Rules.Cosmic.TechParadigm;
@@ -198,6 +198,16 @@ namespace Civ2engine.Advances
 
             return baseCost * (ourAdvances +1);
 
+        }
+
+        public static int CalculateResearchProgressQuarter(int progress, int cost)
+        {
+            if (cost <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Clamp((int)((long)Math.Max(0, progress) * 4 / cost), 0, 3);
         }
 
         public static bool HasTech(Civilization civ, int tech)

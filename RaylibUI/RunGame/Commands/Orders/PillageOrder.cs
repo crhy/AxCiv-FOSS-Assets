@@ -1,4 +1,5 @@
 using Civ2engine.Enums;
+using Civ2engine.IO;
 using Civ2engine.MapObjects;
 using Civ2engine.Terrains;
 using JetBrains.Annotations;
@@ -46,18 +47,21 @@ public class PillageOrder : Order
             !_game.TerrainImprovements[i.Improvement].Negative).ToList();
         if (improvements.Count > 1)
         {
-            // TODO: implement listbox _gameScreen.ShowPopup("PILLAGEWHAT", listbox: new ListboxDefinition
-                                                           //{
-                                                           //    LeftText = improvements
-                                                           //        .Select(i => _game.TerrainImprovements[i.Improvement].Levels[i.Level].Name).ToList()
-                                                           //});
-            //var popup = _mainForm.popupBoxList[];
-            //var dialog = new Civ2dialog(_mainForm, popup, );
-            //dialog.ShowModal();
-            //if (dialog.SelectedButton == "OK")
-            //{
-            //    improvementToPillage = improvements[dialog.SelectedIndex];
-            //}
+            var listbox = new ListboxDefinition
+            {
+                Rows = Math.Min(7, improvements.Count),
+                VerticalScrollbar = improvements.Count > 7
+            };
+            listbox.Update(improvements.Select(i =>
+                _game.TerrainImprovements[i.Improvement].Levels[i.Level].Name).ToList());
+
+            GameScreen.ShowPopup("PILLAGEWHAT", (button, selectedIndex, _, _) =>
+            {
+                if (button == Labels.Ok && selectedIndex >= 0 && selectedIndex < improvements.Count)
+                {
+                    Pillage(improvements[selectedIndex]);
+                }
+            }, listBox: listbox);
         }
         else
         {

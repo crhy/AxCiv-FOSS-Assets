@@ -93,7 +93,9 @@ public class Tribe(Civilization civ, Game game)
 
     public Tech? researching
     {
-        get => Civ.ReseachingAdvance == -1 ? null : new Tech(game.Rules.Advances, Civ.ReseachingAdvance);
+        get => Civ.ReseachingAdvance < 0 || Civ.ReseachingAdvance >= game.Rules.Advances.Length
+            ? null
+            : new Tech(game.Rules.Advances, Civ.ReseachingAdvance);
         set => Civ.ReseachingAdvance = value?.id ?? -1;
     }
 

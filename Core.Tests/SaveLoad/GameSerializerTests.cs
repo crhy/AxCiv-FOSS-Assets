@@ -60,7 +60,28 @@ public class GameSerializerTests
         };
         var ruleset = new Ruleset("test", new Dictionary<string, string> { ["Author"] = "Junie" }, tempPath);
         
-        var civ = new Civilization { Id = 1, TribeId = 0, Alive = true, PlayerType = PlayerType.Local, Advances = new bool[10], GlobalEffects = { } };
+        var relation = new Relation { Contact = true, Peace = true, Embassy = true };
+        var civ = new Civilization
+        {
+            Id = 1,
+            TribeId = 0,
+            Alive = true,
+            PlayerType = PlayerType.Local,
+            LeaderGender = 1,
+            Advances = new bool[10],
+            Science = 17,
+            ReseachingAdvance = -1,
+            FutureTechCount = 3,
+            Patience = 6,
+            Betrayals = 2,
+            CasualtiesPerUnitType = [0, 4],
+            Attitude = [0, 42],
+            Reputation = [0, 7],
+            Relations = [null, relation],
+            PowerRating = [12, 15],
+            ThroneRoom = new ThroneRoom { Floor = 3, DecorStatues = true },
+            GlobalEffects = { }
+        };
         var game = new Mock<IGame>();
         game.Setup(g => g.AllCivilizations).Returns(new List<Civilization> { Barbarians.Civilization, civ });
         game.Setup(g => g.GetPlayerCiv).Returns(civ);
@@ -140,6 +161,19 @@ public class GameSerializerTests
         Assert.NotNull(loadedGame);
         Assert.Equal(2, loadedGame.AllCivilizations.Count);
         Assert.Equal(civ.TribeId, loadedGame.AllCivilizations[1].TribeId);
+        Assert.Equal(civ.LeaderGender, loadedGame.AllCivilizations[1].LeaderGender);
+        Assert.Equal(civ.Science, loadedGame.AllCivilizations[1].Science);
+        Assert.Equal(civ.ReseachingAdvance, loadedGame.AllCivilizations[1].ReseachingAdvance);
+        Assert.Equal(civ.FutureTechCount, loadedGame.AllCivilizations[1].FutureTechCount);
+        Assert.Equal(civ.Patience, loadedGame.AllCivilizations[1].Patience);
+        Assert.Equal(civ.Betrayals, loadedGame.AllCivilizations[1].Betrayals);
+        Assert.Equal(civ.CasualtiesPerUnitType, loadedGame.AllCivilizations[1].CasualtiesPerUnitType);
+        Assert.Equal(civ.Attitude, loadedGame.AllCivilizations[1].Attitude);
+        Assert.Equal(civ.Reputation, loadedGame.AllCivilizations[1].Reputation);
+        Assert.Equal(relation.Summary, loadedGame.AllCivilizations[1].Relations[1]!.Summary);
+        Assert.Equal(civ.PowerRating, loadedGame.AllCivilizations[1].PowerRating);
+        Assert.Equal(3, loadedGame.AllCivilizations[1].ThroneRoom.Floor);
+        Assert.True(loadedGame.AllCivilizations[1].ThroneRoom.DecorStatues);
         Assert.Equal(map.XDim, loadedGame.Maps[0].XDim);
         Assert.Equal(map.YDim, loadedGame.Maps[0].YDim);
         Assert.Single(loadedGame.AllCivilizations[1].Units);

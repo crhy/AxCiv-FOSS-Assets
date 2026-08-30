@@ -57,7 +57,7 @@ namespace Civ2engine
                 else
                 {
                     var maxFood = (city.Size + 1) * foodRows;
-                    if (city.FoodInStorage > maxFood)
+                    if (city.FoodInStorage >= maxFood)
                     {
                         city.GrowCity(game);
                         city.ResetFoodStorage(foodRows);
@@ -149,7 +149,7 @@ namespace Civ2engine
                         {
                             //Sell it !!
                             city.SellImprovement(cityImprovement);
-                            activeCiv.Money += cityImprovement.Cost;
+                            activeCiv.Money += cityImprovement.GetSaleValue(rules);
                             player.CantMaintain(city, cityImprovement);
                         }
                     }

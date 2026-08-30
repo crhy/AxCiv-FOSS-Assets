@@ -1,4 +1,5 @@
 using Civ2engine;
+using Civ2engine.MapObjects;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Cities;
@@ -283,5 +284,62 @@ public class CityExtensionsTests
         Assert.Equal(1, city.Size);
         // Size + 1 = 2
         Assert.Equal(2, city.WorkedTiles.Count);
+    }
+
+    [Fact]
+    public void AutoRemoveWorkersDistribution_RemovesSpecialistBeforeMapWorker()
+    {
+        var (_, rules, civ, map) = SetupGame();
+        var cityTile = map.Tile[1, 1];
+        var workerTile = map.Tile[0, 1];
+        var city = new City
+        {
+            Owner = civ,
+            Location = cityTile,
+            Size = 1,
+            NoOfSpecialistsx4 = 4
+        };
+        cityTile.WorkedBy = city;
+        workerTile.WorkedBy = city;
+
+        city.AutoRemoveWorkersDistribution(rules);
+
+        Assert.Equal(0, city.NoOfSpecialistsx4);
+        Assert.Equal(city, workerTile.WorkedBy);
+    }
+
+    [Fact]
+    public void AutoAddDistributionWorkers_LeavesSpecialistsOffMap()
+    {
+        var (_, rules, civ, map) = SetupGame();
+        var cityTile = map.Tile[1, 1];
+        var city = new City
+        {
+            Owner = civ,
+            Location = cityTile,
+            Size = 2,
+            NoOfSpecialistsx4 = 4
+        };
+        cityTile.CityHere = city;
+        cityTile.WorkedBy = city;
+
+        foreach (var tile in cityTile.CityRadius())
+        {
+            tile.SetVisible(civ.Id);
+        }
+
+        city.AutoAddDistributionWorkers(rules);
+
+        Assert.Equal(2, city.WorkedTiles.Count);
+    }
+
+    [Fact]
+    public void GetSaleValue_UsesScenarioShieldRowSize()
+    {
+        var (_, rules, _, _) = SetupGame();
+        rules.Cosmic.RowsShieldBox = 12;
+        var improvement = new Improvement { Cost = 4 };
+
+        Assert.Equal(48, improvement.GetSaleValue(rules));
     }
 }

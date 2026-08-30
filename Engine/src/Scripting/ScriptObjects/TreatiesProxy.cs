@@ -23,7 +23,7 @@ public class TreatiesProxy(Civilization civ)
         {
             if (tribeId < 0) return;
 
-            if (tribeId > civ.Relations.Length)
+            if (tribeId >= civ.Relations.Length)
             {
                 var newArray = new Relation[tribeId + 1];
                 Array.Copy(civ.Relations, newArray, civ.Relations.Length);
