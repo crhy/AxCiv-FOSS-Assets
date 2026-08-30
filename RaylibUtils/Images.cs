@@ -222,7 +222,7 @@ public static partial class Images
         // Try several common decoders. Any of these is enough to turn the
         // progressive JPEG into a simple PPM stream that this file can parse
         // without adding a new NuGet dependency.
-        if (TryDecodeJpegToPpm(["djpeg", "-ppm", "-outfile", "-", filename], out var ppmBytes) ||
+        if (TryDecodeJpegToPpm(["djpeg", "-ppm", filename], out var ppmBytes) ||
             TryDecodeJpegToPpm(["ffmpeg", "-v", "error", "-i", filename, "-f", "image2pipe", "-vcodec", "ppm", "-"], out ppmBytes) ||
             TryDecodeJpegToPpm(["magick", filename, "ppm:-"], out ppmBytes) ||
             TryDecodeJpegToPpm(["convert", filename, "ppm:-"], out ppmBytes) ||

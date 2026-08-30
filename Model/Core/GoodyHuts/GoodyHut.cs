@@ -26,7 +26,7 @@ namespace Model.Core.GoodyHuts
             _random = random ?? new Random();
         }
 
-        public GoodyHutOutcomeResult Trigger(Unit unit)
+        public GoodyHutOutcomeResult Trigger(Unit unit, IReadOnlyList<int>? eligibleAdvanceIndices = null)
         {
             if (_outcomes.Count == 0)
             {
@@ -36,7 +36,9 @@ namespace Model.Core.GoodyHuts
             // Base chance of each outcome is equal. Certain game circumstances modify this ratio.
             // https://apolyton.net/forum/civilization-series/civilization-i-and-civilization-ii/82184-a-study-of-hut-outcomes
             var outcome = _outcomes[_random.Next(0, _outcomes.Count)];
-            return outcome.ApplyOutcome(unit);
+            return outcome is ScrollsOutcome scrolls
+                ? scrolls.ApplyOutcome(unit, eligibleAdvanceIndices, _random)
+                : outcome.ApplyOutcome(unit);
         }
     }
 }

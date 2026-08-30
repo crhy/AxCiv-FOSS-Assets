@@ -16,12 +16,12 @@ public class DynamicSizingDialog : BaseDialog
 
     private ControlGroup? _buttons;
 
-    private IUserInterface _active = null!;
+    private readonly IUserInterface? _active;
 
     protected DynamicSizingDialog(Main host, string title, int requestedWidth, Point? position = null) :
         base(host, position)
     {
-        _active = host.ActiveInterface!;
+        _active = host.ActiveInterface;
 
         _requestedWidth = requestedWidth;
         if (!string.IsNullOrEmpty(title))

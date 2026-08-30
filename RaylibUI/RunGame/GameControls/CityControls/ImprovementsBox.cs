@@ -5,8 +5,7 @@ using RaylibUI.BasicTypes;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUtils;
 
-using RaylibUI.RunGame.GameControls.CityControls;
-using Raylib_CSharp.UI;
+namespace RaylibUI.RunGame.GameControls.CityControls;
 
 public class ImprovementsBox : Listbox
 {

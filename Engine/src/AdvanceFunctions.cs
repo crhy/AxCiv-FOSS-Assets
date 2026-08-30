@@ -210,7 +210,7 @@ namespace Civ2engine.Advances
             return tech < civ.Advances.Length && civ.Advances[tech];
         }
 
-        public static List<Advance> CalculateAvailableResearch(Game game, Civilization activeCiv)
+        public static List<Advance> CalculateAvailableResearch(IGame game, Civilization activeCiv)
         {
             var allAvailable = game.Rules.Advances.Where(a =>
                 GetAdvanceGroupAccess(activeCiv, a) == AdvanceGroupAccess.CanResearch &&

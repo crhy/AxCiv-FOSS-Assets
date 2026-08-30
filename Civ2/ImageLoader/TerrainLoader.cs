@@ -17,6 +17,21 @@ namespace Civ2.ImageLoader
 {
     public static class TerrainLoader
     {
+        private static readonly string[] FossTerrainNames =
+        [
+            "desert",
+            "plains",
+            "grassland",
+            "grassland", // The forest connection overlay supplies the trees.
+            "hills",
+            "mountains",
+            "tundra",
+            "glacier",
+            "swamp",
+            "jungle",
+            "ocean"
+        ];
+
         public static void LoadTerrain(Ruleset ruleset, IUserInterface active)
         {
             active.TileSets.Clear();
@@ -47,6 +62,7 @@ namespace Civ2.ImageLoader
             ditherTile.ReplaceColor(gray, Color.Black);
 
             terrain.BaseTiles = active.PicSources["base1"].Select(t => MapIndexChange((BitmapStorage)t, index, active)).ToArray();
+            ApplyFossTerrainTextures(terrain, index, active);
 
             terrain.Specials = new[]
             {
@@ -126,6 +142,85 @@ namespace Civ2.ImageLoader
             return terrain;
         }
 
+        private static void ApplyFossTerrainTextures(TerrainSet terrain, int mapIndex, IUserInterface active)
+        {
+            // The bundled textures depict the classic Earth terrain set. Other Test of Time maps
+            // retain their scenario-specific art until equivalent FOSS sets are available.
+            if (mapIndex != 0)
+            {
+                return;
+            }
+
+            for (var terrainIndex = 0;
+                 terrainIndex < terrain.BaseTiles.Length && terrainIndex < FossTerrainNames.Length;
+                 terrainIndex++)
+            {
+                var artPath = FindFossTerrainPath(FossTerrainNames[terrainIndex]);
+                if (artPath == null)
+                {
+                    continue;
+                }
+
+                var replacement = Images.LoadImageFromFile(artPath).Image;
+                if (replacement.Width <= 1 || replacement.Height <= 1)
+                {
+                    continue;
+                }
+
+                replacement.Resize(terrain.TileWidth, terrain.TileHeight);
+                ApplyOriginalTileTransparency(replacement,
+                    Images.ExtractBitmap(terrain.BaseTiles[terrainIndex], active));
+                terrain.BaseTiles[terrainIndex] = new MemoryStorage(replacement,
+                    $"FossTerrain-{terrainIndex}-{artPath}");
+            }
+        }
+
+        private static string? FindFossTerrainPath(string terrainName)
+        {
+            var fileName = $"{terrainName}.jpg";
+            var roots = Settings.SearchPaths
+                .Concat([
+                    Environment.CurrentDirectory,
+                    AppContext.BaseDirectory,
+                    Path.Combine(Environment.CurrentDirectory, "RaylibUI")
+                ])
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var root in roots)
+            {
+                foreach (var directory in new[]
+                         {
+                             Path.Combine(root, "Terrain"),
+                             Path.Combine(root, "FOSSart", "Terrain"),
+                             Path.Combine(root, "RaylibUI", "FOSSart", "Terrain")
+                         })
+                {
+                    var path = Path.Combine(directory, fileName);
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static void ApplyOriginalTileTransparency(Image replacement, Image originalTile)
+        {
+            for (var y = 0; y < replacement.Height; y++)
+            {
+                for (var x = 0; x < replacement.Width; x++)
+                {
+                    if (originalTile.GetColor(x, y).A == 0)
+                    {
+                        replacement.DrawPixel(x, y, Color.Blank);
+                    }
+                }
+            }
+        }
+
         private static DitherMap BuildDitherMaps(Image mask, IImageSource[] baseTiles, int offsetX, int offsetY,
             IImageSource terrainBlank)
         {
@@ -163,4 +258,4 @@ namespace Civ2.ImageLoader
             return img;
         }
     }
-}   
+}

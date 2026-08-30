@@ -1,9 +1,14 @@
-using Model.Core;
+using System;
+using System.Linq;
+using Civ2engine.Enums;
+using Model;
+using Model.Constants;
+using Model.Controls;
 using Model.Core.Production;
 using Model.Core.Units;
 using Model.Core.Cities;
-using Model.Core.Rules;
-using Model.Interfaces;
+using Model.Core.GameRules;
+using Model.Images;
 
 namespace Civ2engine.Production
 {
@@ -12,6 +17,45 @@ namespace Civ2engine.Production
         index, unitDefinition.Prereq, unitDefinition.CivCanBuild, unitDefinition.Until)
     {
         public override string Title => unitDefinition.Name;
+
+        public override bool CompleteProduction(City city, Rules rules)
+        {
+            if (unitDefinition.AIrole == AiRoleType.Settle && city.Size == 1)
+            {
+                return false;
+            }
+
+            var veteran = city.Improvements.Any(i =>
+                i.Effects.ContainsKey(Effects.Veteran) &&
+                i.Effects[Effects.Veteran] == (int)unitDefinition.Domain);
+
+            var unit = new Unit
+            {
+                Id = city.Owner.Units.Any() ? city.Owner.Units.Max(u => u.Id) + 1 : 0,
+                X = city.X,
+                Y = city.Y,
+                HomeCity = city,
+                CurrentLocation = city.Location,
+                Owner = city.Owner,
+                TypeDefinition = unitDefinition,
+                Veteran = veteran,
+                Order = (int)OrderType.NoOrders
+            };
+            unit.Owner.Units.Add(unit);
+
+            if (unitDefinition.AIrole == AiRoleType.Settle)
+            {
+                city.Size -= 1;
+            }
+
+            var government = rules.Governments[city.Owner.Government];
+            if (!unit.FreeSupport(government.UnitTypesAlwaysFree))
+            {
+                city.SetUnitSupport(government);
+            }
+
+            return true;
+        }
 
         public override IImageSource? GetIcon(IUserInterface activeInterface)
         {
@@ -44,15 +88,27 @@ namespace Civ2engine.Production
             return unitDefinition.Name;
         }
 
-        public override void CompleteProduction(City city, Rules rules)
+        public override ListboxGroup GetBuildListEntry(IUserInterface activeInterface, City city)
         {
-            // Basic implementation - extend as needed
-            Console.WriteLine($"Completing production of {unitDefinition.Name} in city {city.Name}");
-        }
-
-        public override string GetBuildListEntry(IUserInterface activeInterface, City city)
-        {
-            return $"{unitDefinition.Name} ({unitDefinition.Type})";
+            var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, 10 * unitDefinition.Cost - city.ShieldsProgress) /
+                                                      (decimal)Math.Max(1, city.Production)));
+            return new ListboxGroup
+            {
+                Elements =
+                [
+                    new() { Icon = GetIcon(activeInterface), Width = 70, ScaleIcon = HasFossArtIcon(activeInterface) ? 0.028f : 0.75f },
+                    new() { Text = unitDefinition.Name, Width = 200, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
+                    new()
+                    {
+                        Text = $"({turns} Turns, ADM: {unitDefinition.Attack}/{unitDefinition.Defense}/{unitDefinition.Move / 3} " +
+                               $"HP: {unitDefinition.Hitp / 10}/{unitDefinition.Firepwr})",
+                        TextSizeOverride = 16,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                ],
+                Height = 38
+            };
         }
     }
 }

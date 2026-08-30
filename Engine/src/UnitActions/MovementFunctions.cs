@@ -735,7 +735,14 @@ namespace Civ2engine.UnitActions
                     mapUpdates.Add(tileTo);
                 }else if (tileTo.HasGoodyHut)
                 {
-                    var outcome = tileTo.ConsumeGoodyHut(unit);
+                    var eligibleAdvances = AdvanceFunctions.CalculateAvailableResearch(game, unit.Owner)
+                        .Select(advance => advance.Index)
+                        .ToArray();
+                    var outcome = tileTo.ConsumeGoodyHut(unit, eligibleAdvances);
+                    if (outcome.AdvanceIndex is { } advanceIndex)
+                    {
+                        game.GiveAdvance(advanceIndex, unit.Owner);
+                    }
                     if (outcome.OutcomeType == "AdvancedTribe")
                     {
                         ApplyAdvancedTribeOutcome(game, unit, tileTo, outcome, mapUpdates);

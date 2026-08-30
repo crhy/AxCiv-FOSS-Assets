@@ -30,7 +30,7 @@ public class FileDialog : DynamicSizingDialog
     private readonly Button _okButton;
     private readonly TableLayoutPanel _innerPanel;
     private bool _isRoot;
-    private readonly IUserInterface _active;
+    private readonly IUserInterface? _active;
     private Dictionary<string, GameVersionType?> _fileList = [];
     private ListboxDefinition _listboxDef = null!;
 
@@ -40,12 +40,12 @@ public class FileDialog : DynamicSizingDialog
         _isValidSelectionCallback = isValidSelectionCallback;
         _onSelectionCallback = onSelectionCallback;
         _selectionMode = selectionMode;
-        _active = host.ActiveInterface!;
+        _active = host.ActiveInterface;
 
         var innerLayout = new TableLayout();
 
-        _directoryLabel = new LabelControl(this, "", true, font: _active.Look.StatusPanelLabelFont,
-            colorFront: _active.Look.StatusPanelLabelColor, colorShadow: _active.Look.StatusPanelLabelColorShadow, shadowOffset: new(1, 1));
+        _directoryLabel = new LabelControl(this, "", true, font: _active?.Look.StatusPanelLabelFont,
+            colorFront: _active?.Look.StatusPanelLabelColor, colorShadow: _active?.Look.StatusPanelLabelColorShadow, shadowOffset: new(1, 1));
         innerLayout.Add(_directoryLabel, 0, 0);
 
         SetDirectoryLocation(baseDirectory);
@@ -56,7 +56,10 @@ public class FileDialog : DynamicSizingDialog
             Columns = 5,
             VerticalScrollbar = false
         };
-        _listboxDef.Looks = _active.GetListboxLooks(ListboxType.Default);
+        if (_active != null)
+        {
+            _listboxDef.Looks = _active.GetListboxLooks(ListboxType.Default);
+        }
         _listbox = new Listbox(this, _listboxDef);
         _listbox.ItemSelected += ItemSelected;
         innerLayout.Add(_listbox, 1, 0, new Padding(2, 2, 2, 2));
@@ -70,12 +73,12 @@ public class FileDialog : DynamicSizingDialog
         Controls.Add(_innerPanel);
 
         _textBox = new TextBox(this, initialFileName ?? string.Empty, 600, TestSelection);
-        _okButton = new Button(this, Labels.For(LabelIndex.OK));
+        _okButton = new Button(this, _active == null ? Labels.Ok : Labels.For(LabelIndex.OK));
         _okButton.Click += OkClicked;
         var menuBar = new ControlGroup(this, flexElement: 0);
         menuBar.AddChild(_textBox);
         menuBar.AddChild(_okButton);
-        var cancelButton = new Button(this, Labels.For(LabelIndex.Cancel));
+        var cancelButton = new Button(this, _active == null ? Labels.Cancel : Labels.For(LabelIndex.Cancel));
         cancelButton.Click += CancelButtonOnClick;
         menuBar.AddChild(cancelButton);
         Controls.Add(menuBar);
@@ -105,12 +108,20 @@ public class FileDialog : DynamicSizingDialog
                 _ => 1
             };
 
+            var elements = new List<ListboxGroupElement>();
+            if (_active?.Look.DiskIcons is { Length: > 0 } diskIcons)
+            {
+                elements.Add(new ListboxGroupElement { Icon = diskIcons[Math.Min(iconIndex, diskIcons.Length - 1)] });
+            }
+            elements.Add(new ListboxGroupElement
+                { Text = _fileList.ElementAt(i).Key, VerticalAlignment = VerticalAlignment.Center });
+
             lists.Add(new ListboxGroup
             {
-                Elements =
-                [ new ListboxGroupElement { Icon = _active.Look.DiskIcons[iconIndex] },
-                  new ListboxGroupElement { Text = _fileList.ElementAt(i).Key, VerticalAlignment = VerticalAlignment.Center } ],
-                Height = Images.GetImageHeight(_active.Look.DiskIcons[0], _active)
+                Elements = elements,
+                Height = _active?.Look.DiskIcons is { Length: > 0 } icons
+                    ? Images.GetImageHeight(icons[0], _active)
+                    : 32
             });
         }
         return lists;

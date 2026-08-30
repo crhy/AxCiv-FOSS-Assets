@@ -1,18 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <TargetFramework>net9.0-android</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>bin/Release/net9.0-android</OutputPath>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="/home/rhy/Projects/Civ2-clone/Model/Model.csproj" />
-    <ProjectReference Include="/home/rhy/Projects/Civ2-clone/Model/Core/Core.csproj" />
-    <ProjectReference Include="/home/rhy/Projects/Civ2-clone/Model/Interfaces/Interfaces.csproj" />
-    <ProjectReference Include="/home/rhy/Projects/Civ2-clone/Model/Rules/Rules.csproj" />
-  </ItemGroup>
-  <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>Civ2engine</RootNamespace>
     <Nullable>enable</Nullable>
@@ -52,5 +39,14 @@
     <None Update="Scripts\default.ai.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+    <Folder Include="src\Improvements\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>
 </Project>

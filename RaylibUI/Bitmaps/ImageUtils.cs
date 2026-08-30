@@ -123,7 +123,7 @@ public static class ImageUtils
     /// <param name="centerImage">Image to place in centre of dialog</param>
     /// <param name="noWallpaper">true to not draw inner wallpaper defaults to false</param>
     /// <param name="statusPanel">true to draw status panel-style background</param>
-    public static Texture2D? PaintDialogBase(IUserInterface active, int width, int height, Padding padding, Image? centerImage = null, bool noWallpaper = false, bool statusPanel = false, bool ToTStatusPanelLayout = false)
+    public static Texture2D? PaintDialogBase(IUserInterface? active, int width, int height, Padding padding, Image? centerImage = null, bool noWallpaper = false, bool statusPanel = false, bool ToTStatusPanelLayout = false)
     {
         // Outer wallpaper
         var image = Image.GenColor(width, height, new Color(0, 0, 0, 0));

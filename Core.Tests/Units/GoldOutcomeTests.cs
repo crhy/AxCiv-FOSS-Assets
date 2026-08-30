@@ -38,7 +38,7 @@ public class GoldOutcomeTests
     }
 
     [Fact]
-    public void ScrollsOutcome_GrantsFirstUnknownAdvance()
+    public void ScrollsOutcome_ReturnsFirstUnknownAdvanceWithoutApplyingItDirectly()
     {
         var unit = CreateUnit(owner: new Civilization { Advances = [true, false, false] });
 
@@ -47,7 +47,21 @@ public class GoldOutcomeTests
         Assert.True(result.Success);
         Assert.Equal("Scrolls", result.OutcomeType);
         Assert.Equal(1, result.AdvanceIndex);
-        Assert.True(unit.Owner.Advances[1]);
+        Assert.False(unit.Owner.Advances[1]);
+    }
+
+    [Fact]
+    public void GoodyHutScrolls_OnlySelectsEligibleResearch()
+    {
+        var unit = CreateUnit(owner: new Civilization { Advances = [true, false, false, false] });
+        var hut = new GoodyHut([new ScrollsOutcome()], new Random(1));
+
+        var result = hut.Trigger(unit, [2]);
+
+        Assert.True(result.Success);
+        Assert.Equal(2, result.AdvanceIndex);
+        Assert.False(unit.Owner.Advances[1]);
+        Assert.False(unit.Owner.Advances[2]);
     }
 
     [Fact]

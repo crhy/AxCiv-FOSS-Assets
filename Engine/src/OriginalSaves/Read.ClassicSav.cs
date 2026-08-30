@@ -11,7 +11,6 @@ using Model.Core;
 using Model.Core.Advances;
 using Model.Core.Cities;
 using Model.Core.Mapping;
-using Raylib_CSharp.Geometry;
 using System;
 using System.Collections.Generic;
 using System.IO;
