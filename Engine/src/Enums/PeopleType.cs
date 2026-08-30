@@ -2,10 +2,13 @@
 {
     public enum PeopleType
     {
-        Aristocrat = 0,
-        Worker = 2,
+        Happy = 0,
+        Aristocrat = Happy,
+        Content = 2,
+        Worker = Content,
         Unhappy = 4,
-        Anarchy = 6,
+        Angry = 6,
+        Anarchy = Angry,
         Elvis = 8,
         Taxman = 9,
         Scientist = 10

@@ -64,7 +64,8 @@ namespace Civ2engine
                     }
                 }
 
-                if (city.UnhappyCitizens > 0)
+                var happiness = city.CalculateHappiness(game);
+                if (happiness.UnhappyCitizens > 0)
                 {
                     if (city.WeLoveKingDay)
                     {
@@ -72,7 +73,7 @@ namespace Civ2engine
                         city.WeLoveKingDay = false;
                     }
 
-                    if (city.UnhappyCitizens > city.HappyCitizens)
+                    if (happiness.IsInDisorder)
                     {
                         player.CivilDisorder(city);
                         city.CivilDisorder = true;
@@ -94,7 +95,7 @@ namespace Civ2engine
                         player.OrderRestored(city);
                     }
 
-                    if (city.HappyCitizens >= city.Size - city.UnhappyCitizens - city.HappyCitizens)
+                    if (happiness.CanCelebrate(city.Size))
                     {
                         if (!city.WeLoveKingDay)
                         {

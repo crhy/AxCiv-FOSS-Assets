@@ -33,7 +33,13 @@ public static class CityResourcesExtensions
 
     public static int GetLuxury(this City city)
     {
-        return (int)(city.GetBaseLuxury() * city.GetMultiplier(Effects.LuxMultiplier));
+        return city.GetLuxury(0);
+    }
+
+    public static int GetLuxury(this City city, int extraBaseLuxury)
+    {
+        return (int)((city.GetBaseLuxury() + extraBaseLuxury) *
+                     city.GetMultiplier(Effects.LuxMultiplier));
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ public class CityCitizensBox : BaseControl
 
     public override void OnResize()
     {
+        var people = _city.GetPeopleTypes(_cityWindow.CurrentGameScreen.Game);
         var pos = _props.CitizensBox.ScaleAll(_cityWindow.Scale);
         Location = new(_cityWindow.LayoutPadding.Left + pos.X, _cityWindow.LayoutPadding.Top + pos.Y);
         Width = (int)pos.Width;
@@ -60,7 +61,7 @@ public class CityCitizensBox : BaseControl
         {
             if (i < _specialistsStart)
             {
-                _citizenIndex[i] = 2 + i % 2;   // show just workers for now
+                _citizenIndex[i] = (int)people[i] + i % 2;
             }
             _icons[i].Image = [_active.PicSources["people"][_citizenIndex[i] + 11 * _epoch]];
 

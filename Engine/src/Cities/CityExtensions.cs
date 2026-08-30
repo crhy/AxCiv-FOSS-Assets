@@ -84,6 +84,7 @@ namespace Civ2engine
 
 
             city.Pollution = CalculatePollution(city);
+            city.CalculateHappiness(game);
         }
 
         private static int CalculatePollution(City city)
@@ -354,65 +355,6 @@ namespace Civ2engine
         {
             var baseLevel = rules.Governments[city.Owner.Government].Level;
             return city.WeLoveKingDay ? baseLevel + 1 : baseLevel;
-        }
-
-        public static PeopleType[] GetPeopleTypes(this City city)
-        {
-            var size = city.Size;
-            var people = new PeopleType[size];
-            // Unhappy
-            int additUnhappy = size - 6; // Without units & improvements present, 6 people are content
-            additUnhappy -=
-                Math.Min(city.Location.UnitsHere.Count, 3); // Each new unit in city -> 1 less unhappy (up to 3 max)
-
-            var contentImprovements = city.Improvements.Where(i => i.Effects.ContainsKey(Effects.ContentFace));
-
-            additUnhappy -= contentImprovements.Sum(i => i.Effects.GetValueOrDefault(Effects.ContentFace));
-            // TODO: Adjustments to colosseum & cathedral for Tech
-            // if (city.Improvements.Any(impr => impr.Type == ImprovementType.Temple)) additUnhappy -= 2;
-            // if (city.Improvements.Any(impr => impr.Type == ImprovementType.Colosseum)) additUnhappy -= 3;
-            // if (city.Improvements.Any(impr => impr.Type == ImprovementType.Cathedral)) additUnhappy -= 3;
-            
-            // Aristocrats
-            int additArist = 0;
-            switch (size + 1 - city.WorkedTiles.Count) // Populating aristocrats based on workers removed
-            {
-                case 1:
-                    additArist += 1;
-                    break;
-                case 2:
-                case 3:
-                    additArist += 3;
-                    break;
-                case 4:
-                case 5:
-                case 6:
-                    additArist += 4;
-                    break;
-                case 7:
-                    additArist += 5;
-                    break;
-                case 8:
-                case 9:
-                    additArist += 6;
-                    break;
-                case 10:
-                    additArist += 7;
-                    break;
-                case 11:
-                    additArist += 8;
-                    break;
-                default: break;
-            }
-
-            // Elvis
-            int additElvis = size + 1 - city.WorkedTiles.Count; // No of elvis = no of workers removed
-            // Populate
-            for (int i = 0; i < size; i++) people[i] = PeopleType.Worker;
-            for (int i = 0; i < additUnhappy; i++) people[size - 1 - i] = PeopleType.Unhappy;
-            for (int i = 0; i < additArist; i++) people[i] = PeopleType.Aristocrat;
-            for (int i = 0; i < additElvis; i++) people[size - 1 - i] = PeopleType.Elvis;
-            return people;
         }
 
         public static bool IsNextToOcean(this City city) =>

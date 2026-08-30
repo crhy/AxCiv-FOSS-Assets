@@ -16,7 +16,7 @@ civ.getImprovement(2).Effects.Add(civ.core.Effects.Veteran, civ.core.UnitDomain.
 civ.getImprovement(3).Effects.Add(civ.core.Effects.FoodStorage, 50)
 
 --Temple,                   4,  1,    Cer,
-civ.getImprovement(4).Effects.Add(civ.core.Effects.ContentFace, 2)
+civ.getImprovement(4).Effects.Add(civ.core.Effects.ContentFace, 1)
 --MarketPlace,              8,  1,    Cur,
 civ.getImprovement(5).Effects.Add(civ.core.Effects.TaxMultiplier, 50)
 civ.getImprovement(5).Effects.Add(civ.core.Effects.LuxMultiplier, 50)
@@ -31,11 +31,13 @@ civ.getImprovement(8).Effects.Add(civ.core.Effects.Walled, 200);
 civ.getImprovement(10).Effects.Add(civ.core.Effects.TaxMultiplier, 50)
 civ.getImprovement(10).Effects.Add(civ.core.Effects.LuxMultiplier, 50)
 --Cathedral,                12, 3,    MT,
+civ.getImprovement(11).Effects.Add(civ.core.Effects.ContentFace, 3)
 --University,               16, 3,    Uni,
 civ.getImprovement(12).Effects.Add(civ.core.Effects.ScienceMultiplier, 50)
 --Mass Transit,             16, 4,    MP,
 civ.getImprovement(13).Effects.Add(civ.core.Effects.EliminatePopulationPollution, 1)
 --Colosseum,                10, 4,    Cst,
+civ.getImprovement(14).Effects.Add(civ.core.Effects.ContentFace, 3)
 --Factory,                  20, 4,    Ind,
 --Manufacturing Plant,      32, 6,    Rob,
 --SDI Defense,              20, 4,    Las,
