@@ -342,7 +342,8 @@ public class GameScreen : BaseScreen
                         Text = $"{unit.Name}{(unit.Veteran ? " (Veteran)" : "")}  " +
                                $"HP {unit.RemainingHitpoints}/{unit.HitpointsBase}  " +
                                $"Moves {unit.MovePoints / (decimal)movementMultiplier:0.##}/" +
-                               $"{unit.MaxMovePoints / (decimal)movementMultiplier:0.##}",
+                               $"{unit.MaxMovePoints / (decimal)movementMultiplier:0.##}  " +
+                               $"Order: {(unit.Order == (int)OrderType.NoOrders ? "None" : ((OrderType)unit.Order).ToString())}",
                         VerticalAlignment = VerticalAlignment.Center
                     }
                 ],
