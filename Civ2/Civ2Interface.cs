@@ -532,7 +532,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
 
     public IImageSource? GetImprovementImage(Improvement improvement, int firstWonderIndex)
     {
-        var fossArtImage = GetFossArtImage(improvement.IsWonder ? "Wonders" : "Improvements", improvement.Name);
+        var fossArtImage = GetFossArtIcon(improvement.IsWonder ? "Wonders" : "Improvements", improvement.Name);
         if (fossArtImage != null)
         {
             return fossArtImage;
@@ -563,7 +563,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
 
     public IImageSource? GetAdvanceImage(Advance advance)
     {
-        var fossArtImage = GetFossArtImage("Advances", advance.Name);
+        var fossArtImage = GetFossArtIcon("Advances", advance.Name);
         if (fossArtImage != null)
         {
             return fossArtImage;
@@ -689,6 +689,14 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         }
 
         return null;
+    }
+
+    private static IImageSource? GetFossArtIcon(string category, string title)
+    {
+        // Civ II's gameplay icons are compact 36x20 cards. Keep those separate from
+        // the square, high-resolution FOSS paintings used by the Civilopedia.
+        return GetFossArtImage(Path.Combine("Icons", category), title)
+               ?? GetFossArtImage(category, title);
     }
 
     private static IEnumerable<string> GetFossArtCategoryPaths(string category)
