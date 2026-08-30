@@ -17,3 +17,13 @@ Generated with OpenAI ImageGen from this art direction:
 > mask and a ritual flame, a dark teal-to-ochre field, strong silhouette,
 > limited painted-pixel palette, brass highlights, and no text or copied game
 > artwork, designed to remain legible at 36x20 pixels.
+
+## rhYciv application icon
+
+`../rhyciv-app-icon.png` was generated with the built-in OpenAI ImageGen workflow
+from this art direction:
+
+> An original open-source historical strategy-game emblem: a bronze heraldic
+> shield containing a blue-and-green globe and gold compass star, with a bold
+> silhouette readable at 32x32 pixels, transparent background, no text, no
+> trademark, and no resemblance to an existing game logo.

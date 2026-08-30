@@ -390,7 +390,7 @@ public class MapControl : BaseControl
             animation.Draw(animation.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
         }
 
-        DrawUnitPathPreview(paddedLoc);
+        DrawPathPreview(paddedLoc);
 
         if (_backgroundImage != null)
             Graphics.DrawTextureEx(_backgroundImage.Value, Location, 0f, 1f, Color.White);
@@ -509,28 +509,74 @@ public class MapControl : BaseControl
         }
     }
 
-    private void DrawUnitPathPreview(Vector2 paddedLocation)
+    private void DrawPathPreview(Vector2 paddedLocation)
     {
-        if (!IsShiftDown() || _gameScreen.Player.ActiveUnit is not { } unit ||
-            GetTileAtMousePosition() is not { } destination || destination == unit.CurrentLocation)
+        if (!IsShiftDown() || GetTileAtMousePosition() is not { } destination)
         {
             return;
         }
 
-        var path = Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
-            unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl);
+        if (_gameScreen.ActiveMode == _gameScreen.Moving && _gameScreen.Player.ActiveUnit is { } unit)
+        {
+            if (destination == unit.CurrentLocation)
+            {
+                return;
+            }
+
+            var unitPath = Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
+                unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl);
+            DrawPath(unit.CurrentLocation, unitPath, paddedLocation, Color.White);
+            return;
+        }
+
+        if (_gameScreen.Player.ActiveTile.CityHere is not { } city)
+        {
+            return;
+        }
+
+        if (destination == city.Location)
+        {
+            foreach (var route in city.TradeRoutes.Take(3))
+            {
+                if (route.Destination < 0 || route.Destination >= _gameScreen.Game.AllCities.Count)
+                {
+                    continue;
+                }
+
+                var partner = _gameScreen.Game.AllCities[route.Destination];
+                if (partner.Location.Map != city.Location.Map)
+                {
+                    continue;
+                }
+
+                var tradePath = Path.CalculatePathBetween(_gameScreen.Game, city.Location, partner.Location,
+                    UnitGas.Ground, _gameScreen.Game.Rules.Cosmic.MovementMultiplier, city.Owner,
+                    alpine: false, ignoreZoc: true, mustBeVisible: false);
+                DrawPath(city.Location, tradePath, paddedLocation, new Color(255, 223, 79, 255));
+            }
+            return;
+        }
+
+        var roadPath = Path.CalculatePathBetween(_gameScreen.Game, city.Location, destination,
+            UnitGas.Ground, _gameScreen.Game.Rules.Cosmic.MovementMultiplier, city.Owner,
+            alpine: false, ignoreZoc: true);
+        DrawPath(city.Location, roadPath, paddedLocation, new Color(79, 223, 255, 255));
+    }
+
+    private void DrawPath(Tile start, Path? path, Vector2 paddedLocation, Color color)
+    {
         if (path == null)
         {
             return;
         }
 
         var dimensions = _gameScreen.TileCache.GetDimensions(_gameScreen.CurrentMap, _gameScreen.Zoom);
-        var previous = TileCenter(unit.CurrentLocation, dimensions) + paddedLocation;
+        var previous = TileCenter(start, dimensions) + paddedLocation;
         foreach (var tile in path.Tiles)
         {
             var next = TileCenter(tile, dimensions) + paddedLocation;
             Graphics.DrawLineEx(previous, next, 3f, Color.Black);
-            Graphics.DrawLineEx(previous, next, 1f, Color.White);
+            Graphics.DrawLineEx(previous, next, 1f, color);
             previous = next;
         }
     }

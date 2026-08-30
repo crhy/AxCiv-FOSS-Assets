@@ -17,8 +17,8 @@ switch.
 | 4 | Correct specialist click bounds | Implemented by per-citizen hit boxes. |
 | 5 | Game turn in sidebar | Implemented. |
 | 6 | Exact research progress in Science Advisor | Implemented as current beakers / required beakers. |
-| 7 | CD track looping/progress | Native replacement: rhYciv does not use Civ II CD audio. Playlist progress remains future media-player work. |
-| 8 | Game icon executable fix | Native replacement: no CIV2.EXE icon patch is needed; branded application packaging remains release work. |
+| 7 | CD track looping/progress | Native replacement implemented: streamed menu music loops reliably and shows track elapsed/total progress without CD dependencies. |
+| 8 | Game icon executable fix | Native replacement implemented: the Raylib window and copied release asset use an original FOSS-safe rhYciv application icon. |
 | 9 | Reset city-name prompts on new game | Native by construction: every new Game owns a fresh city-name sequence. |
 | 10 | Zero-maintenance buildings in Trade Advisor | Implemented. |
 | 11 | Supported-unit scrollbar and total | Implemented. |
@@ -45,12 +45,12 @@ switch.
 | 32 | Mass specialist changes | Implemented: Shift+wheel and Shift+click change every specialist. Specialist types and their output now survive saves. |
 | 33 | Suppress simple popups into map overlay | Pending a native notification overlay and configurable classification. |
 | 34 | Correct proprietary portrait/throne DLLs | Not applicable and intentionally not distributed; rhYciv uses replacement FOSS art. |
-| 35 | Runtime color correction | Pending native shader controls for gamma/saturation/brightness. |
+| 35 | Runtime color correction | Implemented with a full-window shader and persistent brightness, saturation, and gamma controls. |
 | 36 | Shift+right-click mass move | Implemented for eligible units of the active unit's type. |
 | 37 | Foreign Minister gold display | Pending the completed native Foreign Minister screen. |
 | 38 | Alternate Arrange Windows layouts | Native replacement: the single Raylib window responds to arbitrary window sizes and panel layouts. |
-| 39 | Unit and city-trade PathLines | Unit movement PathLines are implemented with Shift-hover; qualified-road and trade-route PathLines remain. |
-| 40 | Dye/copper demand bug fix | Managed code cannot read an uninitialized native variable; exact Civ II supply/demand parity remains under city-economy work. |
+| 39 | Unit and city-trade PathLines | Implemented: Shift-hover previews unit movement; with a city selected it previews candidate road paths, and hovering that city draws its active trade routes. |
+| 40 | Dye/copper demand bug fix | Native by construction: managed demand data is initialized deterministically, so the executable garbage-value bug cannot occur; broader formula parity is tracked separately. |
 | 41 | Improved sentry shading | Implemented through full-color-shape grayscale shading rather than a silhouette. |
 | 42 | U toggles all ground units in a stack | Implemented in the native unload command, including transport membership where applicable. |
 | 43 | New-game zoom defaults to 1:1 | Implemented (`Zoom = 0`). |
@@ -66,5 +66,5 @@ switch.
 
 ## Remaining compatibility work
 
-The incomplete applicable items are 7, 8, 14–15, 26, 31, 33, 35, 37, and 39–40.
+The incomplete applicable items are 14–15, 26, 31, 33, and 37.
 They should remain visible in the GitHub UI-additions tracking issue until each row is verified in a running game.

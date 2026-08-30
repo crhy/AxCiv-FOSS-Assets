@@ -151,8 +151,32 @@ public class MainMenu : BaseScreen
             if (titleImg == null)
                 panel.Draw();
         }
+
+        DrawMusicProgress(screenWidth, screenHeight);
         
         base.Draw(pulse);
+    }
+
+    private void DrawMusicProgress(int screenWidth, int screenHeight)
+    {
+        if (_sndMenuLoop is not { IsMusicLoaded: true } music)
+        {
+            return;
+        }
+
+        const int width = 250;
+        const int height = 24;
+        var x = screenWidth - width - 8;
+        var y = screenHeight - height - 8;
+        Graphics.DrawRectangle(x, y, width, height, new Color(0, 0, 0, 190));
+        Graphics.DrawRectangle(x + 2, y + height - 5, width - 4, 3, new Color(63, 63, 63, 255));
+        Graphics.DrawRectangle(x + 2, y + height - 5,
+            (int)((width - 4) * music.MusicProgress), 3, new Color(255, 223, 79, 255));
+
+        var elapsed = TimeSpan.FromSeconds(music.MusicElapsed);
+        var duration = TimeSpan.FromSeconds(music.MusicDuration);
+        var label = $"♪ {music.DisplayName}  {elapsed:m\\:ss}/{duration:m\\:ss}";
+        Graphics.DrawText(label, x + 6, y + 3, 14, Color.White);
     }
 
     public override void InterfaceChanged(Sound soundManager)

@@ -28,8 +28,9 @@ does not yet include a complete standalone ruleset.
 - `Ctrl` + middle click: reset to 1:1 zoom
 - Middle click: center the map; middle drag: pan
 - Hold `Ctrl`: show quick information for the tile under the pointer
-- Hold `Shift`: preview the active unit's path
+- Hold `Shift`: preview the active unit path; with a city selected, preview road paths or its trade routes
 - `Shift` + right click: move eligible units of the active unit's type
+- `Ctrl` + `Alt` + arrows: adjust brightness/saturation; Page Up/Down adjusts gamma; Home resets
 - Mouse wheel: scroll lists and tax sliders; over a specialist it changes type
 - `Shift` + click/wheel on a specialist: change all specialists
 

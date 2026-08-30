@@ -34,9 +34,13 @@ public class SoundData : IDisposable
     public void Stop()
     {
         if (_rlSoundLoaded)
+        {
             _rlSound.Stop();
-        else if (_rlMusicLoaded)
-            _rlSound.Stop();
+        }
+        if (_rlMusicLoaded)
+        {
+            RlMusic.StopStream();
+        }
     }
 
     public void Play()
@@ -82,9 +86,17 @@ public class SoundData : IDisposable
     /// </summary>
     public void MusicUpdateCall()
     {
-        if (RlMusic.FrameCount > 0)
+        if (_rlMusicLoaded)
+        {
             RlMusic.UpdateStream();
+        }
     }
+
+    public bool IsMusicLoaded => _rlMusicLoaded;
+    public float MusicDuration => _rlMusicLoaded ? RlMusic.GetTimeLength() : 0;
+    public float MusicElapsed => _rlMusicLoaded ? RlMusic.GetTimePlayed() : 0;
+    public float MusicProgress => MusicDuration > 0 ? Math.Clamp(MusicElapsed / MusicDuration, 0, 1) : 0;
+    public string DisplayName => Path.GetFileNameWithoutExtension(PathFull);
 
 
     public bool ConvertAudioPcmU8ToPcmS16Le(string inputFilePath, string outputFilePath)
@@ -129,10 +141,14 @@ public class SoundData : IDisposable
 
     public void Dispose()
     {
-        if (_rlSoundLoaded || _rlSound.FrameCount > 0)
+        Stop();
+        if (_rlSoundLoaded)
         {
-            Stop();
             _rlSound.Unload();
+        }
+        if (_rlMusicLoaded)
+        {
+            RlMusic.UnloadStream();
         }
     }
 

@@ -22,6 +22,9 @@ namespace Civ2engine
         public static string[] SearchPaths { get; internal set; } = BuiltInSearchPaths;
 
         public static int TextureFilter { get; private set; }
+        public static float Brightness { get; private set; } = 1f;
+        public static float Saturation { get; private set; } = 1f;
+        public static float Gamma { get; private set; } = 1f;
 
         public static bool LoadConfigSettings()
         {
@@ -82,6 +85,22 @@ namespace Civ2engine
             }
 
             TextureFilter = root.TryGetProperty(nameof(TextureFilter), out var textureFilter) ? textureFilter.GetInt32() : 0;
+            Brightness = ReadCorrection(root, nameof(Brightness), 1f, 0.5f, 1.5f);
+            Saturation = ReadCorrection(root, nameof(Saturation), 1f, 0f, 2f);
+            Gamma = ReadCorrection(root, nameof(Gamma), 1f, 0.5f, 2f);
+        }
+
+        private static float ReadCorrection(JsonElement root, string property, float fallback, float minimum, float maximum) =>
+            root.TryGetProperty(property, out var element) && element.TryGetSingle(out var value)
+                ? Math.Clamp(value, minimum, maximum)
+                : fallback;
+
+        public static void SetColorCorrection(float brightness, float saturation, float gamma)
+        {
+            Brightness = Math.Clamp(brightness, 0.5f, 1.5f);
+            Saturation = Math.Clamp(saturation, 0f, 2f);
+            Gamma = Math.Clamp(gamma, 0.5f, 2f);
+            Save();
         }
 
         public static bool IsValidRoot(string? civ2Path)
@@ -142,6 +161,10 @@ namespace Civ2engine
                 writer.WriteStringValue(searchPath);
             }
             writer.WriteEndArray();
+            writer.WriteNumber(nameof(TextureFilter), TextureFilter);
+            writer.WriteNumber(nameof(Brightness), Brightness);
+            writer.WriteNumber(nameof(Saturation), Saturation);
+            writer.WriteNumber(nameof(Gamma), Gamma);
             writer.WriteEndObject();
             writer.Flush();
         }
