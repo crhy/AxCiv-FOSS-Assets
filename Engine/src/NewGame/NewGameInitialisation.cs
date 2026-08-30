@@ -17,7 +17,7 @@ namespace Civ2engine.NewGame
         {
             var settlerType = config.Rules.UnitTypes[(int) UnitType.Settlers];
 
-            var units = civilizations.Skip(1).Select(c => new
+            var starts = civilizations.Skip(1).Select(c => new
                 {
                     Civ = c, DefaultStart = config.StartPositions != null ? GetDefaultStart(config, c, maps[0]) : null
                 })
@@ -25,19 +25,10 @@ namespace Civ2engine.NewGame
                 .Select(c => new
                 {
                     c.Civ, StartLocation = c.DefaultStart ?? GetStartLoc(c.Civ, config, maps[0])
-                }).Select((c, id) => new Unit
-                {
-                    Counter = 0,
-                    Dead = false,
-                    Id = id,
-                    Order = (int)OrderType.NoOrders,
-                    Owner = c.Civ,
-                    Veteran = false,
-                    X = c.StartLocation.X,
-                    Y = c.StartLocation.Y,
-                    CurrentLocation = c.StartLocation,
-                    TypeDefinition = settlerType
-                }).ToList();
+                })
+                .Select(c => (c.Civ, c.StartLocation))
+                .ToList();
+            var units = CreateStartingUnits(starts, settlerType, config.PlayerCiv.Id);
             units.ForEach(u =>
             {
                 u.Owner.Units.Add(u);
@@ -46,6 +37,38 @@ namespace Civ2engine.NewGame
             maps[0].WhichCivsMapShown = config.PlayerCiv.Id;
 
             return new Game(maps, config.Rules, civilizations, new Options(config), paths, config.DifficultyLevel, config.BarbarianActivity);
+        }
+
+        internal static List<Unit> CreateStartingUnits(
+            IEnumerable<(Civilization Civ, Tile StartLocation)> starts,
+            UnitDefinition settlerType,
+            int playerCivilizationId)
+        {
+            var units = new List<Unit>();
+            foreach (var (civilization, startLocation) in starts)
+            {
+                // The local Civ II baseline starts the human tribe with two settlers
+                // stacked at its selected start. AI bonuses remain a difficulty concern,
+                // not part of the human default.
+                var numberOfSettlers = civilization.Id == playerCivilizationId ? 2 : 1;
+                for (var settler = 0; settler < numberOfSettlers; settler++)
+                {
+                    units.Add(new Unit
+                    {
+                        Counter = 0,
+                        Dead = false,
+                        Id = units.Count,
+                        Order = (int)OrderType.NoOrders,
+                        Owner = civilization,
+                        Veteran = false,
+                        X = startLocation.X,
+                        Y = startLocation.Y,
+                        CurrentLocation = startLocation,
+                        TypeDefinition = settlerType
+                    });
+                }
+            }
+            return units;
         }
 
         private static Tile? GetDefaultStart(GameInitializationConfig config, Civilization civilization, Map map)
