@@ -6,7 +6,6 @@ using Model.InterfaceActions;
 using RaylibUtils;
 using Civ2;
 using Model.Controls;
-using Raylib_CSharp.Windowing;
 using Raylib_CSharp.Rendering;
 using Raylib_CSharp.Colors;
 using RaylibUI.BasicTypes.Controls;
@@ -127,8 +126,8 @@ public class MainMenu : BaseScreen
     {
         _sndMenuLoop?.MusicUpdateCall();
         
-        var screenWidth = Window.GetScreenWidth();
-        var screenHeight = Window.GetScreenHeight();
+        var screenWidth = DisplayScale.Width;
+        var screenHeight = DisplayScale.Height;
 
         var titleImg = MainWindow.ActiveInterface.ScenTitleImage;
         if (titleImg != null)

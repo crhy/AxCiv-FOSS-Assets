@@ -18,7 +18,6 @@ using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
 using RaylibUI.Controls;
 using Raylib_CSharp.Collision;
-using Raylib_CSharp.Windowing;
 using Path = Civ2engine.Units.Path;
 
 namespace RaylibUI.RunGame.GameControls.Mapping;
@@ -128,6 +127,7 @@ public class MapControl : BaseControl
         base.OnResize();
 
         SetDimensions();
+        NextView();
         //ShowTile(_selectedTile);
     }
 
@@ -159,6 +159,17 @@ public class MapControl : BaseControl
 
         _viewWidth = Width - _padding.Left - _padding.Right;
         _viewHeight = Height - _padding.Top - _padding.Bottom;
+    }
+
+    public void RefreshResolution()
+    {
+        if (Math.Abs(_currentView.RenderScale - DisplayScale.Factor) <= 0.001f)
+        {
+            return;
+        }
+
+        ForceRedraw = true;
+        NextView();
     }
 
     
@@ -347,7 +358,7 @@ public class MapControl : BaseControl
         }
 
         var paddedLoc = new Vector2(Location.X + _padding.Left, Location.Y + _padding.Top);
-        Graphics.DrawTextureEx(_currentView.BaseImage, paddedLoc, 0f, 1f,
+        Graphics.DrawTextureEx(_currentView.BaseImage, paddedLoc, 0f, 1f / _currentView.RenderScale,
             Color.White);
 
         var cityDetails = new List<CityData>();
@@ -497,8 +508,8 @@ public class MapControl : BaseControl
         var lineHeight = 20;
         var width = lines.Max(line => TextManager.MeasureTextEx(_active.Look.DefaultFont, line, fontSize, 1).X) + 18;
         var mouse = Input.GetMousePosition();
-        var x = Math.Min(mouse.X + 14, Window.GetScreenWidth() - width - 6);
-        var y = Math.Min(mouse.Y + 14, Window.GetScreenHeight() - lines.Count * lineHeight - 12);
+        var x = Math.Min(mouse.X + 14, DisplayScale.Width - width - 6);
+        var y = Math.Min(mouse.Y + 14, DisplayScale.Height - lines.Count * lineHeight - 12);
         Graphics.DrawRectangle((int)x, (int)y, (int)width, lines.Count * lineHeight + 8,
             new Color(255, 255, 224, 245));
         Graphics.DrawRectangleLines((int)x, (int)y, (int)width, lines.Count * lineHeight + 8, Color.Black);

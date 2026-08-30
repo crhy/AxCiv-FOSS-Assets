@@ -61,6 +61,7 @@ public abstract class BaseGameView : IGameView
         Location = location;
         ViewWidth = viewWidth;
         ViewHeight = viewHeight;
+        RenderScale = DisplayScale.Factor;
 
         var map = location.Map;
         Dimensions = _gameScreen.TileCache.GetDimensions(map, gameScreen.Zoom);
@@ -97,7 +98,10 @@ public abstract class BaseGameView : IGameView
                 CalculateOffsets(null, location, Dimensions, force: true);
             }
 
-            var image = Image.GenColor(ViewWidth, ViewHeight, Color.Black);
+            var image = Image.GenColor(
+                Math.Max(1, (int)MathF.Ceiling(ViewWidth * RenderScale)),
+                Math.Max(1, (int)MathF.Ceiling(ViewHeight * RenderScale)),
+                Color.Black);
             var dim = _gameScreen.TileCache.GetDimensions(map, gameScreen.Zoom);
             var ypos = -_offsets.Y;
 
@@ -143,39 +147,25 @@ public abstract class BaseGameView : IGameView
                             if (tile.IsVisible(civilizationId) || map.MapRevealed)
                             {
                                 var tileDetails = _gameScreen.TileCache.GetTileDetails(tile, civilizationId);
-                                if (gameScreen.Zoom == 0)
-                                {
-                                    image.Draw(tileDetails.Image, MapImage.TileRec,
-                                        new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight),
-                                        Color.White);
-                                }
-                                else
-                                {
-                                    var resizedImg = tileDetails.Image.Copy();
-                                    if (Settings.TextureFilter == 0)
-                                    {
-                                        resizedImg.ResizeNN(resizedImg.Width.ZoomScale(gameScreen.Zoom),
-                                            resizedImg.Height.ZoomScale(gameScreen.Zoom));
-                                    }
-                                    else
-                                    {
-                                        resizedImg.Resize(resizedImg.Width.ZoomScale(gameScreen.Zoom),
-                                            resizedImg.Height.ZoomScale(gameScreen.Zoom));
-                                    }
-                                    image.Draw(resizedImg, MapImage.TileRec.ZoomScale(gameScreen.Zoom),
-                                        new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight),
-                                        Color.White);
-                                }
+                                image.Draw(tileDetails.Image,
+                                    new Rectangle(0, 0, tileDetails.Image.Width, tileDetails.Image.Height),
+                                    ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight)),
+                                    Color.White);
 
                                 if (_gameScreen.ShowGrid)
                                 {
-                                    image.Draw(Images.ExtractBitmap(activeInterface.PicSources["gridlines"][0]), MapImage.TileRec.ZoomScale(gameScreen.Zoom), new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight),
+                                    var grid = Images.ExtractBitmap(activeInterface.PicSources["gridlines"][0]);
+                                    image.Draw(grid, new Rectangle(0, 0, grid.Width, grid.Height),
+                                        ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight)),
                                         Color.White);
 
                                     // Show coords for debugging
                                     var text = $"({2 * col % (2 * map.XDim) + row % 2},{row})";
                                     var meas = TextManager.MeasureTextEx(Font.GetDefault(), text, 10, 0f);
-                                    image.DrawText(text, (int)xpos + dim.TileWidth / 2 - (int)meas.X / 2, (int)ypos + dim.TileHeight / 2 - (int)meas.Y / 2, 10, Color.Yellow);
+                                    image.DrawText(text,
+                                        (int)((xpos + dim.TileWidth / 2f - meas.X / 2f) * RenderScale),
+                                        (int)((ypos + dim.TileHeight / 2f - meas.Y / 2f) * RenderScale),
+                                        Math.Max(10, (int)(10 * RenderScale)), Color.Yellow);
                                 }
 
                                 var posVector = new Vector2(xpos, ypos);
@@ -195,6 +185,7 @@ public abstract class BaseGameView : IGameView
             }
 
             this.BaseImage = Texture2D.LoadFromImage(image);
+            this.BaseImage.SetFilter(TextureFilter.Bilinear);
             this.Elements = elements.ToArray();
 
             image.Unload();
@@ -346,10 +337,17 @@ public abstract class BaseGameView : IGameView
 
     public Texture2D BaseImage { get; set; }
 
+    private Rectangle ScaleRectangle(Rectangle rectangle) => new(
+        rectangle.X * RenderScale,
+        rectangle.Y * RenderScale,
+        rectangle.Width * RenderScale,
+        rectangle.Height * RenderScale);
+
     private bool IsInSameArea(IGameView previousView, Tile location, MapDimensions dimensions, bool force = false)
     {
         if (previousView.Location.Map != location.Map) return false;
         if (previousView.ViewHeight != ViewHeight || previousView.ViewWidth != ViewWidth) return false;
+        if (Math.Abs(previousView.RenderScale - RenderScale) > 0.001f) return false;
 
         return !CalculateOffsets(previousView, location, dimensions, force);
     }
@@ -461,6 +459,7 @@ public abstract class BaseGameView : IGameView
     public IEnumerable<IViewElement> CurrentAnimations => _animations[_currentIndex];
     public int ViewHeight { get; }
     public int ViewWidth { get; set; }
+    public float RenderScale { get; }
 
     public bool Finished()
     {

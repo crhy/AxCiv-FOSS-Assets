@@ -39,6 +39,7 @@ namespace RaylibUI
             Raylib.SetConfigFlags(ConfigFlags.Msaa4XHint| ConfigFlags.VSyncHint |
                                   ConfigFlags.ResizableWindow);
             Window.Init(1600, 900, "rhYciv");
+            DisplayScale.Update();
             var appIcon = Image.Load(AssetPaths.Resolve("FOSSart/rhyciv-app-icon.png"));
             Window.SetIcon(appIcon);
             appIcon.Unload();
@@ -80,7 +81,14 @@ namespace RaylibUI
 
             while (!Window.ShouldClose() && !_shouldClose)
             {
+                DisplayScale.Update();
                 var frameTime = Time.GetFrameTime();
+
+                if (Input.IsKeyPressed(KeyboardKey.F11))
+                {
+                    Window.ToggleBorderless();
+                    DisplayScale.Update();
+                }
 
                 for (int i = 0; i < _events.Count; i++)
                 {
@@ -100,7 +108,7 @@ namespace RaylibUI
                 {
                     EnsureColorTarget(screenWidth, screenHeight);
                     Graphics.BeginTextureMode(_colorTarget);
-                    DrawScene(pulse, screenHeight);
+                    DrawScene(pulse);
                     Graphics.EndTextureMode();
 
                     Graphics.BeginDrawing();
@@ -115,7 +123,7 @@ namespace RaylibUI
                 else
                 {
                     Graphics.BeginDrawing();
-                    DrawScene(pulse, screenHeight);
+                    DrawScene(pulse);
                     DrawColorCorrectionMessage();
                     Graphics.EndDrawing();
                 }
@@ -130,10 +138,12 @@ namespace RaylibUI
             ShutdownApp();
         }
 
-        private void DrawScene(bool pulse, int screenHeight)
+        private void DrawScene(bool pulse)
         {
+            Graphics.BeginMode2D(DisplayScale.Camera);
             _activeScreen.Draw(pulse);
-            Graphics.DrawText($"{Time.GetFPS()} FPS", 5, screenHeight - 20, 20, Color.Magenta);
+            Graphics.DrawText($"{Time.GetFPS()} FPS", 5, DisplayScale.Height - 20, 20, Color.Magenta);
+            Graphics.EndMode2D();
         }
 
         private static bool ColorCorrectionActive() =>
@@ -191,9 +201,11 @@ namespace RaylibUI
                 return;
             }
 
+            Graphics.BeginMode2D(DisplayScale.Camera);
             var width = _colorCorrectionMessage.Length * 10 + 20;
             Graphics.DrawRectangle(8, 8, width, 28, new Color(0, 0, 0, 210));
             Graphics.DrawText(_colorCorrectionMessage, 18, 13, 18, Color.White);
+            Graphics.EndMode2D();
         }
 
         private MainMenu SetupMainScreen()

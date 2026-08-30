@@ -5,7 +5,6 @@ using Model.Core;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
-using Raylib_CSharp.Windowing;
 using RaylibUI.BasicTypes;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.Controls;
@@ -31,8 +30,9 @@ public class CivDialog : DynamicSizingDialog
     public CivDialog(Main host, DialogElements dialog, Action<string, int, IList<bool>?, IDictionary<string, string>?> handleButtonClick) :
         base(host, DialogUtils.ReplacePlaceholders(dialog.Title, dialog.ReplaceStrings, dialog.ReplaceNumbers),
             dialog.Width == null ? host.ActiveInterface.DefaultDialogWidth : (int)(1.5 * dialog.Width),
-            dialog.X != null || dialog.Y != null ? new Point(dialog.X ?? 0 / Window.GetScreenWidth(),
-            dialog.Y ?? 0 / Window.GetScreenHeight()) : dialog.DialogPos)
+            dialog.X != null || dialog.Y != null ? new Point(
+                (dialog.X ?? 0) / DisplayScale.Width,
+                (dialog.Y ?? 0) / DisplayScale.Height) : dialog.DialogPos)
     {
         _active = host.ActiveInterface;
         _handleButtonClick = handleButtonClick;

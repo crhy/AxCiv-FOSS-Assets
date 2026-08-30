@@ -37,7 +37,13 @@ public static class TextureCache
         {
             var img = Images.ExtractBitmapData(source, activeInterface, civ).Image;
             Textures[key] = Texture2D.LoadFromImage(img);
-            Textures[key].SetFilter((TextureFilter)Settings.TextureFilter);
+            // Large FOSS sources are intentionally sampled down to Civ II's logical
+            // footprint. Bilinear filtering retains their detail; classic sprites
+            // retain the configured (normally nearest-neighbour) pixel-art filter.
+            var filter = img.Width >= 256 || img.Height >= 256
+                ? TextureFilter.Bilinear
+                : (TextureFilter)Settings.TextureFilter;
+            Textures[key].SetFilter(filter);
         }
         return Textures[key];
     }

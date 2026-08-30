@@ -17,6 +17,9 @@ namespace Civ2.ImageLoader
 {
     public static class TerrainLoader
     {
+        // A 2x map tile matches the physical pixel density of a 3840x2160 display
+        // while retaining Civ II's original 64x32 logical tile geometry.
+        private const int FossTerrainRenderScale = 2;
         private static readonly string[] FossTerrainNames =
         [
             "desert",
@@ -167,7 +170,8 @@ namespace Civ2.ImageLoader
                     continue;
                 }
 
-                replacement.Resize(terrain.TileWidth, terrain.TileHeight);
+                replacement.Resize(terrain.TileWidth * FossTerrainRenderScale,
+                    terrain.TileHeight * FossTerrainRenderScale);
                 ApplyOriginalTileTransparency(replacement,
                     Images.ExtractBitmap(terrain.BaseTiles[terrainIndex], active));
                 terrain.BaseTiles[terrainIndex] = new MemoryStorage(replacement,
@@ -213,7 +217,9 @@ namespace Civ2.ImageLoader
             {
                 for (var x = 0; x < replacement.Width; x++)
                 {
-                    if (originalTile.GetColor(x, y).A == 0)
+                    var sourceX = x * originalTile.Width / replacement.Width;
+                    var sourceY = y * originalTile.Height / replacement.Height;
+                    if (originalTile.GetColor(sourceX, sourceY).A == 0)
                     {
                         replacement.DrawPixel(x, y, Color.Blank);
                     }
@@ -224,15 +230,27 @@ namespace Civ2.ImageLoader
         private static DitherMap BuildDitherMaps(Image mask, IImageSource[] baseTiles, int offsetX, int offsetY,
             IImageSource terrainBlank)
         {
-            var sampleRect = new Rectangle(offsetX, offsetY, 32, 16);
             var totalTiles = baseTiles.Length + 1;
             var ditherMaps = new Image[totalTiles];
             for (var i = 0; i < baseTiles.Length; i++)
             {
-                ditherMaps[i] = Image.FromImage(Images.ExtractBitmap(baseTiles[i]), sampleRect);
-                ditherMaps[i].AlphaMask(mask);
+                var baseImage = Images.ExtractBitmap(baseTiles[i]);
+                var scaleX = baseImage.Width / 64f;
+                var scaleY = baseImage.Height / 32f;
+                var scaledSampleRect = new Rectangle(offsetX * scaleX, offsetY * scaleY,
+                    32 * scaleX, 16 * scaleY);
+                ditherMaps[i] = Image.FromImage(baseImage, scaledSampleRect);
+
+                var scaledMask = mask.Copy();
+                if (scaledMask.Width != ditherMaps[i].Width || scaledMask.Height != ditherMaps[i].Height)
+                {
+                    scaledMask.ResizeNN(ditherMaps[i].Width, ditherMaps[i].Height);
+                }
+                ditherMaps[i].AlphaMask(scaledMask);
+                scaledMask.Unload();
             }
 
+            var sampleRect = new Rectangle(offsetX, offsetY, 32, 16);
             ditherMaps[^1] = Image.FromImage(Images.ExtractBitmap(terrainBlank), sampleRect);
             ditherMaps[^1].AlphaMask(mask);
 

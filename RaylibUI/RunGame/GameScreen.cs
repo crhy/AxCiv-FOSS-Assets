@@ -9,7 +9,6 @@ using Model.Controls;
 using Model.Core.Cities;
 using Model.Core.Mapping;
 using Model.Core.Units;
-using Raylib_CSharp.Windowing;
 using Raylib_CSharp.Transformations;
 using RaylibUI.RunGame.Commands.Orders;
 using RaylibUI.RunGame.GameControls;
@@ -118,8 +117,8 @@ public class GameScreen : BaseScreen
             ActiveMode = Processing;
         }
         
-        _width = Window.GetScreenWidth();
-        _height = Window.GetScreenHeight();
+        _width = DisplayScale.Width;
+        _height = DisplayScale.Height;
         
         var menuHeight = _menu.GetPreferredHeight();
         
@@ -244,6 +243,7 @@ public class GameScreen : BaseScreen
         _height = height;
         GetPanelBounds(width, height);
         base.Resize(width, height);
+        _mapControl.RefreshResolution();
     }
 
     private void GetPanelBounds(int width, int height)
@@ -526,19 +526,19 @@ public class GameScreen : BaseScreen
     {
         _ToTPanelLayout = !_ToTPanelLayout;
         _minimapGlobe = _ToTPanelLayout;
-        Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+        Resize(DisplayScale.Width, DisplayScale.Height);
     }
 
     public void RemoveGlobe()
     {
         _minimapGlobe = false;
-        Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+        Resize(DisplayScale.Width, DisplayScale.Height);
     }
 
     public void ShowGlobe()
     {
         _minimapGlobe = true;
-        Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+        Resize(DisplayScale.Width, DisplayScale.Height);
     }
 
     public void ShowMapGrid()

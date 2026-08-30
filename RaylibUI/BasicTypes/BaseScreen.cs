@@ -2,7 +2,6 @@ using Model;
 using Raylib_CSharp;
 using Raylib_CSharp.Collision;
 using Raylib_CSharp.Interact;
-using Raylib_CSharp.Windowing;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.Controls;
 using System.Diagnostics;
@@ -15,10 +14,10 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     public override void Draw(bool pulse)
     {
         var layoutController = _dialogs.LastOrDefault(this);
-        var width = Window.GetScreenWidth();
-        var height = Window.GetScreenHeight();
+        var width = DisplayScale.Width;
+        var height = DisplayScale.Height;
 
-        if (_renderedWidth != width || _renderedHeight != height)
+        if (_renderedWidth != width || _renderedHeight != height || DisplayScale.Changed)
         {
             _renderedWidth = width;
             _renderedHeight = height;

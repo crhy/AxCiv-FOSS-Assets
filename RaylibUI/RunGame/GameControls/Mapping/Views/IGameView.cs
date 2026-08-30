@@ -14,6 +14,7 @@ public interface IGameView : IDisposable
     IEnumerable<IViewElement> CurrentAnimations { get; }
     int ViewHeight { get; }
     int ViewWidth { get; set; }
+    float RenderScale { get; }
     Vector2 Offsets { get; }
     int Xshift { get; }
     bool IsDefault { get;  }

@@ -22,8 +22,18 @@ On first launch, select a local Civilization II data directory containing
 `RULES.TXT`. The bundled FOSS artwork is used where replacements exist, but it
 does not yet include a complete standalone ruleset.
 
+### 4K and high-DPI rendering
+
+- The interface automatically scales from a stable 1920x1080 logical canvas when the window is enlarged on a high-resolution display.
+- Fonts, vector primitives, high-resolution FOSS units/icons, and the map backing render at native display density rather than being stretched from a 1080p frame.
+- Bundled FOSS terrain is composed at 128x64 per normal-zoom tile, retaining twice the detail of the original 64x32 map pipeline.
+- Press `F11` to toggle borderless desktop resolution. The mouse coordinate system scales with the display, so map interaction and dialogs retain their original layout.
+
+See [4K rendering](docs/4K-RENDERING.md) for implementation details and current asset limitations.
+
 ### Enhanced map controls
 
+- `F11`: toggle borderless desktop resolution
 - `Ctrl` + mouse wheel: zoom the map
 - `Ctrl` + middle click: reset to 1:1 zoom
 - Middle click: center the map; middle drag: pan

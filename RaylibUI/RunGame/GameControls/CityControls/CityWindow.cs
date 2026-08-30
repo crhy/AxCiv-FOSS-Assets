@@ -7,7 +7,6 @@ using Raylib_CSharp.Colors;
 using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
 using Raylib_CSharp.Transformations;
-using Raylib_CSharp.Windowing;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.Controls;
 using RaylibUtils;
@@ -123,12 +122,12 @@ public class CityWindow : BaseDialog
         _shrinkIcon.Click += (_, _) =>
         {
             _scale = Math.Max(_scale - _scaleDelta, _scaleMin);
-            Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+            Resize(DisplayScale.Width, DisplayScale.Height);
         };
         _expandIcon.Click += (_, _) =>
         {
             _scale = Math.Min(_scale + _scaleDelta, _scaleMax);
-            Resize(Window.GetScreenWidth(), Window.GetScreenHeight());
+            Resize(DisplayScale.Width, DisplayScale.Height);
         };
         Controls.Add(_shrinkIcon);
         Controls.Add(_expandIcon);

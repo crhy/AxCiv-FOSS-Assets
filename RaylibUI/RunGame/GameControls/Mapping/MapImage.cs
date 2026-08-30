@@ -70,20 +70,20 @@ public static class MapImage
             }
 
             // NW+N+NE tiles
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Coast[coastIndex[0], 0]), new Rectangle(0, 0, 32, 16),
-                new Rectangle(16, 0, 32, 16), Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[0], 0]),
+                new Rectangle(16, 0, 32, 16));
 
             // SW+S+SE tiles
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Coast[coastIndex[1], 1]), new Rectangle(0, 0, 32, 16),
-                new Rectangle(16, 16, 32, 16), Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[1], 1]),
+                new Rectangle(16, 16, 32, 16));
 
             // SW+W+NW tiles
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Coast[coastIndex[2], 2]), new Rectangle(0, 0, 32, 16),
-                new Rectangle(0, 8, 32, 16), Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[2], 2]),
+                new Rectangle(0, 8, 32, 16));
 
             // NE+E+SE tiles
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Coast[coastIndex[3], 3]), new Rectangle(0, 0, 32, 16),
-                new Rectangle(32, 8, 32, 16), Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[3], 3]),
+                new Rectangle(32, 8, 32, 16));
 
             // River mouth
             // If river is next to ocean, draw river mouth on this tile.
@@ -92,7 +92,7 @@ public static class MapImage
                 var neighbour = directNeighbours[index];
                 if (neighbour is { River: true })
                 {
-                    tilePic.Draw(Images.ExtractBitmap(terrainSet.RiverMouth[index]), TileRec, TileRec, Color.White);
+                    DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.RiverMouth[index]), TileRec);
                 }
             }
         }
@@ -111,8 +111,7 @@ public static class MapImage
                 increment *= 2;
             }
 
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.ImagesFor(tile.Type)[index]), TileRec,
-                TileRec, Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.ImagesFor(tile.Type)[index]), TileRec);
         }
 
         // Draw rivers
@@ -130,7 +129,7 @@ public static class MapImage
                 increment *= 2;
             }
 
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.River[index]), TileRec, TileRec, Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.River[index]), TileRec);
         }
 
         // Draw shield for grasslands
@@ -138,20 +137,19 @@ public static class MapImage
         {
             if (tile.HasShield)
             {
-                tilePic.Draw(Images.ExtractBitmap(terrainSet.GrasslandShield), TileRec, TileRec, Color.White);
+                DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.GrasslandShield), TileRec);
             }
         }
         else if (tile.Special != -1)
         {
             // Draw special resources if they exist
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Specials[tile.Special][(int)tile.Type]), TileRec, TileRec,
-                Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Specials[tile.Special][(int)tile.Type]), TileRec);
         }
 
         if(tile.HasGoodyHut)
         {
             // Add a goody hut if it exists on this tile.
-            tilePic.Draw(Images.ExtractBitmap(terrainSet.Huts), TileRec, TileRec, Color.White);
+            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Huts), TileRec);
         }    
 
         var tileDetails = new TileDetails { Image = tilePic };
@@ -189,14 +187,14 @@ public static class MapImage
                             {
                                 if (neighboringImprovement.Level < construct.Level)
                                 {
-                                    tilePic.Draw(Images.ExtractBitmap(graphics.Levels[neighboringImprovement.Level, index]),
-                                        TileRec, TileRec, Color.White);
+                                    DrawLayer(tilePic,
+                                        Images.ExtractBitmap(graphics.Levels[neighboringImprovement.Level, index]), TileRec);
                                 }
                                 else
                                 {
                                     hasNeighbours = true;
-                                    tilePic.Draw(Images.ExtractBitmap(graphics.Levels[construct.Level, index]), TileRec,
-                                        TileRec, Color.White);
+                                    DrawLayer(tilePic, Images.ExtractBitmap(graphics.Levels[construct.Level, index]),
+                                        TileRec);
                                 }
                             }
                         }
@@ -206,7 +204,7 @@ public static class MapImage
                     {
                         if (tile.CityHere is null)
                         {
-                            tilePic.Draw(Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec, TileRec, Color.White);
+                            DrawLayer(tilePic, Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec);
                         }
                     }
                 }
@@ -215,7 +213,7 @@ public static class MapImage
                     if (tile.Map.DirectNeighbours(tile)
                         .Any(t => t.Improvements.Any(i => i.Improvement == construct.Improvement)))
                     {
-                        tilePic.Draw(Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec, TileRec, Color.White);
+                        DrawLayer(tilePic, Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec);
                     }
                 }
                 else
@@ -240,7 +238,7 @@ public static class MapImage
                     }
                     else
                     {
-                        tilePic.Draw(Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec, TileRec, Color.White);
+                        DrawLayer(tilePic, Images.ExtractBitmap(graphics.Levels[construct.Level, 0]), TileRec);
                     }
                 }
             }
@@ -252,8 +250,8 @@ public static class MapImage
             if (directNeighbour != null && !(directNeighbour.IsVisible(civilizationId) || map.MapRevealed)) // Don't dither edge of map (neighbour=null)
             {
                 var ditherMap = terrainSet.DitherMaps[index];
-                tilePic.Draw(ditherMap.Images[^1], new Rectangle(0, 0, 32, 16),
-                    new Rectangle(ditherMap.X, ditherMap.Y, 32, 16), Color.White);
+                DrawLayer(tilePic, ditherMap.Images[^1],
+                    new Rectangle(ditherMap.X, ditherMap.Y, 32, 16));
             }
         }
 
@@ -269,7 +267,20 @@ public static class MapImage
         }
 
         if (neighbourType == tileType) return;
-        origImg.Draw(ditherMap.Images[(int)neighbourType], new Rectangle(0, 0, 32, 16),
-            new Rectangle(ditherMap.X, ditherMap.Y, 32, 16), Color.White);
+        DrawLayer(origImg, ditherMap.Images[(int)neighbourType],
+            new Rectangle(ditherMap.X, ditherMap.Y, 32, 16));
+    }
+
+    private static void DrawLayer(Image target, Image layer, Rectangle logicalDestination)
+    {
+        var scaleX = target.Width / TileRec.Width;
+        var scaleY = target.Height / TileRec.Height;
+        var destination = new Rectangle(
+            logicalDestination.X * scaleX,
+            logicalDestination.Y * scaleY,
+            logicalDestination.Width * scaleX,
+            logicalDestination.Height * scaleY);
+        var source = new Rectangle(0, 0, layer.Width, layer.Height);
+        target.Draw(layer, source, destination, Color.White);
     }
 }

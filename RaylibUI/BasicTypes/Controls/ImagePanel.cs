@@ -3,7 +3,6 @@ using Model.Images;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Rendering;
 using Raylib_CSharp.Textures;
-using Raylib_CSharp.Windowing;
 
 namespace RaylibUI.Controls;
 
@@ -29,28 +28,28 @@ public class ImagePanel
         // Panel position on screen
         if (Location.X < 0) // offset from right
         {
-            x = (int)((1 + Location.X) * Window.GetScreenWidth()) - _texture.Width;
+            x = (int)((1 + Location.X) * DisplayScale.Width) - _texture.Width;
         }
         else if (Location.X > 0)
         {
-            x = (int)(Location.X * Window.GetScreenWidth());
+            x = (int)(Location.X * DisplayScale.Width);
         }
         else // =0 (center on screen)
         {
-            x = (int)(Window.GetScreenWidth() * 0.5 - _texture.Width * 0.5);
+            x = (int)(DisplayScale.Width * 0.5 - _texture.Width * 0.5);
         }
 
         if (Location.Y < 0)
         {
-            y = (int)((1 + Location.Y) * Window.GetScreenHeight()) - _texture.Height;
+            y = (int)((1 + Location.Y) * DisplayScale.Height) - _texture.Height;
         }
         else if (Location.Y > 0)
         {
-            y = (int)(Location.Y * Window.GetScreenHeight());
+            y = (int)(Location.Y * DisplayScale.Height);
         }
         else
         {
-            y = (int)(Window.GetScreenHeight() * 0.5 - _texture.Height * 0.5);
+            y = (int)(DisplayScale.Height * 0.5 - _texture.Height * 0.5);
         }
 
         Graphics.DrawTexture(_texture, x, y, Color.White);
