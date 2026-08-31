@@ -23,10 +23,15 @@ namespace RaylibUI;
 
 public static class ImageUtils
 {
-    private const int HighResolutionShieldScale = 4;
+    private const int HighResolutionShieldScale = 8;
     private static readonly Dictionary<string, Texture2D> HighResolutionUnitShields = new();
-    private static bool _shieldTemplateLoaded;
-    private static Image _shieldTemplate;
+
+    private enum ShieldLayer
+    {
+        Front,
+        Back,
+        Shadow,
+    }
 
     private static Image _innerWallpaper;
     private static Image _outerWallpaper;
@@ -330,16 +335,16 @@ public static class ImageUtils
         var unitImage = active.UnitImages.Units[(int)unit.Type];
         var sourceImage = GetUnitSourceImage(unit, active, unitImage, useMapArt);
         var unitTexture = TextureCache.GetImage(sourceImage);
+        var shield = active.UnitShield((int)unit.Type);
         var baseShieldTexture = TextureCache.GetImage(active.UnitImages.Shields, active, unit.Owner.Id);
-        var shieldTexture = GetHighResolutionUnitShieldTexture(active, unit.Owner.Id, baseShieldTexture);
+        var shieldTexture = GetHighResolutionUnitShieldTexture(active, unit.Owner.Id, baseShieldTexture,
+            shield, ShieldLayer.Front);
         var shieldRenderScale = GetHighResolutionShieldRenderScale(baseShieldTexture, shieldTexture);
         var shieldLogicalSize = new Vector2(baseShieldTexture.Width, baseShieldTexture.Height);
 
         var logicalSize = GetLogicalUnitSize(active, unitImage, unitTexture);
         var unitRenderScale = GetUnitRenderScale(unitImage, unitTexture, logicalSize);
         var unitDrawOffset = GetUnitDrawOffset(unitImage, unitTexture, logicalSize, unitRenderScale);
-
-        var shield = active.UnitShield((int)unit.Type);
 
         var tile = unit.CurrentLocation;
 
@@ -359,21 +364,27 @@ public static class ImageUtils
                 var stackShadowOffset = shield.StackingOffset + shield.ShadowOffset;
                 viewElements.Add(new TextureElement(
                     location: loc,
-                    texture: TextureCache.GetImage(active.UnitImages.ShieldShadow, active, unit.Owner.Id),
-                    tile: tile, offset: shield.Offset + stackShadowOffset));
+                    texture: GetHighResolutionUnitShieldTexture(active, unit.Owner.Id, baseShieldTexture,
+                        shield, ShieldLayer.Shadow),
+                    tile: tile, offset: shield.Offset + stackShadowOffset,
+                    renderScale: shieldRenderScale, maxDrawSize: shieldLogicalSize));
             }
             viewElements.Add(new TextureElement(
                 location: loc,
-                texture: TextureCache.GetImage(active.UnitImages.ShieldBack, active, unit.Owner.Id),
-                tile: tile, offset: shield.Offset + shield.StackingOffset));
+                texture: GetHighResolutionUnitShieldTexture(active, unit.Owner.Id, baseShieldTexture,
+                    shield, ShieldLayer.Back),
+                tile: tile, offset: shield.Offset + shield.StackingOffset,
+                renderScale: shieldRenderScale, maxDrawSize: shieldLogicalSize));
         }
 
         // Shield shadow
         if (shield.DrawShadow)
         {
             viewElements.Add(new TextureElement(location: loc,
-                texture: TextureCache.GetImage(active.UnitImages.ShieldShadow, active, unit.Owner.Id),
-                tile: tile, offset: shield.Offset + shield.ShadowOffset));
+                texture: GetHighResolutionUnitShieldTexture(active, unit.Owner.Id, baseShieldTexture,
+                    shield, ShieldLayer.Shadow),
+                tile: tile, offset: shield.Offset + shield.ShadowOffset,
+                renderScale: shieldRenderScale, maxDrawSize: shieldLogicalSize));
         }
 
         // Front shield. Draw a generated high-resolution shield scaled back to the
@@ -416,11 +427,13 @@ public static class ImageUtils
         return logicalSize;
     }
 
-    private static Texture2D GetHighResolutionUnitShieldTexture(IUserInterface active, int ownerId, Texture2D sourceShield)
+    private static Texture2D GetHighResolutionUnitShieldTexture(IUserInterface active, int ownerId,
+        Texture2D sourceShield, UnitShield shield, ShieldLayer layer)
     {
-        var width = Math.Max(12, sourceShield.Width) * HighResolutionShieldScale;
-        var height = Math.Max(12, sourceShield.Height) * HighResolutionShieldScale;
-        var key = $"FossUnitShield-{ownerId}-{width}x{height}";
+        var width = Math.Max(1, sourceShield.Width) * HighResolutionShieldScale;
+        var height = Math.Max(1, sourceShield.Height) * HighResolutionShieldScale;
+        var key = $"UnitShield-{layer}-{ownerId}-{width}x{height}-" +
+                  $"{shield.HPbarOffset.X},{shield.HPbarOffset.Y}-{shield.HPbarSize.X}x{shield.HPbarSize.Y}";
 
         if (HighResolutionUnitShields.TryGetValue(key, out var cached))
         {
@@ -434,8 +447,14 @@ public static class ImageUtils
             ? active.PlayerColours[ownerId].DarkColour
             : new Color(64, 64, 64, 255);
 
+        if (layer == ShieldLayer.Back)
+        {
+            fill = shade;
+            shade = Blend(shade, new Color(8, 8, 12, 255), 0.52f);
+        }
+
         var image = Image.GenColor(width, height, new Color(0, 0, 0, 0));
-        PaintHighResolutionShield(ref image, fill, shade);
+        PaintHighResolutionShield(ref image, fill, shade, layer, sourceShield.Width, sourceShield.Height, shield);
 
         var texture = Texture2D.LoadFromImage(image);
         image.Unload();
@@ -451,148 +470,6 @@ public static class ImageUtils
             texture.Unload();
         }
         HighResolutionUnitShields.Clear();
-
-        if (_shieldTemplateLoaded && _shieldTemplate.Width > 0 && _shieldTemplate.Height > 0)
-        {
-            _shieldTemplate.Unload();
-        }
-        _shieldTemplate = default;
-        _shieldTemplateLoaded = false;
-    }
-
-    private static bool TryGetHighResolutionShieldTemplate(out Image template)
-    {
-        if (!_shieldTemplateLoaded)
-        {
-            _shieldTemplateLoaded = true;
-            var path = FindHighResolutionShieldTemplatePath();
-            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-            {
-                try
-                {
-                    _shieldTemplate = Images.LoadImageFromFile(path).Image;
-                }
-                catch
-                {
-                    _shieldTemplate = default;
-                }
-            }
-        }
-
-        template = _shieldTemplate;
-        return template.Width > 0 && template.Height > 0;
-    }
-
-    private static string? FindHighResolutionShieldTemplatePath()
-    {
-        var names = new[]
-        {
-            "shield.png",
-            "unitshield.png",
-            "unit-shield.png",
-            "unit_shield.png",
-            "shields.png"
-        };
-
-        foreach (var root in Settings.SearchPaths.Where(Directory.Exists).Concat(CandidateArtRoots()))
-        {
-            foreach (var name in names)
-            {
-                var direct = System.IO.Path.Combine(root, name);
-                if (File.Exists(direct))
-                {
-                    return direct;
-                }
-
-                var foss = System.IO.Path.Combine(root, "FOSSart", name);
-                if (File.Exists(foss))
-                {
-                    return foss;
-                }
-
-                var raylibFoss = System.IO.Path.Combine(root, "RaylibUI", "FOSSart", name);
-                if (File.Exists(raylibFoss))
-                {
-                    return raylibFoss;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private static IEnumerable<string> CandidateArtRoots()
-    {
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var start in new[] { Settings.BasePath, Directory.GetCurrentDirectory() }.Where(Directory.Exists))
-        {
-            var directory = new DirectoryInfo(start);
-            for (var i = 0; i < 8 && directory != null; i++, directory = directory.Parent)
-            {
-                if (seen.Add(directory.FullName))
-                {
-                    yield return directory.FullName;
-                }
-            }
-        }
-    }
-
-    private static void PaintFossShield(ref Image image, Image template, Color fill, Color shade)
-    {
-        PaintShieldBody(ref image, fill, shade);
-        var width = image.Width;
-        var height = image.Height;
-        for (var y = 0; y < height; y++)
-        {
-            var sourceY = Math.Clamp((int)MathF.Round(y * (template.Height - 1) / MathF.Max(1, height - 1)), 0, template.Height - 1);
-            for (var x = 0; x < width; x++)
-            {
-                var sourceX = Math.Clamp((int)MathF.Round(x * (template.Width - 1) / MathF.Max(1, width - 1)), 0, template.Width - 1);
-                var outline = template.GetColor(sourceX, sourceY);
-                if (outline.A == 0)
-                {
-                    continue;
-                }
-
-                var current = image.GetColor(x, y);
-                image.DrawPixel(x, y, AlphaBlend(current, outline));
-            }
-        }
-    }
-
-    private static void PaintShieldBody(ref Image image, Color fill, Color shade)
-    {
-        var width = image.Width;
-        var height = image.Height;
-        var border = Math.Max(1, Math.Min(width, height) / 22);
-        for (var y = 0; y < height; y++)
-        {
-            var ny = (y + 0.5f) / height;
-            var halfWidth = ShieldHalfWidthAt(ny);
-            for (var x = 0; x < width; x++)
-            {
-                var nx = (x + 0.5f) / width;
-                var distanceFromCentre = MathF.Abs(nx - 0.5f);
-                if (distanceFromCentre > halfWidth - border / (float)Math.Max(1, width))
-                {
-                    continue;
-                }
-
-                var amount = Math.Clamp((ny - 0.20f) * 0.45f, 0f, 0.32f);
-                image.DrawPixel(x, y, Blend(fill, shade, amount));
-            }
-        }
-    }
-
-    private static Color AlphaBlend(Color below, Color above)
-    {
-        var alpha = above.A / 255f;
-        var inverse = 1f - alpha;
-        return new Color(
-            (byte)Math.Clamp(above.R * alpha + below.R * inverse, 0, 255),
-            (byte)Math.Clamp(above.G * alpha + below.G * inverse, 0, 255),
-            (byte)Math.Clamp(above.B * alpha + below.B * inverse, 0, 255),
-            (byte)Math.Clamp(above.A + below.A * inverse, 0, 255));
     }
 
     private static float GetHighResolutionShieldRenderScale(Texture2D sourceShield, Texture2D highResolutionShield)
@@ -607,19 +484,24 @@ public static class ImageUtils
         return MathF.Max(0.01f, MathF.Min(widthScale, heightScale));
     }
 
-    private static void PaintHighResolutionShield(ref Image image, Color fill, Color shade)
+    private static void PaintHighResolutionShield(ref Image image, Color fill, Color shade, ShieldLayer layer,
+        int logicalWidth, int logicalHeight, UnitShield shield)
     {
         var width = image.Width;
         var height = image.Height;
-        var border = Math.Max(1.25f, Math.Min(width, height) / 22f);
-        var rim = Math.Max(border * 2.2f, Math.Min(width, height) / 9f);
-        var black = new Color(8, 8, 12, 255);
-        var bright = new Color(255, 255, 255, 235);
+        var pixelScale = MathF.Max(1f, MathF.Min(
+            width / (float)Math.Max(1, logicalWidth),
+            height / (float)Math.Max(1, logicalHeight)));
+        var outerEdge = 0.78f * pixelScale;
+        var innerKeyline = 1.58f * pixelScale;
+        var black = new Color(7, 7, 9, 255);
+        var keyline = Blend(fill, new Color(12, 12, 15, 255), 0.68f);
+        var wideBadge = logicalWidth > logicalHeight * 1.7f;
 
         for (var y = 0; y < height; y++)
         {
             var ny = (y + 0.5f) / height;
-            var halfWidth = ShieldHalfWidthAt(ny);
+            var halfWidth = ShieldHalfWidthAt(ny, wideBadge);
             for (var x = 0; x < width; x++)
             {
                 var nx = (x + 0.5f) / width;
@@ -634,60 +516,83 @@ public static class ImageUtils
                 var bottomDistance = height - y - 1;
                 var outline = Math.Min(Math.Min(edgeDistance, topDistance), bottomDistance);
 
-                if (outline <= border)
+                if (layer == ShieldLayer.Shadow)
+                {
+                    image.DrawPixel(x, y, new Color(5, 5, 7, outline < pixelScale ? (byte)130 : (byte)170));
+                }
+                else if (outline <= outerEdge)
                 {
                     image.DrawPixel(x, y, black);
                 }
-                else if (outline <= rim)
+                else if (outline <= innerKeyline)
                 {
-                    image.DrawPixel(x, y, bright);
+                    image.DrawPixel(x, y, keyline);
                 }
                 else
                 {
-                    var verticalShade = Math.Clamp((ny - 0.22f) * 0.45f, 0f, 0.34f);
-                    var highlight = MathF.Max(0f, 1f - MathF.Abs(nx - 0.38f) * 5f) * MathF.Max(0f, 1f - MathF.Abs(ny - 0.32f) * 6f);
+                    // Stay close to Civ II's flat player-colour marker.  The
+                    // restrained shading only becomes apparent when zoomed in.
+                    var verticalShade = Math.Clamp((ny - 0.14f) * 0.22f, 0f, 0.18f);
+                    var highlight = MathF.Max(0f, 1f - MathF.Abs(nx - 0.37f) * 6.5f) *
+                                    MathF.Max(0f, 1f - MathF.Abs(ny - 0.27f) * 7f);
                     var color = Blend(fill, shade, verticalShade);
                     if (highlight > 0)
                     {
-                        color = Blend(color, Color.White, Math.Min(0.22f, highlight * 0.18f));
+                        color = Blend(color, Color.White, Math.Min(0.07f, highlight * 0.055f));
                     }
                     image.DrawPixel(x, y, color);
                 }
             }
         }
 
-        var barY = (int)(height * 0.22f);
-        var barHeight = Math.Max(1, (int)MathF.Round(height * 0.09f));
-        for (var y = barY; y < Math.Min(height, barY + barHeight); y++)
+        if (layer != ShieldLayer.Front)
         {
-            var ny = (y + 0.5f) / height;
-            var halfWidth = ShieldHalfWidthAt(ny);
-            var left = Math.Max(0, (int)MathF.Floor((0.5f - halfWidth) * width));
-            var right = Math.Min(width - 1, (int)MathF.Ceiling((0.5f + halfWidth) * width));
-            for (var x = left; x <= right; x++)
+            return;
+        }
+
+        var scaleX = width / (float)Math.Max(1, logicalWidth);
+        var scaleY = height / (float)Math.Max(1, logicalHeight);
+        var barLeft = Math.Clamp((int)MathF.Round(shield.HPbarOffset.X * scaleX), 0, width - 1);
+        var barTop = Math.Clamp((int)MathF.Round(shield.HPbarOffset.Y * scaleY), 0, height - 1);
+        var barWidth = Math.Max(1, (int)MathF.Round(shield.HPbarSize.X * scaleX));
+        var barHeight = Math.Max(1, (int)MathF.Round(shield.HPbarSize.Y * scaleY));
+        var barRight = Math.Min(width, barLeft + barWidth);
+        var barBottom = Math.Min(height, barTop + barHeight);
+        for (var y = barTop; y < barBottom; y++)
+        {
+            for (var x = barLeft; x < barRight; x++)
             {
-                var outline = y == barY || y == barY + barHeight - 1 ? black : bright;
                 if (image.GetColor(x, y).A != 0)
                 {
-                    image.DrawPixel(x, y, outline);
+                    image.DrawPixel(x, y, black);
                 }
             }
         }
     }
 
-    private static float ShieldHalfWidthAt(float normalizedY)
+    private static float ShieldHalfWidthAt(float normalizedY, bool wideBadge)
     {
-        if (normalizedY < 0.14f)
+        if (wideBadge)
         {
-            return 0.44f;
+            // Test of Time places the order glyph and health strip side by side
+            // in a broad chamfered badge rather than Gold's heraldic shield.
+            var cornerDistance = MathF.Min(normalizedY, 1f - normalizedY);
+            var corner = Math.Clamp(cornerDistance / 0.16f, 0f, 1f);
+            return 0.455f + 0.03f * MathF.Sqrt(corner);
         }
 
-        if (normalizedY < 0.68f)
+        if (normalizedY < 0.12f)
         {
-            return 0.44f - (normalizedY - 0.14f) * 0.08f;
+            var shoulder = normalizedY / 0.12f;
+            return 0.39f + 0.055f * MathF.Sqrt(MathF.Max(0f, 1f - (1f - shoulder) * (1f - shoulder)));
         }
 
-        return MathF.Max(0.02f, 0.40f * (1f - (normalizedY - 0.68f) / 0.32f));
+        if (normalizedY < 0.66f)
+        {
+            return 0.445f - (normalizedY - 0.12f) * 0.075f;
+        }
+
+        return MathF.Max(0.018f, 0.405f * (1f - (normalizedY - 0.66f) / 0.34f));
     }
 
     private static Color Blend(Color start, Color end, float amount)

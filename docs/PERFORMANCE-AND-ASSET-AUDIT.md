@@ -33,6 +33,10 @@ entry points are intentionally absent in rhYciv.
 - Temporary CPU images are released immediately after GPU upload for generated
   dialog panels, buttons, scrollbars, shields, Civilopedia art, and bordered
   textures.
+- Unit shields are generated once per civilization and ruleset at 8x logical
+  resolution, then reused by every unit.  Gold retains its pointed Civ II badge;
+  Test of Time retains its wide command badge.  This also removes the former
+  startup search/decode of a 1254px outline that the renderer did not use.
 - Texture-cache clearing no longer mutates a dictionary while enumerating it and
   now releases generated shield textures too.
 - Rebuilt and invalidated tile images are unloaded.  Map dimensions are cached by
@@ -46,6 +50,16 @@ RGBA footprint fell from about 300 MiB (50 images at 1254x1254) to about 17.9 Mi
 (52 images at 300x300), a reduction of roughly 94%.  The extra two files cover
 the missing Legion and Mechanized Infantry art while retaining a legacy alias.  More
 importantly, that memory is no longer all committed at startup.
+
+## Unit health shields
+
+- Front, stacked-back, and shadow layers now share crisp high-resolution geometry
+  instead of mixing a smooth front with magnified low-resolution backing sprites.
+- The shape keeps the original black frame and player-color body, with restrained
+  shading that reads as classic at normal zoom and stays clean through 3x zoom.
+- Health is drawn over a permanent black track, so damage is immediately legible.
+  The original red/yellow/green thresholds and Gold's inset frame are preserved;
+  Test of Time's two-pixel health strip remains un-inset.
 
 ## Custom texture results
 

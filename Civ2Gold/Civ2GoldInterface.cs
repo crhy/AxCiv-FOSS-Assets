@@ -695,7 +695,11 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         Color shadowColour = new(51, 51, 51, 255);
         Color replacementColour = new(255, 0, 0, 255);
 
-        var shield = TryLoadModernShieldArtwork() ?? Images.ExtractBitmap(PicSources["backShield1"][0], this);
+        // Keep the original Civ II silhouette as the logical layout source.  The
+        // Raylib renderer supersamples the complete front/back/shadow set, so
+        // decoding a 1254px external outline here only increased startup memory
+        // and produced a less faithful shape.
+        var shield = Images.ExtractBitmap(PicSources["backShield1"][0], this).Copy();
 
         if (shield.Width < 64 && shield.Height < 64 && shield.Width >= 12 && shield.Height >= 15)
         {
@@ -712,6 +716,7 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         var shieldFront = shield.Copy();
         var shieldBack = shield.Copy();
         var shieldShadow = shield.Copy();
+        shield.Unload();
 
         // Give transparent outline-only PNGs a Civ2-style player-colour body,
         // while keeping the upper band clean for the HP bar.
@@ -724,113 +729,6 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         UnitImages.Shields = new MemoryStorage(shieldFront, "Unit-Shield", replacementColour);
         UnitImages.ShieldBack = new MemoryStorage(shieldBack, "Unit-Shield-Back", replacementColour, true);
         UnitImages.ShieldShadow = new MemoryStorage(shieldShadow, "Unit-Shield-Shadow", replacementColour);
-    }
-
-    private static string ResolveAssetPath(params string[] parts)
-    {
-        foreach (var root in CandidateAssetRoots())
-        {
-            var candidate = Path.Combine(new[] { root }.Concat(parts).ToArray());
-            if (File.Exists(candidate) || Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-        }
-
-        return Path.Combine(parts);
-    }
-
-    private static IEnumerable<string> CandidateAssetRoots()
-    {
-        var roots = new[]
-        {
-            Environment.CurrentDirectory,
-            AppContext.BaseDirectory,
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..")),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..")),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."))
-        };
-
-        return roots.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static Image? TryLoadModernShieldArtwork()
-    {
-        var candidateFiles = new List<string>
-        {
-            ResolveAssetPath("FOSSart", "UnitShield.png"),
-            ResolveAssetPath("FOSSart", "shield.png"),
-            ResolveAssetPath("FOSSart", "unit-shield.png"),
-            ResolveAssetPath("FOSSart", "shield-outline.png"),
-            ResolveAssetPath("RaylibUI", "FOSSart", "UnitShield.png"),
-            ResolveAssetPath("RaylibUI", "FOSSart", "shield.png"),
-            ResolveAssetPath("RaylibUI", "FOSS art", "UnitShield.png"),
-            ResolveAssetPath("RaylibUI", "FOSS art", "shield.png")
-        };
-
-        var roots = new[]
-        {
-            Environment.CurrentDirectory,
-            AppContext.BaseDirectory,
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."))
-        };
-
-        foreach (var root in roots.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            foreach (var folder in new[]
-                     {
-                         Path.Combine(root, "FOSSart"),
-                         Path.Combine(root, "RaylibUI", "FOSSart"),
-                         Path.Combine(root, "RaylibUI", "FOSS art")
-                     })
-            {
-                if (!Directory.Exists(folder))
-                {
-                    continue;
-                }
-
-                candidateFiles.AddRange(Directory.EnumerateFiles(folder, "*shield*.png", SearchOption.AllDirectories));
-            }
-        }
-
-        foreach (var candidate in candidateFiles.Where(File.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            var image = Image.Load(candidate);
-            if (image.Width > 0 && image.Height > 0)
-            {
-                return image;
-            }
-        }
-
-        return null;
-    }
-
-    private static string ResolveOptionalAsset(params string[] parts)
-    {
-        var relativePath = Path.Combine(parts);
-        if (Path.IsPathRooted(relativePath))
-        {
-            return relativePath;
-        }
-
-        var roots = new[]
-        {
-            Environment.CurrentDirectory,
-            AppContext.BaseDirectory,
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..")),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."))
-        };
-
-        foreach (var root in roots.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            var candidate = Path.Combine(root, relativePath);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-        }
-
-        return relativePath;
     }
 
     public override void LoadPlayerColours()
