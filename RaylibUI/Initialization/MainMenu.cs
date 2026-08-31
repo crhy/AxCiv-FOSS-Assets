@@ -3,6 +3,7 @@ using Civ2engine.IO;
 using Model;
 using Model.Core;
 using Model.InterfaceActions;
+using Model.Interface;
 using RaylibUtils;
 using Civ2;
 using Model.Controls;
@@ -164,7 +165,7 @@ public class MainMenu : BaseScreen
         }
 
         const int width = 250;
-        const int height = 24;
+        const int height = 28;
         var x = screenWidth - width - 8;
         var y = screenHeight - height - 8;
         Graphics.DrawRectangle(x, y, width, height, new Color(0, 0, 0, 190));
@@ -175,7 +176,11 @@ public class MainMenu : BaseScreen
         var elapsed = TimeSpan.FromSeconds(music.MusicElapsed);
         var duration = TimeSpan.FromSeconds(music.MusicDuration);
         var label = $"♪ {music.DisplayName}  {elapsed:m\\:ss}/{duration:m\\:ss}";
-        Graphics.DrawText(label, x + 6, y + 3, 14, Color.White);
+        const int fontSize = 16;
+        var textSize = TextRendering.Measure(Fonts.Arial, label, fontSize, 0f);
+        TextRendering.Draw(Fonts.Arial, label,
+            new System.Numerics.Vector2(x + 7, y + (height - textSize.Y) / 2f - 1),
+            fontSize, 0f, Color.White);
     }
 
     public override void InterfaceChanged(Sound soundManager)

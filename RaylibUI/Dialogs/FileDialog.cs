@@ -171,6 +171,11 @@ public class FileDialog : DynamicSizingDialog
 
     private void ItemSelected(object? sender, ListboxSelectionEventArgs args)
     {
+        if (args.Index < 0 || args.Index >= _fileList.Count)
+        {
+            return;
+        }
+
         var text = _fileList.ElementAt(args.Index).Key;
         if (!args.Soft)
         {

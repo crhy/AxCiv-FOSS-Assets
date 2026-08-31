@@ -22,7 +22,8 @@ public class CityLabel : LabelControl
     public override void OnResize()
     {
         var scale = _cityWindow.Scale;
-        FontSize = Math.Max(10, (int)Math.Round(_active.Look.CityWindowFontSize * scale * 0.68f));
+        FontSize = Math.Max(TextRendering.MinimumFittedFontSize,
+            (int)Math.Round(_active.Look.CityWindowFontSize * scale * 0.78f));
         var verticalInset = Math.Max(1, (int)Math.Round(2 * scale));
         if (Parent == _cityWindow)
         {

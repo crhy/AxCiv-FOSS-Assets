@@ -159,13 +159,6 @@ public abstract class BaseGameView : IGameView
                                         ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight)),
                                         Color.White);
 
-                                    // Show coords for debugging
-                                    var text = $"({2 * col % (2 * map.XDim) + row % 2},{row})";
-                                    var meas = TextManager.MeasureTextEx(Font.GetDefault(), text, 10, 0f);
-                                    image.DrawText(text,
-                                        (int)((xpos + dim.TileWidth / 2f - meas.X / 2f) * RenderScale),
-                                        (int)((ypos + dim.TileHeight / 2f - meas.Y / 2f) * RenderScale),
-                                        Math.Max(10, (int)(10 * RenderScale)), Color.Yellow);
                                 }
 
                                 var posVector = new Vector2(xpos, ypos);

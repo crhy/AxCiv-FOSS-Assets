@@ -16,6 +16,7 @@ public static class TextRendering
     private const float MapTextScale = 1.0f;
     public const int MinimumUiFontSize = 16;
     public const int MinimumMapFontSize = 16;
+    public const int MinimumFittedFontSize = 13;
 
     public static int LegibleUiFontSize(int fontSize)
     {
@@ -30,6 +31,27 @@ public static class TextRendering
     public static Vector2 Measure(Font font, string text, int fontSize, float spacing)
     {
         return TextManager.MeasureTextEx(font, text, fontSize, spacing);
+    }
+
+    public static int FitFontSize(Font font, string text, int preferredSize, float availableWidth,
+        float availableHeight = float.PositiveInfinity, float spacing = 0f,
+        int minimumSize = MinimumFittedFontSize)
+    {
+        preferredSize = Math.Max(1, preferredSize);
+        minimumSize = Math.Clamp(minimumSize, 1, preferredSize);
+        var fontSize = preferredSize;
+        while (fontSize > minimumSize)
+        {
+            var size = Measure(font, text, fontSize, spacing);
+            if (size.X <= availableWidth && size.Y <= availableHeight)
+            {
+                break;
+            }
+
+            fontSize--;
+        }
+
+        return fontSize;
     }
 
     public static void Draw(Font font, string text, Vector2 position, int fontSize, float spacing, Color color)

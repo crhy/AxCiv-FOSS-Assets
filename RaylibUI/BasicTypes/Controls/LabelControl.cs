@@ -14,10 +14,8 @@ public class LabelControl : BaseControl
     private readonly int _minWidth;
     private readonly int _defaultHeight;
     private readonly float _spacing;
-    private readonly IUserInterface _active;
-    private readonly Timer _timer;
-    private bool _switch;
     private readonly Color[]? _switchColors;
+    private readonly int _switchTime;
 
     public LabelControl(IControlLayout controller,
         string text,
@@ -44,16 +42,15 @@ public class LabelControl : BaseControl
         VerticalAlignment = verticalAlignment;
         _minWidth = minWidth;
         _defaultHeight = defaultHeight;
-        _fontSize = fontSize;
+        _fontSize = Math.Max(1, fontSize);
         _spacing = spacing;
         _font = font ?? controller.MainWindow.ActiveInterface?.Look.LabelFont ?? Fonts.Tnr;
         ColorFront = colorFront ?? TextRendering.StrongBlack;
         ColorShadow = colorShadow ?? Color.Blank;
         ShadowOffset = shadowOffset ?? Vector2.Zero;
 
-        _active = controller.MainWindow.ActiveInterface;
-        _timer = new Timer(_ => _switch = !_switch, null, 0, switchTime);
         _switchColors = switchColors;
+        _switchTime = switchTime;
         BackgroundColor = colorBack;
         _textSize = TextRendering.Measure(_font, _text, _fontSize, _spacing);
     }
@@ -107,30 +104,14 @@ public class LabelControl : BaseControl
     private int _width;
     public override int Width
     {
-        get
-        {
-            if (_width == 0)
-            {
-                _width = GetPreferredWidth();
-            }
-
-            return _width;
-        }
+        get => _width == 0 ? GetPreferredWidth() : _width;
         set { _width = value; }
     }
 
     private int _height;
     public override int Height
     {
-        get
-        {
-            if (_height == 0)
-            {
-                _height = GetPreferredHeight();
-            }
-
-            return _height;
-        }
+        get => _height == 0 ? GetPreferredHeight() : _height;
         set { _height = value; }
     }
 
@@ -153,14 +134,13 @@ public class LabelControl : BaseControl
             Graphics.DrawRectangleRec(Bounds, BackgroundColor.Value);
         }
 
-        var fontSize = _fontSize;
-        var textSize = _textSize;
         var availableWidth = Width - Padding.Left - Padding.Right;
-        while (fontSize > 8 && availableWidth > 0 && textSize.X > availableWidth)
-        {
-            fontSize--;
-            textSize = TextRendering.Measure(_font, _text, fontSize, _spacing);
-        }
+        var availableHeight = Height - Padding.Top - Padding.Bottom;
+        var fontSize = TextRendering.FitFontSize(_font, _text, _fontSize,
+            Math.Max(1, availableWidth), Math.Max(1, availableHeight), _spacing);
+        var textSize = fontSize == _fontSize
+            ? _textSize
+            : TextRendering.Measure(_font, _text, fontSize, _spacing);
 
         var textPosition = new Vector2(Bounds.X + Padding.Left, Bounds.Y + Padding.Top);
 
@@ -186,7 +166,10 @@ public class LabelControl : BaseControl
         Color colorShadow;
         if (_switchColors is not null)
         {
-            colorFront = _switch ? _switchColors[0] : _switchColors[1];
+            var switchIndex = _switchTime > 0
+                ? (int)(Time.GetTime() * 1000 / _switchTime) % _switchColors.Length
+                : 0;
+            colorFront = _switchColors[switchIndex];
             colorShadow = Color.Blank;
         }
         else

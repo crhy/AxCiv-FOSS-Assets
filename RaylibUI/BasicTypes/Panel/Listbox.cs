@@ -140,10 +140,7 @@ public class Listbox : BaseControl
         // Select control at start
         if (_def.Groups.Count > 0 && _def.Selectable)
         {
-            if (_def.SelectedId == -1)  // If this is true there's something wrong
-            {
-                _def.SelectedId = 0;
-            }
+            _def.SelectedId = Math.Clamp(_def.SelectedId, 0, _controls.Count - 1);
             _controls[_def.SelectedId].SelectThis(true);
         }
     }
@@ -188,7 +185,15 @@ public class Listbox : BaseControl
 
     private void Selected(ListboxControlGroup control, bool soft)
     {
-        _def.SelectedId = _controls.IndexOf(control);
+        var selectedId = _controls.IndexOf(control);
+        if (selectedId < 0)
+        {
+            // A directory refresh can replace the list while the previous
+            // hovered control is still finishing its mouse event.
+            return;
+        }
+
+        _def.SelectedId = selectedId;
 
         // If the selected control is beyond the view
         int selectedRow, selectedCol;
@@ -254,12 +259,15 @@ public class Listbox : BaseControl
 
     public void EnterPressed()
     {
-        _controls[_def.SelectedId].SelectThis(false);
+        if (_def.SelectedId >= 0 && _def.SelectedId < _controls.Count)
+        {
+            _controls[_def.SelectedId].SelectThis(false);
+        }
     }
 
     public override bool OnKeyPressed(KeyboardKey key)
     {
-        if (!_def.Selectable) return base.OnKeyPressed(key);
+        if (!_def.Selectable || _controls.Count == 0) return base.OnKeyPressed(key);
 
         int selectedCol;
         switch (key)

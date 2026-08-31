@@ -1,7 +1,18 @@
 **/bin/**
 **/obj/**
 **/.vs/**
-agent/logs/
 **/__pycache__/**
+**/.idea/**
+**/.vscode/**
+**/.junie/**
+*.user
+
+.flatpak-builder/
+.flatpak-work/
+flatpak-build/
+flatpak-repo/
+*.flatpak
 
 RaylibUI/run-log.txt
+/RaylibUI/screenshot*.png
+/growth_diff.txt

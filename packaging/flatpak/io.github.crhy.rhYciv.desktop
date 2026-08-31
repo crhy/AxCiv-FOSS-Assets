@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=rhYciv
+GenericName=Turn-based Strategy Game
+Comment=A high-resolution open-source Civilization II reimplementation
+Exec=rhyciv
+Icon=io.github.crhy.rhYciv
+Terminal=false
+Categories=Game;StrategyGame;
+Keywords=civilization;strategy;turn-based;4X;
+StartupNotify=true

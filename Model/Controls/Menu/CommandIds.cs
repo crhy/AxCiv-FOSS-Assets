@@ -10,14 +10,8 @@ public static class CommandIds
     public const string QuitGame = "GAME_QUIT";
 
     public const string ChangeTaxRate = "CHANGE_TAX_RATE";
-    public const string ViewThroneRoom = "THRONE_ROOM";
     public const string FindCity = "FIND_CITY";
 
-    public const string CityStatus = "CITY_STATUS";
-    public const string DefenseMinister = "DEFENSE_MINISTER";
-    public const string AttitudeAdvisor = "ATTITUDE_ADVISOR";
-    public const string TradeAdvisor = "TRADE_ADVISOR";
-    public const string ScienceAdvisor = "SCIENCE_ADVISOR";
     public const string WorldWonders = "WORLD_WONDERS";
     public const string CivilopediaAdvances = "CIVILOPEDIA_ADVANCES";
     public const string CivilopediaImprovements = "CIVILOPEDIA_IMPROVEMENTS";

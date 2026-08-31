@@ -12,7 +12,7 @@ namespace RaylibUI.RunGame.GameControls.CityControls;
 
 public class ResourceProductionBar : BaseControl
 {
-    private const int LabelFontSize = 11;
+    private const int LabelFontSize = 13;
     private const int LabelSpacing = 0;
     private const int LabelInset = 2;
     private readonly CityWindow _cityWindow;
@@ -142,8 +142,9 @@ public class ResourceProductionBar : BaseControl
             return;
         }
         
-        var fontSize = Math.Max(10, (int)Math.Round(LabelFontSize * Math.Min(1.25f, _cityWindow.Scale * 0.85f)));
-        var textDim = TextManager.MeasureTextEx(Fonts.Arial, _sections[0].Label, fontSize, LabelSpacing);
+        var fontSize = Math.Max(TextRendering.MinimumFittedFontSize,
+            (int)Math.Round(LabelFontSize * Math.Min(1.25f, _cityWindow.Scale * 0.85f)));
+        var textDim = TextRendering.Measure(Fonts.Arial, _sections[0].Label, fontSize, LabelSpacing);
         var labely = GetLabelY(textDim);
             
         DrawResourceLabel(_sections[0].Label, new Vector2(Bounds.X + LabelInset * _cityWindow.Scale, labely), fontSize);
@@ -170,7 +171,7 @@ public class ResourceProductionBar : BaseControl
                 pos.X += _spacing;
             }
             var midText = _sections[1].Label;
-            var midSize = TextManager.MeasureTextEx(Fonts.Arial, midText, fontSize, LabelSpacing);
+            var midSize = TextRendering.Measure(Fonts.Arial, midText, fontSize, LabelSpacing);
             DrawResourceLabel(midText, new Vector2(Bounds.X + Width / 2f - midSize.X / 2, labely), fontSize);
 
             final = 2;
@@ -206,7 +207,7 @@ public class ResourceProductionBar : BaseControl
 
     private static void DrawRightAlignedResourceLabel(string text, float rightEdge, float y, int fontSize)
     {
-        var textSize = TextManager.MeasureTextEx(Fonts.Arial, text, fontSize, LabelSpacing);
+        var textSize = TextRendering.Measure(Fonts.Arial, text, fontSize, LabelSpacing);
         DrawResourceLabel(text, new Vector2(rightEdge - textSize.X, y), fontSize);
     }
 

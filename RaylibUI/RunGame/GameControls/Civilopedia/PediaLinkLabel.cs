@@ -22,7 +22,9 @@ public class PediaLinkLabel : LabelControl
     public override void Draw(bool pulse)
     {
         var color = _red ? new Color(210, 0, 0, 255) : new Color(32, 49, 142, 255);
-        Graphics.DrawLine((int)Bounds.X, (int)Bounds.Y + Height, (int)Bounds.X + Width, (int)Bounds.Y + Height, color);
         base.Draw(pulse);
+        var underlineY = (int)MathF.Round(Bounds.Y + Math.Min(Height - 2, TextSize.Y + 1));
+        Graphics.DrawLine((int)Bounds.X, underlineY,
+            (int)MathF.Round(Bounds.X + Math.Min(Width, TextSize.X)), underlineY, color);
     }
 }

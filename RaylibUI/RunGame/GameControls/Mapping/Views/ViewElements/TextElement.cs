@@ -39,7 +39,7 @@ public class TextElement : IViewElement
     {
         var loc = adjustedLocation + Offset * scale;
         var fontSize = Math.Max(1, (int)MathF.Round(_height * scale));
-        var size = TextManager.MeasureTextEx(Fonts.Arial, _text, fontSize, 0);
+        var size = TextRendering.Measure(Fonts.Arial, _text, fontSize, 0);
         var textPosition = new Vector2(
             MathF.Round(loc.X - size.X / 2f),
             MathF.Round(loc.Y - size.Y / 2f));

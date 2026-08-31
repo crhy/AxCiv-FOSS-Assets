@@ -152,7 +152,9 @@ public class CivDialog : DynamicSizingDialog
             }
 
             var textBoxLabelFontSize = TextRendering.LegibleUiFontSize(Styles.BaseFontSize);
-            var labelSize = (int)textBoxLabels.Max(l => TextManager.MeasureTextEx(host.ActiveInterface.Look.DefaultFont, l, textBoxLabelFontSize, 1.0f).X) + (isNameDialog ? 30 : 24);
+            var labelSize = (int)textBoxLabels.Max(l => TextRendering.Measure(
+                host.ActiveInterface.Look.DefaultFont, l, textBoxLabelFontSize, 1.0f).X) +
+                (isNameDialog ? 30 : 24);
 
             for (int i = 0; i < dialog.TextBoxes.Count; i++)
             {

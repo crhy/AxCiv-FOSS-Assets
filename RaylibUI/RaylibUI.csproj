@@ -38,7 +38,6 @@
     <None Update="Shaders\grayscale.fs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Shaders\color-correction.fs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="SteelGrey.png" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="stripe.png" CopyToOutputDirectory="PreserveNewest" />
     <None Update="FOSSart\**\*" CopyToOutputDirectory="PreserveNewest" TargetPath="%(Identity)" />
   </ItemGroup>
 </Project>

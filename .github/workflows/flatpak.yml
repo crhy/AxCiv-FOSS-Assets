@@ -1,0 +1,28 @@
+name: Flatpak
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build x86_64 Flatpak
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: rhYciv-${{ github.ref_name }}-x86_64.flatpak
+          manifest-path: packaging/flatpak/io.github.crhy.rhYciv.yml
+          cache-key: flatpak-builder-${{ runner.os }}-${{ github.sha }}

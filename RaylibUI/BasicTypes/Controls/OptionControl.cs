@@ -79,12 +79,12 @@ public class OptionControl : BaseControl
 
     public override int GetPreferredWidth()
     {
-        return _imageWidth + TextGap + (int)TextManager.MeasureTextEx(_font, _text, MaxFontSize, 0f).X;
+        return _imageWidth + TextGap + (int)TextRendering.Measure(_font, _text, MaxFontSize, 0f).X;
     }
 
     public override int GetPreferredHeight()
     {
-        var textHeight = TextManager.MeasureTextEx(_font, _text, MaxFontSize, 0f).Y;
+        var textHeight = TextRendering.Measure(_font, _text, MaxFontSize, 0f).Y;
         return Math.Max(_imageHeight, (int)Math.Ceiling(textHeight)) + 6;
     }
 
@@ -99,7 +99,7 @@ public class OptionControl : BaseControl
         Graphics.DrawTexture(icon, (int)Bounds.X, (int)(Bounds.Y + (Height - _imageHeight) / 2f), Color.White);
 
         var fontSize = GetFittedFontSize();
-        var textSize = TextManager.MeasureTextEx(_font, _text, fontSize, 0f);
+        var textSize = TextRendering.Measure(_font, _text, fontSize, 0f);
         var textPosition = new Vector2(
             MathF.Round(Bounds.X + _imageWidth + TextGap),
             MathF.Round(Bounds.Y + (Height - textSize.Y) / 2f));
@@ -125,13 +125,7 @@ public class OptionControl : BaseControl
             return MinFontSize;
         }
 
-        var fontSize = MaxFontSize;
-        while (fontSize > MinFontSize &&
-               TextManager.MeasureTextEx(_font, _text, fontSize, 0f).X > availableTextWidth)
-        {
-            fontSize--;
-        }
-
-        return fontSize;
+        return TextRendering.FitFontSize(_font, _text, MaxFontSize,
+            availableTextWidth, minimumSize: MinFontSize);
     }
 }

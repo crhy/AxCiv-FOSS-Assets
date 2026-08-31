@@ -10,54 +10,34 @@ public static class DialogUtils
     /// </summary>
     public static List<string> GetWrappedTexts(string text, int maxWidth, Font font, int fontSize)
     {
-        string[] words = text.Split();
-        List<string> wrappedLines = new ();
+        var wrappedLines = new List<string>();
+        maxWidth = Math.Max(1, maxWidth);
 
-        string combinedWord = string.Empty;
-        int combinedTextSize, combinedTextSizeNext;
-
-        // Measure string Width by combining words
-        bool newLine = true;
-        for (int i = 0; i < words.Length; i++)
+        foreach (var sourceLine in text.Replace("\r\n", "\n").Split('\n'))
         {
-            if (newLine)
+            var words = sourceLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length == 0)
             {
-                combinedWord = words[i];
-                newLine = false;
-            }
-            else
-            {
-                combinedWord = combinedWord + " " + words[i];
+                wrappedLines.Add(string.Empty);
+                continue;
             }
 
-            combinedTextSize = (int)TextManager.MeasureTextEx(font, combinedWord, fontSize, 0.0f).X;
-            if (i != words.Length - 1)
+            var currentLine = string.Empty;
+            foreach (var word in words)
             {
-                combinedTextSizeNext = (int)TextManager.MeasureTextEx(font, combinedWord + " " + words[i + 1], fontSize, 0.0f).X;
-            }
-            else    // Last word
-            {
-                combinedTextSizeNext = combinedTextSize;
-            }
-
-
-            if (combinedTextSize < maxWidth && combinedTextSizeNext >= maxWidth)
-            {
-                wrappedLines.Add(combinedWord);
-                newLine = true;
+                var candidate = currentLine.Length == 0 ? word : $"{currentLine} {word}";
+                if (currentLine.Length > 0 && TextRendering.Measure(font, candidate, fontSize, 0f).X > maxWidth)
+                {
+                    wrappedLines.Add(currentLine);
+                    currentLine = word;
+                }
+                else
+                {
+                    currentLine = candidate;
+                }
             }
 
-            // Last line
-            if (combinedTextSize < maxWidth && i == words.Length - 1)
-            {
-                wrappedLines.Add(combinedWord);
-            }
-        }
-
-        int[] wrappedLinesLength = new int[wrappedLines.Count];
-        for (int i = 0; i < wrappedLines.Count; i++)
-        {
-            wrappedLinesLength[i] = (int)TextManager.MeasureTextEx(font, wrappedLines[i], fontSize, 0.0f).X;
+            wrappedLines.Add(currentLine);
         }
 
         return wrappedLines;

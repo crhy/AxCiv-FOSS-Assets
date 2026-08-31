@@ -4,6 +4,7 @@ using Civ2engine.IO;
 using Civ2engine.MapObjects;
 using Model;
 using Model.Core.Mapping;
+using Model.Interface;
 using RaylibUI.Initialization;
 using Raylib_CSharp;
 using Raylib_CSharp.Windowing;
@@ -142,7 +143,6 @@ namespace RaylibUI
         {
             Graphics.BeginMode2D(DisplayScale.Camera);
             _activeScreen.Draw(pulse);
-            Graphics.DrawText($"{Time.GetFPS()} FPS", 5, DisplayScale.Height - 20, 20, Color.Magenta);
             Graphics.EndMode2D();
         }
 
@@ -202,9 +202,13 @@ namespace RaylibUI
             }
 
             Graphics.BeginMode2D(DisplayScale.Camera);
-            var width = _colorCorrectionMessage.Length * 10 + 20;
-            Graphics.DrawRectangle(8, 8, width, 28, new Color(0, 0, 0, 210));
-            Graphics.DrawText(_colorCorrectionMessage, 18, 13, 18, Color.White);
+            const int fontSize = 18;
+            var textSize = TextRendering.Measure(Fonts.Arial, _colorCorrectionMessage, fontSize, 0f);
+            var width = (int)MathF.Ceiling(textSize.X) + 20;
+            var height = (int)MathF.Ceiling(textSize.Y) + 10;
+            Graphics.DrawRectangle(8, 8, width, height, new Color(0, 0, 0, 210));
+            TextRendering.Draw(Fonts.Arial, _colorCorrectionMessage, new Vector2(18, 13),
+                fontSize, 0f, Color.White);
             Graphics.EndMode2D();
         }
 

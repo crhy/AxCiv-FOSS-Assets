@@ -375,8 +375,8 @@ public class MapControl : BaseControl
                 _cityDetails.Add(data);
 
                 var size = data.Size.ToString();
-                var fontSize = Math.Clamp(14.ZoomScale(zoom), 10, 18);
-                var textSize = TextManager.MeasureTextEx(Fonts.TnRbold, size, fontSize, 0);
+                var fontSize = Math.Clamp(14.ZoomScale(zoom), TextRendering.MinimumFittedFontSize, 18);
+                var textSize = TextRendering.Measure(Fonts.TnRbold, size, fontSize, 0);
                 var citySizeRectLoc = paddedLoc + data.Location + data.SizeRectLoc.ZoomScale(zoom);
                 var textPosition = citySizeRectLoc;
                 Graphics.DrawRectangle((int)citySizeRectLoc.X, (int)citySizeRectLoc.Y, (int)textSize.X, (int)textSize.Y, data.Color.TextColour);
@@ -392,8 +392,8 @@ public class MapControl : BaseControl
         foreach (var cityData in _cityDetails)
         {
             var name = cityData.Name;
-            var fontSize = Math.Clamp(20.ZoomScale(zoom), 12, 24);
-            var textSize = TextManager.MeasureTextEx(_active.Look.DefaultFont, name, fontSize, 1);
+            var fontSize = Math.Clamp(20.ZoomScale(zoom), TextRendering.MinimumMapFontSize, 24);
+            var textSize = TextRendering.Measure(_active.Look.DefaultFont, name, fontSize, 1);
             var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.Texture.Width.ZoomScale(zoom) / 2f , cityData.Texture.Height.ZoomScale(zoom)) - textSize /2f;
 
             global::RaylibUI.TextRendering.DrawWithShadow(_active.Look.DefaultFont, name, textPosition, fontSize, 1, cityData.Color.TextColour, Color.Black, new Vector2(1, 1));
@@ -510,7 +510,7 @@ public class MapControl : BaseControl
 
         var fontSize = 16;
         var lineHeight = 20;
-        var width = lines.Max(line => TextManager.MeasureTextEx(_active.Look.DefaultFont, line, fontSize, 1).X) + 18;
+        var width = lines.Max(line => TextRendering.Measure(_active.Look.DefaultFont, line, fontSize, 1).X) + 18;
         var mouse = Input.GetMousePosition();
         var x = Math.Min(mouse.X + 14, DisplayScale.Width - width - 6);
         var y = Math.Min(mouse.Y + 14, DisplayScale.Height - lines.Count * lineHeight - 12);

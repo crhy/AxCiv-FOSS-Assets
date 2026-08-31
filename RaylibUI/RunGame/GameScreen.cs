@@ -431,13 +431,7 @@ public class GameScreen : BaseScreen
         var commands = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Where(t => t != commandInterface && commandInterface.IsAssignableFrom(t) && !t.IsAbstract &&
-                        t != improvementCommand &&
-                        t != typeof(ViewThroneRoom) &&
-                        t != typeof(CityStatus) &&
-                        t != typeof(DefenseMinister) &&
-                        t != typeof(AttitudeAdvisor) &&
-                        t != typeof(TradeAdvisor) &&
-                        t != typeof(ScienceAdvisor))
+                        t != improvementCommand)
             .Select(t => Activator.CreateInstance(t, args: args)).OfType<IGameCommand>()
             .Concat(improvements.Select(i => new ImprovementOrder(i, this, game))).ToList();
 

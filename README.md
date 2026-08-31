@@ -1,8 +1,31 @@
-## FOSS Art Assets
-- The Main point of this fork is to add the FOSS Art Assets so the game can be a completely Open Source standalone game at some point.
+## rhYciv
+
+rhYciv recreates the streamlined core gameplay of Civilization II with a
+high-resolution renderer, expanded zoom controls, and freely licensed
+replacement artwork. Spaceships, advisors, and the throne room are deliberately
+outside the project's scope; conquest is the default endgame.
+
+## FOSS art assets
+
+- A primary goal of this fork is to replace the original art so the game can
+  become a completely open-source standalone game.
 ![fusionpower](RaylibUI/FOSSart/Advances/fusionpower.jpg)
 
-I'm also trying to vibe code some code validation tools and clean things up:
+The replacement set is not complete yet. The current beta still requires a
+legally obtained Civilization II data directory containing `RULES.TXT`.
+
+## Install the Flatpak beta
+
+Download `rhYciv-v0.1.0-beta.1-x86_64.flatpak` from the
+[latest GitHub release](https://github.com/crhy/rhYciv/releases/latest), then:
+
+```bash
+flatpak install --user ./rhYciv-v0.1.0-beta.1-x86_64.flatpak
+flatpak run io.github.crhy.rhYciv
+```
+
+The Flatpak uses Freedesktop 25.08 and requests home-directory access while the
+beta still reads original game data and saves from user-selected folders.
 
 ## Local validation
 
@@ -21,6 +44,8 @@ dotnet run --project RaylibUI/RaylibUI.csproj
 On first launch, select a local Civilization II data directory containing
 `RULES.TXT`. The bundled FOSS artwork is used where replacements exist, but it
 does not yet include a complete standalone ruleset.
+
+See [Flatpak packaging](packaging/flatpak/README.md) for local package builds.
 
 ### 4K and high-DPI rendering
 

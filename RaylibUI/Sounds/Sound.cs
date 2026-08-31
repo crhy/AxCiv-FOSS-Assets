@@ -23,7 +23,13 @@ namespace RaylibUI
 
     public Sound(string activeInterface)
     {
-      _convertedSoundsDir = Path.Combine(Settings.BasePath, "CONVERTEDSOUNDS-" + activeInterface.Replace(" ","").ToUpperInvariant());
+      var cacheRoot = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+      if (string.IsNullOrWhiteSpace(cacheRoot))
+      {
+        cacheRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
+      }
+      _convertedSoundsDir = Path.Combine(cacheRoot, "rhYciv",
+        "converted-sounds-" + activeInterface.Replace(" ", "").ToLowerInvariant());
       if (!Directory.Exists(_convertedSoundsDir))
         Directory.CreateDirectory(_convertedSoundsDir);
       SoundDataCache = ReloadAllExistingConvertedSoundReferences();
@@ -82,7 +88,7 @@ namespace RaylibUI
 
     public void SynchronizeCacheReference()
     {
-      string cachePath = $"{_convertedSoundsDir}SoundCache.txt";
+      string cachePath = Path.Combine(_convertedSoundsDir, "SoundCache.txt");
       lock (SoundCacheLock)
       {
         using (StreamWriter writer = new StreamWriter(cachePath))

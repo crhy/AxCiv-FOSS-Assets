@@ -1,7 +1,6 @@
 ﻿using Civ2engine;
 using Model.Controls;
 using Model.Controls.Civilopedia;
-using Raylib_CSharp.Fonts;
 using RaylibUI.BasicTypes;
 using RaylibUI.BasicTypes.Controls;
 
@@ -16,15 +15,17 @@ public class CivilopediaDescription : Listbox
         Location = new System.Numerics.Vector2(window.LayoutPadding.Left + 2, window.LayoutPadding.Top + 2);
         
         var active = gameScreen.MainWindow.ActiveInterface;
+        var fontSize = TextRendering.LegibleUiFontSize(active.Look.CivilopediaFontSize);
 
         string text = CivilopediaLoader.GetDescription(pedia, id);
-        var wrappedTexts = DialogUtils.GetWrappedTexts(text, Width, active.Look.LabelFont, active.Look.CivilopediaFontSize);
-        var textHeight = (int)TextManager.MeasureTextEx(active.Look.LabelFont, text, active.Look.CivilopediaFontSize, 0.0f).Y;
-        var rows = Height / textHeight;
+        var wrappedTexts = DialogUtils.GetWrappedTexts(text, Width, active.Look.LabelFont, fontSize);
+        var textHeight = Math.Max(1, (int)MathF.Ceiling(
+            TextRendering.Measure(active.Look.LabelFont, "Ag", fontSize, 0f).Y));
+        var rows = Math.Max(1, Height / textHeight);
         if (wrappedTexts.Count > rows)
         {
             wrappedTexts = DialogUtils.GetWrappedTexts(text, Width - ScrollBar.ScrollbarDimDefault, 
-                active.Look.LabelFont, active.Look.CivilopediaFontSize);
+                active.Look.LabelFont, fontSize);
         }
 
         List<ListboxGroup> groups = [];
