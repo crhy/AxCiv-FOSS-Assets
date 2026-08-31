@@ -1,0 +1,394 @@
+; rhYciv standalone rules
+; Derived from Freeciv's civ2 ruleset; see SOURCES.md.
+
+@COSMIC
+3
+2
+2
+10
+10
+1
+2
+7
+14
+8
+12
+10
+20
+3
+3
+10
+0
+50
+50
+10
+75
+5
+1
+1
+1
+1
+1
+1
+1
+1
+
+@CIVILIZE
+Advanced Flight, 4, 0, A40, A2B, 3, 4 ; A00
+Alphabet, 4, 0, nil, nil, 0, 3 ; A01
+Amphibious Warfare, 4, 0, A38, A4E, 2, 0 ; A02
+Astronomy, 4, 0, A37, A30, 0, 3 ; A03
+Atomic Theory, 4, 0, A53, A3C, 1, 3 ; A04
+Automobile, 4, 0, A0E, A4C, 3, 4 ; A05
+Banking, 4, 0, A54, A50, 1, 1 ; A06
+Bridge Building, 4, 0, A26, A12, 0, 4 ; A07
+Bronze Working, 4, 0, nil, nil, 0, 3 ; A08
+Ceremonial Burial, 4, 0, nil, nil, 0, 3 ; A09
+Chemistry, 4, 0, A55, A31, 1, 4 ; A0A
+Chivalry, 4, 0, A1C, A23, 1, 0 ; A0B
+Code of Laws, 4, 0, A01, nil, 0, 2 ; A0C
+Combined Arms, 4, 0, A34, A00, 3, 3 ; A0D
+Combustion, 4, 0, A43, A1B, 3, 3 ; A0E
+Communism, 4, 0, A3B, A24, 2, 2 ; A0F
+Computers, 4, 0, A2F, A33, 3, 4 ; A10
+Conscription, 4, 0, A14, A32, 2, 0 ; A11
+Construction, 4, 0, A2E, A13, 0, 3 ; A12
+Currency, 4, 0, A08, nil, 0, 1 ; A13
+Democracy, 4, 0, A06, A25, 1, 2 ; A14
+Economics, 4, 0, A06, A55, 1, 1 ; A15
+Electricity, 4, 0, A32, A2C, 2, 4 ; A16
+Electronics, 4, 0, A4F, A16, 2, 4 ; A17
+Engineering, 4, 0, A51, A12, 0, 4 ; A18
+Environmentalism, 4, 0, A42, A49, 3, 3 ; A19
+Espionage, 4, 0, A0F, A14, 2, 4 ; A1A
+Explosives, 4, 0, A22, A0A, 1, 3 ; A1B
+Feudalism, 4, 0, A56, A35, 0, 4 ; A1C
+Flight, 4, 0, A0E, A53, 3, 4 ; A1D
+Fundamentalism, 4, 0, A52, A11, 2, 3 ; A1E
+Fusion Power, 4, 0, A3A, A4D, 3, 4 ; A1F
+Genetic Engineering, 4, 0, A31, A4F, 2, 4 ; A20
+Guerilla Warfare, 4, 0, A0F, A4E, 2, 0 ; A21
+Gunpowder, 4, 0, A25, A26, 1, 0 ; A22
+Horseback Riding, 4, 0, nil, nil, 0, 3 ; A23
+Industrialization, 4, 0, A41, A06, 2, 1 ; A24
+Invention, 4, 0, A18, A2A, 1, 3 ; A25
+Iron Working, 4, 0, A08, A56, 0, 4 ; A26
+Labor Union, 4, 0, A2F, A21, 3, 4 ; A27
+Laser, 4, 0, A2F, A3A, 3, 4 ; A28
+Leadership, 4, 0, A0B, A22, 1, 0 ; A29
+Literacy, 4, 0, A57, A0C, 0, 3 ; A2A
+Machine Tools, 4, 0, A4C, A4E, 2, 4 ; A2B
+Magnetism, 4, 0, A26, A3C, 1, 4 ; A2C
+Map Making, 4, 0, A01, nil, 0, 4 ; A2D
+Masonry, 4, 0, nil, nil, 0, 3 ; A2E
+Mass Production, 4, 0, A05, A4F, 3, 3 ; A2F
+Mathematics, 4, 0, A01, A2E, 0, 4 ; A30
+Medicine, 4, 0, A3B, A54, 1, 3 ; A31
+Metallurgy, 4, 0, A22, A55, 1, 3 ; A32
+Miniaturization, 4, 0, A2B, A17, 3, 3 ; A33
+Mobile Warfare, 4, 0, A05, A4E, 3, 0 ; A34
+Monarchy, 4, 0, A09, A0C, 0, 3 ; A35
+Monotheism, 4, 0, A3B, A3E, 1, 3 ; A36
+Mysticism, 4, 0, A09, nil, 0, 4 ; A37
+Navigation, 4, 0, A48, A03, 0, 4 ; A38
+Nuclear Fission, 4, 0, A2F, A04, 3, 4 ; A39
+Nuclear Power, 4, 0, A39, A17, 3, 3 ; A3A
+Philosophy, 4, 0, A37, A2A, 0, 2 ; A3B
+Physics, 4, 0, A2A, A38, 1, 3 ; A3C
+Plastics, 4, 0, A43, A49, 3, 3 ; A3D
+Polytheism, 4, 0, A23, A09, 0, 4 ; A3E
+Pottery, 4, 0, nil, nil, 0, 3 ; A3F
+Radio, 4, 0, A1D, A16, 3, 3 ; A40
+Railroad, 4, 0, A4B, A07, 1, 3 ; A41
+Recycling, 4, 0, A2F, A14, 3, 4 ; A42
+Refining, 4, 0, A0A, A4F, 2, 4 ; A43
+Refrigeration, 4, 0, A47, A16, 2, 3 ; A44
+Robotics, 4, 0, A34, A10, 3, 3 ; A45
+Rocketry, 4, 0, A00, A17, 3, 3 ; A46
+Sanitation, 4, 0, A18, A31, 1, 4 ; A47
+Seafaring, 4, 0, A3F, A2D, 0, 3 ; A48
+Space Flight, 4, 0, A10, A46, 3, 4 ; A49
+Stealth, 4, 0, A4D, A45, 3, 4 ; A4A
+Steam Engine, 4, 0, A3C, A25, 1, 4 ; A4B
+Steel, 4, 0, A16, A24, 2, 3 ; A4C
+Superconductors, 4, 0, A3A, A28, 3, 3 ; A4D
+Tactics, 4, 0, A11, A29, 2, 0 ; A4E
+The Corporation, 4, 0, A15, A24, 2, 1 ; A4F
+The Republic, 4, 0, A0C, A2A, 0, 2 ; A50
+The Wheel, 4, 0, A23, nil, 0, 4 ; A51
+Theology, 4, 0, A1C, A36, 1, 2 ; A52
+Theory of Gravity, 4, 0, A03, A55, 1, 4 ; A53
+Trade, 4, 0, A13, A0C, 0, 1 ; A54
+University, 4, 0, A30, A3B, 1, 3 ; A55
+Warrior Code, 4, 0, nil, nil, 0, 3 ; A56
+Writing, 4, 0, A01, nil, 0, 4 ; A57
+
+@IMPROVE
+Nothing, 1, 0, nil
+Palace, 100, 0, A2E
+Barracks, 40, 1, nil
+Granary, 60, 1, A3F
+Temple, 40, 1, A09
+Marketplace, 80, 1, A13
+Library, 80, 1, A57
+Courthouse, 80, 1, A0C
+City Walls, 80, 0, A2E
+Aqueduct, 80, 2, A12
+Bank, 120, 3, A06
+Cathedral, 120, 3, A36
+University, 160, 3, A55
+Mass Transit, 160, 4, A2F
+Colosseum, 100, 4, A12
+Factory, 200, 4, A24
+Mfg. Plant, 320, 6, A45
+SDI Defense, 200, 4, A28
+Recycling Center, 200, 2, A42
+Power Plant, 160, 4, A43
+Hydro Plant, 240, 4, A17
+Nuclear Plant, 160, 2, A3A
+Stock Exchange, 160, 4, A15
+Sewer System, 120, 2, A47
+Supermarket, 120, 3, A44
+Super Highways, 160, 3, A05
+Research Lab, 160, 3, A10
+SAM Battery, 100, 2, A46
+Coastal Defense, 80, 1, A32
+Solar Plant, 320, 4, A19
+Harbor, 60, 1, A48
+Offshore Platform, 160, 3, A33
+Airport, 160, 3, A40
+Police Station, 60, 2, A0F
+Port Facility, 80, 3, A02
+Unused Structural, 40, 0, nil
+Unused Component, 40, 0, nil
+Unused Module, 40, 0, nil
+Capitalization, 999, 0, A4F
+Pyramids, 200, 0, A2E
+Hanging Gardens, 200, 0, A3F
+Colossus, 200, 0, A08
+Lighthouse, 200, 0, A2D
+Great Library, 300, 0, A2A
+Oracle, 300, 0, A37
+Great Wall, 300, 0, A2E
+Sun Tzu's War Academy, 300, 0, A1C
+King Richard's Crusade, 300, 0, A18
+Marco Polo's Embassy, 200, 0, A54
+Michelangelo's Chapel, 400, 0, A36
+Copernicus' Observatory, 300, 0, A03
+Magellan's Expedition, 400, 0, A38
+Shakespeare's Theatre, 300, 0, A31
+Leonardo's Workshop, 400, 0, A25
+J.S. Bach's Cathedral, 400, 0, A52
+Isaac Newton's College, 400, 0, A53
+A.Smith's Trading Co., 400, 0, A15
+Darwin's Voyage, 300, 0, A41
+Statue of Liberty, 400, 0, A14
+Eiffel Tower, 300, 0, A4B
+Hoover Dam, 600, 0, A17
+Women's Suffrage, 600, 0, A24
+Manhattan Project, 600, 0, A39
+United Nations, 600, 0, A0F
+Apollo Program, 600, 0, A49
+SETI Program, 600, 0, A10
+Cure for Cancer, 600, 0, A20
+
+@ENDWONDER
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+nil
+
+@UNITS
+Settlers, nil, 0, 1, 0, 0, 1, 2, 1, 40, 0, 5, nil, 00000000000000
+Engineers, nil, 0, 2, 0, 0, 2, 2, 1, 40, 0, 5, A1B, 00000000000000
+Warriors, nil, 0, 1, 0, 1, 1, 1, 1, 10, 0, 1, nil, 00000000000000
+Phalanx, nil, 0, 1, 0, 1, 2, 1, 1, 20, 0, 0, A08, 00000000000000
+Archers, nil, 0, 1, 0, 3, 2, 1, 1, 30, 0, 1, A56, 00000000000000
+Legion, nil, 0, 1, 0, 4, 2, 1, 1, 40, 0, 1, A26, 00000000000000
+Pikemen, nil, 0, 1, 0, 1, 2, 1, 1, 20, 0, 0, A1C, 00010000000000
+Musketeers, nil, 0, 1, 0, 3, 3, 2, 1, 30, 0, 0, A22, 00000000000000
+Fanatics, nil, 0, 1, 0, 4, 4, 2, 1, 20, 0, 0, A1E, 00100000000000
+Partisan, nil, 0, 1, 0, 4, 4, 2, 1, 50, 0, 0, A21, 00000000000010
+Alpine Troops, nil, 0, 1, 0, 5, 5, 2, 1, 50, 0, 0, A4E, 00001000000000
+Riflemen, nil, 0, 1, 0, 5, 4, 2, 1, 40, 0, 0, A11, 00000000000000
+Marines, nil, 0, 1, 0, 8, 5, 2, 1, 60, 0, 1, A02, 00000000000100
+Paratroopers, nil, 0, 1, 0, 6, 4, 2, 1, 60, 0, 1, A0D, 00000100000000
+Mech. Inf., nil, 0, 3, 0, 6, 6, 3, 1, 50, 0, 0, A27, 00000000000000
+Horsemen, nil, 0, 2, 0, 2, 1, 1, 1, 20, 0, 0, A23, 00000000000000
+Chariot, nil, 0, 2, 0, 3, 1, 1, 1, 30, 0, 0, A51, 00000000000000
+Elephants, nil, 0, 2, 0, 4, 1, 1, 1, 40, 0, 0, A3E, 00000000000000
+Crusaders, nil, 0, 2, 0, 5, 1, 1, 1, 40, 0, 0, A36, 00000000000000
+Knights, nil, 0, 2, 0, 4, 2, 1, 1, 40, 0, 0, A0B, 00000000000000
+Dragoons, nil, 0, 2, 0, 5, 2, 2, 1, 50, 0, 0, A29, 00000000000000
+Cavalry, nil, 0, 2, 0, 8, 3, 2, 1, 60, 0, 0, A4E, 00000000000000
+Armor, nil, 0, 3, 0, 10, 5, 3, 1, 80, 0, 0, A34, 00000000000000
+Catapult, nil, 0, 1, 0, 6, 1, 1, 1, 40, 0, 0, A30, 00000000000000
+Cannon, nil, 0, 1, 0, 8, 1, 2, 1, 40, 0, 0, A32, 00000000000000
+Artillery, nil, 0, 1, 0, 10, 1, 2, 2, 50, 0, 0, A2B, 00000000000000
+Howitzer, nil, 0, 2, 0, 12, 2, 3, 2, 70, 0, 0, A45, 00000001000000
+Fighter, nil, 1, 10, 1, 4, 3, 2, 2, 60, 0, 3, A1D, 00000000010001
+Bomber, nil, 1, 8, 2, 12, 1, 2, 2, 120, 0, 3, A00, 00000000000001
+Helicopter, nil, 1, 6, 0, 10, 3, 2, 2, 100, 0, 3, A0D, 00000000000001
+Stealth Fighter, nil, 1, 14, 1, 8, 4, 2, 2, 80, 0, 3, A4A, 00000000010001
+Stealth Bomber, nil, 1, 12, 2, 14, 5, 2, 2, 160, 0, 3, A4A, 00000000000001
+Trireme, nil, 2, 3, 1, 1, 1, 1, 1, 40, 2, 4, A2D, 00000000100000
+Caravel, nil, 2, 3, 0, 2, 1, 1, 1, 40, 3, 4, A38, 00000000000000
+Galleon, nil, 2, 4, 0, 0, 2, 2, 1, 40, 4, 4, A2C, 00000000000000
+Frigate, nil, 2, 4, 0, 4, 2, 2, 1, 50, 2, 4, A2C, 00000000000000
+Ironclad, nil, 2, 4, 0, 4, 4, 3, 1, 60, 0, 2, A4B, 00000000000000
+Destroyer, nil, 2, 6, 0, 4, 4, 3, 1, 60, 0, 2, A16, 00000000000001
+Cruiser, nil, 2, 5, 0, 6, 6, 3, 2, 80, 0, 2, A4C, 00000000000001
+AEGIS Cruiser, nil, 2, 5, 0, 8, 8, 3, 2, 100, 0, 2, A46, 10000000010001
+Battleship, nil, 2, 4, 0, 12, 12, 4, 2, 160, 0, 2, A05, 00000000000001
+Submarine, nil, 2, 3, 0, 10, 2, 3, 2, 60, 8, 4, A0E, 00000000001001
+Carrier, nil, 2, 5, 0, 1, 9, 4, 2, 160, 8, 4, A00, 00000010000001
+Transport, nil, 2, 5, 0, 0, 3, 3, 1, 50, 8, 4, A24, 00000000000001
+Cruise Missile, nil, 1, 12, 1, 18, 0, 1, 3, 60, 0, 3, A46, 01000000000000
+Nuclear, nil, 1, 16, 1, 99, 0, 1, 1, 160, 0, 3, A46, 01000000000000
+Diplomat, nil, 0, 2, 0, 0, 0, 1, 1, 30, 0, 6, A57, 00000000000010
+Spy, nil, 0, 3, 0, 0, 0, 1, 1, 30, 0, 6, A1A, 00000000000011
+Caravan, nil, 0, 1, 0, 0, 1, 1, 1, 50, 0, 7, A54, 00000000000010
+Freight, nil, 0, 2, 0, 0, 1, 1, 1, 50, 0, 7, A4F, 00000000000010
+Explorer, nil, 0, 1, 0, 0, 1, 1, 1, 30, 0, 0, A48, 00000000000010
+
+@GOVERNMENTS
+Anarchy, Leader, Leader
+Despotism, Chief, Chief
+Monarchy, King, Queen
+Communism, Chairman, Chairwoman
+Fundamentalism, Reverend, Reverend
+Republic, Consul, Consul
+Democracy, President, President
+
+@LEADERS
+Abraham Lincoln, Eleanor Roosevelt, 0, 1, 0, Americans, American, 1, 1, 1
+Motecuhzoma, Tecuichpo, 0, 2, 1, Aztecs, Aztec, 1, 1, 1
+Hammurabi, Sammur-Amat, 0, 3, 2, Babylonians, Babylonian, 1, 1, 1
+Hannibal Barca, Dido, 0, 4, 3, Carthaginians, Carthaginian, 1, 1, 1
+Cunobelinos, Boudica, 0, 5, 0, Celts, Celtic, 1, 1, 1
+Mao Zedong, Wu Zetian, 0, 6, 1, Chinese, Chinese, 1, 1, 1
+Ramesses II, Cleopatra VII, 0, 7, 2, Egyptians, Egyptian, 1, 1, 1
+Henry VIII, Elizabeth I, 0, 8, 3, English, English, 1, 1, 1
+Napoléon Bonaparte, Jeanne d'Arc, 0, 1, 0, French, French, 1, 1, 1
+Friedrich I Barbarossa, Maria Theresia, 0, 2, 1, Germans, German, 1, 1, 1
+Megas Alexandros, Olympias, 0, 3, 2, Greeks, Greek, 1, 1, 1
+Mohandas Gandhi, Indira Gandhi, 0, 4, 3, Indians, Indian, 1, 1, 1
+Tokugawa Ieyasu, Suiko, 0, 5, 0, Japanese, Japanese, 1, 1, 1
+Chinggis, Börte, 0, 6, 1, Mongols, Mongol, 1, 1, 1
+Khshayarsha I, Purandokht, 0, 7, 2, Persians, Persian, 1, 1, 1
+Caesar, Livia, 0, 8, 3, Romans, Roman, 1, 1, 1
+Vladimir Lenin, Ekaterina II, 0, 1, 0, Russians, Russian, 1, 1, 1
+Sitting Bull, Black Shawl, 0, 2, 1, Sioux, Sioux, 1, 1, 1
+Felipe II, Isabel I, 0, 3, 2, Spanish, Spanish, 1, 1, 1
+Knutr, Gunnhildr, 0, 4, 3, Vikings, Viking, 1, 1, 1
+Shaka kaSenzangakhona, Nandi, 0, 5, 0, Zulus, Zulu, 1, 1, 1
+
+@ORDERS
+Fortify,F
+Fortified,F
+Sleep,S
+Build Fortress,F
+Build Road,R
+Build Irrigation,I
+Build Mine,M
+Transform,O
+Clean Pollution,P
+Build Airbase,E
+Transport One,1
+Transport Two,2
+Go To,G
+
+@CARAVAN
+Food
+Textiles
+Metals
+Oil
+Manufactured Goods
+Medicine
+Machinery
+Technology
+Wine
+Spices
+Silk
+Gems
+Gold
+Coal
+Hides
+Salt
+
+@DIFFICULTY
+Chieftain
+Warlord
+Prince
+King
+Emperor
+Deity
+
+@ATTITUDES
+Worshipful
+Enthusiastic
+Cordial
+Receptive
+Neutral
+Uncooperative
+Hostile
+Enraged
+
+@TERRAIN
+Desert, 1, 2, 0, 1, 0, yes, 1, 5, 0, yes, 1, 5, 0, Pla, no ; Des
+Plains, 1, 2, 1, 1, 0, yes, 1, 5, 0, no, 0, 0, 0, Gra, no ; Pla
+Grassland, 1, 2, 2, 0, 0, yes, 1, 5, 0, no, 0, 0, 0, Hil, no ; Gra
+Forest, 2, 3, 1, 2, 0, no, 0, 0, 0, no, 0, 0, 0, Gra, no ; For
+Hills, 2, 4, 1, 0, 0, yes, 1, 10, 0, yes, 3, 10, 0, Pla, no ; Hil
+Mountains, 3, 6, 0, 1, 0, no, 0, 0, 0, yes, 1, 10, 0, Hil, no ; Mou
+Tundra, 1, 2, 1, 0, 0, yes, 1, 5, 0, no, 0, 0, 0, Des, no ; Tun
+Glacier, 2, 2, 0, 0, 0, no, 0, 0, 0, yes, 1, 10, 0, Tun, no ; Gla
+Swamp, 2, 3, 1, 0, 0, no, 0, 0, 0, no, 0, 0, 0, Pla, no ; Swa
+Jungle, 2, 3, 1, 0, 0, no, 0, 0, 0, no, 0, 0, 0, Pla, no ; Jun
+Ocean, 1, 2, 1, 0, 2, no, 0, 0, 0, no, 0, 0, 0, no, no ; Oce
+Oasis, 1, 2, 3, 1, 0
+Buffalo, 1, 2, 1, 3, 0
+Resources, 1, 2, 2, 1, 0
+Pheasant, 2, 3, 3, 2, 0
+Coal, 2, 4, 1, 2, 0
+Gold, 3, 6, 0, 1, 6
+Game, 1, 2, 3, 1, 0
+Ivory, 2, 2, 1, 1, 4
+Peat, 2, 3, 1, 4, 0
+Gems, 2, 3, 1, 0, 4
+Fish, 1, 2, 3, 0, 2
+Oil, 1, 2, 0, 4, 0
+Wheat, 1, 2, 3, 1, 0
+Bonus, 1, 2, 2, 0, 0
+Silk, 2, 3, 1, 2, 3
+Wine, 2, 4, 1, 0, 4
+Iron, 3, 6, 0, 4, 0
+Furs, 1, 2, 2, 0, 3
+Icy Oil, 2, 2, 0, 4, 0
+Spice, 2, 3, 3, 0, 4
+Fruit, 2, 3, 4, 0, 1
+Whales, 1, 2, 2, 1, 2

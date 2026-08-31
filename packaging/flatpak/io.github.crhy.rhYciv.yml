@@ -20,9 +20,6 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --socket=pulseaudio
-  # The beta still reads the user's legally obtained Civilization II data and
-  # writes saves beside it. This can be narrowed once the FOSS ruleset is whole.
-  - --filesystem=home
 
 modules:
   - name: dotnet-runtime

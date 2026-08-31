@@ -20,14 +20,33 @@ public class CivilopediaLoader
     public static void UpdateMapping(Ruleset? rules)
     {
         var describePath = rules != null ? Utils.GetFilePath("describe.txt", rules.Paths) : Utils.GetFilePath("describe.txt");
-        if (describePath == _currentDescribePath || string.IsNullOrWhiteSpace(describePath)) return;
-
         var pediaPath = rules != null ? Utils.GetFilePath("pedia.txt", rules.Paths) : Utils.GetFilePath("pedia.txt");
-        if (pediaPath == _currentPediaPath || string.IsNullOrWhiteSpace(pediaPath)) return;
+
+        if (string.IsNullOrWhiteSpace(describePath) || string.IsNullOrWhiteSpace(pediaPath))
+        {
+            _currentDescribePath = string.Empty;
+            _currentPediaPath = string.Empty;
+            ClearMappingIndexes();
+            return;
+        }
+
+        if (describePath == _currentDescribePath && pediaPath == _currentPediaPath) return;
 
         _currentPediaPath = pediaPath;
         _currentDescribePath = describePath;
+        ClearMappingIndexes();
         GetMappingIndexes(describePath);
+    }
+
+    private static void ClearMappingIndexes()
+    {
+        AdvanceIndex.Clear();
+        ImprovementIndex.Clear();
+        WonderIndex.Clear();
+        UnitIndex.Clear();
+        TerrainIndex.Clear();
+        GovermentIndex.Clear();
+        ConceptIndex.Clear();
     }
 
     public static List<int> AdvanceIndex { get; set; } = [];
@@ -84,6 +103,9 @@ public class CivilopediaLoader
 
     public static string GetDescription(CivilopediaEntry pedia, int id)
     {
+        if (string.IsNullOrWhiteSpace(_currentDescribePath) || !File.Exists(_currentDescribePath))
+            return string.Empty;
+
         var mappingIndex = pedia.InfoType switch
         {
             CivilopediaInfoType.Advances => AdvanceIndex,
@@ -95,6 +117,9 @@ public class CivilopediaLoader
             CivilopediaInfoType.Concepts => ConceptIndex,
             _ => throw new NotImplementedException()
         };
+
+        if (id < 0 || id >= mappingIndex.Count)
+            return string.Empty;
 
         var section = pedia.InfoType switch
         {
@@ -166,6 +191,9 @@ public class CivilopediaLoader
     /// <param name="rulesId">Id of improvement in Rules.txt.</param>
     public static string GetPediaImprovementText(int rulesId)
     {
+        if (string.IsNullOrWhiteSpace(_currentPediaPath) || !File.Exists(_currentPediaPath))
+            return string.Empty;
+
         string text = string.Empty;
         bool checkIfCorrectImprovement = false;
         bool inTargetSection = false;
@@ -213,6 +241,9 @@ public class CivilopediaLoader
     /// <param name="flags">Unit flags from rules.txt.</param>
     public static string GetPediaUnitText(bool[] flags)
     {
+        if (string.IsNullOrWhiteSpace(_currentPediaPath) || !File.Exists(_currentPediaPath))
+            return string.Empty;
+
         string text = string.Empty;
         bool checkIfCorrectSection = false;
         bool inTargetSection = false;
@@ -256,6 +287,9 @@ public class CivilopediaLoader
     public static List<string> ReadConceptsList()
     {
         List<string> concepts = [];
+        if (string.IsNullOrWhiteSpace(_currentDescribePath) || !File.Exists(_currentDescribePath))
+            return concepts;
+
         bool inConceptsSection = false;
         foreach (var line in File.ReadLines(_currentDescribePath))
         {

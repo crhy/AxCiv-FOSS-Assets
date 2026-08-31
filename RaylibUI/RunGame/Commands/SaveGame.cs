@@ -19,7 +19,7 @@ public class SaveGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
             $"{GameScreen.Game.ActivePlayer.Civilization.LeaderName.Substring(0, 2)}_{GameScreen.Game.Date.GameYearString(GameScreen.Game.TurnNumber, "").Replace(".", "")}.sav"
                 .ToLowerInvariant();
         _saveDialog = new FileDialog(GameScreen.Main, Labels.For(LabelIndex.SaveFiles),
-            GameScreen.Main.ActiveRuleSet!.FolderPath, IsValidSelectionCallback, OnSelectionCallback, suggestedFileName,
+            Settings.SaveGameFolder, IsValidSelectionCallback, OnSelectionCallback, suggestedFileName,
             false);
         GameScreen.ShowDialog(_saveDialog, true);
     }

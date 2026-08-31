@@ -13,6 +13,21 @@ namespace Civ2engine
         private static string SettingsFilePath => Path.Combine(ApplicationDataFolder, SettingsFileName);
         
         private static string ApplicationDataFolder => Path.Combine(GetLocalAppDataFolder(), "AxxCiv");
+
+        /// <summary>
+        /// Writable per-user storage for standalone saves. This deliberately
+        /// avoids writing beside the bundled ruleset, which is read-only in a
+        /// Flatpak installation.
+        /// </summary>
+        public static string SaveGameFolder
+        {
+            get
+            {
+                var path = Path.Combine(ApplicationDataFolder, "Saves");
+                Directory.CreateDirectory(path);
+                return path;
+            }
+        }
         
         private const string SettingsFileName = "appsettings.json";
 
@@ -31,6 +46,11 @@ namespace Civ2engine
             if (File.Exists(SettingsFilePath))
             {
                 LoadSettings(SettingsFilePath);
+                if (HasStandaloneData)
+                {
+                    SelectStandaloneRootIfNeeded();
+                    return true;
+                }
                 if (!string.IsNullOrWhiteSpace(Civ2Path) && IsValidRoot(Civ2Path))
                 {
                     return true;
@@ -40,7 +60,21 @@ namespace Civ2engine
 
             LoadSettings(alternativePath);
 
+            if (HasStandaloneData)
+            {
+                SelectStandaloneRootIfNeeded();
+                return true;
+            }
+
             return !string.IsNullOrWhiteSpace(Civ2Path) && IsValidRoot(Civ2Path);
+        }
+
+        private static void SelectStandaloneRootIfNeeded()
+        {
+            if (!string.IsNullOrWhiteSpace(Civ2Path) && IsValidRoot(Civ2Path)) return;
+
+            Civ2Path = BuiltInSearchPaths.First(path =>
+                FileUtilities.GetFile(path, RulesFile) != null && FileUtilities.GetFile(path, "game.txt") != null);
         }
 
         public static string BasePath => AppDomain.CurrentDomain.BaseDirectory;
@@ -66,12 +100,16 @@ namespace Civ2engine
 
             if (root.TryGetProperty(nameof(SearchPaths), out var searchPathsElement))
             {
-                var searchPaths = searchPathsElement.EnumerateArray().Select(e => e.GetString()).Where(IsValidRoot).OfType<string>().Concat(
-                        BuiltInSearchPaths)
+                var searchPaths = BuiltInSearchPaths.Concat(searchPathsElement.EnumerateArray()
+                        .Select(e => e.GetString()).Where(IsValidRoot).OfType<string>())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToArray();
                 if (!string.IsNullOrWhiteSpace(Civ2Path))
                 {
-                    SearchPaths = !searchPaths.Contains(Civ2Path) ? new[] { Civ2Path }.Concat(searchPaths).ToArray() : searchPaths;
+                    SearchPaths = !searchPaths.Contains(Civ2Path, StringComparer.OrdinalIgnoreCase)
+                        ? BuiltInSearchPaths.Concat([Civ2Path]).Concat(searchPaths)
+                            .Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+                        : searchPaths;
                 }
                 else if(searchPaths.Length > 0)
                 {
@@ -81,7 +119,7 @@ namespace Civ2engine
                 
             }else if (!string.IsNullOrWhiteSpace(Civ2Path))
             {
-                SearchPaths = [Civ2Path, ..BuiltInSearchPaths];
+                SearchPaths = [..BuiltInSearchPaths, Civ2Path];
             }
 
             TextureFilter = root.TryGetProperty(nameof(TextureFilter), out var textureFilter) ? textureFilter.GetInt32() : 0;
@@ -129,7 +167,7 @@ namespace Civ2engine
             if (string.IsNullOrWhiteSpace(Civ2Path) || !IsValidRoot(Civ2Path))
             {
                 Civ2Path = path;
-                SearchPaths = [path, ..BuiltInSearchPaths];
+                SearchPaths = [..BuiltInSearchPaths, path];
             }
             else
             {
@@ -141,10 +179,15 @@ namespace Civ2engine
 
         private static string[] BuiltInSearchPaths =>
         [
+            Path.Combine(BasePath, "FOSSart", "Standalone"),
+            Path.Combine(BasePath, "RaylibUI", "FOSSart", "Standalone"),
             Path.Combine(BasePath, "FOSSart"),
             Path.Combine(BasePath, "RaylibUI", "FOSSart"),
             BasePath
         ];
+
+        private static bool HasStandaloneData => BuiltInSearchPaths.Any(path =>
+            FileUtilities.GetFile(path, RulesFile) != null && FileUtilities.GetFile(path, "game.txt") != null);
 
         public static void Save()
         {

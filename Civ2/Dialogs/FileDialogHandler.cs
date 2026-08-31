@@ -42,9 +42,12 @@ public abstract class FileDialogHandler : ICivDialogHandler
         return new FileAction(new OpenFileInfo
         {
             Title = Title,
+            InitialDirectory = InitialDirectory,
             Filters = new List<FileFilter> { new(_extension) }
         }, Name);
     }
+
+    protected virtual string InitialDirectory => Settings.Civ2Path;
 
     public string Title { get; protected set;  }
 }

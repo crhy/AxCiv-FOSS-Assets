@@ -27,6 +27,9 @@ flatpak run io.github.crhy.rhYciv
 
 The GitHub Actions workflow performs the same build for tags and manual runs.
 
+The application is standalone and stores saves under its private XDG data
+directory. The manifest therefore needs no broad host-filesystem permission.
+
 ## Updating NuGet sources
 
 Use the official `flatpak-builder-tools` .NET generator whenever package

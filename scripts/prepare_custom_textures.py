@@ -331,7 +331,7 @@ def prepare_terrain(source: Path, output: Path) -> int:
         for index, image in enumerate(images, 1):
             clean(image, directory / f"{stem}_{index:02}.png")
             count += 1
-    for name in ("fort", "fortify"):
+    for name in ("fort", "fortify", "airstrip", "airstripfull"):
         clean(source / f"{name}.png", terrain / "Improvements" / f"{name}.png")
         count += 1
     return count

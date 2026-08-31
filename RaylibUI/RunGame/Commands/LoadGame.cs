@@ -13,7 +13,7 @@ public class LoadGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
     public override void Action()
     {
         _loadDialog = new FileDialog(GameScreen.Main, Labels.For(LabelIndex.SelectGameToLoad),
-            GameScreen.Main.ActiveRuleSet.FolderPath, IsValidSelectionCallback, OnSelectionCallback);
+            Settings.SaveGameFolder, IsValidSelectionCallback, OnSelectionCallback);
         GameScreen.ShowDialog(_loadDialog, true);
     }
 

@@ -12,6 +12,10 @@ namespace Civ2.Menu
         {
             _elements = new Dictionary<string, List<MenuElement>>();
             var filePath = Utils.GetFilePath("Menu.txt", ruleset.Paths);
+            if (filePath is null)
+            {
+                return;
+            }
             TextFileParser.ParseFile(filePath, new MenuLoader ());
         }
 

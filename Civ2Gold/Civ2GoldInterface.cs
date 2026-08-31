@@ -155,37 +155,19 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         PicSources.Add("gold,large", [new BitmapStorage("ICONS", new Rectangle(16, 320, 14, 14))]);
         PicSources.Add("science,large", [new BitmapStorage("ICONS", new Rectangle(31, 320, 14, 14))]);
         PicSources.Add("trade,small", [ new BitmapStorage("ICONS", new Rectangle(71, 334, 10, 10))]);
-        PicSources.Add("backgroundImage", [new BinaryStorage("Tiles.dll", 0xF7454, 0x1389D)]);
-        PicSources.Add("backgroundImageSmall1", [
-                new BinaryStorage("Tiles.dll", 0xED354, 0xA0FD, new Rectangle(332, 134, 64, 64))
-            ]
-        );
-        PicSources.Add("backgroundImageSmall2", [
-                new BinaryStorage("Tiles.dll", 0xED354, 0xA0FD, new Rectangle(398, 134, 64, 64))
-            ]
-        );
-        PicSources.Add("cityBuiltAncient", [new BinaryStorage("Tiles.dll", 0xDEDA4, 0x46FF)]);
-        PicSources.Add("cityBuiltModern", [new BinaryStorage("Tiles.dll", 0xE34A4, 0x4A42)]);
-        PicSources.Add("taxRateBack", [new BinaryStorage("Tiles.dll", 0xAB2E8, 0xB271, new Rectangle(0, 0, 600, 384))]);
-        PicSources.Add("cityReport", [new BinaryStorage("Tiles.dll", 0x1E8B0, 0x13A3F, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("defenseMinister", [new BinaryStorage("Tiles.dll", 0x322F0, 0xDE6D, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("attitudeAdvisor", [new BinaryStorage("Tiles.dll", 0x4CB3C, 0xCDFA, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("tradeAdvisor", [new BinaryStorage("Tiles.dll", 0x59938, 0xD878, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("scienceAdvisor", [new BinaryStorage("Tiles.dll", 0x671B0, 0xCFD2, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("worldWonders", [new BinaryStorage("Tiles.dll", 0x74184, 0x77E6, new Rectangle(0, 0, 600, 400))]);
-        PicSources.Add("sinaiPic", [new BinaryStorage("Intro.dll", 0x1E630, 0x9F78)]);
-        PicSources.Add("stPeterburgPic", [new BinaryStorage("Intro.dll", 0x285A8, 0x15D04)]);
-        PicSources.Add("desertPic", [new BinaryStorage("Intro.dll", 0xD0140, 0xA35A)]);
-        PicSources.Add("snowPic", [new BinaryStorage("Intro.dll", 0xE2E1C, 0xA925)]);
-        PicSources.Add("canyonPic", [new BinaryStorage("Intro.dll", 0xC51B8, 0xAF88)]);
-        PicSources.Add("mingGeneralPic", [new BinaryStorage("Intro.dll", 0x3E2AC, 0x1D183)]);
-        PicSources.Add("islandPic", [new BinaryStorage("Intro.dll", 0xDA49C, 0x8980)]);
-        PicSources.Add("ancientPersonsPic", [new BinaryStorage("Intro.dll", 0x5B430, 0x15D04)]);
-        PicSources.Add("barbariansPic", [new BinaryStorage("Intro.dll", 0x71134, 0x13D5B)]);
-        PicSources.Add("galleyPic", [new BinaryStorage("Intro.dll", 0xB6A3C, 0xE77A)]);
-        PicSources.Add("peoplePic1", [new BinaryStorage("Intro.dll", 0x84E90, 0x129CE)]);
-        PicSources.Add("peoplePic2", [new BinaryStorage("Intro.dll", 0x97860, 0x139A0)]);
-        PicSources.Add("templePic", [new BinaryStorage("Intro.dll", 0xAB200, 0xB839)]);
+        PicSources.Add("backgroundImage", [new BitmapStorage(Path.Combine("Backgrounds", "main_menu.jpg"))]);
+        PicSources.Add("backgroundImageSmall1", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
+        PicSources.Add("backgroundImageSmall2", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
+        PicSources.Add("cityBuiltAncient", [new BitmapStorage(Path.Combine("Cities", "Aztec", "city_01.png"))]);
+        PicSources.Add("cityBuiltModern", [new BitmapStorage(Path.Combine("Cities", "USA", "city_04.png"))]);
+        foreach (var panelName in new[]
+                 {
+                     "taxRateBack", "cityReport", "defenseMinister", "attitudeAdvisor", "tradeAdvisor",
+                     "scienceAdvisor", "worldWonders"
+                 })
+        {
+            PicSources.Add(panelName, [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
+        }
         string[] citizenEras = ["ancient", "renaissance", "industrial", "modern"];
         string[] citizenRoles =
         [
@@ -220,111 +202,12 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
 
         PicSources.Add("coastline", src);
 
-        PicSources.Add("trBase", [new BinaryStorage("pv.dll", 0x1EFA0, 0x20A3E)]);
-        PicSources.Add("trWallBack", [new BinaryStorage("pv.dll", 0x3F9E0, 0x122EE), 
-            new BinaryStorage("pv.dll", 0x51CD0, 0x122EE), new BinaryStorage("pv.dll", 0x63FC0, 0x9F1D), 
-            new BinaryStorage("pv.dll", 0x6DEE0, 0x964D)]);
-        PicSources.Add("trFloor", [new BinaryStorage("pv.dll", 0x77530, 0xB8FD), 
-            new BinaryStorage("pv.dll", 0x82E30, 0x10162), new BinaryStorage("pv.dll", 0x92F94, 0xB8EB), 
-            new BinaryStorage("pv.dll", 0x9E880, 0xD827)]);
-        PicSources.Add("trRug", [new BinaryStorage("pv.dll", 0xAC0A8, 0x5B1F), 
-            new BinaryStorage("pv.dll", 0xB1BC8, 0x573B), new BinaryStorage("pv.dll", 0xB7304, 0x3429), 
-            new BinaryStorage("pv.dll", 0xBA730, 0x6A9D)]);
-        PicSources.Add("trWallFront", [new BinaryStorage("pv.dll", 0xC11D0, 0x186F1), 
-            new BinaryStorage("pv.dll", 0xD98C4, 0x16AD6), new BinaryStorage("pv.dll", 0xF039C, 0x118B3), 
-            new BinaryStorage("pv.dll", 0x101C50, 0x1785E)]);
-        PicSources.Add("trThroneDecor", [new BinaryStorage("pv.dll", 0x1194B0, 0x3466), 
-            new BinaryStorage("pv.dll", 0x11C918, 0x6D85), new BinaryStorage("pv.dll", 0x1236A0, 0x64D4), 
-            new BinaryStorage("pv.dll", 0x129B74, 0x5592)]);
-        PicSources.Add("trColumnsBack", [new BinaryStorage("pv.dll", 0x12F108, 0x9776),
-            new BinaryStorage("pv.dll", 0x138880, 0x60F3), new BinaryStorage("pv.dll", 0x13E974, 0x61DE), 
-            new BinaryStorage("pv.dll", 0x144B54, 0xC289)]);
-        PicSources.Add("trThrone", [new BinaryStorage("pv.dll", 0x150DE0, 0x2311), 
-            new BinaryStorage("pv.dll", 0x1530F4, 0x1E31), new BinaryStorage("pv.dll", 0x154F28, 0x3137), 
-            new BinaryStorage("pv.dll", 0x158060, 0x1DA0)]);
-        PicSources.Add("trColumnsFront", [new BinaryStorage("pv.dll", 0x159E00, 0x2BA2), 
-            new BinaryStorage("pv.dll", 0x15C9A4, 0x3056), new BinaryStorage("pv.dll", 0x15F9FC, 0x4DBA), 
-            new BinaryStorage("pv.dll", 0x1647B8, 0x5E7D)]);
-        PicSources.Add("trDecorRugs", [new BinaryStorage("pv.dll", 0x16A638, 0x20A8)]);
-        PicSources.Add("trDecorPaintings", [new BinaryStorage("pv.dll", 0x16C6E0, 0x9CEF)]);
-        PicSources.Add("trDecorBushes", [new BinaryStorage("pv.dll", 0x1763D0, 0x1AFE)]);
-        PicSources.Add("trDecorThroneBushes", [new BinaryStorage("pv.dll", 0x177ED0, 0x1EC0)]);
-        PicSources.Add("trDecorPots", [new BinaryStorage("pv.dll", 0x179D90, 0x148C)]);
-        PicSources.Add("trDecorTreasures", [new BinaryStorage("pv.dll", 0x17B21C, 0x29B7)]);
-        PicSources.Add("trDecorStatues", [new BinaryStorage("pv.dll", 0x17DBD4, 0x6CEA)]);
-        PicSources.Add("trWallBack_section", [new BinaryStorage("pv.dll", 0x1848C0, 0x24FB)]);
-        PicSources.Add("trFloor_section", [new BinaryStorage("pv.dll", 0x186DBC, 0x35EA)]);
-        PicSources.Add("trRug_section", [new BinaryStorage("pv.dll", 0x18A3A8, 0xE8F)]);
-        PicSources.Add("trWallFront_section", [new BinaryStorage("pv.dll", 0x18B238, 0x19C3)]);
-        PicSources.Add("trThroneDecor_section", [new BinaryStorage("pv.dll", 0x18CBFC, 0x10EF)]);
-        PicSources.Add("trColumnsBack_section", [new BinaryStorage("pv.dll", 0x18DCEC, 0x47E3)]);
-        PicSources.Add("trThrone_section", [new BinaryStorage("pv.dll", 0x1924D0, 0x822)]);
-        PicSources.Add("trColumnsFront_section", [new BinaryStorage("pv.dll", 0x192CF4, 0x1AD7)]);
-        PicSources.Add("trDecorRugs_section", [new BinaryStorage("pv.dll", 0x1947CC, 0xA0F)]);
-        PicSources.Add("trDecorPaintings_section", [new BinaryStorage("pv.dll", 0x1951DC, 0xF5C)]);
-        PicSources.Add("trDecorBushes_section", [new BinaryStorage("pv.dll", 0x196138, 0xAB0)]);
-        PicSources.Add("trDecorThroneBushes_section", [new BinaryStorage("pv.dll", 0x196BE8, 0xBC4)]);
-        PicSources.Add("trDecorPots_section", [new BinaryStorage("pv.dll", 0x1977AC, 0x901)]);
-        PicSources.Add("trDecorTreasures_section", [new BinaryStorage("pv.dll", 0x1980B0, 0x8E5)]);
-        PicSources.Add("trDecorStatues_section", [new BinaryStorage("pv.dll", 0x198998, 0xFC1)]);
-
-        PicSources.Add("cvOcean", [
-            new BinaryStorage("cv.dll", 0x9D250, 0x45423), 
-            new BinaryStorage("cv.dll", 0xE2674, 0x46642),
-            new BinaryStorage("cv.dll", 0x128CB8, 0x44E6A), 
-            new BinaryStorage("cv.dll", 0x16DB24, 0x44B23)]);
-        PicSources.Add("cvRiver", [
-            new BinaryStorage("cv.dll", 0x1B2648, 0x47B68), 
-            new BinaryStorage("cv.dll", 0x1FA1B0, 0x48F7A),
-            new BinaryStorage("cv.dll", 0x24312C, 0x472FA), 
-            new BinaryStorage("cv.dll", 0x28A428, 0x473B0)]);
-        PicSources.Add("cvContinent", [
-            new BinaryStorage("cv.dll", 0x2D17D8, 0x48D0A), 
-            new BinaryStorage("cv.dll", 0x31A4E4, 0x4A859),
-            new BinaryStorage("cv.dll", 0x364D40, 0x483D5), 
-            new BinaryStorage("cv.dll", 0x3AD118, 0x48FFE)]);
-        PicSources.Add("cvImprovements", [new BinaryStorage("cv.dll", 0x432F0, 0x35C79)]);
-
-        DialogHandlers["MAINMENU"].Dialog.Decorations
-            .Add(new Decoration(PicSources["sinaiPic"][0], new Point(0.08, 0.09)));
-        DialogHandlers["SIZEOFMAP"].Dialog.Decorations
-            .Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMSIZE"].Dialog.Decorations
-            .Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMLAND"].Dialog.Decorations
-            .Add(new Decoration(PicSources["stPeterburgPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMFORM"].Dialog.Decorations
-            .Add(new Decoration(PicSources["islandPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMCLIMATE"].Dialog.Decorations
-            .Add(new Decoration(PicSources["desertPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMTEMP"].Dialog.Decorations
-            .Add(new Decoration(PicSources["snowPic"][0], new Point(0, 0.09)));
-        DialogHandlers["CUSTOMAGE"].Dialog.Decorations
-            .Add(new Decoration(PicSources["canyonPic"][0], new Point(0, 0.09)));
-        DialogHandlers["DIFFICULTY"].Dialog.Decorations
-            .Add(new Decoration(PicSources["mingGeneralPic"][0], new Point(-0.08, 0.09)));
-        DialogHandlers["ENEMIES"].Dialog.Decorations
-            .Add(new Decoration(PicSources["ancientPersonsPic"][0], new Point(0.08, 0.09)));
-        DialogHandlers["BARBARITY"].Dialog.Decorations
-            .Add(new Decoration(PicSources["barbariansPic"][0], new Point(-0.08, 0.09)));
-        DialogHandlers["RULES"].Dialog.Decorations
-            .Add(new Decoration(PicSources["galleyPic"][0], new Point(0.08, 0.09)));
-        DialogHandlers["ADVANCED"].Dialog.Decorations
-            .Add(new Decoration(PicSources["galleyPic"][0], new Point(-0.08, 0.09)));
-        DialogHandlers["ACCELERATED"].Dialog.Decorations
-            .Add(new Decoration(PicSources["galleyPic"][0], new Point(0.08, 0.09)));
-        DialogHandlers["GENDER"].Dialog.Decorations
-            .Add(new Decoration(PicSources["peoplePic1"][0], new Point(0.0, 0.09)));
-        DialogHandlers["TRIBE"].Dialog.Decorations
-            .Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMTRIBE"].Dialog.Decorations
-            .Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMTRIBE2"].Dialog.Decorations
-            .Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
-        DialogHandlers["NAME"].Dialog.Decorations
-            .Add(new Decoration(PicSources["peoplePic2"][0], new Point(0.0, 0.09)));
-        DialogHandlers["CUSTOMCITY"].Dialog.Decorations
-            .Add(new Decoration(PicSources["templePic"][0], new Point(0.08, 0.09)));
+        PicSources.Add("cvOcean", Enumerable.Repeat<IImageSource>(
+            new BitmapStorage(Path.Combine("Backgrounds", "city_ocean.jpg")), 4).ToArray());
+        PicSources.Add("cvRiver", Enumerable.Repeat<IImageSource>(
+            new BitmapStorage(Path.Combine("Backgrounds", "city_river.jpg")), 4).ToArray());
+        PicSources.Add("cvContinent", Enumerable.Repeat<IImageSource>(
+            new BitmapStorage(Path.Combine("Backgrounds", "city_land.jpg")), 4).ToArray());
     }
 
     protected override List<MenuDetails> MenuMap { get; } =
@@ -587,6 +470,7 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
 
     public override List<CityViewTiles> GetCityViewTiles()
     {
+#if LEGACY_CIV2_CITY_VIEW
         return
         [
             new(0, 62, new BinaryStorage("cv.dll", 0x432F0, 0x35C79, new(160, 116, 158, 114)), new(4, 0), 2),   // manhattan project
@@ -660,10 +544,16 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
             new(66, 58, new BinaryStorage("cv.dll", 0x432F0, 0x35C79, new(1, 852, 125, 253)), new(0, 0), 0),   // statue liberty (sea)
             new(67, 58, new BinaryStorage("cv.dll", 0x432F0, 0x35C79, new(127, 852, 125, 253)), new(0, 0), 0),   // statue liberty (land)
         ];
+#else
+        // The standalone city panorama keeps the terrain backdrop and normal
+        // city controls without loading proprietary cv.dll scenery layers.
+        return [];
+#endif
     }
 
     public override List<BinaryStorage> GetCityViewAltTiles()
     {
+#if LEGACY_CIV2_CITY_VIEW
         return
         [
             new BinaryStorage("cv.dll", 0x78F6C, 0x242E4, new(1, 1, 158, 114)),
@@ -694,6 +584,9 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
             new BinaryStorage("cv.dll", 0x78F6C, 0x242E4, new(373, 512, 123, 82)),
             new BinaryStorage("cv.dll", 0x78F6C, 0x242E4, new(497, 512, 123, 82))
         ];
+#else
+        return [];
+#endif
     }
 
     public override void GetShieldImages()

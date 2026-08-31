@@ -1,0 +1,2 @@
+@metadata
+@title=rhYciv Standalone - Civilization II Multiplayer Gold compatible

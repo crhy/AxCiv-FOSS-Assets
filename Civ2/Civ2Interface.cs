@@ -41,26 +41,27 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
     public virtual void Initialize()
     {
         Dialogs = PopupBoxReader.LoadPopupBoxes(MainApp.ActiveRuleSet.Paths, "game.txt");
-        // Add popups not in game.txt
-        var extraPopups = new List<string> { "SCENCHOSECIV", "SCENINTRO", "SCENCUSTOMINTRO" };
-        foreach (var popup in extraPopups)
-        {
-            Dialogs.Add(popup, new PopupBox());
-        }
+        Labels.UpdateLabels(MainApp.ActiveRuleSet);
+        CivilopediaLoader.UpdateMapping(MainApp.ActiveRuleSet);
+        BuiltInDialogs.AddFallbacks(Dialogs);
         //foreach (var value in Dialogs.Values)
         //{
         //    value.Width = (int)(value.Width * 1.5m); // update this in CivDialog class so that you don't skip advisor, scenario and other popups
         //}
-        Labels.UpdateLabels(null);
-        CivilopediaLoader.UpdateMapping(null);
-        
         var handlerInterface = typeof(ICivDialogHandler);
-        DialogHandlers = AppDomain.CurrentDomain.GetAssemblies()
+        var handlers = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Where(t => t != handlerInterface && handlerInterface.IsAssignableFrom(t) && !t.IsAbstract)
             .Select(Activator.CreateInstance)
             .OfType<ICivDialogHandler>()
-            .Select(h => h.UpdatePopupData(Dialogs))
+            .ToArray();
+
+        foreach (var handler in handlers)
+        {
+            Dialogs.TryAdd(handler.Name, BuiltInDialogs.Generic(handler.Name));
+        }
+
+        DialogHandlers = handlers.Select(h => h.UpdatePopupData(Dialogs))
             .ToDictionary(k => k.Name);
     }
 

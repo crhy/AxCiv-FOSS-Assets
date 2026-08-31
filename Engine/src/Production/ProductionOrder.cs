@@ -6,6 +6,7 @@ using Model.Core.Cities;
 using Model.Core.GameRules;
 using Model.Core.Production;
 using Model.Images;
+using Civ2engine.Enums;
 
 namespace Civ2engine.Production
 {
@@ -59,7 +60,13 @@ namespace Civ2engine.Production
         {
             return rules.ProductionOrders ??= rules.UnitTypes.Select((u, index) => new UnitProductionOrder(u, index))
                 .Cast<IProductionOrder>()
-                .Concat(rules.Improvements[1..].Select(((imp, i) => new BuildingProductionOrder(imp, i, rules.FirstWonderIndex)))).ToArray();
+                .Concat(rules.Improvements[1..]
+                    .Where(imp => imp.Type is not ((int)ImprovementType.SSstructural)
+                        and not ((int)ImprovementType.SScomponent)
+                        and not ((int)ImprovementType.SSmodule)
+                        and not ((int)ImprovementType.ApolloProgr))
+                    .Select(imp => new BuildingProductionOrder(imp, imp.Type - 1, rules.FirstWonderIndex)))
+                .ToArray();
 
         }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Model.Core.GameRules;
 
@@ -48,7 +50,11 @@ namespace Civ2engine.IO
         public static void UpdateLabels(Ruleset? rules)
         {
             var labelPath = rules != null ? Utils.GetFilePath("labels.txt", rules.Paths) : Utils.GetFilePath("labels.txt");
-            if (string.IsNullOrWhiteSpace(labelPath)) return;
+            if (string.IsNullOrWhiteSpace(labelPath))
+            {
+                UseBuiltInLabels();
+                return;
+            }
 
             lock (Lock)
             {
@@ -57,6 +63,47 @@ namespace Civ2engine.IO
                 _currentPath = labelPath;
                 TextFileParser.ParseFile(labelPath, new LabelLoader());
             }
+        }
+
+        private static void UseBuiltInLabels()
+        {
+            const string builtInPath = "<rhYciv built-in labels>";
+            lock (Lock)
+            {
+                if (_currentPath == builtInPath) return;
+
+                var indexes = Enum.GetValues<LabelIndex>();
+                var maximum = indexes.Max(index => (int)index);
+                var labels = Enumerable.Range(0, maximum + 1)
+                    .Select(index => index == 0 ? string.Empty : $"Label {index}")
+                    .ToArray();
+
+                foreach (var index in indexes)
+                {
+                    labels[(int)index] = Humanize(index.ToString());
+                }
+
+                labels[(int)LabelIndex.BC] = "BC";
+                labels[(int)LabelIndex.AD] = "AD";
+                labels[(int)LabelIndex.OK] = Ok;
+                labels[(int)LabelIndex.Cancel] = Cancel;
+                labels[(int)LabelIndex.Help] = Help;
+                labels[(int)LabelIndex.BronzeAgeMonolith] = "Bronze Age";
+                labels[(int)LabelIndex.ClassicalForum] = "Classical";
+                labels[(int)LabelIndex.FarEastPavilion] = "East Asian";
+                labels[(int)LabelIndex.MedievalCastle] = "Medieval";
+
+                Items = labels;
+                _currentPath = builtInPath;
+            }
+        }
+
+        private static string Humanize(string value)
+        {
+            value = value.Replace("STRING0", "%STRING0", StringComparison.OrdinalIgnoreCase);
+            value = Regex.Replace(value, "([a-z0-9])([A-Z])", "$1 $2");
+            value = Regex.Replace(value, "([A-Za-z])([0-9])", "$1 $2");
+            return value.Replace('_', ' ').Trim();
         }
     }
 }

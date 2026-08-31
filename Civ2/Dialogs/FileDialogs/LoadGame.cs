@@ -16,6 +16,8 @@ public class LoadGame : FileDialogHandler
     {
     }
 
+    protected override string InitialDirectory => Settings.SaveGameFolder;
+
     public override ICivDialogHandler UpdatePopupData(Dictionary<string, PopupBox> popup)
     {
         this.Title = Labels.For(LabelIndex.SelectGameToLoad);

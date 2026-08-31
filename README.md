@@ -11,8 +11,10 @@ outside the project's scope; conquest is the default endgame.
   become a completely open-source standalone game.
 ![fusionpower](RaylibUI/FOSSart/Advances/fusionpower.jpg)
 
-The replacement set is not complete yet. The current beta still requires a
-legally obtained Civilization II data directory containing `RULES.TXT`.
+The bundled rules, city names, interface atlases, terrain, units, cities, and
+citizens now run without a Civilization II installation. See the
+[standalone asset audit](docs/STANDALONE-ASSET-AUDIT.md) for the few functional
+placeholders that can still receive more polished art.
 
 ## Install the Flatpak beta
 
@@ -24,8 +26,8 @@ flatpak install --user ./rhYciv-v0.1.0-beta.1-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
-The Flatpak uses Freedesktop 25.08 and requests home-directory access while the
-beta still reads original game data and saves from user-selected folders.
+The Flatpak uses Freedesktop 25.08. Saves are stored in the app's private user
+data directory, so the package does not request broad home-directory access.
 
 ## Local validation
 
@@ -41,9 +43,8 @@ The desktop client requires the .NET 9 SDK:
 dotnet run --project RaylibUI/RaylibUI.csproj
 ```
 
-On first launch, select a local Civilization II data directory containing
-`RULES.TXT`. The bundled FOSS artwork is used where replacements exist, but it
-does not yet include a complete standalone ruleset.
+The game launches directly with its bundled standalone ruleset. An external
+compatible rules directory remains optional for mod and scenario testing.
 
 See [Flatpak packaging](packaging/flatpak/README.md) for local package builds.
 

@@ -59,7 +59,10 @@ public class MainMenu : BaseScreen
             case FileAction fileAction:
                 _imagePanels.Clear();
                 
-                ShowDialog(new FileDialog(MainWindow,fileAction.FileInfo.Title, Settings.Civ2Path, (fileName) =>
+                var initialDirectory = Directory.Exists(fileAction.FileInfo.InitialDirectory)
+                    ? fileAction.FileInfo.InitialDirectory
+                    : Settings.Civ2Path;
+                ShowDialog(new FileDialog(MainWindow,fileAction.FileInfo.Title, initialDirectory, (fileName) =>
                 {
                     return fileAction.FileInfo.Filters.Any(filter => filter.IsMatch(fileName));
                 }, HandleFileSelection));
