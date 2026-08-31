@@ -33,22 +33,12 @@ namespace Civ2.ImageLoader
                 // expect small Civ2 sprites. The high-resolution FOSS art belongs
                 // only to zoomable map rendering.
                 var uiProps = Images.ExtractBitmapData(originalSource, active);
-                var mapProps = Images.ExtractBitmapData(mapSource, active);
-
-                var drawScale = GetDrawScale(mapProps.Image.Width, mapProps.Image.Height, logicalSize);
-                var drawSize = new Vector2(mapProps.Image.Width * drawScale, mapProps.Image.Height * drawScale);
-                var drawOffset = new Vector2(
-                    MathF.Max(0, (logicalSize.X - drawSize.X) / 2f),
-                    MathF.Max(0, logicalSize.Y - drawSize.Y));
-
                 units[i] = new UnitImage
                 {
                     Image = originalSource,
                     MapImage = ReferenceEquals(mapSource, originalSource) ? null : mapSource,
                     FlagLoc = uiProps.Flag1,
                     LogicalSize = logicalSize,
-                    DrawOffset = drawOffset,
-                    DrawScale = drawScale,
                 };
             }
 
@@ -72,16 +62,6 @@ namespace Civ2.ImageLoader
                 new Rectangle(1 + 65 * (index % UnitColumns), 1 + (active.UnitsPxHeight + 1) * (index / UnitColumns),
                     OriginalUnitWidth, active.UnitsPxHeight),
                 searchFlagLoc: true);
-        }
-
-        private static float GetDrawScale(int sourceWidth, int sourceHeight, Vector2 logicalSize)
-        {
-            if (sourceWidth <= 0 || sourceHeight <= 0)
-            {
-                return 1f;
-            }
-
-            return MathF.Min(logicalSize.X / sourceWidth, logicalSize.Y / sourceHeight);
         }
     }
 }

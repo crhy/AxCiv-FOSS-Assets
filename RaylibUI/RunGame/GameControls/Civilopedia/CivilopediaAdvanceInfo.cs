@@ -452,7 +452,8 @@ public sealed class CivilopediaAdvanceInfo : BaseControl
             }
 
             texture = Texture2D.LoadFromImage(image);
-            texture.SetFilter((TextureFilter)Settings.TextureFilter);
+            image.Unload();
+            texture.SetFilter(TextureFilter.Bilinear);
             FossArtTextures[path] = texture;
             return texture.Width > 0 && texture.Height > 0;
         }

@@ -12,7 +12,7 @@ public class ZoomOut(GameScreen gameScreen)
 {
     public override void Action()
     {
-        if (GameScreen.Zoom > -7)
+        if (GameScreen.Zoom > GameScreen.MinimumZoom)
             GameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = GameScreen.Zoom - 1 });
     }
 }

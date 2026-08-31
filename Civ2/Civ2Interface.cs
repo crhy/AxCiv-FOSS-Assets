@@ -632,11 +632,11 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         [UnitType.Riflemen] = ["riflemen"],
         [UnitType.Marines] = ["marines"],
         [UnitType.Paratroopers] = ["paratroopers"],
-        [UnitType.MechInf] = ["mechinfantry", "mechanized infantry", "mech inf"],
+        [UnitType.MechInf] = ["mechanized infantry", "mechinfantry", "mech inf"],
         [UnitType.Horsemen] = ["horsemen"],
         [UnitType.Chariot] = ["chariot"],
         [UnitType.Elephant] = ["elephant"],
-        [UnitType.Crusaders] = ["crusader", "crusaders"],
+        [UnitType.Crusaders] = ["crusaders", "crusader"],
         [UnitType.Knights] = ["knight", "knights"],
         [UnitType.Dragoons] = ["dragoons"],
         [UnitType.Cavalry] = ["cavalry"],
@@ -677,18 +677,37 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
 
         foreach (var categoryPath in GetFossArtCategoryPaths(category))
         {
-            var matchingFile = Directory.EnumerateFiles(categoryPath)
-                .FirstOrDefault(file => string.Equals(
-                    NormalizeFossArtName(Path.GetFileNameWithoutExtension(file)),
-                    directName,
-                    StringComparison.OrdinalIgnoreCase));
-            if (matchingFile != null)
+            if (GetFossArtFileIndex(categoryPath).TryGetValue(directName, out var matchingFile))
             {
                 return new BitmapStorage(matchingFile);
             }
         }
 
         return null;
+    }
+
+    private static readonly Dictionary<string, IReadOnlyDictionary<string, string>> FossArtFileIndexes =
+        new(StringComparer.OrdinalIgnoreCase);
+    private static readonly object FossArtFileIndexLock = new();
+
+    private static IReadOnlyDictionary<string, string> GetFossArtFileIndex(string categoryPath)
+    {
+        lock (FossArtFileIndexLock)
+        {
+            if (FossArtFileIndexes.TryGetValue(categoryPath, out var cached))
+            {
+                return cached;
+            }
+
+            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var file in Directory.EnumerateFiles(categoryPath).OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+            {
+                index.TryAdd(NormalizeFossArtName(Path.GetFileNameWithoutExtension(file)), file);
+            }
+
+            FossArtFileIndexes[categoryPath] = index;
+            return index;
+        }
     }
 
     private static IImageSource? GetFossArtIcon(string category, string title)

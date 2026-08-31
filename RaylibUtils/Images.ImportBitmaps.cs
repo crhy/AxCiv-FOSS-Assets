@@ -71,6 +71,7 @@ namespace RaylibUtils
 
         private static Dictionary<string, Image> _imageCache = new();
         private static Dictionary<string, int> _sourceBpp = new();
+        private static readonly HashSet<string> OwnedImageKeys = new(StringComparer.Ordinal);
 
         public static ImageProps ExtractBitmapData(IImageSource imageSource, string[]? searchPaths)
         {
@@ -123,6 +124,7 @@ namespace RaylibUtils
                             }
                             var source_img_bpp = Images.LoadImageFromFile(path, binarySource.DataStart, binarySource.Length);
                             _imageCache[sourceKey] = source_img_bpp.Image;
+                            OwnedImageKeys.Add(sourceKey);
                             _sourceBpp[sourceKey] = source_img_bpp.ColourDepth;
                         }
 
@@ -134,6 +136,7 @@ namespace RaylibUtils
                         }
                         var image = Image.FromImage(sourceImage, rect);
                         _imageCache[binarySource.Key] = image;
+                        OwnedImageKeys.Add(binarySource.Key);
                         break;
                     }
                 case BitmapStorage bitmapStorage:
@@ -151,6 +154,7 @@ namespace RaylibUtils
                             }
                             var source_img_bpp = Images.LoadImageFromFile(path);
                             _imageCache[sourceKey] = source_img_bpp.Image;
+                            OwnedImageKeys.Add(sourceKey);
                             _sourceBpp[sourceKey] = source_img_bpp.ColourDepth;
                         }
 
@@ -201,6 +205,7 @@ namespace RaylibUtils
                         }
 
                         _imageCache[bitmapStorage.Key] = image;
+                        OwnedImageKeys.Add(bitmapStorage.Key);
                     break;
                 }
                 case MemoryStorage memoryStorage:
@@ -213,6 +218,7 @@ namespace RaylibUtils
                                 ? active.PlayerColours[owner].DarkColour
                                 : active.PlayerColours[owner].LightColour);
                         _imageCache[key] = image;
+                        OwnedImageKeys.Add(key);
                     }
                     else
                     {
@@ -233,10 +239,18 @@ namespace RaylibUtils
         
         public static void ClearCache()
         {
-            foreach (var image in _imageCache.Where(t => !t.Key.StartsWith("Binary")))
+            // MemoryStorage images without color replacement are borrowed. All
+            // decoded files, crops, and recolored copies are owned by this cache.
+            foreach (var key in OwnedImageKeys)
             {
-                _imageCache.Remove(image.Key);
+                if (_imageCache.TryGetValue(key, out var image) && image.Width > 0 && image.Height > 0)
+                {
+                    image.Unload();
+                }
             }
+            OwnedImageKeys.Clear();
+            _imageCache.Clear();
+            _sourceBpp.Clear();
         }
     }
 }

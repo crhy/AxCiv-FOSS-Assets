@@ -15,6 +15,7 @@ public class TileTextureCache
     private readonly List<int> _seenMaps = new();
     private readonly List<TerrainSet> _tileSets = new();
     private readonly List<MapDimensions> _dimensions = new();
+    private readonly Dictionary<(int MapIndex, int Zoom), MapDimensions> _scaledDimensions = new();
 
     public TileTextureCache(GameScreen parentScreen)
     {
@@ -58,6 +59,11 @@ public class TileTextureCache
 
     public MapDimensions GetDimensions(Map map, int zoom)
     {
+        if (_scaledDimensions.TryGetValue((map.MapIndex, zoom), out var scaled))
+        {
+            return scaled;
+        }
+
         var cacheIndex = _seenMaps.IndexOf(map.MapIndex);
         if (cacheIndex == -1)
         {
@@ -65,7 +71,7 @@ public class TileTextureCache
         }
 
         //return _dimensions[mapIndex];
-        return new MapDimensions
+        scaled = new MapDimensions
         {
             TotalWidth = _dimensions[cacheIndex].TotalWidth.ZoomScale(zoom),
             TotalHeight = _dimensions[cacheIndex].TotalHeight.ZoomScale(zoom),
@@ -75,6 +81,8 @@ public class TileTextureCache
             HalfWidth = _dimensions[cacheIndex].HalfWidth.ZoomScale(zoom),
             DiagonalCut = _dimensions[cacheIndex].DiagonalCut.ZoomScale(zoom).ZoomScale(zoom),
         };
+        _scaledDimensions[(map.MapIndex, zoom)] = scaled;
+        return scaled;
     }
 
     public void Redraw(Tile tile, int civilizationId)
@@ -85,15 +93,25 @@ public class TileTextureCache
             mapIndex = SetupMap(tile.Map);
         }
 
-        _mapTileTextures[mapIndex][tile.XIndex, tile.Y] =
+        var cache = _mapTileTextures[mapIndex];
+        cache[tile.XIndex, tile.Y]?.Image.Unload();
+        cache[tile.XIndex, tile.Y] =
             MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
     }
 
     public void Clear()
     {
+        foreach (var mapTextures in _mapTileTextures)
+        {
+            foreach (var details in mapTextures)
+            {
+                details?.Image.Unload();
+            }
+        }
         _seenMaps.Clear();
         _mapTileTextures.Clear();
         _dimensions.Clear();
+        _scaledDimensions.Clear();
         _tileSets.Clear();
     }
 }

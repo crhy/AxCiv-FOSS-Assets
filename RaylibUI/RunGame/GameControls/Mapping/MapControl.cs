@@ -36,6 +36,9 @@ public class MapControl : BaseControl
     private float _zoomBtnScale;
     private bool _middlePanning, _middleMoved, _middleReset;
     private Vector2 _middleDrag;
+    private readonly List<CityData> _cityDetails = new();
+    private PathPreviewKey? _pathPreviewKey;
+    private Path? _pathPreview;
 
     private readonly Queue<IGameView> _animationQueue = new();
     private IGameView _currentView;
@@ -60,12 +63,12 @@ public class MapControl : BaseControl
         _zoomOutButton = new Button(Controller, String.Empty, backgroundImage: _active.PicSources["zoomOut"][0], imageScale: _zoomBtnScale);
         _zoomInButton.Click += (_, _) =>
         {
-            if (_gameScreen.Zoom < 8)
+            if (_gameScreen.Zoom < GameScreen.MaximumZoom)
                 _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = _gameScreen.Zoom + 1 });
         };
         _zoomOutButton.Click += (_, _) =>
         {
-            if (_gameScreen.Zoom > -7)
+            if (_gameScreen.Zoom > GameScreen.MinimumZoom)
                 _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = _gameScreen.Zoom - 1 });
         };
         SetDimensions();
@@ -361,7 +364,7 @@ public class MapControl : BaseControl
         Graphics.DrawTextureEx(_currentView.BaseImage, paddedLoc, 0f, 1f / _currentView.RenderScale,
             Color.White);
 
-        var cityDetails = new List<CityData>();
+        _cityDetails.Clear();
 
         var zoom = _gameScreen.Zoom;
         foreach (var element in _currentView.Elements)
@@ -369,7 +372,7 @@ public class MapControl : BaseControl
             if (element is CityData data)
             {
                 element.Draw(element.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
-                cityDetails.Add(data);
+                _cityDetails.Add(data);
 
                 var size = data.Size.ToString();
                 var fontSize = Math.Clamp(14.ZoomScale(zoom), 10, 18);
@@ -386,7 +389,7 @@ public class MapControl : BaseControl
             }
         }
 
-        foreach (var cityData in cityDetails)
+        foreach (var cityData in _cityDetails)
         {
             var name = cityData.Name;
             var fontSize = Math.Clamp(20.ZoomScale(zoom), 12, 24);
@@ -417,7 +420,8 @@ public class MapControl : BaseControl
             return false;
         }
 
-        var nextZoom = Math.Clamp(_gameScreen.Zoom + (amount > 0 ? 1 : -1), -7, 8);
+        var nextZoom = Math.Clamp(_gameScreen.Zoom + (amount > 0 ? 1 : -1),
+            GameScreen.MinimumZoom, GameScreen.MaximumZoom);
         if (nextZoom != _gameScreen.Zoom)
         {
             _gameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = nextZoom });
@@ -534,8 +538,10 @@ public class MapControl : BaseControl
                 return;
             }
 
-            var unitPath = Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
-                unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl);
+            var unitPath = GetPreviewPath(new PathPreviewKey(unit.CurrentLocation, destination, unit.Domain,
+                    unit.MaxMovePoints, unit.Owner.Id, unit.Alpine, unit.IgnoreZonesOfControl, true),
+                () => Path.CalculatePathBetween(_gameScreen.Game, unit.CurrentLocation, destination,
+                    unit.Domain, unit.MaxMovePoints, unit.Owner, unit.Alpine, unit.IgnoreZonesOfControl));
             DrawPath(unit.CurrentLocation, unitPath, paddedLocation, Color.White);
             return;
         }
@@ -568,10 +574,22 @@ public class MapControl : BaseControl
             return;
         }
 
-        var roadPath = Path.CalculatePathBetween(_gameScreen.Game, city.Location, destination,
-            UnitGas.Ground, _gameScreen.Game.Rules.Cosmic.MovementMultiplier, city.Owner,
-            alpine: false, ignoreZoc: true);
+        var roadPath = GetPreviewPath(new PathPreviewKey(city.Location, destination, UnitGas.Ground,
+                _gameScreen.Game.Rules.Cosmic.MovementMultiplier, city.Owner.Id, false, true, true),
+            () => Path.CalculatePathBetween(_gameScreen.Game, city.Location, destination,
+                UnitGas.Ground, _gameScreen.Game.Rules.Cosmic.MovementMultiplier, city.Owner,
+                alpine: false, ignoreZoc: true));
         DrawPath(city.Location, roadPath, paddedLocation, new Color(79, 223, 255, 255));
+    }
+
+    private Path? GetPreviewPath(PathPreviewKey key, Func<Path?> factory)
+    {
+        if (_pathPreviewKey != key)
+        {
+            _pathPreviewKey = key;
+            _pathPreview = factory();
+        }
+        return _pathPreview;
     }
 
     private void DrawPath(Tile start, Path? path, Vector2 paddedLocation, Color color)
@@ -608,6 +626,8 @@ public class MapControl : BaseControl
 
     private void NextView()
     {
+        _pathPreviewKey = null;
+        _pathPreview = null;
         var nextView = _animationQueue.Count > 0
             ? _animationQueue.Dequeue()
             : _gameScreen.ViewAnchor is { } anchor
@@ -619,6 +639,9 @@ public class MapControl : BaseControl
             _currentView = nextView;
         }
     }
+
+    private readonly record struct PathPreviewKey(Tile Start, Tile Destination, UnitGas Domain,
+        int Movement, int OwnerId, bool Alpine, bool IgnoreZoc, bool MustBeVisible);
 
     private bool _forceRedraw;
 

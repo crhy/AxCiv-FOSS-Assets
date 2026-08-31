@@ -142,7 +142,9 @@ public static class ImageUtils
             DrawTiledImage(Wallpaper, ref image, height, width, padding, statusPanel: statusPanel, ToTStatusPanelLayout: ToTStatusPanelLayout);
         }
 
-        return Texture2D.LoadFromImage(image);
+        var texture = Texture2D.LoadFromImage(image);
+        image.Unload();
+        return texture;
     }
 
     public static Texture2D PaintButtonBase(int width, int height)
@@ -164,7 +166,9 @@ public static class ImageUtils
             image.Draw(btn[rnd.Next(1, len + 1)], new Rectangle(0, 0, btn[0].Width, btn[0].Height), new Rectangle(btn[0].Width * col, 0, btn[0].Width, btn[0].Height), Color.White);
         }
         image.Draw(btn[^1], new Rectangle(0, 0, btn[0].Width, btn[0].Height), new Rectangle(width - btn[0].Width, 0, btn[0].Width, btn[0].Height), Color.White);
-        return Texture2D.LoadFromImage(image);
+        var texture = Texture2D.LoadFromImage(image);
+        image.Unload();
+        return texture;
     }
 
     private static Texture2D PaintFallbackButtonBase(int width, int height)
@@ -181,7 +185,9 @@ public static class ImageUtils
         image.DrawLine(1, height - 2, width - 2, height - 2, new Color(128, 128, 128, 255));
         image.DrawLine(width - 2, 1, width - 2, height - 2, new Color(128, 128, 128, 255));
 
-        return Texture2D.LoadFromImage(image);
+        var texture = Texture2D.LoadFromImage(image);
+        image.Unload();
+        return texture;
     }
 
     public static Wallpaper? Wallpaper { get; set; }
@@ -432,9 +438,26 @@ public static class ImageUtils
         PaintHighResolutionShield(ref image, fill, shade);
 
         var texture = Texture2D.LoadFromImage(image);
+        image.Unload();
         texture.SetFilter(TextureFilter.Bilinear);
         HighResolutionUnitShields[key] = texture;
         return texture;
+    }
+
+    public static void ClearGeneratedTextures()
+    {
+        foreach (var texture in HighResolutionUnitShields.Values)
+        {
+            texture.Unload();
+        }
+        HighResolutionUnitShields.Clear();
+
+        if (_shieldTemplateLoaded && _shieldTemplate.Width > 0 && _shieldTemplate.Height > 0)
+        {
+            _shieldTemplate.Unload();
+        }
+        _shieldTemplate = default;
+        _shieldTemplateLoaded = false;
     }
 
     private static bool TryGetHighResolutionShieldTemplate(out Image template)

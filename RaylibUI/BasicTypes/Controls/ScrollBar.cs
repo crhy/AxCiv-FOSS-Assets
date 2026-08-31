@@ -21,7 +21,12 @@ public class ScrollBar : BaseControl
         _scrollAction = scrollAction;
         _vertical = vertical;
         _scrollbarDim = scrollbarDim == null ? ScrollbarDimDefault : (int)scrollbarDim;
-        _images = ImageUtils.GetScrollImages(_scrollbarDim, _vertical).Select(Texture2D.LoadFromImage).ToArray();
+        var sourceImages = ImageUtils.GetScrollImages(_scrollbarDim, _vertical);
+        _images = sourceImages.Select(Texture2D.LoadFromImage).ToArray();
+        foreach (var image in sourceImages)
+        {
+            image.Unload();
+        }
         if (_vertical)
         {
             Width = _scrollbarDim;

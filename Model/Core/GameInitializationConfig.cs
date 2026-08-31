@@ -17,8 +17,11 @@ namespace Model.Core
         public bool FlatWorld { get; set; }
         public bool SelectComputerOpponents { get; set; }
         public int AcceleratedStartup { get; set; }
-        public bool Bloodlust { get; set; }
-        public bool DontRestartEliminatedPlayers { get; set; }
+        // rhYciv is a conquest-focused game. Keep the classic options loadable for
+        // save compatibility, but make new games default to bloodlust without
+        // respawning defeated civilizations.
+        public bool Bloodlust { get; set; } = true;
+        public bool DontRestartEliminatedPlayers { get; set; } = true;
         public int Gender { get; set; }
         public Rules Rules { get; set; } = new();
         public int? ResourceSeed { get; set; }

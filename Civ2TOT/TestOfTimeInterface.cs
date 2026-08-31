@@ -442,29 +442,6 @@ public class TestOfTimeInterface(IMain main) : Civ2Interface(main)
             },
         },
 
-
-        new()
-        {
-            Key = "ADVISORS", Defaults = new List<MenuElement>
-            {
-                new("&Advisors", Shortcut.None, Key.A),
-                new("Chat with &Kings|Ctrl+C", new Shortcut(Key.C, ctrl: true),
-                    Key.K),
-                new("-", Shortcut.None, Key.None),
-                new("&City Status|F1", new Shortcut(Key.F1), Key.C),
-                new("&Defense Minister|F2", new Shortcut(Key.F2), Key.D),
-                new("&Foreign Minister|F3", new Shortcut(Key.F3), Key.F),
-                new("-", Shortcut.None, Key.None),
-                new("&Attitude Advisor|F4", new Shortcut(Key.F4), Key.A),
-                new("&Trade Advisor|F5", new Shortcut(Key.F5), Key.T),
-                new("&Science Advisor|F6", new Shortcut(Key.F6), Key.S),
-                new("-", Shortcut.None, Key.None),
-                new("Cas&ualty Timeline|Ctrl-D", new Shortcut(Key.D, ctrl: true),
-                    Key.U)
-            },
-        },
-
-
         new()
         {
             Key = "WORLD", Defaults = new List<MenuElement>
@@ -474,8 +451,7 @@ public class TestOfTimeInterface(IMain main) : Civ2Interface(main)
                 new("&Top 5 Cities|F8", new Shortcut(Key.F8), Key.T),
                 new("&Civilization Score|F9", new Shortcut(Key.F9), Key.C),
                 new("-", Shortcut.None, Key.None),
-                new("&Demographics|F11", new Shortcut(Key.F11), Key.D),
-                new("&Spaceships|F12", new Shortcut(Key.F12), Key.S)
+                new("&Demographics|F11", new Shortcut(Key.F11), Key.D)
             },
         },
 

@@ -147,7 +147,6 @@ namespace EtoFormsUI
                 var taxWin = new TaxRateWindow(this);
                 taxWin.ShowModal();
             };
-            var ViewThroneRoomCommand = new Command { MenuText = "View Throne Room", Shortcut = Keys.Shift | Keys.H };
             var FindCityCommand = new Command { MenuText = "Find City", Shortcut = Keys.Shift | Keys.C };
             var RevolutionCommand = new Command { MenuText = "REVOLUTION", Shortcut = Keys.Shift | Keys.R };
 
@@ -168,48 +167,11 @@ namespace EtoFormsUI
             // Orders menu commands
 
 
-            // Advisors menu commands
-            var ChatWithKingsCommand = new Command { MenuText = "Chat With Kings", Shortcut = Keys.Control | Keys.C };
-            var ConsultHighCouncilCommand = new Command { MenuText = "Consult High Council" };
-            var CityStatusCommand = new Command { MenuText = "City Status", Shortcut = Keys.F1 };
-            CityStatusCommand.Executed += (_, _) =>
-            {
-                var win = new CityStatusWindow(this);
-                win.Location = new Point((ClientSize.Width / 2) - (win.Width / 2), (ClientSize.Height / 2) - (win.Height / 2));
-                win.Show();
-            };
-            var DefenseMinisterCommand = new Command { MenuText = "Defense Minister", Shortcut = Keys.F2 };
-            DefenseMinisterCommand.Executed += (_, _) =>
-            {
-                var win = new DefenseMinisterWindow(this);
-                win.Location = new Point((ClientSize.Width / 2) - (win.Width / 2), (ClientSize.Height / 2) - (win.Height / 2));
-                win.Show();
-            };
-            var ForeignMinisterCommand = new Command { MenuText = "Foreign Minister", Shortcut = Keys.F3 };
-            var AttitudeAdvisorCommand = new Command { MenuText = "Attitude Advisor", Shortcut = Keys.F4 };
-            AttitudeAdvisorCommand.Executed += (_, _) =>
-            {
-                var win = new AttitudeAdvisorWindow(this);
-                win.Location = new Point((ClientSize.Width / 2) - (win.Width / 2), (ClientSize.Height / 2) - (win.Height / 2));
-                win.Show();
-            };
-            var TradeAdvisorCommand = new Command { MenuText = "Trade Advisor", Shortcut = Keys.F5 };
-            TradeAdvisorCommand.Executed += (_, _) =>
-            {
-                var win = new TradeAdvisorWindow(this);
-                win.Location = new Point((ClientSize.Width / 2) - (win.Width / 2), (ClientSize.Height / 2) - (win.Height / 2));
-                win.Show();
-            }; 
-            var ScienceAdvisorCommand = new Command { MenuText = "Science Advisor", Shortcut = Keys.F6 };
-            var CasualtyTimelineCommand = new Command { MenuText = "Casualty Timeline", Shortcut = Keys.Control | Keys.D };
-
             // World menu commands
             var WondersCommand = new Command { MenuText = "Wonders of the World", Shortcut = Keys.F7 };
             var Top5citiesCommand = new Command { MenuText = "Top 5 Cities", Shortcut = Keys.F8 };
             var CivScoreCommand = new Command { MenuText = "Civilization Score", Shortcut = Keys.F9 };
             var DemographicsCommand = new Command { MenuText = "Demographics", Shortcut = Keys.F11 };
-            var SpaceshipsCommand = new Command { MenuText = "Spaceships", Shortcut = Keys.F12 };
-
             // Cheat menu commands
             var ToggleCheatModeCommand = new Command { MenuText = "Toggle Cheat Mode", Shortcut = Keys.Control | Keys.K };
             ToggleCheatModeCommand.Executed += (s, e) =>
@@ -315,11 +277,10 @@ namespace EtoFormsUI
                 {
                     // File submenu
                     new ButtonMenuItem { Text = "&Game", Items = { GameOptionsCommand, GraphicOptionsCommand, CityReportOptionsCommand, MultiplayerOptionsCommand, GameProfileCommand, new SeparatorMenuItem(), PickMusicCommand, new SeparatorMenuItem(), SaveGameCommand, LoadGameCommand, JoinGameCommand, new SeparatorMenuItem(), SetPasswordCommand, ChangeTimerCommand, new SeparatorMenuItem(), RetireCommand, QuitCommand } },
-                    new ButtonMenuItem { Text = "&Kingdom", Items = { TaxRateCommand, new SeparatorMenuItem(), ViewThroneRoomCommand, FindCityCommand, new SeparatorMenuItem(), RevolutionCommand } },
+                    new ButtonMenuItem { Text = "&Kingdom", Items = { TaxRateCommand, new SeparatorMenuItem(), FindCityCommand, new SeparatorMenuItem(), RevolutionCommand } },
                     new ButtonMenuItem { Text = "&View", Items = { MovePiecesCommand, ViewPiecesCommand, new SeparatorMenuItem(), ZoomInCommand, ZoomOutCommand, new SeparatorMenuItem(), MaxZoomInCommand, StandardZoomCommand, MediumZoomOutCommand, MaxZoomOutCommand, new SeparatorMenuItem(), ShowMapGridCommand, ArrangeWindowsCommand, ShowHiddenTerrainCommand, CenterViewCommand } },
                     _ordersMenu,
-                    new ButtonMenuItem { Text = "&Advisors", Items = { ChatWithKingsCommand, ConsultHighCouncilCommand, new SeparatorMenuItem(), CityStatusCommand, DefenseMinisterCommand, ForeignMinisterCommand, new SeparatorMenuItem(), AttitudeAdvisorCommand, TradeAdvisorCommand, ScienceAdvisorCommand, new SeparatorMenuItem(), CasualtyTimelineCommand } },
-                    new ButtonMenuItem { Text = "&World", Items = { WondersCommand, Top5citiesCommand, CivScoreCommand, new SeparatorMenuItem(), DemographicsCommand, SpaceshipsCommand } },
+                    new ButtonMenuItem { Text = "&World", Items = { WondersCommand, Top5citiesCommand, CivScoreCommand, new SeparatorMenuItem(), DemographicsCommand } },
                     new ButtonMenuItem { Text = "&Cheat", Items = { ToggleCheatModeCommand, new SeparatorMenuItem(), CreateUnitCommand, RevealMapCommand, SetHumanPlayerCommand, new SeparatorMenuItem(), SetGameYearCommand, KillCivilizationCommand, new SeparatorMenuItem(), TechnologyAdvanceCommand, EditTechsCommand, ForceGovernmentCommand, ChangeTerrainCursorCommand, DestroyUnitsCursorCommand, ChangeMoneyCommand, new SeparatorMenuItem(), EditUnitCommand, EditCityCommand, EditKingCommand, new SeparatorMenuItem(), ScenarioParamsCommand, SaveAsScenCommand, new SeparatorMenuItem(), _openLuaConsoleCommand } },
                     new ButtonMenuItem { Text = "&Editor", Items = { ToggleScenFlagCommand, new SeparatorMenuItem(), AdvancesEditorCommand, CitiesEditorCommand, EffectsEditorCommand, ImprovEditorCommand, TerrainEditorCommand, TribeEditorCommand, UnitsEditorCommand, EventsEditorCommand } },
                     new ButtonMenuItem { Text = "&Civilopedia", Items = { CivAdvancesFlagCommand, CityImprovFlagCommand, WondersWorldCommand, MilitaryUnitsCommand, new SeparatorMenuItem(), GovernmentsCommand, TerrainTypesCommand, new SeparatorMenuItem(), GameConceptsCommand, new SeparatorMenuItem(), AboutCommand } },

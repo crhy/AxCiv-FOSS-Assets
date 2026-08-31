@@ -10,6 +10,7 @@ using Model.Core.Cities;
 using Model.Core.Mapping;
 using Model.Core.Units;
 using Raylib_CSharp.Transformations;
+using RaylibUI.RunGame.Commands;
 using RaylibUI.RunGame.Commands.Orders;
 using RaylibUI.RunGame.GameControls;
 using RaylibUI.RunGame.GameControls.CityControls;
@@ -23,6 +24,8 @@ namespace RaylibUI.RunGame;
 
 public class GameScreen : BaseScreen
 {
+    public const int MinimumZoom = -7;
+    public const int MaximumZoom = 16;
     public Main Main { get; }
     public IGame Game { get; }
     public Sound Soundman { get; }
@@ -49,10 +52,10 @@ public class GameScreen : BaseScreen
     public int MinimapHeight => _minimapGlobe ? MiniMapGlobeHeight : Math.Max(100, CurrentMap.YDim) + 38 + 11;
     public int MinimapWidth => _minimapGlobe ? MiniMapGlobeWidth : MiniMapNormalWidth;
 
-    public int Zoom     // -7 (min) ... 8 (max), 0=std.
+    public int Zoom     // -7 (min) ... 16 (max), 0=std.
     {
         get => _zoom;
-        set => _zoom = Math.Max(Math.Min(value, 8), -7);
+        set => _zoom = Math.Clamp(value, MinimumZoom, MaximumZoom);
     }
     public TileTextureCache TileCache { get; }
     
@@ -428,7 +431,13 @@ public class GameScreen : BaseScreen
         var commands = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Where(t => t != commandInterface && commandInterface.IsAssignableFrom(t) && !t.IsAbstract &&
-                        t != improvementCommand)
+                        t != improvementCommand &&
+                        t != typeof(ViewThroneRoom) &&
+                        t != typeof(CityStatus) &&
+                        t != typeof(DefenseMinister) &&
+                        t != typeof(AttitudeAdvisor) &&
+                        t != typeof(TradeAdvisor) &&
+                        t != typeof(ScienceAdvisor))
             .Select(t => Activator.CreateInstance(t, args: args)).OfType<IGameCommand>()
             .Concat(improvements.Select(i => new ImprovementOrder(i, this, game))).ToList();
 

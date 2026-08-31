@@ -11,7 +11,7 @@ public class MaxZoomOut(GameScreen gameScreen) :  AlwaysOnCommand(gameScreen,Com
 {
     public override void Action()
     {
-        if (GameScreen.Zoom > -7)
-            GameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = -7 });
+        if (GameScreen.Zoom > GameScreen.MinimumZoom)
+            GameScreen.TriggerMapEvent(new MapEventArgs(MapEventType.ZoomChange) { Zoom = GameScreen.MinimumZoom });
     }
 }

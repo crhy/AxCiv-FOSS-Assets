@@ -2,5 +2,6 @@
 **/obj/**
 **/.vs/**
 agent/logs/
+**/__pycache__/**
 
 RaylibUI/run-log.txt
