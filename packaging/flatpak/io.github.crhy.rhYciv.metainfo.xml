@@ -12,11 +12,11 @@
     <p>
       rhYciv recreates the core turn-based gameplay of Civilization II with a
       modern high-resolution renderer, deeper zoom, streamlined bloodlust rules,
-      and an expanding set of freely licensed replacement artwork.
+      and freely licensed replacement artwork.
     </p>
     <p>
-      This beta currently requires a legally obtained Civilization II data
-      directory containing RULES.TXT. Select that directory on first launch.
+      The bundled rules, interface data, and art make this a standalone game;
+      no commercial Civilization II installation is required.
     </p>
   </description>
   <launchable type="desktop-id">io.github.crhy.rhYciv.desktop</launchable>
@@ -27,6 +27,11 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
+    <release version="0.2.0-beta.1" date="2026-08-31">
+      <description>
+        <p>First fully standalone beta with bundled rules, cities, interface atlases, and replacement art.</p>
+      </description>
+    </release>
     <release version="0.1.0-beta.1" date="2026-08-31">
       <description>
         <p>First public Flatpak beta for gameplay, interface, and performance testing.</p>

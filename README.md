@@ -18,11 +18,11 @@ placeholders that can still receive more polished art.
 
 ## Install the Flatpak beta
 
-Download `rhYciv-v0.1.0-beta.1-x86_64.flatpak` from the
+Download `rhYciv-v0.2.0-beta.1-x86_64.flatpak` from the
 [latest GitHub release](https://github.com/crhy/rhYciv/releases/latest), then:
 
 ```bash
-flatpak install --user ./rhYciv-v0.1.0-beta.1-x86_64.flatpak
+flatpak install --user ./rhYciv-v0.2.0-beta.1-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
