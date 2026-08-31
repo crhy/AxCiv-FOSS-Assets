@@ -186,8 +186,14 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         PicSources.Add("peoplePic1", [new BinaryStorage("Intro.dll", 0x84E90, 0x129CE)]);
         PicSources.Add("peoplePic2", [new BinaryStorage("Intro.dll", 0x97860, 0x139A0)]);
         PicSources.Add("templePic", [new BinaryStorage("Intro.dll", 0xAB200, 0xB839)]);
-        PicSources.Add("people", Enumerable.Range(0, 11 * 4).Select(i =>
-                        new BitmapStorage("PEOPLE", new Rectangle(2 + 28 * (i % 11), 6 + 31 * (i / 11), 27, 30))).ToArray<IImageSource>());
+        string[] citizenEras = ["ancient", "renaissance", "industrial", "modern"];
+        string[] citizenRoles =
+        [
+            "happy_1", "happy_2", "content_1", "content_2", "unhappy_1", "unhappy_2",
+            "angry_1", "angry_2", "entertainer", "taxman", "scientist"
+        ];
+        PicSources.Add("people", citizenEras.SelectMany(era => citizenRoles.Select(role =>
+            new BitmapStorage(Path.Combine("People", $"{era}_{role}.png")))).ToArray<IImageSource>());
 
         var src = new IImageSource[6 * 8];
         for (var row = 0; row < 6; row++)

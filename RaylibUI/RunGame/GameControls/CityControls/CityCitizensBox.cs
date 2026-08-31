@@ -57,7 +57,11 @@ public class CityCitizensBox : BaseControl
         Height = (int)pos.Height;
         base.OnResize();
 
-        var iconWidth = Images.GetImageWidth(_active.PicSources["people"][0], _active);
+        var sourceWidth = Images.GetImageWidth(_active.PicSources["people"][0], _active);
+        var sourceHeight = Images.GetImageHeight(_active.PicSources["people"][0], _active);
+        const float citizenHeight = 30f;
+        var baseIconScale = citizenHeight / Math.Max(1, sourceHeight);
+        var iconWidth = Math.Max(1, (int)MathF.Round(sourceWidth * baseIconScale));
         int spacing = 0;
         if (_city.Size > 2)
         {
@@ -77,7 +81,7 @@ public class CityCitizensBox : BaseControl
             _icons[i].Image = [_active.PicSources["people"][_citizenIndex[i] + 11 * _epoch]];
 
             _icons[i].Location = new((2 + i * spacing) * _cityWindow.Scale, 7 * _cityWindow.Scale);
-            _icons[i].Scale = Math.Min(_cityWindow.Scale, 1.25f);
+            _icons[i].Scale = baseIconScale * Math.Min(_cityWindow.Scale, 1.25f);
         }
 
         foreach (var child in Controls)
