@@ -388,7 +388,9 @@ namespace Civ2.ImageLoader
 
         private static string? FindFossTerrainPath(string terrainName)
         {
-            var fileName = $"{terrainName}.jpg";
+            // PNG first: the newer terrain diamonds carry their own alpha, so they
+            // do not depend on the compatibility sheet's mask to cut the corners.
+            var fileNames = new[] { $"{terrainName}.png", $"{terrainName}.jpg" };
             var roots = Settings.SearchPaths
                 .Concat([
                     Environment.CurrentDirectory,
@@ -407,10 +409,13 @@ namespace Civ2.ImageLoader
                              Path.Combine(root, "RaylibUI", "FOSSart", "Terrain")
                          })
                 {
-                    var path = Path.Combine(directory, fileName);
-                    if (File.Exists(path))
+                    foreach (var fileName in fileNames)
                     {
-                        return path;
+                        var path = Path.Combine(directory, fileName);
+                        if (File.Exists(path))
+                        {
+                            return path;
+                        }
                     }
                 }
             }

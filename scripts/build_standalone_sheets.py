@@ -45,6 +45,27 @@ def contain(source: Image.Image, size: tuple[int, int], padding: int = 0) -> Ima
     return result
 
 
+def terrain_source(name: str, variant: int = 1) -> Path:
+    """Base terrain art, preferring a PNG diamond over the legacy square JPEG.
+
+    Civ II keeps two interchangeable tiles per terrain so a landmass does not
+    visibly repeat; a "_b" file supplies the second one where it exists.
+    """
+    if variant == 2:
+        alternate = ART / "Terrain" / f"{name}_b.png"
+        if alternate.exists():
+            return alternate
+
+    png = ART / "Terrain" / f"{name}.png"
+    return png if png.exists() else ART / "Terrain" / f"{name}.jpg"
+
+
+def special_source(name: str, slot: int) -> Path | None:
+    """Painted art for a terrain's special resource, if it has been made yet."""
+    path = ART / "Terrain" / "Specials" / f"{name}_{slot}.png"
+    return path if path.exists() else None
+
+
 def diamond_texture(path: Path) -> Image.Image:
     with Image.open(path) as loaded:
         tile = ImageOps.fit(loaded.convert("RGB"), (64, 32), Image.Resampling.LANCZOS)
@@ -212,13 +233,21 @@ def build_terrain1() -> None:
     sheet = Image.new("RGBA", (586, 480), (0, 0, 0, 0))
     draw = ImageDraw.Draw(sheet)
     for row, name in enumerate(TERRAIN_FILES):
-        base = diamond_texture(ART / "Terrain" / f"{name}.jpg")
-        for x in (1, 66):
-            sheet.alpha_composite(base, (x, 1 + 33 * row))
+        for variant, x in enumerate((1, 66), 1):
+            sheet.alpha_composite(diamond_texture(terrain_source(name, variant)),
+                                  (x, 1 + 33 * row))
         for special, x in enumerate((131, 196), 1):
-            resource = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-            rdraw = ImageDraw.Draw(resource)
-            rdraw.ellipse((27, 10, 37, 20), fill=((246, 205, 47, 230) if special == 1 else (235, 235, 235, 230)), outline=(40, 40, 40, 255), width=1)
+            art = special_source(name, special)
+            if art is not None:
+                with Image.open(art) as loaded:
+                    resource = contain(loaded, (64, 32))
+            else:
+                # No painting for this resource yet; a clear marker still reads.
+                resource = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+                rdraw = ImageDraw.Draw(resource)
+                rdraw.ellipse((27, 10, 37, 20),
+                              fill=((246, 205, 47, 230) if special == 1 else (235, 235, 235, 230)),
+                              outline=(40, 40, 40, 255), width=1)
             sheet.alpha_composite(resource, (x, 1 + 33 * row))
 
     for column in range(9):

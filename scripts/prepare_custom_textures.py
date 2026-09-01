@@ -293,6 +293,98 @@ def clean(source: Path, destination: Path, *, unit: bool = False, flag: bool = F
     output.save(destination, "PNG", optimize=True, compress_level=9)
 
 
+TERRAIN_BASE_NAMES = {
+    "desert.png": "desert.png",
+    "desert_b.png": "desert_b.png",
+    "plains.png": "plains.png",
+    "plains_b.png": "plains_b.png",
+}
+
+# Special resources by terrain row and slot, matching the two special columns the
+# renderer reads out of TERRAIN1.
+TERRAIN_SPECIAL_NAMES = {
+    "desert_1_oasis.png": "desert_1.png",
+    "desert_2_oil.png": "desert_2.png",
+    "plains_1_buffalo.png": "plains_1.png",
+    "plains_2_wheat.png": "plains_2.png",
+}
+
+
+def is_key_colour(pixel: tuple[int, int, int]) -> bool:
+    """The vivid generation matte wherever it sits, including pockets the edge
+    flood fill can never reach -- gaps between palm fronds, under an animal."""
+    r, g, b = pixel
+    peak = max(r, b)
+    return peak > 55 and g < peak * 0.48 and min(r, b) > peak * 0.55
+
+
+def key_out_matte(source: Path, working: int) -> Image.Image:
+    with Image.open(source) as loaded:
+        image = loaded.convert("RGB")
+        image.thumbnail((working, working), Image.Resampling.LANCZOS)
+
+    background = connected_background(image, is_matte_background)
+    pixels = image.load()
+    width, height = image.size
+    for y in range(height):
+        row = y * width
+        for x in range(width):
+            if not background[row + x] and is_key_colour(pixels[x, y]):
+                background[row + x] = 1
+
+    rgba = image.convert("RGBA")
+    rgba.putalpha(Image.frombytes("L", image.size, bytes(0 if v else 255 for v in background)))
+    return rgba
+
+
+def prepare_terrain_tiles(source: Path, output: Path) -> int:
+    """Base terrain diamonds and their special-resource overlays.
+
+    Base tiles are written at 2:1 so the renderer's resize to the working tile
+    size does not distort them; specials are treated like every other overlay,
+    contained in a 300x300 box and resting on the bottom edge.
+    """
+    directory = source / "terrain"
+    if not directory.is_dir():
+        return 0
+
+    count = 0
+    for input_name, output_name in TERRAIN_BASE_NAMES.items():
+        path = directory / input_name
+        if not path.exists():
+            continue
+        tile = key_out_matte(path, 1100)
+        bounds = tile.getchannel("A").getbbox()
+        if bounds:
+            tile = tile.crop(bounds)
+        tile = tile.resize((1024, 512), Image.Resampling.LANCZOS)
+        destination = output / "Terrain" / output_name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        tile.save(destination, "PNG", optimize=True, compress_level=9)
+        count += 1
+
+    for input_name, output_name in TERRAIN_SPECIAL_NAMES.items():
+        path = directory / input_name
+        if not path.exists():
+            continue
+        sprite = key_out_matte(path, 700)
+        bounds = sprite.getchannel("A").getbbox()
+        if bounds:
+            sprite = sprite.crop(bounds)
+        sprite.thumbnail((300, 300), Image.Resampling.LANCZOS)
+        sprite = remove_hot_pink(sprite)
+        alpha = remove_small_islands(sprite.getchannel("A").point(lambda v: 0 if v < 48 else v))
+        sprite.putalpha(alpha)
+        canvas = Image.new("RGBA", (300, 300), (0, 0, 0, 0))
+        canvas.alpha_composite(sprite, ((300 - sprite.width) // 2, 300 - sprite.height))
+        destination = output / "Terrain" / "Specials" / output_name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        canvas.save(destination, "PNG", optimize=True, compress_level=9)
+        count += 1
+
+    return count
+
+
 def numbered_sources(directory: Path, prefix: str = "ChatGPT Image") -> list[Path]:
     return sorted(path for path in directory.glob("*.png") if path.name.startswith(prefix))
 
@@ -302,6 +394,7 @@ def prepare_units(source: Path, output: Path) -> int:
         clean(source / "units" / input_name, output / "Units" / output_name, unit=True)
     # Preserve the legacy singular lookup name without keeping its former
     # 1254px RGB copy.
+    clean(source / "units" / "crusaders.png", output / "Units" / "crusader.png", unit=True)
     return len(UNIT_NAMES) + 1
 
 
@@ -375,6 +468,7 @@ def main() -> None:
     if not args.source.is_dir():
         parser.error(f"source directory does not exist: {args.source}")
     counts = {
+        "terrain tiles": prepare_terrain_tiles(args.source, args.output),
         "units": prepare_units(args.source, args.output),
         "cities": prepare_cities(args.source, args.output),
         "terrain/improvements": prepare_terrain(args.source, args.output),
