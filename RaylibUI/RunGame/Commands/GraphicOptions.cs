@@ -25,24 +25,22 @@ public class GraphicOptions(GameScreen gameScreen) : IGameCommand
     public void Action()
     {
         // ReSharper disable once StringLiteralTypo
+        // The throne room, animated heralds, the high council and wonder movies are
+        // outside this game's scope, so only the two live toggles are offered.
         gameScreen.ShowPopup("GRAPHICOPTIONS", DialogClick,
             checkboxStates: new List<bool>
             {
-                _options.ThroneRoomGraphics, _options.DiplomacyScreenGraphics, _options.AnimatedHeralds,
-                _options.CivilopediaForAdvances, _options.HighCouncil, _options.WonderMovies
+                _options.DiplomacyScreenGraphics, _options.CivilopediaForAdvances
             });
     }
 
     private void DialogClick(string button, int _, IList<bool>? checkboxes, IDictionary<string, string>? _2)
     {
         if (button != Labels.Ok) return;
-        
-        _options.ThroneRoomGraphics = checkboxes![0];
-        _options.DiplomacyScreenGraphics = checkboxes[1];
-        _options.AnimatedHeralds = checkboxes[2];
-        _options.CivilopediaForAdvances = checkboxes[3];
-        _options.HighCouncil = checkboxes[4];
-        _options.WonderMovies = checkboxes[5];
+        if (checkboxes is not { Count: >= 2 }) return;
+
+        _options.DiplomacyScreenGraphics = checkboxes[0];
+        _options.CivilopediaForAdvances = checkboxes[1];
     }
 
     public bool Checked => false;

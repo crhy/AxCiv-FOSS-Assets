@@ -135,12 +135,24 @@ public static class ImageUtils
         PaintPanelBorders(active, ref image, width, height, padding, statusPanel: statusPanel, toTStatusPanelLayout: ToTStatusPanelLayout);
         if (centerImage != null)
         {
-            //var innerWidth = Math.Min(width - padding.Left - padding.Right, centerImage.Value.Width);
-            //var innerHeight = Math.Min(height - padding.Top - padding.Bottom, centerImage.Value.Height);
             var innerWidth = width - padding.Left - padding.Right;
             var innerHeight = height - padding.Top - padding.Bottom;
-            image.Draw(centerImage.Value, new Rectangle(0, 0, innerWidth, innerHeight), new Rectangle(padding.Left, padding.Top, innerWidth, innerHeight), Color.White);
-            image.Draw(centerImage.Value, new Rectangle(0, 0, centerImage.Value.Width, centerImage.Value.Height), new Rectangle(padding.Left, padding.Top, innerWidth, innerHeight), Color.White);
+            var imgW = centerImage.Value.Width;
+            var imgH = centerImage.Value.Height;
+            if (imgW > 0 && imgH > 0)
+            {
+                var scaleX = innerWidth / (float)imgW;
+                var scaleY = innerHeight / (float)imgH;
+                var scale = MathF.Min(scaleX, scaleY);
+                var drawW = (int)(imgW * scale);
+                var drawH = (int)(imgH * scale);
+                var offsetX = padding.Left + (innerWidth - drawW) / 2;
+                var offsetY = padding.Top + (innerHeight - drawH) / 2;
+                image.Draw(centerImage.Value,
+                    new Rectangle(0, 0, imgW, imgH),
+                    new Rectangle(offsetX, offsetY, drawW, drawH),
+                    Color.White);
+            }
         }
         else if (!noWallpaper)
         {
@@ -259,8 +271,12 @@ public static class ImageUtils
         }
         else    // MGE
         {
-            wallpaper.Outer = Images.ExtractBitmap(_look.Outer, active);
-            wallpaper.Inner = new[] { Images.ExtractBitmap(_look.Inner![0], active) };
+            var outerSrc = Images.ExtractBitmap(_look.Outer, active);
+            var outerColor = new Color(65, 69, 78, 255);
+            wallpaper.Outer = Image.GenColor(outerSrc.Width, outerSrc.Height, outerColor);
+            var srcTile = Images.ExtractBitmap(_look.Inner![0], active);
+            var color = srcTile.GetColor(srcTile.Width / 2, srcTile.Height / 2);
+            wallpaper.Inner = new[] { Image.GenColor(srcTile.Width, srcTile.Height, color) };
         }
 
     }

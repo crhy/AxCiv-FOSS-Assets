@@ -31,6 +31,25 @@ public class StandaloneRulesTests
         Assert.DoesNotContain(production, order => order.Title.Contains("Apollo", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void BundledCityNamesParseIntoSeparateTribeLists()
+    {
+        var repository = FindRepositoryRoot();
+        var standalone = Path.Combine(repository, "RaylibUI", "FOSSart", "Standalone");
+        var cityNames = NameLoader.LoadCityNames([standalone]);
+
+        Assert.True(cityNames.ContainsKey("AMERICANS"));
+        Assert.True(cityNames.ContainsKey("ROMANS"));
+        Assert.True(cityNames.ContainsKey("EXTRA"));
+        Assert.True(cityNames.ContainsKey("BARBARIANS"));
+
+        foreach (var (tribe, list) in cityNames)
+        {
+            Assert.NotNull(list);
+            Assert.NotEmpty(list!);
+        }
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

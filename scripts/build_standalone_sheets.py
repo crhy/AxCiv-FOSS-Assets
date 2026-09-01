@@ -123,6 +123,91 @@ def draw_connections(draw: ImageDraw.ImageDraw, origin: tuple[int, int], railroa
             draw.line((x + 32 + offset, y + 11, x + 32 + offset, y + 21), fill=(55, 55, 52, 255), width=1)
 
 
+# --- Tile overlays -----------------------------------------------------------
+#
+# Small isometric markers drawn onto a transparent 64x32 diamond. The diamond
+# corners are (32, 0), (63, 15), (32, 31) and (0, 16).
+
+
+def _overlay_canvas() -> tuple[Image.Image, ImageDraw.ImageDraw]:
+    canvas = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    return canvas, ImageDraw.Draw(canvas, "RGBA")
+
+
+def tile_irrigation() -> Image.Image:
+    """Two crossed water channels running along the tile's axes."""
+    canvas, draw = _overlay_canvas()
+    water = (86, 156, 214, 235)
+    sheen = (168, 214, 244, 220)
+    for offset in (-6, 6):
+        top = 16 + offset
+        draw.line((12, 16 + offset // 2, 32, top - 8), fill=water, width=3)
+        draw.line((32, top - 8, 52, 16 + offset // 2), fill=water, width=3)
+        draw.line((12, 16 + offset // 2, 32, top + 8), fill=water, width=3)
+        draw.line((32, top + 8, 52, 16 + offset // 2), fill=water, width=3)
+    draw.line((14, 16, 50, 16), fill=sheen, width=1)
+    return canvas
+
+
+def tile_farmland() -> Image.Image:
+    """A denser irrigated lattice with cultivated rows between the channels."""
+    canvas, draw = _overlay_canvas()
+    water = (86, 156, 214, 225)
+    crop = (150, 176, 76, 200)
+    for step in (-9, -3, 3, 9):
+        draw.line((14, 16 + step // 2, 50, 16 + step // 2), fill=crop, width=2)
+    for step in (-12, -4, 4, 12):
+        draw.line((32 + step, 6 + abs(step) // 3, 32 + step, 26 - abs(step) // 3),
+                  fill=water, width=2)
+    return canvas
+
+
+def tile_mine() -> Image.Image:
+    """A cut into the hillside with spoil heaped beside it."""
+    canvas, draw = _overlay_canvas()
+    draw.polygon([(28, 12), (44, 12), (48, 22), (24, 22)], fill=(58, 50, 44, 235))
+    draw.polygon([(30, 13), (42, 13), (45, 19), (27, 19)], fill=(28, 24, 21, 245))
+    for cx, cy, r in ((21, 21, 4), (49, 20, 3), (26, 24, 3)):
+        draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(122, 116, 108, 235),
+                     outline=(70, 66, 60, 245))
+    draw.line((34, 16, 40, 14), fill=(214, 186, 96, 235), width=2)
+    return canvas
+
+
+def tile_pollution() -> Image.Image:
+    """Sour ground and a low haze."""
+    canvas, draw = _overlay_canvas()
+    for cx, cy, rx, ry in ((26, 18, 10, 5), (40, 15, 9, 5), (33, 22, 11, 4)):
+        draw.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=(96, 84, 62, 215))
+    for cx, cy, rx, ry in ((28, 12, 7, 4), (41, 11, 6, 3)):
+        draw.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=(126, 122, 118, 165))
+    for x, y in ((24, 20), (31, 17), (38, 20), (44, 16)):
+        draw.point((x, y), fill=(48, 40, 30, 255))
+    return canvas.filter(ImageFilter.GaussianBlur(0.6))
+
+
+def tile_shield() -> Image.Image:
+    """The grassland resource marker."""
+    canvas, draw = _overlay_canvas()
+    shield = [(32, 8), (39, 11), (38, 20), (32, 25), (26, 20), (25, 11)]
+    draw.polygon(shield, fill=(78, 92, 64, 245), outline=(232, 232, 220, 255))
+    draw.polygon([(32, 11), (36, 13), (35, 19), (32, 22), (29, 19), (28, 13)],
+                 fill=(140, 160, 108, 245))
+    return canvas
+
+
+def tile_hut() -> Image.Image:
+    """A small shelter marking an unexplored find."""
+    canvas, draw = _overlay_canvas()
+    draw.polygon([(24, 24), (24, 16), (40, 16), (40, 24)], fill=(196, 164, 106, 245),
+                 outline=(120, 94, 52, 255))
+    draw.polygon([(21, 17), (32, 8), (43, 17)], fill=(158, 116, 62, 250),
+                 outline=(104, 74, 36, 255))
+    draw.rectangle((30, 19, 34, 24), fill=(58, 42, 26, 255))
+    draw.line((24, 20, 40, 20), fill=(150, 120, 74, 200), width=1)
+    return canvas
+
+
 def build_terrain1() -> None:
     sheet = Image.new("RGBA", (586, 480), (0, 0, 0, 0))
     draw = ImageDraw.Draw(sheet)
@@ -140,15 +225,19 @@ def build_terrain1() -> None:
         draw_connections(draw, (1 + 65 * column, 363), False)
         draw_connections(draw, (1 + 65 * column, 397), True)
 
-    improvement = ART / "Terrain" / "Overlays" / "Improvements" / "fort.png"
-    with Image.open(improvement) as loaded:
-        icon = contain(loaded, (64, 32))
-    for y, tint in ((100, None), (133, (80, 160, 80)), (166, (100, 100, 100)), (199, (120, 80, 80)), (232, (215, 55, 55)), (265, (205, 175, 75))):
-        item = icon.copy()
-        if tint:
-            overlay = Image.new("RGBA", item.size, (*tint, 90))
-            item = Image.alpha_composite(item, overlay)
-        sheet.alpha_composite(item, (456, y))
+    # The six 64x32 slots in this column are read by the renderer as irrigation,
+    # farmland, mine, pollution, the grassland shield and a goody hut. They each
+    # need their own overlay; reusing one icon for all six puts a fortress on
+    # every shielded grassland square.
+    for y, overlay in (
+        (100, tile_irrigation()),
+        (133, tile_farmland()),
+        (166, tile_mine()),
+        (199, tile_pollution()),
+        (232, tile_shield()),
+        (265, tile_hut()),
+    ):
+        sheet.alpha_composite(overlay, (456, y))
 
     dither = Image.new("RGBA", (64, 32), (160, 160, 160, 255))
     dd = ImageDraw.Draw(dither)

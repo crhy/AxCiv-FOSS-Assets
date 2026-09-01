@@ -474,10 +474,15 @@ namespace Civ2engine.IO
             {
                 var wonder = Rules.Improvements[improvementIndex];
                 wonder.IsWonder = true;
-                if (!values[i].StartsWith("nil"))
+
+                // Trailing ';' comments are allowed here, as they are in the sound
+                // section, so the obsolescence column can name the wonder it belongs to.
+                var entry = values[i].Split(';', 2, StringSplitOptions.TrimEntries)[0];
+                if (!entry.StartsWith("nil"))
                 {
+                    var advance = entry.Split(',', 2, StringSplitOptions.TrimEntries)[0];
                     wonder.ExpiresAt =
-                        Rules.AdvanceMappings.ContainsKey(values[i].Split(',', 2)[0]) ? Rules.AdvanceMappings[values[i].Split(',', 2)[0]] : -1; // temp
+                        Rules.AdvanceMappings.TryGetValue(advance, out var expiry) ? expiry : -1;
                 }
                 improvementIndex--;
             }

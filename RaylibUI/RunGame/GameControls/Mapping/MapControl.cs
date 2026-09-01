@@ -394,7 +394,9 @@ public class MapControl : BaseControl
             var name = cityData.Name;
             var fontSize = Math.Clamp(20.ZoomScale(zoom), TextRendering.MinimumMapFontSize, 24);
             var textSize = TextRendering.Measure(_active.Look.DefaultFont, name, fontSize, 1);
-            var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.Texture.Width.ZoomScale(zoom) / 2f , cityData.Texture.Height.ZoomScale(zoom)) - textSize /2f;
+            // Anchor to the city's logical footprint, not the source texture, so
+            // high-resolution FOSS city art does not push the label off the tile.
+            var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.LogicalSize.X.ZoomScale(zoom) / 2f , cityData.LogicalSize.Y.ZoomScale(zoom)) - textSize /2f;
 
             global::RaylibUI.TextRendering.DrawWithShadow(_active.Look.DefaultFont, name, textPosition, fontSize, 1, cityData.Color.TextColour, Color.Black, new Vector2(1, 1));
         }

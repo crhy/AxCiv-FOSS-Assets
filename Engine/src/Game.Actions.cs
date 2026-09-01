@@ -243,15 +243,131 @@ namespace Civ2engine
             // Adjust reputation
             
             // Reset turns of all units and let resting wounded units recover.
+            // Wonder movement bonuses are re-derived here so they appear and expire
+            // with the wonder rather than being baked into a unit when it is built.
+            var seaMovementBonus = WonderFunctions.GetSeaMovementBonus(activeCiv) *
+                                   Rules.Cosmic.MovementMultiplier;
             foreach (var unit in activeCiv.Units.Where(n => !n.Dead))
             {
                 HealRestingUnit(unit);
+                unit.BonusMovePoints = unit.Domain == UnitGas.Sea ? seaMovementBonus : 0;
                 unit.MovePointsLost = 0;
             }
+
+            ResolveAirFuel(activeCiv, player);
+            ResolveShipsLostAtSea(activeCiv, player);
 
             // Update all cities
             this.CitiesTurn(player);
         }
+
+        /// <summary>
+        /// Civ II air units carry a fuel range: a fighter must land every turn and a
+        /// bomber may spend one turn out. A unit that has not reached a city, airbase
+        /// or carrier by the time its range is used up crashes.
+        /// </summary>
+        private void ResolveAirFuel(Civilization activeCiv, IPlayer player)
+        {
+            var crashed = new List<Unit>();
+            foreach (var unit in activeCiv.Units.Where(u => !u.Dead && u.Domain == UnitGas.Air && u.FuelRange > 0).ToList())
+            {
+                if (CanRefuel(unit))
+                {
+                    unit.TurnsAirborne = 0;
+                    continue;
+                }
+
+                unit.TurnsAirborne++;
+                if (unit.TurnsAirborne >= unit.FuelRange)
+                {
+                    unit.Dead = true;
+                    crashed.Add(unit);
+                }
+            }
+
+            foreach (var unit in crashed)
+            {
+                player.UnitLost(unit, null);
+            }
+        }
+
+        private static bool CanRefuel(Unit unit)
+        {
+            if (unit.InShip is { } carrier && carrier.CanCarryAirUnits)
+            {
+                return true;
+            }
+
+            var tile = unit.CurrentLocation;
+            if (tile == null)
+            {
+                return false;
+            }
+
+            if (tile.CityHere != null && tile.CityHere.Owner == unit.Owner)
+            {
+                return true;
+            }
+
+            return tile.EffectsList.Any(e => e.Target == ImprovementConstants.Airbase);
+        }
+
+        /// <summary>
+        /// Triremes and other "must stay near land" ships risk being lost when they
+        /// end a turn out of sight of land. Civ II uses a one-in-two chance, improved
+        /// to one-in-four by Seafaring and one-in-eight by Navigation, and removed
+        /// entirely by the Lighthouse.
+        /// </summary>
+        private void ResolveShipsLostAtSea(Civilization activeCiv, IPlayer player)
+        {
+            var atRisk = activeCiv.Units
+                .Where(u => !u.Dead && u.ShipMustStayNearLand && u.CurrentLocation != null)
+                .ToList();
+            if (atRisk.Count == 0)
+            {
+                return;
+            }
+
+            if (WonderFunctions.OwnsActiveWonder(activeCiv, ImprovementType.Lighthouse))
+            {
+                return;
+            }
+
+            var lossChance = 2;
+            if (HasAdvance(activeCiv, AdvanceType.Seafaring)) lossChance = 4;
+            if (HasAdvance(activeCiv, AdvanceType.Navigation)) lossChance = 8;
+
+            var lost = new List<Unit>();
+            foreach (var unit in atRisk)
+            {
+                var tile = unit.CurrentLocation!;
+                if (tile.Type != TerrainType.Ocean)
+                {
+                    continue;
+                }
+
+                if (tile.Map.Neighbours(tile).Any(t => t.Type != TerrainType.Ocean))
+                {
+                    continue;
+                }
+
+                if (Random.Next(lossChance) != 0)
+                {
+                    continue;
+                }
+
+                unit.Dead = true;
+                lost.Add(unit);
+            }
+
+            foreach (var unit in lost)
+            {
+                player.UnitLost(unit, null);
+            }
+        }
+
+        private static bool HasAdvance(Civilization civilization, AdvanceType advance) =>
+            (int)advance < civilization.Advances.Length && civilization.Advances[(int)advance];
 
         private static void HealRestingUnit(Unit unit)
         {

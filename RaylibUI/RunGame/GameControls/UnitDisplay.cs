@@ -23,7 +23,7 @@ public class UnitDisplay : BaseControl
         // Keep child texture elements relative to this control. Passing the final UI
         // location into ImageUtils made high-resolution unit art much easier to draw
         // outside its parent when the parent later moved the control during layout.
-        _size = ImageUtils.GetUnitTextures(unit, activeInterface, game, _unitTextures, Vector2.Zero, noStacking: true, useMapArt: true);
+        _size = ImageUtils.GetUnitTextures(unit, activeInterface, game, _unitTextures, Vector2.Zero, noStacking: true, useMapArt: false);
         Location = location;
     }
 

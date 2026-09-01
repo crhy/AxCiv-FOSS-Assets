@@ -3,6 +3,7 @@ using System.Linq;
 using Civ2engine.Enums;
 using Civ2engine.MapObjects;
 using Model.Constants;
+using Model.Core;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
@@ -10,6 +11,12 @@ namespace Civ2engine.Units;
 
 public static class UnitExtensions
 {
+    /// <summary>
+    /// Defence bonus a city wall provides, matching the bundled ruleset. Used when
+    /// a wonder stands in for the building itself.
+    /// </summary>
+    private const int FreeCityWallEffect = 200;
+
     public static double AttackFactor(this Unit attackUnit, Unit defendingUnit)
     {
         // Base attack factor from RULES
@@ -22,6 +29,13 @@ public static class UnitExtensions
         if (attackUnit.TypeDefinition.Effects.TryGetValue(UnitEffect.Partisan, out var effect) && defendingUnit.AttackBase == 0)
         {
             af *= effect;
+        }
+
+        // The Great Wall doubles its owner's attack strength against barbarians.
+        if (defendingUnit.Owner.PlayerType == PlayerType.Barbarians &&
+            WonderFunctions.DoublesAttackAgainstBarbarians(attackUnit.Owner))
+        {
+            af *= 2;
         }
 
         return af;
@@ -38,6 +52,20 @@ public static class UnitExtensions
 
         // Bonus for veteran units
         if (defendingUnit.Veteran) df *= 1.5m;
+
+        // Pikemen-style bonus. Civ II applies x1.5 -- not x2 -- and only against a
+        // land attacker with two movement points, one hit point and one firepower,
+        // which is how the rules identify a mounted unit without a dedicated flag.
+        if (defendingUnit.X2OnDefenseVersusHorse && IsMountedAttacker(attackingUnit))
+        {
+            df *= 1.5m;
+        }
+
+        // AEGIS-style bonus: x3 against aircraft, x5 against missiles.
+        if (defendingUnit.X2OnDefenseVersusAir && attackingUnit.Domain == UnitGas.Air)
+        {
+            df *= attackingUnit.DestroyedAfterAttacking ? 5m : 3m;
+        }
 
         // City walls bonus (applies only to land units)
         if (defendingUnit.Domain == UnitGas.Ground)
@@ -63,8 +91,17 @@ public static class UnitExtensions
             if (tile.CityHere != null &&
                 defendingUnit.Domain == UnitGas.Ground && !attackingUnit.NegatesCityWalls)
             {
-                var totalWallDefence =
-                    tile.CityHere.Improvements.Sum(i => i.Effects.GetValueOrDefault(Effects.Walled, 0)) / 100m;
+                var wallEffect =
+                    tile.CityHere.Improvements.Sum(i => i.Effects.GetValueOrDefault(Effects.Walled, 0));
+
+                // The Great Wall stands in for city walls wherever a city has none.
+                if (wallEffect < FreeCityWallEffect &&
+                    WonderFunctions.HasFreeCityWalls(tile.CityHere.Owner))
+                {
+                    wallEffect = FreeCityWallEffect;
+                }
+
+                var totalWallDefence = wallEffect / 100m;
                 if (totalWallDefence > bestGroundFactor)
                 {
                     bestGroundFactor = totalWallDefence;
@@ -144,5 +181,20 @@ public static class UnitExtensions
         df *= tile.Defense;
 
         return (int)df;
+    }
+
+    /// <summary>
+    /// Civ II has no explicit "is a horse" flag. A mounted attacker is a land unit
+    /// with two movement points, a single hit point and a single firepower, which
+    /// selects exactly the Horsemen-through-Cavalry line in the standard rules
+    /// while still working for custom rulesets.
+    /// </summary>
+    private static bool IsMountedAttacker(Unit attackingUnit)
+    {
+        var definition = attackingUnit.TypeDefinition;
+        return attackingUnit.Domain == UnitGas.Ground &&
+               definition.AttackPerTurn == 2 &&
+               definition.Hitp == 10 &&
+               definition.Firepwr == 1;
     }
 }

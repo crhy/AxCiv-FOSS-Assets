@@ -1,8 +1,8 @@
-
-
-ai.RegisterEvent(AiEvent.Turn_Start, function(ai,d)
-    print(ai.civ.TribeName .. " Turn: " .. d.Turn)
-end)
+-- Default opponent behaviour.
+--
+-- Production is chosen by the engine's built-in heuristic unless a script
+-- registers City_Production_Complete and returns an order, an index into the
+-- supplied list, or an order title.
 
 local function defender_score(unit)
     local defense = unit.type and unit.type.defense or 0
@@ -18,7 +18,6 @@ end
 ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
     local unit = data.Unit;
 
-    print("Looking for orders for " .. unit.type.name)
     local currentTile = unit.location;
 
     if unit.type.role == AiRoleType.Defend then
@@ -49,10 +48,8 @@ ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
         end
     end
     
-    print(unit.type.role)
 
     if unit.type.role == AiRoleType.Settle then
-        print("Check for city near")
         local isCityRadius = ai.GetNearestCity(currentTile, true)
     
         if isCityRadius then
@@ -121,7 +118,6 @@ ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
 end)
 
 ai.RegisterEvent(AiEvent.Research_Complete, function(ai, data)
-    print("Research_Complete called")
     local possibilities = data.researchPossibilities
     local bestTech = nil
     local bestScore = -1
@@ -132,23 +128,10 @@ ai.RegisterEvent(AiEvent.Research_Complete, function(ai, data)
         -- Bias towards lower epochs by penalizing higher ones
         local score = aiValue - (epoch * 10)
         
-        print("Considering tech: " .. name .. " (Epoch: " .. epoch .. ", Value: " .. aiValue .. ", Score: " .. score .. ")")
         if not bestTech or score > bestScore then
             bestTech = tech
             bestScore = score
         end
     end
-    if bestTech then
-        print("Selected tech: " .. bestTech.name)
-    else
-        print("No tech selected")
-    end
     return bestTech
 end)
-
-ai.RegisterEvent(AiEvent.Unit_Moved, function(a, data)
-    local unit = data.Unit
-    local tileFrom = data.TileFrom;
-    local tileTo = data.TileTo;
-    print("Unit moved " .. unit.name)
-    end)

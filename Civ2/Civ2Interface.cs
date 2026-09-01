@@ -590,6 +590,31 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         return null;
     }
 
+    /// <summary>
+    /// City style rows in the classic CITIES sheet, in the order the renderer
+    /// indexes them: four per-civilisation ancient/classical/medieval styles,
+    /// then the shared industrial and modern styles.
+    /// </summary>
+    private static readonly string[] FossArtCityStyleFolders =
+        ["Aztec", "German", "Greek", "Japanese", "London", "USA"];
+
+    /// <summary>
+    /// Native high-resolution city art for a style row and size/walled column.
+    /// Columns 0-3 are the unwalled size steps and 4-7 their walled variants,
+    /// matching <see cref="GetCityIndexForStyle"/>.
+    /// </summary>
+    public IImageSource? GetFossArtCityImage(int cityStyleIndex, int sizeIndex)
+    {
+        if (cityStyleIndex < 0 || cityStyleIndex >= FossArtCityStyleFolders.Length ||
+            sizeIndex < 0 || sizeIndex > 7)
+        {
+            return null;
+        }
+
+        return GetFossArtImage(Path.Combine("Cities", FossArtCityStyleFolders[cityStyleIndex]),
+            $"city_{sizeIndex + 1:00}");
+    }
+
     private static IEnumerable<string> GetFossArtUnitNames(int unitType)
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

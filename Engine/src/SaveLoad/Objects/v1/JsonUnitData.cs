@@ -37,6 +37,7 @@ public class JsonUnitData
         GoToX = unit.GoToX;
         Commodity = unit.CaravanCommodity;
         Counter = unit.Counter;
+        TurnsAirborne = unit.TurnsAirborne;
         if (unit.ExtendedData.Count > 0)
         {
             ExtendedData = unit.ExtendedData;
@@ -62,4 +63,5 @@ public class JsonUnitData
     public int GoToY { get; set; }
     public int Commodity { get; set; }
     public int Counter { get; set; }
+    public int TurnsAirborne { get; set; }
 }

@@ -1,3 +1,4 @@
+using Civ2.ImageLoader;
 using Civ2engine;
 using Civ2engine.Enums;
 using Civ2engine.Events;
@@ -25,7 +26,9 @@ namespace RaylibUI.RunGame;
 public class GameScreen : BaseScreen
 {
     public const int MinimumZoom = -7;
-    public const int MaximumZoom = 16;
+    // Terrain is now composed at a scale that follows the zoom, so the map can go
+    // well past the old 3x ceiling without being upscaled from a fixed grid.
+    public const int MaximumZoom = 32;
     public Main Main { get; }
     public IGame Game { get; }
     public Sound Soundman { get; }
@@ -55,7 +58,67 @@ public class GameScreen : BaseScreen
     public int Zoom     // -7 (min) ... 16 (max), 0=std.
     {
         get => _zoom;
-        set => _zoom = Math.Clamp(value, MinimumZoom, MaximumZoom);
+        set
+        {
+            _zoom = Math.Clamp(value, MinimumZoom, MaximumZoom);
+            SyncTerrainDetail();
+        }
+    }
+
+    /// <summary>
+    /// Terrain reaches the screen as per-tile bitmaps composed ahead of time, so
+    /// its detail is fixed when a tile is built rather than when it is drawn.
+    /// Keeping the composition scale in step with the zoom means a zoomed-in map
+    /// is composed at the size it will be drawn at instead of being stretched up
+    /// from a fixed 64x32 grid, which is what limited how far the map could
+    /// usefully zoom.
+    /// </summary>
+    public void SyncTerrainDetail()
+    {
+        if (_mapControl is null)
+        {
+            // Still constructing; the initial terrain load already picked a scale.
+            return;
+        }
+
+        var active = Main.ActiveInterface;
+        if (active.TileSets.Count == 0)
+        {
+            return;
+        }
+
+        var desired = TerrainRenderScaleFor(_zoom);
+        if (active.TileSets[0].RenderScale == desired)
+        {
+            return;
+        }
+
+        TerrainLoader.UseTerrainScale(Main.ActiveRuleSet, active, desired);
+
+        // Cached tiles were composed at the old scale and cannot be reused.
+        TileCache.Clear();
+        ForceRedraw();
+    }
+
+    /// <summary>
+    /// Source pixels to compose per logical tile pixel: enough to cover the zoom
+    /// and the display's own density, so nothing is ever upscaled on the way to
+    /// the screen.
+    /// </summary>
+    private static int TerrainRenderScaleFor(int zoom)
+    {
+        var drawnScale = ImageUtils.ZoomScale(zoom) * DisplayScale.Factor;
+
+        // Doubling bands rather than an exact match: rebuilding a terrain set
+        // resizes every base texture and recomposes every overlay, so it must not
+        // happen on each notch of the mouse wheel.
+        var scale = 1;
+        while (scale < drawnScale && scale < TerrainLoader.MaximumTerrainRenderScale)
+        {
+            scale *= 2;
+        }
+
+        return Math.Clamp(scale, 1, TerrainLoader.MaximumTerrainRenderScale);
     }
     public TileTextureCache TileCache { get; }
     
@@ -246,6 +309,9 @@ public class GameScreen : BaseScreen
         _height = height;
         GetPanelBounds(width, height);
         base.Resize(width, height);
+
+        // A different display density changes how many source pixels a tile needs.
+        SyncTerrainDetail();
         _mapControl.RefreshResolution();
     }
 

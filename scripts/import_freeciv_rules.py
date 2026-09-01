@@ -250,8 +250,8 @@ def build_rules(source: Path) -> tuple[str, str]:
     rules = "\n".join(lines).rstrip() + "\n"
     city_lines = ["; City names derived from Freeciv's GPL civ2 nation data."]
     for name, cities in city_sections:
-        city_lines += [f"@{name}", *cities, "@STOP"]
-    city_lines += ["@EXTRA", "New Hope", "New Town", "New City", "Frontier", "@STOP", "@BARBARIANS", "Stronghold", "@STOP", "@end"]
+        city_lines += ["", f"@{name}", *cities, "@STOP", ""]
+    city_lines += ["", "@EXTRA", "New Hope", "New Town", "New City", "Frontier", "@STOP", "", "@BARBARIANS", "Stronghold", "@STOP", "", "@end"]
     return rules, "\n".join(city_lines) + "\n"
 
 

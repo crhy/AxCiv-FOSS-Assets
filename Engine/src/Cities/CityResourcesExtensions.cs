@@ -11,9 +11,16 @@ public static class CityResourcesExtensions
 {
     private static decimal GetMultiplier(this City city, Effects effect)
     {
-        return (100 + city.Improvements
+        var percent = city.Improvements
             .Where(i => i.Effects.ContainsKey(effect))
-            .Select(b => b.Effects[effect]).Sum()) / 100m;
+            .Select(b => b.Effects[effect]).Sum();
+
+        // Wonders that behave like a multiplier building are not held in the
+        // city's improvement list when they belong to another city, or when they
+        // apply civilisation-wide, so they are added here.
+        percent += WonderFunctions.GetMultiplierBonus(city, effect);
+
+        return (100 + percent) / 100m;
     }
 
     private static int GetBaseScience(this City city)

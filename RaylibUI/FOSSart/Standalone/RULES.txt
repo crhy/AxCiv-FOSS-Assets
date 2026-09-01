@@ -193,34 +193,34 @@ SETI Program, 600, 0, A10
 Cure for Cancer, 600, 0, A20
 
 @ENDWONDER
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
-nil
+nil ; Pyramids
+A41 ; Hanging Gardens
+A1D ; Colossus
+A2C ; Lighthouse
+A16 ; Great Library
+A52 ; Oracle
+A32 ; Great Wall
+A34 ; Sun Tzu's War Academy
+A24 ; King Richard's Crusade
+A0F ; Marco Polo's Embassy
+nil ; Michelangelo's Chapel
+nil ; Copernicus' Observatory
+nil ; Magellan's Expedition
+nil ; Shakespeare's Theatre
+A05 ; Leonardo's Workshop
+nil ; J.S. Bach's Cathedral
+nil ; Isaac Newton's College
+nil ; A.Smith's Trading Co.
+nil ; Darwin's Voyage
+nil ; Statue of Liberty
+nil ; Eiffel Tower
+nil ; Hoover Dam
+nil ; Women's Suffrage
+nil ; Manhattan Project
+nil ; United Nations
+nil ; Apollo Program
+nil ; SETI Program
+nil ; Cure for Cancer
 
 @UNITS
 Settlers, nil, 0, 1, 0, 0, 1, 2, 1, 40, 0, 5, nil, 00000000000000

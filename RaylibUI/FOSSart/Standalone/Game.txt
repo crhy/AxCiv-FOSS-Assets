@@ -1,2 +1,362 @@
 @metadata
 @title=rhYciv Standalone
+
+@NAMECITY
+@title=A New City
+@width=320
+@button=Ok
+@button=Cancel
+What shall we call it?
+
+@FOUNDED
+@title=City Founded
+@width=340
+@button=Ok
+%STRING0 is founded in %STRING1.
+
+Its people look to you to make it prosper.
+
+@ONLYSETTLERS
+@title=Not This Unit
+@width=300
+@button=Ok
+Only Settlers and Engineers can found a city.
+
+@CITYATSEA
+@title=Open Water
+@width=300
+@button=Ok
+A city cannot be founded at sea.
+
+@ADJACENTCITY
+@title=Too Close
+@width=320
+@button=Ok
+There is already a city beside this square.
+Cities need room to grow; move further out.
+
+@ONLY10
+@title=City Full
+@width=320
+@button=Ok
+This city cannot take in more people until it has an aqueduct.
+
+@CANTDO
+@title=Not Possible
+@width=300
+@button=Ok
+This unit cannot do that here.
+
+@ALREADYROAD
+@title=Already Built
+@width=300
+@button=Ok
+This square already has a road.
+
+@ALREADYFARMLAND
+@title=Already Built
+@width=300
+@button=Ok
+This square is already farmland.
+
+@ALREADYMINING
+@title=Already Built
+@width=300
+@button=Ok
+This square has already been mined.
+
+@ALREADYFORT
+@title=Already Built
+@width=300
+@button=Ok
+There is already a fortress on this square.
+
+@ALREADYAIR
+@title=Already Built
+@width=300
+@button=Ok
+There is already an airbase on this square.
+
+@NOWATER
+@title=No Water
+@width=320
+@button=Ok
+Irrigation needs fresh water: a river, a lake, the sea,
+or an irrigated square next to this one.
+
+@NOPOLLUTION
+@title=Nothing to Clean
+@width=300
+@button=Ok
+This square is not polluted.
+
+@BRIDGES
+@title=Bridge Building Needed
+@width=320
+@button=Ok
+Your engineers cannot carry a road across a river
+until they have learned to build bridges.
+
+@RAILROADS
+@title=Railroad Needed
+@width=300
+@button=Ok
+Your people have not yet learned to build railroads.
+
+@FARMLAND
+@title=Refrigeration Needed
+@width=300
+@button=Ok
+Your people have not yet learned to farm this intensively.
+
+@CONSTRUCTION
+@title=Construction Needed
+@width=300
+@button=Ok
+Your people have not yet learned to raise a fortress.
+
+@RADIO
+@title=Radio Needed
+@width=300
+@button=Ok
+Your people have not yet learned to run an airbase.
+
+@NEWFORTRESS
+@title=Fortresses
+@width=340
+@button=Ok
+Your engineers can now raise fortresses.
+
+A unit defending a fortress is far harder to dislodge.
+
+@NEWAIRLIFT
+@title=Airbases
+@width=340
+@button=Ok
+Your engineers can now build airbases.
+
+Aircraft can refuel and rest at an airbase, far from home.
+
+@NEWFARMLAND
+@title=Farmland
+@width=340
+@button=Ok
+Your engineers can now improve irrigated land into farmland.
+
+A city with a supermarket will eat better for it.
+
+@NEWRAILROAD
+@title=Railroads
+@width=340
+@button=Ok
+Your engineers can now lay railroad.
+
+Units move along it without spending their turn.
+
+@GOTO
+@title=Go To
+@width=320
+@button=Ok
+@button=Cancel
+Send this unit where?
+
+@PILLAGEWHAT
+@title=Pillage
+@width=320
+@button=Ok
+@button=Cancel
+Which improvement should be destroyed?
+
+@UNITOPTIONS
+@title=%STRING0
+@width=320
+@button=Ok
+@button=Cancel
+Home city: %STRING2
+
+@HOCKTHIS
+@title=Sell Building
+@width=340
+@button=Ok
+@button=Cancel
+This city can sell one building a turn.
+@options
+Sell the %STRING0 for %NUMBER0 gold
+Keep it
+
+@CANTHOCKTHIS
+@title=Not For Sale
+@width=320
+@button=Ok
+This building cannot be sold.
+
+@ALREADYSOLD
+@title=Already Sold
+@width=320
+@button=Ok
+This city has already sold a building this turn.
+
+@BUILT
+@title=%STRING0
+@width=340
+@button=Ok
+The %STRING2 city of %STRING0 %STRING3 %STRING1.
+@options
+Zoom to City
+Continue
+
+@BADBUILD
+@title=%STRING0
+@width=340
+@button=Ok
+%STRING0 cannot build %STRING1 and has changed its plans.
+@options
+Zoom to City
+Continue
+
+@DISORDER
+@title=Civil Disorder
+@width=340
+@button=Ok
+%STRING0 has fallen into disorder.
+
+It will produce nothing until its people are content.
+@options
+Zoom to City
+Continue
+
+@RESTORED
+@title=Order Restored
+@width=340
+@button=Ok
+Order has returned to %STRING0.
+@options
+Zoom to City
+Continue
+
+@WELOVEKING
+@title=Celebration
+@width=340
+@button=Ok
+%STRING0 is celebrating.
+@options
+Zoom to City
+Continue
+
+@WEDONTLOVEKING
+@title=Celebration Ends
+@width=340
+@button=Ok
+The celebration in %STRING0 is over.
+@options
+Zoom to City
+Continue
+
+@FOODSHORTAGE
+@title=Food Shortage
+@width=340
+@button=Ok
+%STRING0 is running short of food.
+
+Move people onto better land, or the city will starve.
+@options
+Zoom to City
+Continue
+
+@DECREASE
+@title=Famine
+@width=340
+@button=Ok
+Famine has taken a citizen of %STRING0.
+@options
+Zoom to City
+Continue
+
+@INHOCK
+@title=Treasury Empty
+@width=340
+@button=Ok
+%STRING0 could not pay for its %STRING1, and has sold it
+for %NUMBER0 gold.
+@options
+Zoom to City
+Continue
+
+@RESEARCH
+@title=Choose Your Research
+@width=360
+@button=Ok
+Our %STRING0 await your direction.
+
+@FINDCITY
+@title=Find City
+@width=320
+@button=Ok
+@button=Cancel
+Which city?
+
+@SAVEOK
+@title=Game Saved
+@width=360
+@button=Ok
+%STRING0 %STRING1 of the %STRING2,
+your game is saved as %STRING3.
+
+@REALLYQUIT
+@title=Leave the Game
+@width=340
+@default=0
+@button=Ok
+@button=Cancel
+Any progress since your last save will be lost.
+@options
+Keep playing
+Quit to the main menu
+
+@GAMEOPTIONS
+@title=Game Options
+@width=360
+@checkbox
+@button=Ok
+@button=Cancel
+@options
+Sound effects
+Music
+Always wait at end of turn
+Autosave each turn
+Show enemy moves
+No pause after enemy moves
+Fast piece slide
+Instant advice
+Tutorial help
+Move units with the keyboard
+Enter closest city screen
+
+@MESSAGEOPTIONS
+@title=City Report Options
+@width=380
+@checkbox
+@button=Ok
+@button=Cancel
+@options
+Warn when city growth is halted
+Announce buildings completed
+Announce non-combat units built
+Warn about invalid build orders
+Announce cities in disorder
+Announce order restored
+Announce celebrations
+Warn when food runs low
+Warn when pollution appears
+Warn when changing production costs shields
+Zoom to city is not the default action
+
+@GRAPHICOPTIONS
+@title=Graphic Options
+@width=360
+@checkbox
+@button=Ok
+@button=Cancel
+@options
+Diplomacy screen graphics
+Open the Civilopedia on a new advance

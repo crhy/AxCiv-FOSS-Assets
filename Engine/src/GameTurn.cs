@@ -139,6 +139,12 @@ namespace Civ2engine
 
                 foreach (var cityImprovement in city.Improvements)
                 {
+                    // A. Smith's Trading Co. covers every building that costs one gold.
+                    if (WonderFunctions.PaysUpkeepFor(activeCiv, cityImprovement.Upkeep))
+                    {
+                        continue;
+                    }
+
                     if (cityImprovement.Upkeep > 0)
                     {
                         if (activeCiv.Money >= cityImprovement.Upkeep)

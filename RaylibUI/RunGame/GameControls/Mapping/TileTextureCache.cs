@@ -12,6 +12,24 @@ public class TileTextureCache
 
     private readonly List<TileDetails?[,]> _mapTileTextures = new();
 
+    /// <summary>
+    /// Composed tiles in least-recently-used order, newest first. Tiles are built
+    /// at the terrain set's render scale, so at high zoom each one is large; the
+    /// cache is bounded by total pixels rather than by tile count.
+    /// </summary>
+    private readonly LinkedList<CacheKey> _recent = new();
+    private readonly Dictionary<CacheKey, LinkedListNode<CacheKey>> _recentNodes = new();
+    private long _cachedBytes;
+    private long _generation;
+
+    /// <summary>
+    /// Roughly a handful of screenfuls at any zoom. Composing a tile is cheap
+    /// next to holding every tile a long game has ever revealed.
+    /// </summary>
+    private const long CachedTileByteBudget = 192L * 1024 * 1024;
+
+    private readonly record struct CacheKey(int MapIndex, int X, int Y);
+
     private readonly List<int> _seenMaps = new();
     private readonly List<TerrainSet> _tileSets = new();
     private readonly List<MapDimensions> _dimensions = new();
@@ -22,6 +40,15 @@ public class TileTextureCache
         _parentScreen = parentScreen;
     }
 
+    /// <summary>
+    /// Marks the start of composing a view. Tiles drawn during this build are
+    /// protected from eviction until the next one begins.
+    /// </summary>
+    public void BeginViewBuild()
+    {
+        _generation++;
+    }
+
     public TileDetails GetTileDetails(Tile tile, int civilizationId)
     {
         var mapIndex = _seenMaps.IndexOf(tile.Map.MapIndex);
@@ -30,8 +57,88 @@ public class TileTextureCache
             mapIndex = SetupMap(tile.Map);
         }
 
-        return _mapTileTextures[mapIndex][tile.XIndex, tile.Y] ??=
-            MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
+        var key = new CacheKey(mapIndex, tile.XIndex, tile.Y);
+        var cache = _mapTileTextures[mapIndex];
+        var details = cache[tile.XIndex, tile.Y];
+        if (details != null)
+        {
+            details.Generation = _generation;
+            Touch(key);
+            return details;
+        }
+
+        details = MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
+        details.Generation = _generation;
+        cache[tile.XIndex, tile.Y] = details;
+        Track(key, details);
+        TrimToBudget();
+        return details;
+    }
+
+    private void Touch(CacheKey key)
+    {
+        if (_recentNodes.TryGetValue(key, out var node))
+        {
+            _recent.Remove(node);
+            _recent.AddFirst(node);
+        }
+    }
+
+    private void Track(CacheKey key, TileDetails details)
+    {
+        if (_recentNodes.TryGetValue(key, out var existing))
+        {
+            _recent.Remove(existing);
+            _recentNodes.Remove(key);
+        }
+
+        _recentNodes[key] = _recent.AddFirst(key);
+        _cachedBytes += ByteSize(details);
+    }
+
+    private void Forget(CacheKey key, TileDetails details)
+    {
+        if (_recentNodes.Remove(key, out var node))
+        {
+            _recent.Remove(node);
+        }
+
+        _cachedBytes -= ByteSize(details);
+        if (_cachedBytes < 0)
+        {
+            _cachedBytes = 0;
+        }
+    }
+
+    private static long ByteSize(TileDetails details) =>
+        Math.Max(0L, (long)details.Image.Width * details.Image.Height * 4);
+
+    /// <summary>
+    /// Drops the coldest tiles until the cache is inside its budget, never
+    /// touching a tile the view currently being composed has used.
+    /// </summary>
+    private void TrimToBudget()
+    {
+        var node = _recent.Last;
+        while (_cachedBytes > CachedTileByteBudget && node != null)
+        {
+            var previous = node.Previous;
+            var key = node.Value;
+            var cached = _mapTileTextures[key.MapIndex][key.X, key.Y];
+            if (cached != null && cached.Generation != _generation)
+            {
+                _mapTileTextures[key.MapIndex][key.X, key.Y] = null;
+                Forget(key, cached);
+                cached.Image.Unload();
+            }
+            else if (cached == null)
+            {
+                _recent.Remove(node);
+                _recentNodes.Remove(key);
+            }
+
+            node = previous;
+        }
     }
 
     private int SetupMap(Map map)
@@ -93,10 +200,19 @@ public class TileTextureCache
             mapIndex = SetupMap(tile.Map);
         }
 
+        var key = new CacheKey(mapIndex, tile.XIndex, tile.Y);
         var cache = _mapTileTextures[mapIndex];
-        cache[tile.XIndex, tile.Y]?.Image.Unload();
-        cache[tile.XIndex, tile.Y] =
-            MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
+        var previous = cache[tile.XIndex, tile.Y];
+        if (previous != null)
+        {
+            Forget(key, previous);
+            previous.Image.Unload();
+        }
+
+        var replacement = MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
+        replacement.Generation = _generation;
+        cache[tile.XIndex, tile.Y] = replacement;
+        Track(key, replacement);
     }
 
     public void Clear()
@@ -113,5 +229,8 @@ public class TileTextureCache
         _dimensions.Clear();
         _scaledDimensions.Clear();
         _tileSets.Clear();
+        _recent.Clear();
+        _recentNodes.Clear();
+        _cachedBytes = 0;
     }
 }

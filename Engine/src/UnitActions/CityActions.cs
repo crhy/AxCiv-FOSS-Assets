@@ -21,8 +21,10 @@ namespace Civ2engine.UnitActions
             var cityCount = game.CitiesBuiltSoFar.GetValueOrDefault(civ, (byte) 0);
             var names = game.CityNames;
             var tribe = civ.TribeName.ToUpperInvariant();
-            var civCityList = names[names.ContainsKey(tribe) ? tribe : "EXTRA"];
-            if (cityCount < civCityList?.Count)
+            var civCityList = names.TryGetValue(tribe, out var tribeList) ? tribeList
+                : names.TryGetValue("EXTRA", out var extraList) ? extraList
+                : null;
+            if (civCityList != null && cityCount < civCityList.Count)
             {
                 return civCityList[cityCount];
             }

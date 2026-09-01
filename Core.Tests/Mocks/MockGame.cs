@@ -11,7 +11,9 @@ namespace Core.Tests.Mocks;
 
 internal class MockGame : IGame
 {
-    public FastRandom Random => throw new NotImplementedException();
+    // Seeded so any engine code that reaches for randomness stays deterministic
+    // across test runs instead of throwing.
+    public FastRandom Random { get; } = new(42);
     public Civilization GetPlayerCiv => throw new NotImplementedException();
     public IDictionary<int, TerrainImprovement> TerrainImprovements => throw new NotImplementedException();
     public IImprovementEncoder ImprovementEncoder { get; }

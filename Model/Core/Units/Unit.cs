@@ -30,7 +30,13 @@ namespace Model.Core.Units
 
         public int UntilTech => TypeDefinition.Until;
         public UnitGas Domain => TypeDefinition.Domain;
-        public int MaxMovePoints => TypeDefinition.Move;
+        public int MaxMovePoints => TypeDefinition.Move + BonusMovePoints;
+
+        /// <summary>
+        /// Extra movement granted by wonders, recalculated at the start of each of
+        /// the owner's turns. Derived state, so it is not saved.
+        /// </summary>
+        public int BonusMovePoints { get; set; }
         public int FuelRange => TypeDefinition.Range;
         public int AttackBase => TypeDefinition.Attack;
         public int DefenseBase => TypeDefinition.Defense;
@@ -42,21 +48,32 @@ namespace Model.Core.Units
         public int Cost => TypeDefinition.Cost;
         public int ShipHold => TypeDefinition.Hold;
         public AiRoleType AiRole => TypeDefinition.AIrole;
-        public bool TwoSpaceVisibility => TypeDefinition.Flags[0] ;
-        public bool IgnoreZonesOfControl => TypeDefinition.Flags[1]  || Domain == UnitGas.Air || Domain == UnitGas.Sea;
-        public bool CanMakeAmphibiousAssaults => TypeDefinition.Flags[2] ;
-        public bool SubmarineAdvantagesDisadvantages => TypeDefinition.Flags[3] ;
-        public bool CanAttackAirUnits => TypeDefinition.Flags[4] ;    // fighter
-        public bool ShipMustStayNearLand => TypeDefinition.Flags[5] ;  // trireme
-        public bool NegatesCityWalls => TypeDefinition.Flags[6] ;  // howitzer
-        public bool CanCarryAirUnits => TypeDefinition.Flags[7] ;  // carrier
-        public bool CanMakeParadrops => TypeDefinition.Flags[8];
-        public bool Alpine => TypeDefinition.Flags[9] ;    // treats all squares as road
-        public bool X2OnDefenseVersusHorse => TypeDefinition.Flags[10] ;    // pikemen
-        public bool FreeSupportForFundamentalism => TypeDefinition.Flags[11] ;    // fanatics
-        public bool DestroyedAfterAttacking => TypeDefinition.Flags[12] ;    // missiles
-        public bool X2OnDefenseVersusAir => TypeDefinition.Flags[13] ;    // AEGIS
-        public bool UnitCanSpotSubmarines => TypeDefinition.Flags[4] ;
+        /// <summary>
+        /// Reads one of the rules' unit flags. The flag field is a variable-length
+        /// bit string, so a ruleset that defines fewer flags than the engine knows
+        /// about leaves the remainder unset rather than throwing.
+        /// </summary>
+        private bool Flag(int index)
+        {
+            var flags = TypeDefinition.Flags;
+            return flags.Length > index && flags[index];
+        }
+
+        public bool TwoSpaceVisibility => Flag(0);
+        public bool IgnoreZonesOfControl => Flag(1) || Domain == UnitGas.Air || Domain == UnitGas.Sea;
+        public bool CanMakeAmphibiousAssaults => Flag(2);
+        public bool SubmarineAdvantagesDisadvantages => Flag(3);
+        public bool CanAttackAirUnits => Flag(4);    // fighter
+        public bool ShipMustStayNearLand => Flag(5);  // trireme
+        public bool NegatesCityWalls => Flag(6);  // howitzer
+        public bool CanCarryAirUnits => Flag(7);  // carrier
+        public bool CanMakeParadrops => Flag(8);
+        public bool Alpine => Flag(9);    // treats all squares as road
+        public bool X2OnDefenseVersusHorse => Flag(10);    // pikemen
+        public bool FreeSupportForFundamentalism => Flag(11);    // fanatics
+        public bool DestroyedAfterAttacking => Flag(12);    // missiles
+        public bool X2OnDefenseVersusAir => Flag(13);    // AEGIS
+        public bool UnitCanSpotSubmarines => Flag(4);
 
 
         public int Id { get; set; }
@@ -83,6 +100,12 @@ namespace Model.Core.Units
         public int LinkOtherUnitsOnTop { get; set; }
         public int LinkOtherUnitsUnder { get; set; }
         public int Counter { get; set; }
+
+        /// <summary>
+        /// Consecutive turns an air unit has spent away from a city, airbase or
+        /// carrier. Civ II crashes an air unit once this reaches its fuel range.
+        /// </summary>
+        public int TurnsAirborne { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public int MapIndex { get; set; }

@@ -92,14 +92,8 @@ public class StatusPanel : BaseControl
         _endTurnButton.Visible = _game.GetPlayerCiv == _game.GetActiveCiv;
         Controls = [_headerLabel, populLabel, yearLabel, goldLabel, turnsLabel, researchIcon, _endTurnButton];
 
-        // TODO: find out when global warming icon is shown (it's based on no of skull icons on map)
-        if (true)
-        {
-            iconNo = 0;
-            var warmingIconLoc = new Vector2(researchIconLoc.X + 24, researchIconLoc.Y);
-            var warmingIcon = new TextureDisplay(_gameScreen, TextureCache.GetImage(_active.PicSources["globalWarming"][iconNo]), warmingIconLoc, scale: iconScale);
-            Controls.Add(warmingIcon);
-        }
+        // Global warming is outside this game's scope, so the status panel has no
+        // warming indicator.
 
         if (_game.GetPlayerCiv == _game.GetActiveCiv)
         {

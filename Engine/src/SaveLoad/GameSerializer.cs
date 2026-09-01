@@ -168,7 +168,8 @@ public class GameSerializer
             GoToX = unitData.GoToX,
             GoToY = unitData.GoToY,
             CaravanCommodity = unitData.Commodity,
-            Counter = unitData.Counter
+            Counter = unitData.Counter,
+            TurnsAirborne = unitData.TurnsAirborne
         };
         if (unitData.ExtendedData != null)
         {

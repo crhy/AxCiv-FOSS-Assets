@@ -84,14 +84,129 @@ namespace Civ2engine
 
         public void CantProduce(City city, IProductionOrder? newItem)
         {
+            // The caller applies newItem when it found one; only step in when it
+            // could not, otherwise the city keeps building something invalid.
+            if (newItem != null)
+            {
+                return;
+            }
+
+            var replacement = ChooseProduction(city, ProductionPossibilities.GetAllowedProductionOrders(city));
+            if (replacement != null)
+            {
+                city.ItemInProduction = replacement;
+            }
         }
 
         public void CityProductionComplete(City city)
         {
             var productionOrders = ProductionPossibilities.GetAllowedProductionOrders(city);
-            Ai.Call(AiEvent.CityProductionComplete,
+            if (productionOrders.Count == 0)
+            {
+                return;
+            }
+
+            var result = Ai.Call(AiEvent.CityProductionComplete,
                 new LuaTable { { "city", city }, { "productionOrders", productionOrders } });
+
+            // A script may answer with an order, an index into the list, or a title.
+            // Without an answer the built-in heuristic decides, so an AI civilisation
+            // always chooses deliberately rather than falling through to the
+            // cheapest item of whatever it happened to build last.
+            var chosen = ResolveProductionChoice(result, productionOrders)
+                         ?? ChooseProduction(city, productionOrders);
+            if (chosen != null)
+            {
+                city.ItemInProduction = chosen;
+            }
         }
+
+        private static IProductionOrder? ResolveProductionChoice(LuaResult? result,
+            IList<IProductionOrder> orders)
+        {
+            if (result is not { Count: > 0 })
+            {
+                return null;
+            }
+
+            switch (result[0])
+            {
+                case IProductionOrder order when orders.Contains(order):
+                    return order;
+                case string title:
+                    return orders.FirstOrDefault(o =>
+                        string.Equals(o.Title, title, StringComparison.OrdinalIgnoreCase));
+                case int index:
+                    return index >= 0 && index < orders.Count ? orders[index] : null;
+                case long longIndex:
+                    return longIndex >= 0 && longIndex < orders.Count ? orders[(int)longIndex] : null;
+                case double number:
+                {
+                    var index = (int)number;
+                    return index >= 0 && index < orders.Count ? orders[index] : null;
+                }
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// How many cities this civilisation tries to found before it stops
+        /// prioritising settlers. Harder opponents expand further, which is the
+        /// main lever Civ II uses to make higher difficulties harder.
+        /// </summary>
+        private int ExpansionTarget => 6 + DifficultyLevel * 2;
+
+        /// <summary>
+        /// The built-in production heuristic: garrison the city, expand while the
+        /// empire is small, then build infrastructure, and fall back to offence.
+        /// </summary>
+        private IProductionOrder? ChooseProduction(City city, IList<IProductionOrder> orders)
+        {
+            if (orders.Count == 0)
+            {
+                return null;
+            }
+
+            var units = orders.OfType<UnitProductionOrder>().ToList();
+            var buildings = orders.OfType<BuildingProductionOrder>()
+                .Where(b => !b.Improvement.IsWonder)
+                .ToList();
+
+            var garrison = city.Location.UnitsHere
+                .Count(u => !u.Dead && u.Owner == Civilization && u.DefenseBase > 0);
+            var wantedGarrison = 1 + city.Size / 6;
+            if (garrison < wantedGarrison)
+            {
+                var defender = Cheapest(units.Where(u => u.UnitDefinition.AIrole == AiRoleType.Defend));
+                if (defender != null)
+                {
+                    return defender;
+                }
+            }
+
+            // Founding a city costs a population point, so never squeeze out a
+            // settler from a city that would disappear.
+            if (city.Size > 1 && Civilization.Cities.Count < ExpansionTarget)
+            {
+                var settler = Cheapest(units.Where(u => u.UnitDefinition.IsSettler));
+                if (settler != null)
+                {
+                    return settler;
+                }
+            }
+
+            var building = Cheapest(buildings);
+            if (building != null)
+            {
+                return building;
+            }
+
+            return Cheapest(units.Where(u => u.UnitDefinition.Attack > 0)) ?? Cheapest(orders);
+        }
+
+        private static IProductionOrder? Cheapest(IEnumerable<IProductionOrder> orders) =>
+            orders.MinBy(o => o.Cost);
 
         public IInterfaceCommands Ui { get; } = null!;
         public string AIScript { get; set; } = civilization.PlayerType == PlayerType.Barbarians ? "barbarian.ai" : "default.ai";

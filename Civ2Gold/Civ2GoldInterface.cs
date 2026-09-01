@@ -158,7 +158,7 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         PicSources.Add("gold,large", [new BitmapStorage("ICONS", new Rectangle(16, 320, 14, 14))]);
         PicSources.Add("science,large", [new BitmapStorage("ICONS", new Rectangle(31, 320, 14, 14))]);
         PicSources.Add("trade,small", [ new BitmapStorage("ICONS", new Rectangle(71, 334, 10, 10))]);
-        PicSources.Add("backgroundImage", [new BitmapStorage(Path.Combine("Backgrounds", "main_menu.jpg"))]);
+        PicSources.Add("backgroundImage", [new BitmapStorage(Path.Combine("Backgrounds", "NewCartographerBackground.png"))]);
         PicSources.Add("backgroundImageSmall1", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
         PicSources.Add("backgroundImageSmall2", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
         PicSources.Add("cityBuiltAncient", [new BitmapStorage(Path.Combine("Cities", "Aztec", "city_01.png"))]);

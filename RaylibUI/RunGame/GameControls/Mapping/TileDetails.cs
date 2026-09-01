@@ -8,6 +8,12 @@ public class TileDetails
 {
     public Image Image { get; set; }
     public ForegroundImprovement? ForegroundElement { get; set; }
+
+    /// <summary>
+    /// View build this tile was last used by. The cache will not evict a tile
+    /// that the view currently being composed has already drawn from.
+    /// </summary>
+    internal long Generation { get; set; }
 }
 
 public class ForegroundImprovement

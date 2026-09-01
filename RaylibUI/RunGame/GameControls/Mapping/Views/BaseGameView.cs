@@ -98,6 +98,9 @@ public abstract class BaseGameView : IGameView
                 CalculateOffsets(null, location, Dimensions, force: true);
             }
 
+            // Tiles drawn into this view must survive until it is finished with them.
+            _gameScreen.TileCache.BeginViewBuild();
+
             var image = Image.GenColor(
                 Math.Max(1, (int)MathF.Ceiling(ViewWidth * RenderScale)),
                 Math.Max(1, (int)MathF.Ceiling(ViewHeight * RenderScale)),
@@ -222,6 +225,58 @@ public abstract class BaseGameView : IGameView
         };
     }
 
+    /// <summary>
+    /// The Civ2 logical footprint a city sprite occupies. High-resolution art is
+    /// fitted into this box so it does not change map layout.
+    /// </summary>
+    private static Vector2 GetCityLogicalSize(CityImage cityImage, CityImageSet cities, Texture2D texture)
+    {
+        if (cityImage.LogicalSize.X > 0 && cityImage.LogicalSize.Y > 0)
+        {
+            return cityImage.LogicalSize;
+        }
+
+        if (cities.CityRectangle.Width > 0 && cities.CityRectangle.Height > 0)
+        {
+            return new Vector2(cities.CityRectangle.Width, cities.CityRectangle.Height);
+        }
+
+        return new Vector2(texture.Width, texture.Height);
+    }
+
+    /// <summary>
+    /// Scale that fits a source texture inside a logical box without cropping.
+    /// Textures already at or below the logical size are drawn unscaled.
+    /// </summary>
+    private static float GetContainedRenderScale(Texture2D texture, Vector2 logicalSize)
+    {
+        if (texture.Width <= 0 || texture.Height <= 0 || logicalSize.X <= 0 || logicalSize.Y <= 0)
+        {
+            return 1f;
+        }
+
+        if (texture.Width <= logicalSize.X && texture.Height <= logicalSize.Y)
+        {
+            return 1f;
+        }
+
+        return MathF.Max(0.01f,
+            MathF.Min(logicalSize.X / texture.Width, logicalSize.Y / texture.Height));
+    }
+
+    /// <summary>
+    /// Centres a contained texture horizontally and sits it on the bottom of the
+    /// logical box, matching how the classic sprites are laid out.
+    /// </summary>
+    private static Vector2 GetContainedDrawOffset(Texture2D texture, Vector2 logicalSize, float renderScale)
+    {
+        var drawWidth = texture.Width * renderScale;
+        var drawHeight = texture.Height * renderScale;
+        return new Vector2(
+            MathF.Max(0f, (logicalSize.X - drawWidth) / 2f),
+            MathF.Max(0f, logicalSize.Y - drawHeight));
+    }
+
     private void CalculateElementsAtTile(GameScreen gameScreen, Tile tile, List<IViewElement> elements,
         IUserInterface activeInterface,
         CityImageSet cities,
@@ -244,14 +299,27 @@ public abstract class BaseGameView : IGameView
                 : GetCitySizeIndexForStyle(cityStyleIndex, cityHere.Size);
             
             var cityImage = cities.Sets[cityStyleIndex][sizeIncrement];
-            var cityPos = posVector with{ Y = posVector.Y + Dimensions.TileHeight - TextureCache.GetImage(cityImage.Image).Height.ZoomScale(gameScreen.Zoom) };
+
+            // Prefer the native 300x300 FOSS city art. It is drawn into the
+            // classic sprite's logical footprint, so the map layout, flag anchor
+            // and size marker are unchanged while zoomed-in views render from
+            // the high-resolution source.
+            var cityTexture = TextureCache.GetImage(cityImage.MapImage ?? cityImage.Image);
+            var cityLogicalSize = GetCityLogicalSize(cityImage, cities, cityTexture);
+            var cityRenderScale = GetContainedRenderScale(cityTexture, cityLogicalSize);
+            var cityDrawOffset = GetContainedDrawOffset(cityTexture, cityLogicalSize, cityRenderScale);
+
+            var cityPos = posVector with { Y = posVector.Y + Dimensions.TileHeight - cityLogicalSize.Y.ZoomScale(gameScreen.Zoom) };
             elements.Add(new CityData(
                 color: activeInterface.PlayerColours[cityHere.OwnerId],
                 name: cityHere.Name,
                 size: cityHere.Size,
                 sizeRectLoc: cityImage.SizeLoc,
-                texture: TextureCache.GetImage(cityImage.Image),
-                location: cityPos, tile: tile));
+                texture: cityTexture,
+                location: cityPos, tile: tile,
+                logicalSize: cityLogicalSize,
+                offset: cityDrawOffset,
+                renderScale: cityRenderScale));
             if (tile.UnitsHere.Count > 0)
             {
                 var flagTexture = TextureCache.GetImage(activeInterface.PlayerColours[cityHere.OwnerId].Image);

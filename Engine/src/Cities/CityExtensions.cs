@@ -26,11 +26,23 @@ namespace Civ2engine
             var totalSheilds = 0;
             var totalTrade = 0;
 
+            // King Richard's Crusade adds a shield to every worked tile of its city;
+            // the Colossus adds trade to every worked tile already producing some.
+            var wonderShieldBonus = WonderFunctions.GetWorkedTileShieldBonus(city);
+            var wonderTradeBonus = WonderFunctions.GetProducingTileTradeBonus(city);
+
             city.WorkedTiles.ForEach(t =>
             {
                 totalFood += t.GetFood(lowOrganisation);
-                totalSheilds += t.GetShields(lowOrganisation);
-                totalTrade += t.GetTrade(orgLevel);
+                totalSheilds += t.GetShields(lowOrganisation) + wonderShieldBonus;
+
+                var tileTrade = t.GetTrade(orgLevel);
+                if (tileTrade > 0)
+                {
+                    tileTrade += wonderTradeBonus;
+                }
+
+                totalTrade += tileTrade;
             });
 
 
@@ -269,6 +281,13 @@ namespace Civ2engine
             var storageBuildings = city.Improvements
                 .Where(i => i.Effects.ContainsKey(Effects.FoodStorage))
                 .Select(b => b.Effects[Effects.FoodStorage]).ToList();
+
+            // The Pyramids act as a granary in every city their owner holds.
+            var wonderStorage = WonderFunctions.GetFoodStorageBonus(city);
+            if (wonderStorage > 0)
+            {
+                storageBuildings.Add(wonderStorage);
+            }
 
             if (storageBuildings.Count <= 0) return 0;
 

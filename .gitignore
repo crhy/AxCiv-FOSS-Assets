@@ -9,6 +9,8 @@
 
 .flatpak-builder/
 .flatpak-work/
+.flatpak-build/
+.flatpak-repo/
 flatpak-build/
 flatpak-repo/
 *.flatpak
@@ -16,3 +18,6 @@ flatpak-repo/
 RaylibUI/run-log.txt
 /RaylibUI/screenshot*.png
 /growth_diff.txt
+
+build.log
+test.log

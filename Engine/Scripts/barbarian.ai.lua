@@ -31,7 +31,6 @@ end)
 
 diplomats = make_unit_list("dip",0,0)
 
-
 local current_unit_index = 0
 
 local function add_unit(listing, unit) 
@@ -82,16 +81,12 @@ while unprocessed_unit do
     unprocessed_unit = civ.getUnitType(current_unit_index)
 end
 
-print("Units processed")
-
 function check_unit(listing)
-    print("Checking " .. listing.name)
     local next = listing.current + 1 + listing.offset;
     if next < 0 then
         next = 0
     end
     if listing.items[next] == nil then
-        print("No more items")
         return
     end
     
@@ -102,12 +97,9 @@ function check_unit(listing)
     end    
 end
 
-print("Unit parse successful")
-
 diplomat = -1
 
 function check_units()
-    print("Clearing" .. diplomat)
     diplomat = -1
     check_unit(infantry)
     check_unit(cav)
@@ -140,10 +132,8 @@ function get_unit_type(ai)
 end 
 
 function get_free_horde()
-    print("Finding horde")
     for i = 1, #hordes do
         if hordes[i].count == 0 then
-            print("Reusing exhausted horde" .. i)
             return i
         end
     end
@@ -156,22 +146,17 @@ unit_type_counter = {}
 function move_hordes(ai)
     for i = 1, #hordes do        
         if hordes[i].count > 0 then
-            print("Moving horde " .. i)
             if hordes[i].target == nil or hordes[i].target == hordes[i].location then
                 hordes[i].target = ai.NearestEnemy({ tile = hordes[i].location, distance = 50, same_landmass = true })
             end            
             if hordes[i].target then
-                print("From " .. hordes[i].location.x .. "-" .. hordes[i].location.y)
                 hordes[i].location = ai.LocationTowards(hordes[i])
-                print("To " .. hordes[i].location.x .. "-" .. hordes[i].location.y)
-                print("Target " .. hordes[i].target.x .. "-" .. hordes[i].target.y)
             end
         end
     end
 end
 
 ai.RegisterEvent(AiEvent.Turn_Start, function(a,d)
-    print("Processing Barbarians turn: " .. d.Turn)
 
     check_units()
     
@@ -182,7 +167,6 @@ ai.RegisterEvent(AiEvent.Turn_Start, function(a,d)
         local tries = 3
     
         while tries > 0 do
-            print("Finding spawn" .. tries)
             candidate = a.RandomTile({ global = true })
             target = nil
 
@@ -229,7 +213,6 @@ ai.RegisterEvent(AiEvent.Turn_Start, function(a,d)
                 hordes[horde].speed = ship.type.move
             else
                 local unit_type = get_unit_type(a)
-                print("Attempting to create " .. unit_type.name .. " item " .. unit_type.current)
                 local first_unit = create_at(unit_type, a, candidate, horde)
                 hordes[horde].speed = first_unit.type.move
                 if diplomats.current ~= -1 then
@@ -246,7 +229,6 @@ ai.RegisterEvent(AiEvent.Units_Lost, function(ai, data)
     for _, unit in ipairs(data.Units) do
         local horde = unit:GetNum("horde")
         if horde >= 0 then
-            print("Unit from horde " .. horde .. " was lost")
             -- Update horde tracking, send reinforcements, etc.
             hordes[horde].count = hordes[horde].count - 1
         end
@@ -254,13 +236,11 @@ ai.RegisterEvent(AiEvent.Units_Lost, function(ai, data)
 
     -- If we know what killed them
     if data.By then
-        print("Killed by: " .. data.By.type.name)
     end
 end)
 
 ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
     local unit = data.Unit;
-    print("Finding orders for " .. unit.type.name)
     -- Move leaders last and to nearest friendly unit
     if unit.type.role == AiRoleType.Diplomacy then
         if diplomat == unit.id then
@@ -289,7 +269,6 @@ ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
             for _, friend_unit in pairs(friend.units) do
                 local horde_id = friend_unit:GetNum("horde")
                 if horde_id > 0 then
-                    print("Found unit from horde " .. horde_id .. " at friend location")
                     horde = horde_id
                     break
                 end
@@ -316,7 +295,6 @@ ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
     local hLoc = hordes[horde].location
     local current_dist = ai.Distance(unit.location, hLoc)
     
-    print("Current dist " .. current_dist .. " from " .. hLoc.x .. "-" .. hLoc.y .. " " .. hLoc.landmass)
 
     for _, move in ipairs(moves) do
 
@@ -344,15 +322,12 @@ ai.RegisterEvent(AiEvent.Unit_Orders_Needed, function(ai, data)
             end
         end
 
-        print("Final priority for " .. move.actionType .. ": " .. move.priority .. " " .. move.tile.x .. "-" .. move.tile.y .. " " .. move.tile.landmass)
         if not best_move or move.priority > best_move.priority then
-            print("New best")
             best_move = move
         end
     end
 
     if best_move and best_move.tile then
-        print("Selected " .. best_move.actionType .. " to tile " .. best_move.tile.x .. "-" .. best_move.tile.y)
     end
     return best_move
 end)

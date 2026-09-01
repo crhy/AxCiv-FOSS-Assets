@@ -43,6 +43,12 @@ namespace Civ2engine
                         handler.ProcessSection(section, contents);
                         section = null;
                     }
+                    else if (line.StartsWith('@'))
+                    {
+                        handler.ProcessSection(section, contents);
+                        section = line[1..].TrimEnd();
+                        contents = new List<string>();
+                    }
                     else
                     {
                         contents.Add(line);

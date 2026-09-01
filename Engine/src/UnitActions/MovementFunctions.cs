@@ -389,9 +389,11 @@ namespace Civ2engine.UnitActions
                 // Caught in port (A sea unit’s firepower is reduced to 1 when it is caught in port (or on a land square) by a land or air unit; The attacking air or land unit’s firepower is doubled)
                 fpA *= 2;
                 fpD = 1;
-            }else if (attacker.Domain == UnitGas.Air && defender.Domain == UnitGas.Air && defender.FuelRange == 0)
+            }else if (attacker.CanAttackAirUnits && defender.Domain == UnitGas.Air && defender.FuelRange == 0)
             {
-                // Helicopters attacked by fighters have firepower reduced to 1
+                // Helicopters attacked by fighters have firepower reduced to 1.
+                // This matches the x0.5 defence adjustment in DefenseFactor, which
+                // is also keyed on the attacker being able to engage air units.
                 fpD = 1;
             }
             
@@ -472,6 +474,20 @@ namespace Civ2engine.UnitActions
                 game.Players[attacker.Owner.Id].UnitLost(attacker, defender);
                 //_casualties.Add(attacker);
                 //_units.Remove(attacker);
+            }
+
+            // Missiles are expended by their own attack, whatever the outcome.
+            if (attacker.DestroyedAfterAttacking && !attacker.Dead)
+            {
+                attacker.Dead = true;
+                game.Players[attacker.Owner.Id].UnitLost(attacker, defender);
+            }
+
+            // Civ II promotes a surviving combatant to veteran half the time.
+            var survivor = attackerWinsBattle ? attacker : defender;
+            if (!survivor.Dead && !survivor.Veteran && random.Next(0, 2) == 0)
+            {
+                survivor.Veteran = true;
             }
 
             var updatedTiles = new List<Tile> { tile };

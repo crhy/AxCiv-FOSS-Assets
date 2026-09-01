@@ -18,6 +18,12 @@ namespace Civ2engine.Production
     {
         public override string Title => unitDefinition.Name;
 
+        /// <summary>
+        /// The unit this order builds, so callers such as the AI can reason about
+        /// its role and statistics rather than matching on the name.
+        /// </summary>
+        public UnitDefinition UnitDefinition => unitDefinition;
+
         public override bool CompleteProduction(City city, Rules rules)
         {
             if (unitDefinition.AIrole == AiRoleType.Settle && city.Size == 1)
@@ -25,9 +31,12 @@ namespace Civ2engine.Production
                 return false;
             }
 
+            // Barracks-style buildings promote by domain; Sun Tzu's War Academy does
+            // the same for ground units across the whole civilisation.
             var veteran = city.Improvements.Any(i =>
-                i.Effects.ContainsKey(Effects.Veteran) &&
-                i.Effects[Effects.Veteran] == (int)unitDefinition.Domain);
+                                 i.Effects.ContainsKey(Effects.Veteran) &&
+                                 i.Effects[Effects.Veteran] == (int)unitDefinition.Domain) ||
+                             WonderFunctions.ProducesVeterans(city.Owner, unitDefinition.Domain);
 
             var unit = new Unit
             {

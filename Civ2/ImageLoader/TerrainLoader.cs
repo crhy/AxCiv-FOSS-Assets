@@ -17,9 +17,18 @@ namespace Civ2.ImageLoader
 {
     public static class TerrainLoader
     {
-        // A 2x map tile matches the physical pixel density of a 3840x2160 display
-        // while retaining Civ II's original 64x32 logical tile geometry.
-        private const int FossTerrainRenderScale = 2;
+        /// <summary>
+        /// Composition scale used when nothing better is known. A 2x map tile
+        /// matches the physical pixel density of a 3840x2160 display while
+        /// retaining Civ II's original 64x32 logical tile geometry.
+        /// </summary>
+        public const int DefaultTerrainRenderScale = 2;
+
+        /// <summary>
+        /// Upper bound on composition scale. A tile is composed at
+        /// 64 x 32 x scale, so this caps a single tile at 512x256 pixels.
+        /// </summary>
+        public const int MaximumTerrainRenderScale = 8;
         private static readonly string[] FossTerrainNames =
         [
             "desert",
@@ -35,37 +44,83 @@ namespace Civ2.ImageLoader
             "ocean"
         ];
 
-        public static void LoadTerrain(Ruleset ruleset, IUserInterface active)
+        /// <summary>
+        /// Terrain sets already built for this interface, keyed by composition
+        /// scale. Building one resizes every base texture and recomposes every
+        /// overlay, and the images end up in the shared image cache either way, so
+        /// a scale is built once and then reused whenever the zoom returns to it.
+        /// </summary>
+        private static readonly Dictionary<IUserInterface, Dictionary<int, List<TerrainSet>>> BuiltSets = new();
+
+        /// <summary>
+        /// Loads terrain for a newly selected ruleset, discarding anything built
+        /// for the previous one.
+        /// </summary>
+        public static void LoadTerrain(Ruleset ruleset, IUserInterface active,
+            int renderScale = DefaultTerrainRenderScale)
         {
-            active.TileSets.Clear();
-            for (var i = 0; i < active.ExpectedMaps; i++)
+            BuiltSets.Remove(active);
+            UseTerrainScale(ruleset, active, renderScale);
+        }
+
+        /// <summary>
+        /// Switches the active terrain to a given composition scale, building it
+        /// the first time that scale is asked for.
+        /// </summary>
+        public static void UseTerrainScale(Ruleset ruleset, IUserInterface active, int renderScale)
+        {
+            renderScale = Math.Clamp(renderScale, 1, MaximumTerrainRenderScale);
+
+            if (!BuiltSets.TryGetValue(active, out var byScale))
             {
-                active.TileSets.Add(LoadTerrain(ruleset, i, active));
+                byScale = new Dictionary<int, List<TerrainSet>>();
+                BuiltSets[active] = byScale;
+            }
+
+            if (!byScale.TryGetValue(renderScale, out var sets))
+            {
+                sets = new List<TerrainSet>();
+                for (var i = 0; i < active.ExpectedMaps; i++)
+                {
+                    sets.Add(LoadTerrain(ruleset, i, active, renderScale));
+                }
+
+                byScale[renderScale] = sets;
+            }
+
+            active.TileSets.Clear();
+            foreach (var set in sets)
+            {
+                active.TileSets.Add(set);
             }
         }
 
-        private static TerrainSet LoadTerrain(Ruleset ruleset, int index, IUserInterface active)
+        private static TerrainSet LoadTerrain(Ruleset ruleset, int index, IUserInterface active, int renderScale)
         {
             // Initialize objects
-            var terrain = new TerrainSet(64, 32);
+            var terrain = new TerrainSet(64, 32, renderScale);
 
-            // Get dither tile before making it transparent
+            // Get dither tile before making it transparent.
+            // Threshold every pixel to pure black or white so AlphaMask produces
+            // only fully-transparent or fully-opaque regions (no blue crosshatching).
             var ditherTile = Images.ExtractBitmap(MapIndexChange((BitmapStorage)active.PicSources["dither"][0], index, active));
-
-            Color gray;
             unsafe
             {
-                // Get the gray colour (it's not always the same in MGE/TOT, unlike magenta)
-                var imageColours = ditherTile.LoadColors();
-                gray = imageColours[0];
-                Image.UnloadColors(imageColours);
+                var pixels = ditherTile.LoadColors();
+                for (var i = 0; i < pixels.Length; i++)
+                {
+                    var c = pixels[i];
+                    var lum = (c.R + c.G + c.B) / 3;
+                    var bw = lum < 128 ? Color.Black : Color.White;
+                    var x = i % ditherTile.Width;
+                    var y = i / ditherTile.Width;
+                    ditherTile.DrawPixel(x, y, bw);
+                }
+                Image.UnloadColors(pixels);
             }
-            ditherTile.ReplaceColor(Color.Black, Color.White);
-            ditherTile.ReplaceColor(new Color(255, 0, 255, 0), Color.Black);
-            ditherTile.ReplaceColor(gray, Color.Black);
 
             terrain.BaseTiles = active.PicSources["base1"].Select(t => MapIndexChange((BitmapStorage)t, index, active)).ToArray();
-            ApplyFossTerrainTextures(terrain, index, active);
+            var fossTerrainApplied = ApplyFossTerrainTextures(terrain, index, active);
 
             terrain.Specials = new[]
             {
@@ -97,6 +152,11 @@ namespace Civ2.ImageLoader
             terrain.Mountains = active.PicSources["mountain"].Select(r => MapIndexChange((BitmapStorage)r, index, active)).ToArray();
             terrain.Hills = active.PicSources["hill"].Select(r => MapIndexChange((BitmapStorage)r, index, active)).ToArray();
             terrain.RiverMouth = active.PicSources["riverMouth"].Select(r => MapIndexChange((BitmapStorage)r, index, active)).ToArray();
+
+            if (fossTerrainApplied)
+            {
+                ApplyFossOverlayArt(terrain);
+            }
 
             terrain.Coast = new IImageSource[8, 4];
             for (var i = 0; i < 8; i++)
@@ -145,15 +205,22 @@ namespace Civ2.ImageLoader
             return terrain;
         }
 
-        private static void ApplyFossTerrainTextures(TerrainSet terrain, int mapIndex, IUserInterface active)
+        /// <summary>
+        /// Swaps the base terrain diamonds for the bundled FOSS textures, composed
+        /// at the set's own render scale times Civ2's logical tile size.
+        /// Returns true when the higher-resolution tiles were installed, so the
+        /// connection overlays know they can be composed to match.
+        /// </summary>
+        private static bool ApplyFossTerrainTextures(TerrainSet terrain, int mapIndex, IUserInterface active)
         {
             // The bundled textures depict the classic Earth terrain set. Other Test of Time maps
             // retain their scenario-specific art until equivalent FOSS sets are available.
             if (mapIndex != 0)
             {
-                return;
+                return false;
             }
 
+            var applied = false;
             for (var terrainIndex = 0;
                  terrainIndex < terrain.BaseTiles.Length && terrainIndex < FossTerrainNames.Length;
                  terrainIndex++)
@@ -170,13 +237,153 @@ namespace Civ2.ImageLoader
                     continue;
                 }
 
-                replacement.Resize(terrain.TileWidth * FossTerrainRenderScale,
-                    terrain.TileHeight * FossTerrainRenderScale);
+                replacement.Resize(terrain.TileWidth * terrain.RenderScale,
+                    terrain.TileHeight * terrain.RenderScale);
                 ApplyOriginalTileTransparency(replacement,
                     Images.ExtractBitmap(terrain.BaseTiles[terrainIndex], active));
                 terrain.BaseTiles[terrainIndex] = new MemoryStorage(replacement,
-                    $"FossTerrain-{terrainIndex}-{artPath}");
+                    $"FossTerrain-{terrainIndex}-{terrain.RenderScale}-{artPath}");
+                applied = true;
             }
+
+            return applied;
+        }
+
+        /// <summary>
+        /// Connection-overlay sets bundled as native 300x300 art. Each set holds
+        /// eight variants; the sixteen neighbour-connection indices cycle through
+        /// them, matching how the compatibility sheet is generated.
+        /// </summary>
+        private static readonly (string Directory, string Stem)[] FossOverlaySets =
+        [
+            ("Rivers", "river"),
+            ("Forest", "forest"),
+            ("Mountains", "mountain"),
+            ("Hills", "hill")
+        ];
+
+        private const int FossOverlayVariants = 8;
+
+        /// <summary>
+        /// Replaces the forest/hills/mountains/river connection overlays with the
+        /// native high-resolution art, composed once at the working tile size.
+        /// Routing them through the legacy 64x32 sheet cell and letting the tile
+        /// compositor upscale it throws away half the detail the source carries.
+        /// </summary>
+        private static void ApplyFossOverlayArt(TerrainSet terrain)
+        {
+            foreach (var (directory, stem) in FossOverlaySets)
+            {
+                var variants = LoadFossOverlayVariants(terrain, directory, stem);
+                if (variants == null)
+                {
+                    continue;
+                }
+
+                var target = stem switch
+                {
+                    "river" => terrain.River,
+                    "forest" => terrain.Forest,
+                    "mountain" => terrain.Mountains,
+                    "hill" => terrain.Hills,
+                    _ => null
+                };
+
+                if (target == null || target.Length == 0)
+                {
+                    continue;
+                }
+
+                for (var i = 0; i < target.Length; i++)
+                {
+                    target[i] = variants[i % FossOverlayVariants];
+                }
+            }
+        }
+
+        private static IImageSource[]? LoadFossOverlayVariants(TerrainSet terrain, string directory, string stem)
+        {
+            var variants = new IImageSource[FossOverlayVariants];
+            for (var variant = 0; variant < FossOverlayVariants; variant++)
+            {
+                var path = FindFossOverlayPath(directory, $"{stem}_{variant + 1:00}.png");
+                if (path == null)
+                {
+                    return null;
+                }
+
+                var composed = ComposeOverlayTile(terrain, path);
+                if (composed == null)
+                {
+                    return null;
+                }
+
+                variants[variant] = new MemoryStorage(composed.Value,
+                    $"FossOverlay-{stem}-{variant}-{terrain.RenderScale}");
+            }
+
+            return variants;
+        }
+
+        /// <summary>
+        /// Fits square overlay art into a tile-sized transparent canvas, centred
+        /// horizontally and resting on the bottom edge, so it lands where the
+        /// classic sheet cell used to sit.
+        /// </summary>
+        private static Image? ComposeOverlayTile(TerrainSet terrain, string path)
+        {
+            var art = Images.LoadImageFromFile(path).Image;
+            if (art.Width <= 1 || art.Height <= 1)
+            {
+                return null;
+            }
+
+            var targetWidth = terrain.TileWidth * terrain.RenderScale;
+            var targetHeight = terrain.TileHeight * terrain.RenderScale;
+
+            var scale = MathF.Min((float)targetWidth / art.Width, (float)targetHeight / art.Height);
+            var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
+            var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
+            art.Resize(drawWidth, drawHeight);
+
+            var canvas = Image.GenColor(targetWidth, targetHeight, Color.Blank);
+            canvas.Draw(art,
+                new Rectangle(0, 0, drawWidth, drawHeight),
+                new Rectangle((targetWidth - drawWidth) / 2f, targetHeight - drawHeight, drawWidth, drawHeight),
+                Color.White);
+            art.Unload();
+            return canvas;
+        }
+
+        private static string? FindFossOverlayPath(string directory, string fileName)
+        {
+            var roots = Settings.SearchPaths
+                .Concat([
+                    Environment.CurrentDirectory,
+                    AppContext.BaseDirectory,
+                    Path.Combine(Environment.CurrentDirectory, "RaylibUI")
+                ])
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var root in roots)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(root, "Terrain", "Overlays", directory),
+                             Path.Combine(root, "FOSSart", "Terrain", "Overlays", directory),
+                             Path.Combine(root, "RaylibUI", "FOSSart", "Terrain", "Overlays", directory)
+                         })
+                {
+                    var path = Path.Combine(candidate, fileName);
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private static string? FindFossTerrainPath(string terrainName)

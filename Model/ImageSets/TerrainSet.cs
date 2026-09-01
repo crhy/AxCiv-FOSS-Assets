@@ -8,14 +8,24 @@ namespace Model.ImageSets
 {
     public class TerrainSet
     {
-        public TerrainSet(int tileWidth, int tileHeight)
+        public TerrainSet(int tileWidth, int tileHeight, int renderScale = 1)
         {
             TileWidth = tileWidth;
             TileHeight = tileHeight;
             HalfWidth = tileWidth / 2;
             HalfHeight = tileHeight / 2;
             DiagonalCut = HalfHeight * HalfWidth;
+            RenderScale = renderScale < 1 ? 1 : renderScale;
         }
+
+        /// <summary>
+        /// How many source pixels this set composes per logical Civ2 tile pixel.
+        /// Tile graphics are built at <see cref="TileWidth"/> x <see cref="RenderScale"/>
+        /// so that a zoomed-in map is composed at the resolution it will be drawn
+        /// at, rather than being upscaled from a fixed 64x32 grid.
+        /// </summary>
+        public int RenderScale { get; }
+
 
         public int DiagonalCut { get; }
 

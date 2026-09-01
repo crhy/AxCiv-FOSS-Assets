@@ -25,6 +25,17 @@ copyright notices, and this attribution information.
   AxxCiv/Civ2-clone codebase. Exact introduction commits and authors are pinned
   in the asset manifest.
 
+*The New Textures are largely based on ideas from the original Civilization II,
+however most of them were redone from sratch using ChatGPT as heavily enhanced
+versions of the work by Blake from Blake's Sanctum as part of Better Terrain
+Graphics mod by Blake in 2023
+
+*None of this would have been possible without the genius of Sid Meier, the
+creator of the original Civilization, and also part of one of the greatest
+games ever made:  Civilization II, the gameplay of which we are trying to
+emulate fairly precisely (minus some of the stupid stuff, like global warming
+and the spaceship part of the game).
+
 The authoritative per-file inventory is `ASSET-MANIFEST.tsv`. It records exact
 SHA-256 hashes, sizes, authors, SPDX license identifiers, sources, and generators.
 
