@@ -302,7 +302,6 @@ def prepare_units(source: Path, output: Path) -> int:
         clean(source / "units" / input_name, output / "Units" / output_name, unit=True)
     # Preserve the legacy singular lookup name without keeping its former
     # 1254px RGB copy.
-    clean(source / "units" / "crusaders.png", output / "Units" / "crusader.png", unit=True)
     return len(UNIT_NAMES) + 1
 
 

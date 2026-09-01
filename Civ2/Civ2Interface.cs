@@ -29,7 +29,7 @@ namespace Civ2;
 
 public abstract class Civ2Interface(IMain main) : IUserInterface
 {
-    public bool CanDisplay(string? title)
+    public virtual bool CanDisplay(string? title)
     {
         return title != null && title.Contains(Title);
     }

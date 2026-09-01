@@ -13,7 +13,7 @@ public class GameFileLocatorScreen : BaseScreen
     public GameFileLocatorScreen(Main host, Action onSelect, Action shutdownApp) : base(host)
     {
         ImageUtils.InnerWallpaper = Image.GenColor(16, 16, new Color(232, 232, 232, 255));
-        ImageUtils.OuterWallpaper = Image.Load(AssetPaths.Resolve("SteelGrey.png"));
+        ImageUtils.OuterWallpaper = Image.Load(AssetPaths.Resolve("FOSSart/Standalone/Backgrounds/panel.jpg"));
         ShowDialog(new FileDialog(host,"Please select Civ 2 data folder", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), Settings.IsValidRoot, (fileName) =>
         {
             if (fileName is null)

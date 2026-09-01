@@ -51,14 +51,14 @@ public static class Helpers
 
     public static void LoadFonts()
     {
-        var tnr = Utils.GetFilePath("times-new-roman.ttf") ??
-                  throw new FileNotFoundException("Bundled Times New Roman font was not found.");
+        var tnr = Utils.GetFilePath(Path.Combine("Fonts", "LiberationSerif-Regular.ttf")) ??
+                  throw new FileNotFoundException("Bundled Liberation Serif font was not found.");
         Fonts.SetTnr(Font.LoadEx(tnr, 96, null));
-        var bold = Utils.GetFilePath("times-new-roman-bold.ttf") ??
-                   throw new FileNotFoundException("Bundled bold Times New Roman font was not found.");
+        var bold = Utils.GetFilePath(Path.Combine("Fonts", "LiberationSerif-Bold.ttf")) ??
+                   throw new FileNotFoundException("Bundled bold Liberation Serif font was not found.");
         Fonts.SetBold(Font.LoadEx(bold, 112, null));
-        var alternative = Utils.GetFilePath("ARIAL.ttf") ??
-                          throw new FileNotFoundException("Bundled Arial font was not found.");
+        var alternative = Utils.GetFilePath(Path.Combine("Fonts", "LiberationSans-Regular.ttf")) ??
+                          throw new FileNotFoundException("Bundled Liberation Sans font was not found.");
         Fonts.SetArial(Font.LoadEx(alternative, 96, null));
     }
 }

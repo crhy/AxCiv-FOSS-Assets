@@ -13,9 +13,11 @@ namespace Civ2engine
         {
             return Task.Run(() =>
             {
-                var secondaryMaps = config.Rules.Maps;
                 var area = config.WorldSize;
-                var maps = new Map[(secondaryMaps?.Length ?? 0) + 1];
+                // Rules.Maps already contains the standard map descriptor. Extra
+                // entries represent actual secondary maps, so adding one here
+                // created an unintended duplicate map for every new game.
+                var maps = new Map[Math.Max(1, config.Rules.Maps?.Length ?? 0)];
 
                 var width = area[0];
                 var height = area[1];

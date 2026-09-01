@@ -1,5 +1,8 @@
 # rhYciv performance and custom-art audit
 
+Audit snapshot: 2026-08-31. For current licensing and inventory status, see
+`CLEAN-ROOM-STATUS.md` and the repository-root `ASSET-MANIFEST.tsv`.
+
 ## Scope
 
 This pass reviewed the solution's model, engine, Civ II data adapters, both Raylib
@@ -45,10 +48,10 @@ entry points are intentionally absent in rhYciv.
   frame.  Shift-hover unit and road paths are cached until their inputs or view
   change instead of rerunning A* every frame.
 
-The tracked unit PNG set fell from 76.3 MiB to 2.9 MiB.  Its theoretical decoded
-RGBA footprint fell from about 300 MiB (50 images at 1254x1254) to about 17.9 MiB
-(52 images at 300x300), a reduction of roughly 94%.  The extra two files cover
-the missing Legion and Mechanized Infantry art while retaining a legacy alias.  More
+The tracked unit PNG set fell from 76.3 MiB to about 2.9 MiB. Its theoretical decoded
+RGBA footprint fell from about 300 MiB (50 images at 1254x1254) to about 17.5 MiB
+(51 images at 300x300), a reduction of roughly 94%. The set covers every standard
+unit slot, including Legion and Mechanized Infantry. More
 importantly, that memory is no longer all committed at startup.
 
 ## Unit health shields
@@ -76,19 +79,18 @@ output-stage color-key pass removes hot-pink matte remnants after resampling.
 
 Accepted output:
 
-- 52 unit files: all 51 standard named unit sources plus one legacy filename
-  alias.  This includes the previously missing Legion and the new Mechanized
-  Infantry cutout.
+- 51 unit files, one for every standard unit slot. This includes the previously
+  missing Legion and the new Mechanized Infantry cutout.
 - 48 city sprites: eight each for Aztec, German, Greek, Japanese, London, and USA.
 - 34 terrain/improvement overlays: eight mountains, eight hills, eight forests,
   eight rivers, a fort, and a fortified marker.
 - 18 individual flags sliced from the source sheet.
 
-Reviewed but deliberately excluded:
+Reviewed but deliberately excluded at the first conversion stage:
 
 - Eight files in `cities/aborted`.
-- `airstrip.png`, an abstract red placeholder, and `airstripfull.png`, which adds
-  a modern passenger aircraft inconsistent with the unit scale and period.
+- Early airstrip drafts. They were subsequently cleaned and accepted as the
+  current `airstrip.png` and `airstripfull.png` overlays.
 - Redundant pre-downsampled RGB/magenta copies and alternate terrain batches where
   the clean source-derived overlay set already supplies all eight variations.
 - Four full river terrain plates; the eight isolated river overlays are the useful

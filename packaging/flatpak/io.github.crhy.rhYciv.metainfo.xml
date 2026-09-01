@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.crhy.rhYciv</id>
   <name>rhYciv</name>
-  <summary>A crisp, high-resolution Civilization II reimplementation</summary>
+  <summary>A crisp, high-resolution turn-based empire strategy game</summary>
   <developer id="io.github.crhy">
     <name>rhYciv contributors</name>
   </developer>
@@ -10,13 +10,13 @@
   <project_license>GPL-3.0-only</project_license>
   <description>
     <p>
-      rhYciv recreates the core turn-based gameplay of Civilization II with a
-      modern high-resolution renderer, deeper zoom, streamlined bloodlust rules,
-      and freely licensed replacement artwork.
+      rhYciv is a classic turn-based empire strategy game with a modern
+      high-resolution renderer, deeper zoom, streamlined conquest rules, and
+      attributed open-source artwork.
     </p>
     <p>
-      The bundled rules, interface data, and art make this a standalone game;
-      no commercial Civilization II installation is required.
+      The bundled rules, interface data, fonts, and art make this a standalone
+      game; no commercial game installation is required.
     </p>
   </description>
   <launchable type="desktop-id">io.github.crhy.rhYciv.desktop</launchable>
@@ -29,7 +29,7 @@
   <releases>
     <release version="0.2.0-beta.1" date="2026-08-31">
       <description>
-        <p>First fully standalone beta with bundled rules, cities, interface atlases, and replacement art.</p>
+        <p>First runtime-standalone beta with bundled rules, cities, interface atlases, and replacement art.</p>
       </description>
     </release>
     <release version="0.1.0-beta.1" date="2026-08-31">

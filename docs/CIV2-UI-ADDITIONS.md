@@ -9,6 +9,10 @@ or corrected proprietary DLL resources.
 Applicable completed features are enabled by default. They do not require a separate launcher or settings
 switch.
 
+This is an implementation comparison, not a runtime or source dependency. New
+forks can remove it without changing the game. Asset and legal status are defined
+by `ASSET-PROVENANCE.md`, not by this compatibility matrix.
+
 | # | Upstream feature | rhYciv status |
 |---:|---|---|
 | 1 | Wheel support; Ctrl+wheel zoom; Ctrl+middle reset; middle center/drag | Implemented by default. Wheel events also reach lists, tax sliders, and city specialists. |

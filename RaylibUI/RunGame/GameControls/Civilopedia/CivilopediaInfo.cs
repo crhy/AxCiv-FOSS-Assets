@@ -784,7 +784,7 @@ public sealed class CivilopediaInfo : BaseControl
         if (unitName.Equals("Mech. Inf.", StringComparison.OrdinalIgnoreCase) ||
             unitName.Equals("Mech Inf", StringComparison.OrdinalIgnoreCase))
         {
-            yield return "mechinfantry";
+            yield return "mechanizedinfantry";
         }
 
         if (unitName.Equals("Stealth Fighter", StringComparison.OrdinalIgnoreCase))

@@ -26,7 +26,7 @@ public class LoadGameTests
         // We need to hard code the SearchPaths here for the LoadFrom() method to work properly under test.
         _mockUi = new MockInterface();
         _mockMainApp = _mockUi.MainApp;
-        var testFileDirectory = TestFileUtils.GetTestFileDirectory();
+        var testFileDirectory = CleanRoomGameFactory.StandaloneDirectory;
         Settings.SearchPaths = [testFileDirectory, testFileDirectory];
 
         // This is also needed so that the Barbarians civ can be initialised in the GameSerializer.
@@ -47,46 +47,25 @@ public class LoadGameTests
     }
 
     [Fact]
-    public void TestLoadClassicGameGivesValue()
-    {
-        // Arrange
-        // These are identified by having the "CIVILISE" word at the start of the file.
-        var path = TestFileUtils.GetTestFilePath("test_classic.sav");
-
-        // Act
-        LoadGame.LoadFrom(path, _mockMainApp);
-        var result = (Game)_mockUi.LoadedGame!;
-
-        // Assert
-        Assert.NotNull(result);
-        
-        Assert.Equal(1, result.TurnNumber);
-        Assert.Equal(8, result.AllCivilizations.Count);
-        
-        var barbarians = result.AllCivilizations[0];
-        Assert.Equal("Barbarians", barbarians.TribeName);
-        Assert.Equal(PlayerType.Barbarians, barbarians.PlayerType);
-
-        var player = result.AllCivilizations[1];
-        Assert.Equal("Romans", player.TribeName);
-        Assert.Equal(PlayerType.Local, player.PlayerType);
-        Assert.Equal(0, player.Money);
-        Assert.InRange(player.ReseachingAdvance, -2, -1);
-    }
-
-    [Fact]
     public void TestLoadJsonGameGivesValue()
     {
-        // Arrange
-        // This is the json version of the "test_classic.sav" file
-        var path = TestFileUtils.GetTestFilePath("test_json.sav");
+        var path = Path.Combine(Path.GetTempPath(), $"rhyciv-clean-room-{Guid.NewGuid():N}.sav");
+        File.WriteAllBytes(path, CleanRoomGameFactory.CreateJsonSave());
 
-        // Act
-        LoadGame.LoadFrom(path, _mockMainApp);
-        var result = (Game)_mockUi.LoadedGame!;
+        try
+        {
+            LoadGame.LoadFrom(path, _mockMainApp);
+            var result = (Game)_mockUi.LoadedGame!;
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(1, result.TurnNumber);
+            Assert.NotNull(result);
+            Assert.True(result.Options.Bloodlust);
+            Assert.Equal(3, result.AllCivilizations.Count);
+            Assert.Equal(PlayerType.Barbarians, result.AllCivilizations[0].PlayerType);
+            Assert.Equal(PlayerType.Local, result.AllCivilizations[1].PlayerType);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 }

@@ -23,13 +23,16 @@
 		<None Update="explorer_icons.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="times-new-roman-bold.ttf">
+		<None Update="Fonts\LiberationSerif-Bold.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="times-new-roman.ttf">
+      <None Update="Fonts\LiberationSerif-Regular.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="ARIAL.TTF">
+      <None Update="Fonts\LiberationSans-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Fonts\OFL-1.1.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

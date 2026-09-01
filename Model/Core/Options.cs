@@ -1,4 +1,6 @@
-﻿namespace Model.Core
+﻿using System.Text.Json.Serialization;
+
+namespace Model.Core
 {
     public class Options
     {
@@ -15,10 +17,10 @@
         }
 
         // START GAME RULES
-        public bool SimplifiedCombat { get; private set; }
-        public bool Bloodlust { get; private set; }
-        public bool DontRestartIfEliminated { get; private set; }
-        public bool FlatEarth { get; private set; }
+        [JsonInclude] public bool SimplifiedCombat { get; private set; }
+        [JsonInclude] public bool Bloodlust { get; private set; }
+        [JsonInclude] public bool DontRestartIfEliminated { get; private set; }
+        [JsonInclude] public bool FlatEarth { get; private set; }
 
         // GAME OPTIONS
         public bool Music { get; set; }
@@ -104,4 +106,3 @@
         }
     }
 }
-

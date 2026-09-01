@@ -93,6 +93,22 @@ public class Civ2WorldGeneratorTests
             tile => Assert.NotEqual(TerrainType.Ocean, tile.Type));
     }
 
+    [Fact]
+    public async Task DefaultRulesMapDescriptorBuildsExactlyOneMap()
+    {
+        var terrains = Enum.GetValues<TerrainType>()
+            .Select(type => new Terrain { Type = type, Name = type.ToString(), Food = 2 })
+            .ToArray();
+        var config = Config(4242);
+        config.WorldSize = [20, 24];
+        config.NumberOfCivs = 2;
+        config.Rules = new Rules { Terrains = [terrains] };
+
+        var maps = await MapGenerator.GenerateMap(config);
+
+        Assert.Single(maps);
+    }
+
     private static GameInitializationConfig Config(int seed, int propLand = 1, int climate = 1, int age = 1) =>
         new()
         {

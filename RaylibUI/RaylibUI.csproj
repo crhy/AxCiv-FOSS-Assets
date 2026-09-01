@@ -37,7 +37,9 @@
     <None Update="Shaders\base.vs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Shaders\grayscale.fs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Shaders\color-correction.fs" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="SteelGrey.png" CopyToOutputDirectory="PreserveNewest" />
     <None Update="FOSSart\**\*" CopyToOutputDirectory="PreserveNewest" TargetPath="%(Identity)" />
+    <None Include="..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\NOTICE.md" Link="NOTICE.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\ASSET-MANIFEST.tsv" Link="ASSET-MANIFEST.tsv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

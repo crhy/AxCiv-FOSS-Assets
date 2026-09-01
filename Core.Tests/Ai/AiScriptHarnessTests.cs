@@ -99,15 +99,7 @@ public class AiScriptHarnessTests
 
     private static (Game game, AiPlayer aiPlayer, Civilization civ) CreateGameAndAi()
     {
-        var testFilesDirectory = TestFileUtils.GetTestFileDirectory();
-        var scriptsDirectory = FindScriptsDirectory();
-        var ruleset = new Ruleset("mock", new Dictionary<string, string>(), testFilesDirectory, scriptsDirectory);
-        Labels.UpdateLabels(ruleset);
-
-        var rules = RulesParser.ParseRules(ruleset);
-        var savFile = new JsonSavFile();
-        var savePath = TestFileUtils.GetTestFilePath("test_json.sav");
-        var game = (Game)savFile.LoadGame(File.ReadAllBytes(savePath), ruleset, rules);
+        var (game, _, _) = CleanRoomGameFactory.CreateGame();
 
         var civ = game.AllCivilizations.First(c => c.PlayerType != PlayerType.Barbarians);
         var aiPlayer = (AiPlayer)game.Players[civ.Id];
@@ -168,23 +160,6 @@ public class AiScriptHarnessTests
 
         civ.Units.Add(unit);
         return unit;
-    }
-
-    private static string FindScriptsDirectory()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory != null)
-        {
-            var candidate = Path.Combine(directory.FullName, "Engine", "Scripts");
-            if (Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not locate Engine/Scripts for AI script tests.");
     }
 
     private static object? UnwrapLuaResult(object? result)

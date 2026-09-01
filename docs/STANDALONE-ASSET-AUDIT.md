@@ -1,9 +1,13 @@
 # Standalone asset audit
 
 rhYciv's bundled standalone ruleset does not read art or data from a commercial
-Civilization II installation. The files in `FOSSart/Standalone` are generated
+game installation. The files in `FOSSart/Standalone` are generated
 compatibility atlases assembled from the project's individual replacement art;
-they are not copies of MicroProse sheets.
+they are not copies of commercial sprite sheets.
+
+This document tracks visual/runtime coverage. Redistribution provenance is
+tracked separately for every file in the repository-root `ASSET-MANIFEST.tsv`;
+see `ASSET-PROVENANCE.md` and `CLEAN-ROOM-STATUS.md`.
 
 ## Completed replacements
 
@@ -28,7 +32,7 @@ they are not copies of MicroProse sheets.
 
 ## Art that can still be polished
 
-These are functional clean-room placeholders, not missing runtime assets:
+These are attributed, functional placeholders, not missing runtime assets:
 
 - unique illustrated terrain-special icons rather than the current clear
   procedural resource markers;

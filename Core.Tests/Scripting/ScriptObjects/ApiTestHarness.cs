@@ -1,12 +1,9 @@
 using Civ2engine;
-using Civ2engine.IO;
 using Civ2engine.MapObjects;
-using Civ2engine.SaveLoad.SavFile;
 using Civ2engine.Scripting.ScriptObjects;
 using Core.Tests.TestFiles;
 using Model.Core;
 using Model.Core.Cities;
-using Model.Core.GameRules;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
@@ -16,15 +13,7 @@ public static class ApiTestHarness
 {
     public static (Game game, AiPlayer aiPlayer, Civilization civ) CreateGameAndAi()
     {
-        var testFilesDirectory = TestFileUtils.GetTestFileDirectory();
-        var scriptsDirectory = FindScriptsDirectory();
-        var ruleset = new Ruleset("mock", new Dictionary<string, string>(), testFilesDirectory, scriptsDirectory);
-        Labels.UpdateLabels(ruleset);
-
-        var rules = RulesParser.ParseRules(ruleset);
-        var savFile = new JsonSavFile();
-        var savePath = TestFileUtils.GetTestFilePath("test_json.sav");
-        var game = (Game)savFile.LoadGame(File.ReadAllBytes(savePath), ruleset, rules);
+        var (game, _, _) = CleanRoomGameFactory.CreateGame();
 
         var civ = game.AllCivilizations.First(c => c.PlayerType != PlayerType.Barbarians);
 
@@ -92,20 +81,4 @@ public static class ApiTestHarness
         return city;
     }
 
-    public static string FindScriptsDirectory()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory != null)
-        {
-            var candidate = Path.Combine(directory.FullName, "Engine", "Scripts");
-            if (Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not locate Engine/Scripts for tests.");
-    }
 }

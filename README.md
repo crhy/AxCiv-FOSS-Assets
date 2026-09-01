@@ -1,73 +1,86 @@
-## rhYciv
+# rhYciv
 
-rhYciv recreates the streamlined core gameplay of Civilization II with a
-high-resolution renderer, expanded zoom controls, and freely licensed
-replacement artwork. Spaceships, advisors, and the throne room are deliberately
-outside the project's scope; conquest is the default endgame.
+rhYciv is a standalone, high-resolution turn-based empire strategy game. It
+preserves the map, city, research, production, diplomacy, and tactical-unit
+rhythm of 1990s 4X games while deliberately focusing the endgame on conquest.
 
-## FOSS art assets
+No commercial game installation, CD, DLL, font, rules file, artwork, or save
+file is required. The repository is designed to be a redistribution-ready base
+for downstream forks. rhYciv is an independent project and is not affiliated
+with or endorsed by Take-Two Interactive, 2K, Firaxis, MicroProse, or any other
+publisher of the Civilization series.
 
-- A primary goal of this fork is to replace the original art so the game can
-  become a completely open-source standalone game.
-![fusionpower](RaylibUI/FOSSart/Advances/fusionpower.jpg)
+![Fusion Power artwork](RaylibUI/FOSSart/Advances/fusionpower.jpg)
 
-The bundled rules, city names, interface atlases, terrain, units, cities, and
-citizens now run without a Civilization II installation. See the
-[standalone asset audit](docs/STANDALONE-ASSET-AUDIT.md) for the few functional
-placeholders that can still receive more polished art.
+## Gameplay scope
+
+- Explore a procedurally generated world, found cities, improve terrain, trade,
+  research technologies, build wonders, and conduct diplomacy and war.
+- New games default to conquest-only victory and permanent elimination.
+- Spaceship victory, the throne room, animated advisors/high council, and wonder
+  movies are outside the streamlined product scope.
+- The renderer uses a 1920x1080 logical layout, native high-DPI drawing,
+  128x64 working terrain tiles, 300x300 unit/citizen sources, and map zoom levels
+  from -7 through 16.
+- Land and air units have a rear-left silhouette shadow. Naval units have wakes
+  and waterline splashes instead of land shadows.
+
+See [the gameplay guide](docs/GAMEPLAY.md) for systems, differences, and controls.
 
 ## Install the Flatpak beta
 
 Download `rhYciv-v0.2.0-beta.1-x86_64.flatpak` from the
 [latest GitHub release](https://github.com/crhy/rhYciv/releases/latest), then:
 
-```bash
+```sh
 flatpak install --user ./rhYciv-v0.2.0-beta.1-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
-The Flatpak uses Freedesktop 25.08. Saves are stored in the app's private user
-data directory, so the package does not request broad home-directory access.
+The current public beta predates the clean-room font and fixture conversion.
+Build the current `master` branch for the fully audited asset set until the next
+release is published.
 
-## Local validation
-
-- `dotnet build Civ2clone.sln`
-- `dotnet test Civ2clone.sln`
-- `./scripts/quality_gate.sh`
-
-## Run locally
+## Build and run
 
 The desktop client requires the .NET 9 SDK:
 
-```bash
+```sh
 dotnet run --project RaylibUI/RaylibUI.csproj
 ```
 
-The game launches directly with its bundled standalone ruleset. An external
-compatible rules directory remains optional for mod and scenario testing.
+It launches directly with the bundled ruleset. An external compatible rules
+directory is optional for mod and scenario testing.
 
-See [Flatpak packaging](packaging/flatpak/README.md) for local package builds.
+Run the complete validation gate before distributing a build:
 
-### 4K and high-DPI rendering
+```sh
+./scripts/quality_gate.sh
+```
 
-- The interface automatically scales from a stable 1920x1080 logical canvas when the window is enlarged on a high-resolution display.
-- Fonts, vector primitives, high-resolution FOSS units/icons, and the map backing render at native display density rather than being stretched from a 1080p frame.
-- Bundled FOSS terrain is composed at 128x64 per normal-zoom tile, retaining twice the detail of the original 64x32 map pipeline.
-- Press `F11` to toggle borderless desktop resolution. The mouse coordinate system scales with the display, so map interaction and dialogs retain their original layout.
+The gate verifies every attributed asset, restores dependencies, builds the
+solution, and runs the test suite. Flatpak instructions are in
+[packaging/flatpak/README.md](packaging/flatpak/README.md).
 
-See [4K rendering](docs/4K-RENDERING.md) for implementation details and current asset limitations.
-
-### Enhanced map controls
+## Essential controls
 
 - `F11`: toggle borderless desktop resolution
 - `Ctrl` + mouse wheel: zoom the map
 - `Ctrl` + middle click: reset to 1:1 zoom
-- Middle click: center the map; middle drag: pan
-- Hold `Ctrl`: show quick information for the tile under the pointer
-- Hold `Shift`: preview the active unit path; with a city selected, preview road paths or its trade routes
-- `Shift` + right click: move eligible units of the active unit's type
-- `Ctrl` + `Alt` + arrows: adjust brightness/saturation; Page Up/Down adjusts gamma; Home resets
-- Mouse wheel: scroll lists and tax sliders; over a specialist it changes type
-- `Shift` + click/wheel on a specialist: change all specialists
+- Middle click/drag: center or pan the map
+- Hold `Ctrl`: inspect the tile under the pointer
+- Hold `Shift`: preview unit, road, or trade-route paths
+- `Shift` + right click: move eligible units of the active type
+- `Ctrl` + `Alt` + arrows: brightness/saturation; Page Up/Down: gamma; Home: reset
 
-See [Civ2 UI Additions compatibility](docs/CIV2-UI-ADDITIONS.md) for the complete upstream feature matrix.
+## Forking and licensing
+
+Code and project-original art are GPL-3.0-only unless an asset’s manifest row
+says otherwise. Freeciv-derived standalone data remains GPL-2.0-or-later, and
+Liberation fonts remain OFL-1.1. Every shipped media/data file has a pinned row
+in [ASSET-MANIFEST.tsv](ASSET-MANIFEST.tsv).
+
+Start with [the documentation index](docs/README.md),
+[architecture guide](docs/ARCHITECTURE.md), [clean-room status](docs/CLEAN-ROOM-STATUS.md),
+and [contribution rules](CONTRIBUTING.md). Legal and attribution notices are in
+[NOTICE.md](NOTICE.md).

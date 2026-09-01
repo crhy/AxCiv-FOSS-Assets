@@ -27,6 +27,9 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
 {
     public override string Title => "Civilization II Multiplayer Gold";
 
+    public override bool CanDisplay(string? title) =>
+        title != null && (title.Contains(Title) || title.Contains("rhYciv Standalone"));
+
     public override string InitialMenu => "MAINMENU";
 
     public override InterfaceStyle Look { get; } = new()
@@ -430,7 +433,7 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
                 new("-", Shortcut.None, Key.None),
                 new("Game &Concepts", Shortcut.None, Key.C, commandId: CivilopediaConcepts),
                 new("-", Shortcut.None, Key.None),
-                new("&About Civilization II", Shortcut.None, Key.A)
+                new("&About rhYciv", Shortcut.None, Key.A)
             },
         }
     ];

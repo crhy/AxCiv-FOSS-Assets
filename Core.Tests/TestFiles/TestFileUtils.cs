@@ -5,13 +5,11 @@ internal static class TestFileUtils
 {
     internal static string GetTestFileDirectory()
     {
-        string testDirectory = Directory.GetCurrentDirectory();
-        return Path.Combine(testDirectory, "TestFiles");
+        return CleanRoomGameFactory.StandaloneDirectory;
     }
 
     internal static string GetTestFilePath(string fileName)
     {
-        string testDirectory = Directory.GetCurrentDirectory();
-        return Path.Combine(testDirectory, "TestFiles", fileName);
+        return Path.Combine(GetTestFileDirectory(), fileName);
     }
 }
