@@ -14,6 +14,8 @@
   rendering, cache, memory, and custom-texture work.
 - [Standalone asset audit](STANDALONE-ASSET-AUDIT.md): coverage of generated
   compatibility atlases and optional art polish.
+- [Texture gap list](TEXTURE-GAP.md): the shot list of terrain, overlay, and
+  screen art still procedural or on a legacy square tile.
 - [Civ2 UI Additions compatibility](CIV2-UI-ADDITIONS.md): behavior comparison
   used during implementation; not a dependency.
 - [Flatpak packaging](../packaging/flatpak/README.md): reproducible package build.

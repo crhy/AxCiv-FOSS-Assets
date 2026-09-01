@@ -39,13 +39,18 @@ civ.getImprovement(13).Effects.Add(civ.core.Effects.EliminatePopulationPollution
 --Colosseum,                10, 4,    Cst,
 civ.getImprovement(14).Effects.Add(civ.core.Effects.ContentFace, 3)
 --Factory,                  20, 4,    Ind,
+civ.getImprovement(15).Effects.Add(civ.core.Effects.ProductionMultiplier, 50)
 --Manufacturing Plant,      32, 6,    Rob,
+civ.getImprovement(16).Effects.Add(civ.core.Effects.ProductionMultiplier, 25)
 --SDI Defense,              20, 4,    Las,
 civ.getImprovement(17).Effects.Add(civ.core.Effects.MissileDefence, 100)
 --Recycling Center,         20, 2,    Rec,
 --Power Plant,              16, 4,    Ref,
+civ.getImprovement(19).Effects.Add(civ.core.Effects.ProductionMultiplier, 25)
 --Hydro Plant,              24, 4,    E2,
+civ.getImprovement(20).Effects.Add(civ.core.Effects.ProductionMultiplier, 25)
 --Nuclear Plant,            16, 2,    NP,
+civ.getImprovement(21).Effects.Add(civ.core.Effects.ProductionMultiplier, 25)
 --Stock Exchange,           16, 4,    Eco,
 civ.getImprovement(22).Effects.Add(civ.core.Effects.TaxMultiplier, 50)
 civ.getImprovement(22).Effects.Add(civ.core.Effects.LuxMultiplier, 50)
@@ -63,6 +68,7 @@ civ.getImprovement(28).Effects.Add(civ.core.Effects.OceanRequired, 1)
 --Solar Plant,              32, 4,    Env,
 civ.getImprovement(29).Effects.Add(civ.core.Effects.PopulationPollutionModifier, -1)
 civ.getImprovement(29).Effects.Add(civ.core.Effects.EliminateIndustrialPollution, 1)
+civ.getImprovement(29).Effects.Add(civ.core.Effects.ProductionMultiplier, 25)
 --Harbor,                   6,  1,    Sea,
 civ.getImprovement(30).addTerrainEffect({ Resource = civ.core.Resources.Food, Value = 1, Terrain = 10 })
 civ.getImprovement(30).Effects.Add(civ.core.Effects.OceanRequired, 1)

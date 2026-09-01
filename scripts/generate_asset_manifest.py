@@ -76,6 +76,11 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             generator = "scripts/prepare_people_sheet.py"
         elif "/Units/" in f"/{relative}" or "/Cities/" in f"/{relative}" or "/Flags/" in f"/{relative}" or "/Overlays/" in f"/{relative}":
             generator = "scripts/prepare_custom_textures.py"
+        elif "/Terrain/" in f"/{relative}" and relative.endswith(".png"):
+            # Painted base diamonds and special-resource cutouts are keyed and
+            # downsampled from the rhYcivtextures source set by this script; the
+            # legacy square .jpg tiles beside them are hand-made originals.
+            generator = "scripts/prepare_custom_textures.py"
         elif "/Standalone/Backgrounds/" in f"/{relative}":
             generator = "scripts/build_standalone_sheets.py"
         return (

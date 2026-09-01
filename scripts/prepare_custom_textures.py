@@ -293,20 +293,49 @@ def clean(source: Path, destination: Path, *, unit: bool = False, flag: bool = F
     output.save(destination, "PNG", optimize=True, compress_level=9)
 
 
+# Painted base diamonds, one row per terrain the renderer reads out of TERRAIN1.
+# A "_b" file supplies the second interchangeable tile Civ II keeps per terrain so
+# a landmass does not visibly repeat. Rows without a PNG here fall back to the
+# legacy square JPEG.
 TERRAIN_BASE_NAMES = {
     "desert.png": "desert.png",
     "desert_b.png": "desert_b.png",
     "plains.png": "plains.png",
     "plains_b.png": "plains_b.png",
+    "grassland.png": "grassland.png",
+    "grassland_b.png": "grassland_b.png",
+    "hills.png": "hills.png",
+    "mountains.png": "mountains.png",
+    "tundra.png": "tundra.png",
+    "glacier.png": "glacier.png",
+    "glacier_b.png": "glacier_b.png",
+    "swamp.png": "swamp.png",
+    "swamp_b.png": "swamp_b.png",
+    "jungle.png": "jungle.png",
+    "jungle_b.png": "jungle_b.png",
+    "ocean.png": "ocean.png",
+    "ocean_b.png": "ocean_b.png",
 }
 
 # Special resources by terrain row and slot, matching the two special columns the
-# renderer reads out of TERRAIN1.
+# renderer reads out of TERRAIN1. Slots left unmapped keep the generator's
+# procedural marker.
 TERRAIN_SPECIAL_NAMES = {
     "desert_1_oasis.png": "desert_1.png",
     "desert_2_oil.png": "desert_2.png",
     "plains_1_buffalo.png": "plains_1.png",
     "plains_2_wheat.png": "plains_2.png",
+    "grassland_1_pheasant.png": "grassland_1.png",
+    "grassland_2_sheep.png": "grassland_2.png",
+    "hills_2_wine.png": "hills_2.png",
+    "tundra_1_game.png": "tundra_1.png",
+    "tundra_2_furs.png": "tundra_2.png",
+    "glacier_2_oil.png": "glacier_2.png",
+    "swamp_1_resource.png": "swamp_1.png",
+    "jungle_1_fruit.png": "jungle_1.png",
+    "jungle_2_spice.png": "jungle_2.png",
+    "ocean_1_fish.png": "ocean_1.png",
+    "ocean_2_whales.png": "ocean_2.png",
 }
 
 

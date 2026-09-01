@@ -27,6 +27,11 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
+    <release version="0.3.0-beta.1" date="2026-09-01">
+      <description>
+        <p>Painted isometric terrain art for every terrain type and most special resources, working city-improvement production bonuses (Factory and the power plants), a disband-unit command, and a ranked Civilization II gameplay-parity backlog.</p>
+      </description>
+    </release>
     <release version="0.2.0-beta.1" date="2026-08-31">
       <description>
         <p>First runtime-standalone beta with bundled rules, cities, interface atlases, and replacement art.</p>

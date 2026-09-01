@@ -45,6 +45,10 @@ namespace Civ2engine
                 totalTrade += tileTrade;
             });
 
+            // Factory, Mfg. Plant and the power plants raise shield production by
+            // a percentage rather than a flat amount; Hoover Dam grants every city
+            // of its owner the Hydro Plant bonus (see WonderFunctions).
+            totalSheilds = (int)(totalSheilds * city.GetMultiplier(Effects.ProductionMultiplier));
 
             city.Support = city.SupportedUnits.Count(u => u.NeedsSupport);
 

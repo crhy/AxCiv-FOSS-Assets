@@ -9,7 +9,12 @@ namespace Civ2engine;
 
 public static class CityResourcesExtensions
 {
-    private static decimal GetMultiplier(this City city, Effects effect)
+    /// <summary>
+    /// The city's total bonus for one of the percentage-multiplier effects
+    /// (tax, luxury, science, production), summed from its own improvements
+    /// plus any wonder that behaves like one, as <c>(100 + percent) / 100</c>.
+    /// </summary>
+    internal static decimal GetMultiplier(this City city, Effects effect)
     {
         var percent = city.Improvements
             .Where(i => i.Effects.ContainsKey(effect))

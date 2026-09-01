@@ -29,11 +29,11 @@ See [the gameplay guide](docs/GAMEPLAY.md) for systems, differences, and control
 
 ## Install the Flatpak beta
 
-Download `rhYciv-v0.2.0-beta.1-x86_64.flatpak` from the
+Download `rhYciv-v0.3.0-beta.1-x86_64.flatpak` from the
 [latest GitHub release](https://github.com/crhy/rhYciv/releases/latest), then:
 
 ```sh
-flatpak install --user ./rhYciv-v0.2.0-beta.1-x86_64.flatpak
+flatpak install --user ./rhYciv-v0.3.0-beta.1-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 

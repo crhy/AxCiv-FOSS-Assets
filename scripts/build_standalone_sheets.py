@@ -275,7 +275,7 @@ def build_terrain1() -> None:
             if (x + y) % 2:
                 dd.point((x, y), fill=(0, 0, 0, 255))
     sheet.alpha_composite(dither, (1, 447))
-    sheet.alpha_composite(diamond_texture(ART / "Terrain" / "ocean.jpg"), (131, 447))
+    sheet.alpha_composite(diamond_texture(terrain_source("ocean")), (131, 447))
     sheet.save(OUT / "TERRAIN1.png", optimize=True)
 
 

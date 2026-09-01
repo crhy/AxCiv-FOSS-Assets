@@ -16,6 +16,40 @@ Out of scope by design, and not treated as gaps: the throne room, advisor and
 high-council sequences, wonder movies, spaceships and spaceship victory, and
 global warming.
 
+## Ranked backlog
+
+One ordered list, highest value-per-effort first. Each row's detail is in the
+matching section below. Status: **done** (this pass or earlier), **in
+progress** (this pass), **open**.
+
+| # | Item | Area | Status |
+|---|---|---|---|
+| 1 | City-improvement production bonus (Factory, Mfg. Plant, power plants; unblocks Hoover Dam) | economy | done |
+| 2 | Disband unit, disband-in-city for shields | unit action | done |
+| 3 | Great Library / Darwin's Voyage turn hook (grant advances) | wonder | open |
+| 4 | Leonardo's Workshop unit-upgrade pass | wonder | open |
+| 5 | Diplomat/Spy actions: embassy, investigate, sabotage, steal tech, incite, bribe | unit action | open |
+| 6 | Caravan/Freight actions: trade route, help build wonder | unit action | open |
+| 7 | AI production choice (`City_Production_Complete`) | AI | open |
+| 8 | AI expansion strategy: site evaluation, escorting, target count | AI | open |
+| 9 | AI terrain improvement | AI | open |
+| 10 | Paradrop | unit action | open |
+| 11 | Airlift | unit action | open |
+| 12 | Amphibious-assault enforcement (marine-only ship attack) | rules | open |
+| 13 | Submarine visibility | rules | open |
+| 14 | Nuclear strike (area effect, fallout) | rules | open |
+| 15 | Revolution and anarchy | government | open |
+| 16 | Diplomacy: contact, negotiation, treaty state, reputation | diplomacy | open |
+| 17 | Senate constraint under Republic/Democracy | government | open |
+| 18 | AI difficulty scaling | AI | open |
+| 19 | Marco Polo's Embassy / United Nations / Eiffel Tower (needs diplomacy) | wonder | open, blocked by #16 |
+| 20 | Statue of Liberty (needs revolution) | wonder | open, blocked by #15 |
+| 21 | Manhattan Project gate (needs nuclear weapons) | wonder | open, blocked by #14 |
+| 22 | AI Lua per-order/per-move `print` spam | AI perf | open |
+
+Items 1 and 2 were implemented in this pass (2026-09-01); see their sections
+below for what landed and what's still open within them. Item 3 is next.
+
 ## Rules that were already faithful
 
 These were checked against the reference and need no work:
@@ -64,10 +98,16 @@ dictionary directly — so any non-American civilisation, including every AI,
 threw `KeyNotFoundException` on founding its first city. Sections are now
 separated correctly and the lookup no longer throws.
 
-Still open on the same sheet: **the special-resource cells are plain coloured
-circles.** The twenty-two resource paintings in `FOSSart/Other/` — buffalo, fish,
-whales, wine, gems, gold, furs, silk, spice, oasis and the rest — are not drawn
-by anything.
+**Mostly fixed in a later pass (2026-09-01):** painted base diamonds now feed
+every TERRAIN1 row, and painted special-resource cutouts render for the desert,
+plains, grassland, hills-2, tundra, glacier-2, swamp-1, jungle, and ocean
+slots. Still the procedural coloured circle: coal, gold, iron, ivory, and the
+swamp-2 slot. Full detail in [TEXTURE-GAP.md](TEXTURE-GAP.md). The orphaned
+`FOSSart/Other/*.jpg` reference paintings this section originally pointed at are
+still wired to nothing; the new art was generated fresh from `~/rhYcivtextures`
+instead. Road and railroad tiles remain the generator-drawn vector rosettes —
+a painted road-overlay set was still being authored in `~/rhYcivtextures/roads`
+at the time of this pass and was left alone.
 
 ## Combat and unit abilities
 
@@ -108,8 +148,11 @@ by anything.
   "spot submarines" property is wired to the fighter flag and is read nowhere.
 - Nuclear attack. A Nuclear Missile resolves as ordinary combat. There is no
   strike, no area destruction, no fallout.
-- Disband. No command, so units cannot be disbanded and cannot be disbanded in a
-  city for shields.
+- **Fixed in a later pass (2026-09-01):** Disband. A `DisbandOrder` (Shift+D) now
+  removes the active unit anywhere on the map; the existing city-window disband
+  path and the new order share one `CityActions.DisbandUnit`/
+  `ApplyDisbandProductionCredit` implementation, crediting half the unit's
+  shield cost to the city it is standing in or homed to.
 
 ## Non-combat unit actions
 
@@ -168,12 +211,24 @@ section, as it already did for sounds, so each line can name its wonder.
 
 ## City improvements
 
-Discovered while working on the wonders, and worth its own entry: **no building
-provides a shield bonus.** The `Effects` enum has multipliers for tax, luxury and
-science but none for production, and `CalculateOutput` applies none. So the
-Factory, Manufacturing Plant, Power Plant, Hydro Plant, Nuclear Plant and Solar
-Plant contribute nothing to production. They cost shields and upkeep and are pure
-loss. This also blocks the Hoover Dam.
+**Fixed in a later pass (2026-09-01):** no building provided a shield bonus. The
+`Effects` enum had multipliers for tax, luxury and science but none for
+production, and `CalculateOutput` applied none, so the Factory, Manufacturing
+Plant, Power Plant, Hydro Plant, Nuclear Plant and Solar Plant contributed
+nothing and were pure loss. A `ProductionMultiplier` effect now exists,
+following the exact pattern already used for the other three multipliers
+(percentage points summed across improvements and multiplier-style wonders,
+applied as `(100 + percent) / 100`): Factory +50%, Mfg. Plant/Power
+Plant/Hydro Plant/Nuclear Plant/Solar Plant +25% each, wired in
+`Engine/Scripts/improvements.lua`. Hoover Dam now grants every city its owner
+holds the Hydro Plant bonus, the same way SETI Program grants a research lab.
+
+Still open: Civ II gates Mfg. Plant and the power plants behind having a
+Factory, and treats the four power-plant types as mutually exclusive per city;
+neither constraint is enforced here, so they simply stack. The exact Civ II
+percentages (and whether the bonus applies before or after corruption/waste)
+are reconstructed from general knowledge of the ruleset, not re-verified
+against a reference implementation.
 
 ## Government and diplomacy
 
@@ -217,12 +272,5 @@ not an opponent.
 
 ## Suggested order of work
 
-1. Wonders. Largest gameplay gap per unit of effort, well-bounded, and each one
-   is independent of the others.
-2. Diplomat, Spy, Caravan and Freight actions. Four unit types that currently do
-   nothing.
-3. AI production and expansion. The single biggest determinant of whether the
-   game feels like Civ II to play against.
-4. Revolution and governments, then diplomacy.
-5. The remaining unit abilities — paradrop, airlift, disband, amphibious
-   enforcement, submarine visibility, nuclear strikes.
+Superseded by the [ranked backlog](#ranked-backlog) at the top of this document,
+which tracks status per item as work lands.

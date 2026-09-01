@@ -93,6 +93,7 @@ namespace Civ2engine.Scripting
         public Effects TaxMultiplier = Effects.TaxMultiplier;
         public Effects LuxMultiplier = Effects.LuxMultiplier;
         public Effects ScienceMultiplier = Effects.ScienceMultiplier;
+        public Effects ProductionMultiplier = Effects.ProductionMultiplier;
         public Effects Walled = Effects.Walled;
         public Effects AirDefence = Effects.AirDefence;
         public Effects SeaDefence = Effects.SeaDefence;

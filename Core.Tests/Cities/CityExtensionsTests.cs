@@ -177,6 +177,33 @@ public class CityExtensionsTests
     }
 
     [Fact]
+    public void CalculateOutput_WithFactory_AppliesProductionBonus()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var tile = map.Tile[1, 1];
+        tile.Terrain.Food = 2;
+        // Kept below the despotism-style per-tile penalty threshold (>= 3) so the
+        // bonus under test is the only thing separating this from the simple case.
+        tile.Terrain.Shields = 2;
+        tile.Terrain.Trade = 1;
+        tile.Terrain.Defense = 100;
+
+        var city = new City { Owner = civ, Location = tile, Size = 1 };
+        city.WorkedTiles.Add(tile);
+        civ.Cities.Add(city);
+        // Capital, so distance-based waste/corruption is zero and does not
+        // obscure the production multiplier under test.
+        city.AddImprovement(new Improvement { Type = 1, Effects = { [Effects.Capital] = 0 } });
+        city.AddImprovement(new Improvement { Type = 15, Effects = { [Effects.ProductionMultiplier] = 50 } });
+
+        city.CalculateOutput(0, game.Object);
+
+        // Factory: base 2 shields * (100 + 50) / 100 = 3.
+        Assert.Equal(3, city.TotalProduction);
+        Assert.Equal(3, city.Production);
+    }
+
+    [Fact]
     public void CalculatePollution_Cases()
     {
         var (game, rules, civ, map) = SetupGame();

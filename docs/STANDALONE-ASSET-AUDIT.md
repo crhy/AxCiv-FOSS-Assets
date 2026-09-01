@@ -32,10 +32,19 @@ see `ASSET-PROVENANCE.md` and `CLEAN-ROOM-STATUS.md`.
 
 ## Art that can still be polished
 
+The full shot list is in [TEXTURE-GAP.md](TEXTURE-GAP.md). Highlights below.
+
+As of 2026-09-01, painted isometric base diamonds feed TERRAIN1 for desert,
+plains, grassland, hills, mountains, tundra, and glacier, and painted
+special-resource cutouts render for the desert, plains, grassland, hills 2,
+tundra, glacier 2, and ocean 1 slots. Swamp, jungle, and ocean bases and the
+remaining special slots still use the legacy square tile or the procedural
+marker.
+
 These are attributed, functional placeholders, not missing runtime assets:
 
-- unique illustrated terrain-special icons rather than the current clear
-  procedural resource markers;
+- painted special-resource icons for the coal, gold, iron, ivory, whales, peat,
+  spice, gems, and fruit slots, which are still the clear procedural marker;
 - bespoke high-resolution Civilopedia concept/category illustrations;
 - richer battle, global-warming, and production-progress animation frames;
 - additional city-view scenery if the optional decorative city panorama is

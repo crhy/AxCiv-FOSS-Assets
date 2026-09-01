@@ -19,6 +19,13 @@ public static class WonderFunctions
     /// </summary>
     public static City? FindActiveWonder(Civilization civilization, ImprovementType wonder)
     {
+        // A city that is not yet attached to a civilisation (freshly constructed
+        // or mid-transfer) owns no wonders.
+        if (civilization?.Cities == null)
+        {
+            return null;
+        }
+
         var wonderCity = civilization.Cities.FirstOrDefault(c => c.ImprovementExists((int)wonder));
         if (wonderCity == null)
         {
@@ -46,6 +53,12 @@ public static class WonderFunctions
     /// </summary>
     public static int GetMultiplierBonus(City city, Effects effect)
     {
+        if (effect == Effects.ProductionMultiplier)
+        {
+            // Hoover Dam counts as a Hydro Plant in every city its owner holds.
+            return OwnsActiveWonder(city.Owner, ImprovementType.HooverDam) ? 25 : 0;
+        }
+
         if (effect != Effects.ScienceMultiplier)
         {
             return 0;
