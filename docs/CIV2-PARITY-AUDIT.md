@@ -26,7 +26,7 @@ progress** (this pass), **open**.
 |---|---|---|---|
 | 1 | City-improvement production bonus (Factory, Mfg. Plant, power plants; unblocks Hoover Dam) | economy | done |
 | 2 | Disband unit, disband-in-city for shields | unit action | done |
-| 3 | Great Library / Darwin's Voyage turn hook (grant advances) | wonder | open |
+| 3 | Great Library / Darwin's Voyage turn hook (grant advances) | wonder | done |
 | 4 | Leonardo's Workshop unit-upgrade pass | wonder | open |
 | 5 | Diplomat/Spy actions: embassy, investigate, sabotage, steal tech, incite, bribe | unit action | open |
 | 6 | Caravan/Freight actions: trade route, help build wonder | unit action | open |
@@ -47,8 +47,9 @@ progress** (this pass), **open**.
 | 21 | Manhattan Project gate (needs nuclear weapons) | wonder | open, blocked by #14 |
 | 22 | AI Lua per-order/per-move `print` spam | AI perf | open |
 
-Items 1 and 2 were implemented in this pass (2026-09-01); see their sections
-below for what landed and what's still open within them. Item 3 is next.
+Items 1, 2 and 3 were implemented across the 2026-09-01 passes; see their
+sections below for what landed and what's still open within them. Item 4
+(Leonardo's Workshop unit-upgrade pass) is next.
 
 ## Rules that were already faithful
 
@@ -197,9 +198,22 @@ section, as it already did for sounds, so each line can name its wonder.
 - A. Smith's Trading Co. — pays the upkeep of every building that costs one gold.
 - SETI Program — a research lab in every city.
 
+**Fixed in a later pass (2026-09-01):**
+
+- Great Library — `Game.ResolveGreatLibrary` runs at the start of the owner's
+  turn, before research is resolved, and calls `GiveAdvance` for every advance
+  that at least two other non-barbarian civilisations already know. It stops when
+  Electricity obsoletes the wonder, which `FindActiveWonder` already handles. The
+  qualifying-advance set is `WonderFunctions.GreatLibraryAdvances`, unit-tested in
+  `WonderFunctionsTests`.
+- Darwin's Voyage — `GameTurn.GrantWonderCompletionAdvances` fires once, at the
+  point of construction, and grants the owner two advances taken from
+  `CalculateAvailableResearch` (highest AI value first, recomputed between the
+  two so a freshly unlocked advance is eligible). It is deliberately resolved at
+  build time rather than from a per-turn hook because it is a one-off.
+
 **Still cosmetic**, and why:
 
-- Great Library and Darwin's Voyage need a turn-level hook to grant advances.
 - Leonardo's Workshop needs a unit-upgrade pass.
 - Hoover Dam counts as a hydro plant, but power plants have no effect yet — see
   below.

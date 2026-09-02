@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using Civ2engine.Advances;
+using Civ2engine.Enums;
 using Civ2engine.Production;
+using Model.Core.Cities;
 using Model.Core.Player;
 
 namespace Civ2engine
@@ -131,6 +134,8 @@ namespace Civ2engine
                         city.SetUnitSupport(government);
                         city.CalculateOutput(city.Owner.Government, game);
 
+                        GrantWonderCompletionAdvances(game, city, player);
+
                         player.CityProductionComplete(city);
                     }
                 }
@@ -168,6 +173,39 @@ namespace Civ2engine
             }
 
             ResolveResearch(game, player);
+        }
+
+        /// <summary>
+        /// Civ II's Darwin's Voyage delivers two immediate technology advances the
+        /// moment it is completed. It is a one-off, so it is resolved here at the
+        /// point of construction rather than from a per-turn hook.
+        /// </summary>
+        private static void GrantWonderCompletionAdvances(Game game, City city, IPlayer player)
+        {
+            if (city.ItemInProduction is not BuildingProductionOrder
+                {
+                    Improvement.Type: (int)ImprovementType.DarwinVoyage
+                })
+            {
+                return;
+            }
+
+            for (var i = 0; i < 2; i++)
+            {
+                var options = AdvanceFunctions.CalculateAvailableResearch(game, city.Owner);
+                if (options.Count == 0)
+                {
+                    break;
+                }
+
+                var advance = options
+                    .OrderByDescending(a => a.AIvalue)
+                    .ThenBy(a => a.Index)
+                    .First();
+
+                game.GiveAdvance(advance.Index, city.Owner);
+                player.NotifyAdvanceResearched(advance.Index);
+            }
         }
 
         private static void ResolveResearch(Game game, IPlayer player)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Civ2engine.Advances;
 using Civ2engine.Enums;
 using Civ2engine.Events;
 using Civ2engine.MapObjects;
@@ -256,9 +257,40 @@ namespace Civ2engine
 
             ResolveAirFuel(activeCiv, player);
             ResolveShipsLostAtSea(activeCiv, player);
+            ResolveGreatLibrary(activeCiv, player);
 
             // Update all cities
             this.CitiesTurn(player);
+        }
+
+        /// <summary>
+        /// Civ II's Great Library hands its owner every advance that at least two
+        /// other civilisations already know. It runs at the start of the owner's
+        /// turn, before research is resolved, and keeps working until Electricity
+        /// obsoletes the wonder.
+        /// </summary>
+        private void ResolveGreatLibrary(Civilization activeCiv, IPlayer player)
+        {
+            if (!WonderFunctions.OwnsActiveWonder(activeCiv, ImprovementType.GreatLibrary))
+            {
+                return;
+            }
+
+            var granted = WonderFunctions
+                .GreatLibraryAdvances(activeCiv, AllCivilizations, Rules.Advances.Length)
+                .ToList();
+
+            foreach (var advance in granted)
+            {
+                this.GiveAdvance(advance, activeCiv);
+
+                // GiveAdvance silently ignores an advance the civ is barred from,
+                // so only announce the ones that actually landed.
+                if (AdvanceFunctions.HasTech(activeCiv, advance))
+                {
+                    player.NotifyAdvanceResearched(advance);
+                }
+            }
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Civ2engine.Enums;
 using Model.Constants;
@@ -150,6 +151,34 @@ public static class WonderFunctions
     /// </summary>
     public static bool PaysUpkeepFor(Civilization civilization, int upkeep) =>
         upkeep == 1 && OwnsActiveWonder(civilization, ImprovementType.TradingCompany);
+
+    /// <summary>
+    /// Advances the Great Library hands its owner: every advance already known to
+    /// at least two other civilisations that the owner does not yet have. Civ II
+    /// keeps the owner level with the field this way until Electricity obsoletes
+    /// the wonder, which <see cref="FindActiveWonder"/> already accounts for.
+    /// Barbarians are not counted as a civilisation for this purpose.
+    /// </summary>
+    public static IEnumerable<int> GreatLibraryAdvances(Civilization owner,
+        IEnumerable<Civilization> allCivilizations, int advanceCount)
+    {
+        var others = allCivilizations
+            .Where(c => c != owner && c.PlayerType != PlayerType.Barbarians)
+            .ToList();
+
+        for (var advance = 0; advance < advanceCount; advance++)
+        {
+            if (HasAdvance(owner, advance))
+            {
+                continue;
+            }
+
+            if (others.Count(c => HasAdvance(c, advance)) >= 2)
+            {
+                yield return advance;
+            }
+        }
+    }
 
     private static bool HasAdvance(Civilization civilization, int advance) =>
         advance >= 0 && advance < civilization.Advances.Length && civilization.Advances[advance];
