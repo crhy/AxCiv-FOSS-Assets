@@ -272,13 +272,153 @@ public static class ImageUtils
         else    // MGE
         {
             var outerSrc = Images.ExtractBitmap(_look.Outer, active);
-            var outerColor = new Color(65, 69, 78, 255);
-            wallpaper.Outer = Image.GenColor(outerSrc.Width, outerSrc.Height, outerColor);
             var srcTile = Images.ExtractBitmap(_look.Inner![0], active);
-            var color = srcTile.GetColor(srcTile.Width / 2, srcTile.Height / 2);
-            wallpaper.Inner = new[] { Image.GenColor(srcTile.Width, srcTile.Height, color) };
+
+            if (TryBuildStoneWallpaper(out var stoneInner, out var stoneOuter))
+            {
+                wallpaper.Inner = stoneInner;
+                wallpaper.Outer = stoneOuter;
+            }
+            else
+            {
+                var outerColor = new Color(65, 69, 78, 255);
+                wallpaper.Outer = Image.GenColor(outerSrc.Width, outerSrc.Height, outerColor);
+                var color = srcTile.GetColor(srcTile.Width / 2, srcTile.Height / 2);
+                wallpaper.Inner = new[] { Image.GenColor(srcTile.Width, srcTile.Height, color) };
+            }
         }
 
+    }
+
+    // Path of the painted slate sheet, relative to the RaylibUI asset root. When it
+    // is present (every build from this repo) the MGE-style dialog and side-panel
+    // chrome is cut from it instead of being flat-filled.
+    private const string StoneTextureAsset = "FOSSart/Standalone/Backgrounds/stonetexture.png";
+
+    // A uniform tile size for the interior fill. Four crops at this size, taken
+    // from well-separated regions of the sheet, give DrawUtils.TileFill enough
+    // variety that the repeat is not readable at dialog scale.
+    private const int StoneInnerTileSize = 224;
+
+    /// <summary>
+    /// Builds the interior and border wallpaper tiles for the standalone look from
+    /// the painted stone sheet. The interior crops are lightened toward warm
+    /// limestone so the near-black dialog text keeps its contrast; the border crop
+    /// is darkened so the bevel drawn over it reads as a carved stone frame.
+    /// Returns false, leaving the caller on its flat-colour fallback, when the
+    /// sheet is not on disk (a plain Civ II install).
+    /// </summary>
+    private static bool TryBuildStoneWallpaper(out Image[] inner, out Image outer)
+    {
+        inner = [];
+        outer = default;
+
+        var path = AssetPaths.Resolve(StoneTextureAsset);
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        var sheet = Image.Load(path);
+        try
+        {
+            if (sheet.Width < StoneInnerTileSize * 2 || sheet.Height < StoneInnerTileSize * 2)
+            {
+                return false;
+            }
+
+            var maxX = sheet.Width - StoneInnerTileSize;
+            var maxY = sheet.Height - StoneInnerTileSize;
+            var offsets = new[]
+            {
+                (X: (int)(maxX * 0.05f), Y: (int)(maxY * 0.08f)),
+                (X: (int)(maxX * 0.62f), Y: (int)(maxY * 0.12f)),
+                (X: (int)(maxX * 0.28f), Y: (int)(maxY * 0.70f)),
+                (X: (int)(maxX * 0.88f), Y: (int)(maxY * 0.82f)),
+            };
+
+            var limestone = new Color(234, 228, 214, 255);
+            inner = offsets
+                .Select(o =>
+                {
+                    var tile = Image.FromImage(sheet,
+                        new Rectangle(o.X, o.Y, StoneInnerTileSize, StoneInnerTileSize));
+                    // Match every crop to the same mean brightness first, so the
+                    // seam between two neighbouring tiles does not read as a patch,
+                    // then lift the whole thing toward warm limestone.
+                    NormaliseBrightness(ref tile, 150f);
+                    TintImage(ref tile, limestone, 0.58f);
+                    return tile;
+                })
+                .ToArray();
+
+            // A large crop for the frame: it is tiled across strips only a few tens
+            // of pixels wide, so the bigger the source the less any repeat reads.
+            var borderSize = Math.Min(Math.Min(sheet.Width, sheet.Height), 480);
+            outer = Image.FromImage(sheet,
+                new Rectangle((sheet.Width - borderSize) / 2, (sheet.Height - borderSize) / 2,
+                    borderSize, borderSize));
+            TintImage(ref outer, new Color(42, 40, 41, 255), 0.3f);
+            return true;
+        }
+        finally
+        {
+            sheet.Unload();
+        }
+    }
+
+    /// <summary>
+    /// Blends every pixel of <paramref name="image"/> a fixed fraction of the way
+    /// toward <paramref name="target"/>, in place.
+    /// </summary>
+    private static void TintImage(ref Image image, Color target, float amount)
+    {
+        for (var y = 0; y < image.Height; y++)
+        {
+            for (var x = 0; x < image.Width; x++)
+            {
+                image.DrawPixel(x, y, Blend(image.GetColor(x, y), target, amount));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rescales <paramref name="image"/> so its mean channel value lands on
+    /// <paramref name="target"/>, in place. Used to bring independently chosen
+    /// crops of one sheet to a common exposure before they are tiled together.
+    /// </summary>
+    private static void NormaliseBrightness(ref Image image, float target)
+    {
+        double sum = 0;
+        var count = image.Width * image.Height;
+        for (var y = 0; y < image.Height; y++)
+        {
+            for (var x = 0; x < image.Width; x++)
+            {
+                var c = image.GetColor(x, y);
+                sum += (c.R + c.G + c.B) / 3.0;
+            }
+        }
+
+        var mean = count > 0 ? sum / count : target;
+        if (mean < 1)
+        {
+            return;
+        }
+
+        var scale = target / (float)mean;
+        for (var y = 0; y < image.Height; y++)
+        {
+            for (var x = 0; x < image.Width; x++)
+            {
+                var c = image.GetColor(x, y);
+                image.DrawPixel(x, y, new Color(
+                    (byte)Math.Clamp(c.R * scale, 0, 255),
+                    (byte)Math.Clamp(c.G * scale, 0, 255),
+                    (byte)Math.Clamp(c.B * scale, 0, 255),
+                    (byte)255));
+            }
+        }
     }
 
     private static InterfaceStyle _look = null!;
