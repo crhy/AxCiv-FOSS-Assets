@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Model.Core;
 
 namespace Civ2engine.IO
@@ -90,10 +91,16 @@ namespace Civ2engine.IO
                 }
             }
 
-            popupBox.Button ??= new List<string>();
-            popupBox.Button.Add("OK");
-            // Add cancel buttons if @options exist
-            if (popupBox.Options != null)
+            // Only synthesise the default OK button when the section declared no
+            // @button lines of its own; otherwise its explicit buttons stand.
+            if (popupBox.Button is not { Count: > 0 })
+            {
+                popupBox.Button = new List<string> { "OK" };
+            }
+
+            // Add a Cancel button for choice dialogs that did not list one.
+            if (popupBox.Options != null &&
+                !popupBox.Button.Contains("Cancel", StringComparer.OrdinalIgnoreCase))
             {
                 popupBox.Button.Add("Cancel");
             }
