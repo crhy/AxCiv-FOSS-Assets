@@ -17,6 +17,7 @@ flatpak-repo/
 
 RaylibUI/run-log.txt
 /RaylibUI/screenshot*.png
+rhyciv-*.png
 /growth_diff.txt
 
 build.log

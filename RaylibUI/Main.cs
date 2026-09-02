@@ -129,6 +129,8 @@ namespace RaylibUI
                     Graphics.EndDrawing();
                 }
 
+                CaptureScreenshotIfRequested();
+
                 if (counter++ >= 30)
                 {
                     pulse = !pulse;
@@ -137,6 +139,29 @@ namespace RaylibUI
             }
 
             ShutdownApp();
+        }
+
+        // Press F10 to write a PNG of the current frame. Handy for bug reports and
+        // for capturing the UI without an external screen-grabber; the directory
+        // comes from RHYCIV_SHOT_DIR when set, otherwise the working directory.
+        private int _screenshotCounter;
+
+        private void CaptureScreenshotIfRequested()
+        {
+            if (!Input.IsKeyPressed(KeyboardKey.F10))
+            {
+                return;
+            }
+
+            var dir = Environment.GetEnvironmentVariable("RHYCIV_SHOT_DIR");
+            dir = string.IsNullOrWhiteSpace(dir) ? Environment.CurrentDirectory : dir;
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, $"rhyciv-{DateTime.Now:yyyyMMdd-HHmmss}-{_screenshotCounter++:00}.png");
+
+            var frame = Image.LoadFromScreen();
+            frame.Export(path);
+            frame.Unload();
+            Console.WriteLine($"screenshot: {path}");
         }
 
         private void DrawScene(bool pulse)
