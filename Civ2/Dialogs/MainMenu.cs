@@ -10,7 +10,12 @@ namespace Civ2.Dialogs;
 public class MainMenu : BaseDialogHandler
 {
     public const string Title = "MAINMENU";
-    public MainMenu() : base(Title, -0.08, -0.07) { }
+
+    // Centre it like the other new-game wizard dialogs. The old
+    // (-0.08, -0.07) anchor pinned it into the bottom-right corner, where a
+    // wider inner panel then overflowed the window and the buttons became
+    // unclickable.
+    public MainMenu() : base(Title) { }
 
     public override IInterfaceAction HandleDialogResult(DialogResult result,
         Dictionary<string, ICivDialogHandler> civDialogHandlers, Civ2Interface civ2Interface)

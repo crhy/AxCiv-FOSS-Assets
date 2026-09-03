@@ -482,6 +482,9 @@ namespace Civ2.ImageLoader
                 Color.White);
             loaded.Unload();
 
+            // Key out the magenta, and pull the shield most of the way toward
+            // neutral grey so the marker does not draw the eye the way the full
+            // painted colours did.
             for (var y = 0; y < art.Height; y++)
             {
                 for (var x = 0; x < art.Width; x++)
@@ -491,19 +494,24 @@ namespace Civ2.ImageLoader
                     if (magenta > 120)
                     {
                         art.DrawPixel(x, y, new Color((byte)0, (byte)0, (byte)0, (byte)0));
+                        continue;
                     }
-                    else if (magenta > 88)
-                    {
-                        var a = (byte)Math.Clamp((int)Math.Round((120 - magenta) / 32.0 * 255.0), 0, 255);
-                        art.DrawPixel(x, y, new Color(c.R, c.G, c.B, a));
-                    }
+
+                    var a = magenta > 88
+                        ? (byte)Math.Clamp((int)Math.Round((120 - magenta) / 32.0 * 255.0), 0, 255)
+                        : c.A;
+
+                    const double desat = 0.7;
+                    var lum = 0.299 * c.R + 0.587 * c.G + 0.114 * c.B;
+                    byte Mix(byte ch) => (byte)Math.Clamp((int)Math.Round(ch + (lum - ch) * desat), 0, 255);
+                    art.DrawPixel(x, y, new Color(Mix(c.R), Mix(c.G), Mix(c.B), a));
                 }
             }
 
             var targetWidth = terrain.TileWidth * terrain.RenderScale;
             var targetHeight = terrain.TileHeight * terrain.RenderScale;
 
-            var scale = MathF.Min(targetWidth * 0.5f / art.Width, targetHeight * 0.82f / art.Height);
+            var scale = MathF.Min(targetWidth * 0.34f / art.Width, targetHeight * 0.56f / art.Height);
             var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
             var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
             art.Resize(drawWidth, drawHeight);
@@ -1043,9 +1051,47 @@ namespace Civ2.ImageLoader
                 }
             }
 
-            var sampleRect = new Rectangle(offsetX, offsetY, 32, 16);
-            ditherMaps[^1] = Image.FromImage(Images.ExtractBitmap(terrainBlank), sampleRect);
-            ditherMaps[^1].AlphaMask(mask);
+            // Fog-of-war edge. On the classic sheet this is a crop of the "blank"
+            // tile behind the checkerboard mask; against the high-resolution art
+            // that blank tile shows through as blue/black checker pixels, so use
+            // a plain dark wash there instead, shaped by the same soft ramp as
+            // the terrain dither.
+            if (feather)
+            {
+                var fw = ditherMaps.Length > 1 ? ditherMaps[0].Width : mask.Width;
+                var fh = ditherMaps.Length > 1 ? ditherMaps[0].Height : mask.Height;
+                var fog = Image.GenColor(fw, fh, new Color((byte)8, (byte)12, (byte)26, (byte)255));
+                const double band = 0.6;
+                const double maxStrength = 0.78;
+                for (var py = 0; py < fh; py++)
+                {
+                    var tileY = offsetY + (py + 0.5) / fh * 16.0;
+                    var ny = tileY / 16.0 - 1.0;
+                    for (var px = 0; px < fw; px++)
+                    {
+                        var tileX = offsetX + (px + 0.5) / fw * 32.0;
+                        var nx = tileX / 32.0 - 1.0;
+                        var dd = Math.Abs(nx) + Math.Abs(ny);
+                        var strength = 0.0;
+                        if (dd < 1.0)
+                        {
+                            var t = Math.Clamp((dd - (1.0 - band)) / band, 0.0, 1.0);
+                            strength = t * t * maxStrength;
+                        }
+
+                        fog.DrawPixel(px, py, new Color((byte)8, (byte)12, (byte)26,
+                            (byte)Math.Clamp((int)Math.Round(strength * 255.0), 0, 255)));
+                    }
+                }
+
+                ditherMaps[^1] = fog;
+            }
+            else
+            {
+                var sampleRect = new Rectangle(offsetX, offsetY, 32, 16);
+                ditherMaps[^1] = Image.FromImage(Images.ExtractBitmap(terrainBlank), sampleRect);
+                ditherMaps[^1].AlphaMask(mask);
+            }
 
             return new DitherMap { X = offsetX, Y = offsetY, Images = ditherMaps };
         }

@@ -1,6 +1,14 @@
 @metadata
 @title=rhYciv Standalone
 
+@INIT
+@title=In the Beginning
+@width=420
+@button=Begin
+Before there were borders, monuments, or chronicles, there was only a people beneath an open sky. They look to you now.
+^
+From this first campfire, raise a civilization whose memory will outlive the ages.
+
 @NAMECITY
 @title=A New City
 @width=320

@@ -375,7 +375,9 @@ public class MapControl : BaseControl
                 _cityDetails.Add(data);
 
                 var size = data.Size.ToString();
-                var fontSize = Math.Clamp(14.ZoomScale(zoom), TextRendering.MinimumFittedFontSize, 18);
+                // Let the size number keep growing with zoom instead of freezing
+                // at 18px on top of a huge tile.
+                var fontSize = Math.Clamp(14.ZoomScale(zoom), TextRendering.MinimumFittedFontSize, 14.ZoomScale(Math.Clamp(zoom, 0, 14)));
                 var textSize = TextRendering.Measure(Fonts.TnRbold, size, fontSize, 0);
                 var citySizeRectLoc = paddedLoc + data.Location + data.SizeRectLoc.ZoomScale(zoom);
                 var textPosition = citySizeRectLoc;
@@ -392,7 +394,9 @@ public class MapControl : BaseControl
         foreach (var cityData in _cityDetails)
         {
             var name = cityData.Name;
-            var fontSize = Math.Clamp(20.ZoomScale(zoom), TextRendering.MinimumMapFontSize, 24);
+            // Grow the city name with zoom rather than capping at 24px when the
+            // tile itself is several times that tall.
+            var fontSize = Math.Clamp(20.ZoomScale(zoom), TextRendering.MinimumMapFontSize, 20.ZoomScale(Math.Clamp(zoom, 0, 14)));
             var textSize = TextRendering.Measure(_active.Look.DefaultFont, name, fontSize, 1);
             // Anchor to the city's logical footprint, not the source texture, so
             // high-resolution FOSS city art does not push the label off the tile.
