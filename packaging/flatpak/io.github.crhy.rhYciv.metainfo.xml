@@ -27,9 +27,9 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
-    <release version="0.4.0-beta.1" date="2026-09-02">
+    <release version="0.4.0-beta.1" date="2026-09-03">
       <description>
-        <p>Seamless high-resolution terrain: the painted terrain diamonds now blend edge to edge with no visible tile borders, soft transitions between terrain types, a procedural shallow-water shoreline in place of the legacy coast stipple, and crisp map overlays when zoomed in. Also adds Great Library and Darwin's Voyage advance grants, a stone-panel interface pass, an F10 screenshot hotkey, a fix for a crash when founding a city, and a formula-level Civilization II parity audit.</p>
+        <p>Seamless high-resolution terrain: the painted terrain diamonds now blend edge to edge with no visible tile borders, soft transitions between terrain types, a procedural shoreline with surf and rocks in place of the legacy coast stipple, high-resolution special-resource art, and crisp map overlays when zoomed in. Event prompts are rewritten in original prose and shown as large, centred, legible panels. Also adds Great Library and Darwin's Voyage advance grants, a stone-panel interface pass, an F10 screenshot hotkey, a fix for a crash when founding a city, and a formula-level Civilization II parity audit.</p>
       </description>
     </release>
     <release version="0.3.0-beta.1" date="2026-09-01">
