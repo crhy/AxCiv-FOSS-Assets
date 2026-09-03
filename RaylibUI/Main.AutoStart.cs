@@ -80,6 +80,24 @@ namespace RaylibUI
                 gameScreen.MapControl.ForceRedraw = true;
             }
 
+            // RHYCIV_TEST_POPUP=NAME[,NAME...] pops the named GAME.TXT dialog(s)
+            // right after start, with placeholder text, so prompt layout can be
+            // reviewed without playing to the event that triggers it.
+            var testPopups = Environment.GetEnvironmentVariable("RHYCIV_TEST_POPUP");
+            if (!string.IsNullOrWhiteSpace(testPopups) && _activeScreen is RunGame.GameScreen screen)
+            {
+                var fillers = new List<string>
+                {
+                    game.GetPlayerCiv.TribeName, "Babylon", "the Wonder of the Ages",
+                    "an aqueduct", "scholars", "the Hanging Gardens", "Marketplace",
+                };
+                foreach (var name in testPopups.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                {
+                    screen.ShowPopup(name, replaceStrings: fillers,
+                        replaceNumbers: new List<int> { 42, 120, 7 });
+                }
+            }
+
             return true;
         }
     }

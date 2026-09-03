@@ -27,9 +27,32 @@ public class CivDialog : DynamicSizingDialog
     private readonly ImageBox _imageBox;
     private bool _closed;
 
+    /// <summary>
+    /// A plain message / choice popup: it carries body text and, at most, radio
+    /// options, with no text entry, list, or picture. These are the classic
+    /// GAME.TXT event prompts, and we render them as a large, centred, legible
+    /// panel rather than a small strip.
+    /// </summary>
+    private static bool IsMessageLayout(DialogElements d) =>
+        d.Text is { Count: > 0 }
+        && (d.TextBoxes is null || d.TextBoxes.Count == 0)
+        && d.Listbox is null
+        && (d.Image is null || d.Image.Image.Any(n => n is null));
+
+    /// <summary>Inner-panel width to request for a dialog, in logical pixels.</summary>
+    private static int MessagePanelWidth() =>
+        Math.Clamp((int)(DisplayScale.Width * 0.62f), 560, 1100);
+
+    private static int RequestedWidth(Main host, DialogElements d) =>
+        IsMessageLayout(d)
+            ? MessagePanelWidth()
+            : d.Width == null
+                ? host.ActiveInterface.DefaultDialogWidth
+                : (int)(1.5 * d.Width);
+
     public CivDialog(Main host, DialogElements dialog, Action<string, int, IList<bool>?, IDictionary<string, string>?> handleButtonClick) :
         base(host, DialogUtils.ReplacePlaceholders(dialog.Title, dialog.ReplaceStrings, dialog.ReplaceNumbers),
-            dialog.Width == null ? host.ActiveInterface.DefaultDialogWidth : (int)(1.5 * dialog.Width),
+            RequestedWidth(host, dialog),
             dialog.X != null || dialog.Y != null ? new Point(
                 (dialog.X ?? 0) / DisplayScale.Width,
                 (dialog.Y ?? 0) / DisplayScale.Height) : dialog.DialogPos)
@@ -43,9 +66,11 @@ public class CivDialog : DynamicSizingDialog
                             title.Contains("In the Beginning", StringComparison.OrdinalIgnoreCase);
         var isNameDialog = string.Equals(normalizedDialogName, "NAME", StringComparison.OrdinalIgnoreCase) ||
                            title.Contains("Enter Your Name", StringComparison.OrdinalIgnoreCase);
-        var dialogFontSize = _active.Look.LabelFontSize + (isIntroDialog ? 3 : 1);
+        var isMessageDialog = IsMessageLayout(dialog);
+        var isBigDialog = isIntroDialog || isMessageDialog;
+        var dialogFontSize = _active.Look.LabelFontSize + (isBigDialog ? 4 : 1);
         var textFront = TextRendering.StrongBlack;
-        var textShadow = new Color(255, 255, 245, (byte)(isIntroDialog ? 220 : 160));
+        var textShadow = new Color(255, 255, 245, (byte)(isBigDialog ? 220 : 160));
         var textShadowOffset = new Vector2(-1, -1);
 
         var innerLayout = new TableLayout();
@@ -90,12 +115,18 @@ public class CivDialog : DynamicSizingDialog
                     nonWrappedLabels.Add(new LabelControl(this,
                         string.IsNullOrEmpty(texts[j]) && styles[j] == TextStyles.LeftOwnLine ? " " : texts[j],    // Add space if ^ is the only character 
                         false,
-                        horizontalAlignment: styles[j] == TextStyles.Centered || isIntroDialog ? HorizontalAlignment.Center : HorizontalAlignment.Left,
+                        horizontalAlignment: styles[j] == TextStyles.Centered || isBigDialog ? HorizontalAlignment.Center : HorizontalAlignment.Left,
                         font: _active.Look.LabelFont, fontSize: dialogFontSize, colorFront: textFront, colorShadow: textShadow, shadowOffset: textShadowOffset));
                 }
             }
 
             maxTextWidth = GetInnerPanelWidthFromText(nonWrappedLabels, dialog.Width ?? 0);
+            if (isMessageDialog)
+            {
+                // Wrap the body to the full requested panel so the message fills
+                // the dialog instead of clumping to one side of it.
+                maxTextWidth = Math.Max(maxTextWidth, MessagePanelWidth());
+            }
 
             // Make wrapped labels and adjust width of all labels
             List<LabelControl> textLabels = [];
@@ -110,7 +141,7 @@ public class CivDialog : DynamicSizingDialog
                         var wrappedLabel = new LabelControl(this,
                             string.IsNullOrEmpty(text) ? " " : text,    // Add space if ^ is the only character 
                             false,
-                            horizontalAlignment: styles[j] == TextStyles.Centered || isIntroDialog ? HorizontalAlignment.Center : HorizontalAlignment.Left,
+                            horizontalAlignment: styles[j] == TextStyles.Centered || isBigDialog ? HorizontalAlignment.Center : HorizontalAlignment.Left,
                             font: _active.Look.LabelFont, fontSize: dialogFontSize,
                             colorFront: textFront, colorShadow: textShadow, shadowOffset: textShadowOffset);
 
@@ -166,7 +197,7 @@ public class CivDialog : DynamicSizingDialog
             }
         }
 
-        if (dialog.Options is not null)
+        if (dialog.Options is { Texts: not null })
         {
             dialog.Options.ReplacedTexts = [];
             for (int i = 0; i < dialog.Options.Texts.Count; i++)

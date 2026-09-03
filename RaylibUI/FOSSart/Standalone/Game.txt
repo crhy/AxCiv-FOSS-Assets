@@ -6,174 +6,147 @@
 @width=320
 @button=Ok
 @button=Cancel
-What shall we call it?
-
+A city is more than stone and timber; it is a promise to the future. Give this new settlement the name by which history will remember it.
 @FOUNDED
 @title=City Founded
 @width=340
 @button=Ok
 %STRING0 is founded in %STRING1.
-
+^
 Its people look to you to make it prosper.
-
 @ONLYSETTLERS
 @title=Not This Unit
 @width=300
 @button=Ok
-Only Settlers and Engineers can found a city.
-
+Armies can conquer ground, but only settlers can turn wilderness into a lasting home. Bring builders, families, and tools.
 @CITYATSEA
 @title=Open Water
 @width=300
 @button=Ok
-A city cannot be founded at sea.
-
+The sea may carry fleets and fortunes, but it cannot hold streets and foundations. Find solid ground for your city.
 @ADJACENTCITY
 @title=Too Close
 @width=320
 @button=Ok
-There is already a city beside this square.
-Cities need room to grow; move further out.
-
+Another city already commands this ground. Give each settlement room to breathe, grow, and draw strength from the land around it.
 @ONLY10
 @title=City Full
 @width=320
 @button=Ok
 This city cannot take in more people until it has an aqueduct.
-
 @CANTDO
 @title=Not Possible
 @width=300
 @button=Ok
 This unit cannot do that here.
-
 @ALREADYROAD
 @title=Already Built
 @width=300
 @button=Ok
-This square already has a road.
-
+A road already binds this ground to the wider world. Send these workers where new paths are still needed.
 @ALREADYFARMLAND
 @title=Already Built
 @width=300
 @button=Ok
-This square is already farmland.
-
+This soil has already been shaped for intensive agriculture. Its furrows are as developed as present methods allow.
 @ALREADYMINING
 @title=Already Built
 @width=300
 @button=Ok
-This square has already been mined.
-
+The valuable seams here are already being cut and hauled. Further mining orders would only repeat work already done.
 @ALREADYFORT
 @title=Already Built
 @width=300
 @button=Ok
-There is already a fortress on this square.
-
+Earthworks and defenses already command this position. The ground is prepared for soldiers to hold it.
 @ALREADYAIR
 @title=Already Built
 @width=300
 @button=Ok
 There is already an airbase on this square.
-
 @NOWATER
 @title=No Water
 @width=320
 @button=Ok
 Irrigation needs fresh water: a river, a lake, the sea,
 or an irrigated square next to this one.
-
 @NOPOLLUTION
 @title=Nothing to Clean
 @width=300
 @button=Ok
 This square is not polluted.
-
 @BRIDGES
 @title=Bridge Building Needed
 @width=320
 @button=Ok
 Your engineers cannot carry a road across a river
 until they have learned to build bridges.
-
 @RAILROADS
 @title=Railroad Needed
 @width=300
 @button=Ok
 Your people have not yet learned to build railroads.
-
 @FARMLAND
 @title=Refrigeration Needed
 @width=300
 @button=Ok
 Your people have not yet learned to farm this intensively.
-
 @CONSTRUCTION
 @title=Construction Needed
 @width=300
 @button=Ok
 Your people have not yet learned to raise a fortress.
-
 @RADIO
 @title=Radio Needed
 @width=300
 @button=Ok
 Your people have not yet learned to run an airbase.
-
 @NEWFORTRESS
 @title=Fortresses
 @width=340
 @button=Ok
 Your engineers can now raise fortresses.
-
+^
 A unit defending a fortress is far harder to dislodge.
-
 @NEWAIRLIFT
 @title=Airbases
 @width=340
 @button=Ok
 Your engineers can now build airbases.
-
+^
 Aircraft can refuel and rest at an airbase, far from home.
-
 @NEWFARMLAND
 @title=Farmland
 @width=340
 @button=Ok
 Your engineers can now improve irrigated land into farmland.
-
+^
 A city with a supermarket will eat better for it.
-
 @NEWRAILROAD
 @title=Railroads
 @width=340
 @button=Ok
 Your engineers can now lay railroad.
-
+^
 Units move along it without spending their turn.
-
 @GOTO
 @title=Go To
 @width=320
 @button=Ok
 @button=Cancel
 Send this unit where?
-
 @PILLAGEWHAT
 @title=Pillage
 @width=320
 @button=Ok
 @button=Cancel
 Which improvement should be destroyed?
-
 @UNITOPTIONS
 @title=%STRING0
 @width=320
 @button=Ok
 @button=Cancel
 Home city: %STRING2
-
 @HOCKTHIS
 @title=Sell Building
 @width=340
@@ -183,19 +156,16 @@ This city can sell one building a turn.
 @options
 Sell the %STRING0 for %NUMBER0 gold
 Keep it
-
 @CANTHOCKTHIS
 @title=Not For Sale
 @width=320
 @button=Ok
 This building cannot be sold.
-
 @ALREADYSOLD
 @title=Already Sold
 @width=320
 @button=Ok
-This city has already sold a building this turn.
-
+This city has already stripped away one improvement this turn. What is dismantled cannot be endlessly sold twice.
 @BUILT
 @title=%STRING0
 @width=340
@@ -204,7 +174,6 @@ The %STRING2 city of %STRING0 %STRING3 %STRING1.
 @options
 Zoom to City
 Continue
-
 @BADBUILD
 @title=%STRING0
 @width=340
@@ -213,18 +182,16 @@ Continue
 @options
 Zoom to City
 Continue
-
 @DISORDER
 @title=Civil Disorder
 @width=340
 @button=Ok
 %STRING0 has fallen into disorder.
-
+^
 It will produce nothing until its people are content.
 @options
 Zoom to City
 Continue
-
 @RESTORED
 @title=Order Restored
 @width=340
@@ -233,36 +200,30 @@ Order has returned to %STRING0.
 @options
 Zoom to City
 Continue
-
 @WELOVEKING
 @title=Celebration
 @width=340
 @button=Ok
-%STRING0 is celebrating.
+Lanterns burn late in %STRING0. Markets overflow, music fills the streets, and the people celebrate an age of confidence beneath your rule.
 @options
 Zoom to City
 Continue
-
 @WEDONTLOVEKING
 @title=Celebration Ends
 @width=340
 @button=Ok
-The celebration in %STRING0 is over.
+The banners are coming down in %STRING0. The people return to ordinary life, and the city's brief season of jubilation has passed.
 @options
 Zoom to City
 Continue
-
 @FOODSHORTAGE
 @title=Food Shortage
 @width=340
 @button=Ok
-%STRING0 is running short of food.
-
-Move people onto better land, or the city will starve.
+The granaries of %STRING0 are running thin. Unless more food reaches the people, growth will turn to hardship and the city will begin to shrink.
 @options
 Zoom to City
 Continue
-
 @DECREASE
 @title=Famine
 @width=340
@@ -271,7 +232,6 @@ Famine has taken a citizen of %STRING0.
 @options
 Zoom to City
 Continue
-
 @INHOCK
 @title=Treasury Empty
 @width=340
@@ -281,38 +241,33 @@ for %NUMBER0 gold.
 @options
 Zoom to City
 Continue
-
 @RESEARCH
 @title=Choose Your Research
 @width=360
 @button=Ok
 Our %STRING0 await your direction.
-
 @FINDCITY
 @title=Find City
 @width=320
 @button=Ok
 @button=Cancel
 Which city?
-
 @SAVEOK
 @title=Game Saved
 @width=360
 @button=Ok
 %STRING0 %STRING1 of the %STRING2,
 your game is saved as %STRING3.
-
 @REALLYQUIT
 @title=Leave the Game
 @width=340
 @default=0
 @button=Ok
 @button=Cancel
-Any progress since your last save will be lost.
+Quit the current game? Any unsaved decisions, battles, and discoveries since your last save will be lost.
 @options
 Keep playing
 Quit to the main menu
-
 @GAMEOPTIONS
 @title=Game Options
 @width=360
@@ -331,7 +286,6 @@ Instant advice
 Tutorial help
 Move units with the keyboard
 Enter closest city screen
-
 @MESSAGEOPTIONS
 @title=City Report Options
 @width=380
@@ -350,7 +304,6 @@ Warn when food runs low
 Warn when pollution appears
 Warn when changing production costs shields
 Zoom to city is not the default action
-
 @GRAPHICOPTIONS
 @title=Graphic Options
 @width=360
@@ -360,3 +313,1524 @@ Zoom to city is not the default action
 @options
 Diplomacy screen graphics
 Open the Civilopedia on a new advance
+
+
+; ---- Event text below has no engine trigger yet ----
+
+@ABANDONWONDER
+@title=Abandon the Great Work
+@width=360
+@button=Ok
+Years of labor have already gone into %STRING0. Abandoning it will free the city for other work, but this unfinished dream may never be reclaimed.
+
+@ACCELERATED
+@title=The Pace of History
+@width=360
+@button=Ok
+The ages can move swiftly. In this accelerated world, every decision echoes sooner and every opportunity closes faster.
+
+@ACCURSEDUN
+@title=The United Nations Intervenes
+@width=360
+@button=Ok
+The wider community of nations has entered the dispute. What you do next will be judged far beyond the immediate battlefield.
+
+@ACCURSEDWALL
+@title=The Great Wall Frustrates War
+@width=360
+@button=Ok
+Old fortifications have become more than stone: they are a symbol around which diplomacy hardens against aggression.
+
+@ACTIVATEALLY
+@title=Call the Alliance
+@width=360
+@button=Ok
+The treaty is no ornament. War has come, and now you may call upon your ally to honor the promise made in quieter days.
+
+@ADDTOTHRONE
+@title=A Gift to the Throne
+@width=360
+@button=Ok
+A new treasure has been added to the seat of power, not merely as decoration but as a visible record of an age growing richer and more confident.
+
+@ADDTOWONDER
+@title=Caravan Aid to a Wonder
+@width=360
+@button=Ok
+The caravan's cargo can be folded into the vast work on %STRING0. Warehouses empty, crews unload, and the great project leaps forward.
+
+@ADMIRECITY
+@title=Foreign Admiration
+@width=360
+@button=Ok
+Even rival envoys speak with respect of %STRING0. Prestige is a form of power that crosses borders without an army.
+
+@AIRCOMBT
+@title=Air Combat
+@width=360
+@button=Ok
+Aircraft meet at speed above the battlefield. Seconds of maneuver and fire will decide which pilot returns home.
+
+@AIRLIFTSELECT
+@title=Choose an Airlift Destination
+@width=360
+@button=Ok
+Select the city that will receive this unit. Airlift turns geography into logistics, but only where runways and capacity allow.
+
+@ALLIANCENOBETRAY
+@title=Alliance Refused - Trust Is Broken
+@width=360
+@button=Ok
+They will not tie their survival to a ruler whose promises they do not trust. Reputation has become the obstacle.
+
+@ALLIANCENODISLIKE
+@title=Alliance Refused - Too Much Hostility
+@width=360
+@button=Ok
+They may tolerate peace, but they will not call you friend. The distance between non-aggression and alliance remains too great.
+
+@ALLIANCENOPATIENCE
+@title=Alliance Refused - Talks Exhausted
+@width=360
+@button=Ok
+Their diplomats have heard enough proposals. For now, no further argument will move them.
+
+@ALLIANCENOSMALL
+@title=Alliance Refused - You Seem Too Weak
+@width=360
+@button=Ok
+They see little strategic value in binding themselves to a smaller power. Grow stronger, and the same proposal may sound different.
+
+@ALLIANCENOTHANKS
+@title=Alliance Refused
+@width=360
+@button=Ok
+They decline without closing every door. Cooperation may still be possible, but not under the obligations of a formal alliance.
+
+@ALLIANCENOWINNING
+@title=Alliance Refused - They Need No Partner
+@width=360
+@button=Ok
+Confidence has made them solitary. They believe the future is already leaning their way and see no need to share the advantage.
+
+@ALLIEDREPAIR
+@title=Repairs in Allied Territory
+@width=360
+@button=Ok
+Friendly ports and workshops open their doors to your damaged forces. An alliance is sometimes measured in spare parts and safe harbors.
+
+@ALLOWAGGRESSOR
+@title=Authority to Strike
+@width=360
+@button=Ok
+The restraints on open aggression have lifted. If you choose war now, the responsibility will be unmistakably yours.
+
+@ALLOWHAWKS
+@title=The Hawks Demand War
+@width=360
+@button=Ok
+Voices in government insist that restraint has become weakness. They urge action before the enemy grows stronger.
+
+@ALLYATTACKING
+@title=Your Ally Goes to War
+@width=360
+@button=Ok
+Your ally has opened hostilities. Their war may soon become your problem whether you join it or not.
+
+@ALLYHELPS
+@title=The Ally Answers
+@width=360
+@button=Ok
+Your ally honors the pact. Their banners turn toward the common enemy, and the war becomes larger overnight.
+
+@ALLYMAKESPEACE
+@title=An Ally Makes Peace
+@width=360
+@button=Ok
+Your ally has ended its war. The front narrows, and you may now find yourself fighting alone.
+
+@ALLYMAKESWAR
+@title=An Ally Declares War
+@width=360
+@button=Ok
+The diplomatic map shifts as your ally enters war with %STRING1. Every shared border and treaty must now be reconsidered.
+
+@ALLYUNDERATTACK
+@title=Your Ally Is Under Attack
+@width=360
+@button=Ok
+Enemy forces have struck your ally. The treaty now asks a plain question: was the alliance written for ceremony, or for this moment?
+
+@ALMOSTWONDER
+@title=A Rival Nears Completion
+@width=360
+@button=Ok
+Travelers report that {otherCiv} is nearing completion of {wonder}. The race is no longer theoretical; the final stones are being set.
+
+@ALREADYAIRLIFT
+@title=Airlift Capacity Used
+@width=360
+@button=Ok
+This city has already committed its airlift capacity. More troops must wait for the next operational window.
+
+@ALREADYCHOSEN
+@title=Order Already Given
+@width=360
+@button=Ok
+This unit has already been committed to that action. Choose a different order or let the turn advance.
+
+@AMBASSADORS
+@title=Ambassadors
+@width=360
+@button=Ok
+Permanent embassies turn rumor into information and accidents into conversations. Diplomacy becomes easier when nations have a door they can knock on.
+
+@AMPHIBMOTIZE
+@title=Amphibious Assault
+@width=360
+@button=Ok
+Troops prepare to strike from sea onto defended land. There will be no easy retreat once the first boats touch shore.
+
+@ANNOYALLIED
+@title=An Ally Is Offended
+@width=360
+@button=Ok
+Your ally's patience is thinning. Shared enemies do not erase every grievance between friends.
+
+@ANNOYCEASE
+@title=The Cease-Fire Frays
+@width=360
+@button=Ok
+The guns are quiet, but the diplomacy is not. One more provocation may be enough to turn a pause into renewed war.
+
+@ANNOYPEACE
+@title=Peace Under Strain
+@width=360
+@button=Ok
+The treaty still stands, though resentment gathers beneath it. Peace can survive anger, but not indefinitely without repair.
+
+@ANNOYVASSAL
+@title=A Subordinate Power Resents You
+@width=360
+@button=Ok
+Obedience without respect breeds quiet resistance. The weaker state is complying, but its resentment is becoming part of the strategic landscape.
+
+@APOLOGIZE
+@title=Offer an Apology
+@width=360
+@button=Ok
+Words cannot undo an injury, but they can decide whether an injury becomes a feud. Offer a formal apology and test whether pride can still yield to reason.
+
+@ARCHAEOLOGISTS
+@title=Voices Beneath the Dust
+@width=360
+@button=Ok
+Scholars uncover traces of a vanished age. Broken walls and buried tools reveal that history is deeper than any living memory.
+
+@ARCHAEOLOGISTS3
+@title=The Past Speaks Clearly
+@width=360
+@button=Ok
+Years of excavation have assembled fragments into a story. What was once legend can now be read in stone, bone, and earth.
+
+@ASTRONAUTS
+@title=A New Kind of Explorer
+@width=360
+@button=Ok
+For most of history, the sky was a ceiling. Your astronauts have turned it into a frontier.
+
+@ATTITUDEALLY
+@title=Alliance Attitude
+@width=360
+@button=Ok
+An alliance is more than a document; it is a running account of aid, restraint, shared enemies, and remembered betrayals.
+
+@ATTITUDEMULTI
+@title=Diplomatic Attitude
+@width=360
+@button=Ok
+Other civilizations judge you by more than your armies. Reputation, power, generosity, threats, and broken promises all arrive before your ambassadors do.
+
+@ATTITUDEPEACE
+@title=Peace Attitude
+@width=360
+@button=Ok
+Relations are peaceful, but peace has shades: warm, wary, resentful, or nearly broken. Every agreement changes the tone of the next meeting.
+
+@AUTOBUILD
+@title=Automated Production
+@width=360
+@button=Ok
+The city may choose its own next project when current work is complete. Leave the workshops to local judgment, or retain direct control.
+
+@AUTOMONARCHY
+@title=A Crown in the Vacuum
+@width=360
+@button=Ok
+Order has returned faster than debate. Until a new course is chosen, authority gathers beneath a single crown.
+
+@BARBARIANS
+@title=Barbarian Raiders
+@width=360
+@button=Ok
+Raiders with no interest in treaties or borders have appeared. They will take what they can and burn what they cannot carry.
+
+@BARBARIANSLAND
+@title=Raiders Come Ashore
+@width=360
+@button=Ok
+Boats grind onto the coast and armed raiders spill onto land. Settlements near the shore are suddenly on the front line.
+
+@BARBARITY
+@title=Rule by Fear
+@width=360
+@button=Ok
+Order can be imposed through fear, but fear leaves scars. Every act of brutality purchases obedience at the cost of memory and trust.
+
+@BLEWITUP
+@title=Target Destroyed
+@width=360
+@button=Ok
+The attack lands with devastating force. Smoke and wreckage are all that remain where the target stood.
+
+@BOATSINK
+@title=A Ship Is Lost
+@width=360
+@button=Ok
+The vessel rolls beneath the waves, taking cargo, crew, and certainty with it. The sea closes quickly over even the proudest hull.
+
+@BONDGLORY
+@title=Bound by Shared Glory
+@width=360
+@button=Ok
+Victory fought side by side has created a bond no treaty clerk could have written. For now, memory itself strengthens the alliance.
+
+@BREAKCEASE
+@title=Break the Cease-Fire
+@width=360
+@button=Ok
+To attack now is to end the truce by your own hand. The military gain may be immediate; the diplomatic cost will last longer.
+
+@BREAKTHROUGH
+@title=A New Idea Changes the World
+@width=360
+@button=Ok
+Your scholars have mastered %STRING0. What yesterday was impossible now becomes a tool, a question, or a doorway to something greater.
+
+@BRIBEDUNIT
+@title=An Enemy Unit Changes Sides
+@width=360
+@button=Ok
+Coin, promises, and self-interest prove stronger than loyalty. The unit lowers its old banner and accepts your command.
+
+@BRIDGEBUILDING
+@title=Bridges Open the Roads
+@width=360
+@button=Ok
+Your engineers have learned to carry roads across rivers without surrendering momentum. Waterways that once divided the map can now become arteries of trade and war.
+
+@BUILDCITY
+@title=Found a City
+@width=360
+@button=Ok
+Here roads may meet, homes may rise, and generations may gather behind walls of their own making. Shall this place become a city?
+
+@CANCELALLIANCE
+@title=End the Alliance
+@width=360
+@button=Ok
+To dissolve an alliance is to turn a shield into a question mark. Former partners may remain friends-or become the rivals who know you best.
+
+@CANCELALLIED
+@title=Alliance Cancelled
+@width=360
+@button=Ok
+The alliance is over. Treaties may vanish in an instant; the strategic consequences rarely do.
+
+@CANCELALLY
+@title=Withdraw From the Alliance
+@width=360
+@button=Ok
+Your civilization steps away from the pact. The shared obligations end here, but shared memories do not.
+
+@CANCELPEACE
+@title=Renounce Peace
+@width=360
+@button=Ok
+Breaking this peace will free your armies and stain your word. Once the treaty is torn, every rival will remember who tore it.
+
+@CANCELTREATY
+@title=Renounce the Treaty
+@width=360
+@button=Ok
+A treaty is only as strong as the willingness to honor it. End this one, and accept the consequences of making your signature lighter.
+
+@CANESCAPE
+@title=Escape Route Open
+@width=360
+@button=Ok
+The mission is complete and a narrow route remains out of the city. Move now, before the guards understand what has happened.
+
+@CANTIMPROVE
+@title=The Land Resists This Work
+@width=360
+@button=Ok
+This terrain cannot support that improvement. The land has its own logic; choose a task suited to what stands beneath your feet.
+
+@CAPTUREWONDER
+@title=A Wonder Changes Hands
+@width=360
+@button=Ok
+With the capture of {city}, {wonder} now stands within your realm. You did not raise it, but history has placed its guardianship in your hands.
+
+@CARACONFIRM
+@title=Establish This Trade Route?
+@width=360
+@button=Ok
+Once opened, this route will tie the fortunes of two cities together. Confirm the exchange and let merchants turn distance into wealth.
+
+@CARAVANBUILT
+@title=A Caravan Is Ready
+@width=360
+@button=Ok
+Wagons are loaded, manifests sealed, and guards assembled. This caravan can carry the wealth of %STRING0 across the world.
+
+@CARAVANHOME
+@title=Trade With the Home City
+@width=360
+@button=Ok
+The caravan has returned to familiar markets. Useful exchange is possible, but the greatest fortunes are usually found beyond the horizon.
+
+@CARAVANMENU
+@title=Caravan Orders
+@width=360
+@button=Ok
+The caravan stands ready. Establish trade, help a Wonder, or continue onward in search of a richer destination.
+
+@CARAVANOTHER
+@title=A Foreign Market
+@width=360
+@button=Ok
+The caravan has reached %STRING0. Merchants crowd the gates, prices shift, and a new commercial relationship is within reach.
+
+@CASHFORPEACE
+@title=Gold for Peace
+@width=360
+@button=Ok
+They offer %NUMBER0 gold to end the fighting. Decide whether the treasury is worth more than the opportunity war has opened.
+
+@CASUALTIES
+@title=The Cost of Battle
+@width=360
+@button=Ok
+The field is won or lost, but the dead do not care which banner remains standing. Every battle spends lives that no treasury can replace.
+
+@CATHEDRL
+@title=A Great House of Worship
+@width=360
+@button=Ok
+Vaulted stone and gathering crowds transform the city's spiritual life. The new cathedral becomes both sanctuary and landmark.
+
+@CEASEEXPIRE
+@title=The Cease-Fire Expires
+@width=360
+@button=Ok
+The agreed pause has run its course. Unless renewed, every frontier is once again a place where one nervous soldier can begin a war.
+
+@CEASEFIRE
+@title=Cease-Fire
+@width=360
+@button=Ok
+The weapons fall silent, but only for a time. A cease-fire is breathing room, not reconciliation.
+
+@CENTAURI
+@title=Voyage to Alpha Centauri
+@width=360
+@button=Ok
+The ship is committed to the dark between stars. Nothing your civilization has ever built has traveled so far from home.
+
+@CENTAURI3
+@title=Approaching a New Sun
+@width=360
+@button=Ok
+After years in the void, another star grows bright ahead. The destination that once existed only in equations now fills the forward windows.
+
+@CENTAURI_BEATEN
+@title=Another Civilization Reaches the Stars
+@width=360
+@button=Ok
+A rival civilization has reached Alpha Centauri first. Humanity has entered a new chapter, but another banner stands on its first page.
+
+@CHERNOBYL
+@title=Nuclear Catastrophe
+@width=360
+@button=Ok
+A reactor disaster has torn through %STRING0. Evacuation, contamination, and fear spread beyond the plant itself, leaving a scar that will outlive the emergency.
+
+@CITYCAPTURE
+@title=%STRING0 Has Fallen
+@width=360
+@button=Ok
+The gates of %STRING0 are open and its standards have been torn down. Your troops now hold the streets; the city's fate passes into your hands.
+
+@CITYCAPTURE2
+@title=A New Banner Over %STRING0
+@width=360
+@button=Ok
+After smoke, shouting, and shattered gates, %STRING0 wakes beneath a new banner. Its people now wait to learn what your victory will mean.
+
+@CITYLOSEALLY
+@title=An Ally Loses %STRING0
+@width=360
+@button=Ok
+News has reached the capital: allied defenses at %STRING0 have broken. The enemy is advancing, and the balance of the war has shifted.
+
+@CIVADVANCE
+@title=Civilization Advance
+@width=360
+@button=Ok
+Knowledge has crossed a threshold. %STRING0 is no longer speculation; it is now part of the working inheritance of your civilization.
+
+@COMPLETE0
+@title=Construction Complete
+@width=360
+@button=Ok
+The final crews step back. {city} has completed {item}, and its benefits now belong to the city and the civilization beyond it.
+
+@COMPONENT
+@title=Spaceship Component
+@width=360
+@button=Ok
+Another critical system is ready for the interstellar vessel. Every component turns a national dream into an engineering fact.
+
+@CONTINUEHAWKS
+@title=Pressure for War Continues
+@width=360
+@button=Ok
+The war faction has not quieted. Each new insult is being used as proof that patience has failed.
+
+@CUSTOMTRIBE
+@title=A People of Your Own
+@width=360
+@button=Ok
+No old banner need bind you. Name the civilization that will rise here and make its place among the nations.
+
+@CUSTOMTRIBE2
+@title=The Language of a Nation
+@width=360
+@button=Ok
+Choose the words by which your people will be known: their name, their adjective, and the titles carried by those who rule them.
+
+@DECLAREWAR
+@title=Declare War
+@width=360
+@button=Ok
+This command will end diplomacy and begin open war. Once issued, armies, cities, trade, and memory will all be changed by what follows.
+
+@DELETEITEM
+@title=Dismantle Improvement
+@width=360
+@button=Ok
+Once removed, this work will cease to serve the city. Recover what value you can, but remember that rebuilding takes time.
+
+@DEMANDHELP
+@title=Demand Allied Assistance
+@width=360
+@button=Ok
+Call on %STRING1 to provide material or military help. Allies reveal themselves most clearly when help is expensive.
+
+@DEMOCRATS
+@title=The Public Demands a Voice
+@width=360
+@button=Ok
+Citizens are no longer content to be subjects of distant decisions. They demand institutions that answer to the governed.
+
+@DESTROYED
+@title=Unit Destroyed
+@width=360
+@button=Ok
+%STRING0 has been destroyed. The formation disappears from the map, but the consequences of its loss may remain for many turns.
+
+@DIDNTHELP
+@title=The Ally Refuses
+@width=360
+@button=Ok
+When the moment came, the promised help did not. The treaty remains on paper, but trust has taken a wound.
+
+@DIPLOMACY
+@title=Diplomacy
+@width=360
+@button=Ok
+Across the table sits another civilization with fears, ambitions, pride, and memory. Every word is a move on the same board as armies and cities.
+
+@DIPLOMACYMENU
+@title=What Will You Discuss?
+@width=360
+@button=Ok
+Choose the matter to place before %STRING1: peace, alliance, exchange, tribute, threats, or farewell.
+
+@EMISSARYFORCE
+@title=An Audience Is Demanded
+@width=360
+@button=Ok
+The envoy will not be dismissed quietly. Their ruler insists that the matter is too urgent to postpone.
+
+@ENEMYEMBASSY
+@title=Establish an Embassy
+@width=360
+@button=Ok
+A permanent diplomatic mission will give you a clearer window into this civilization. Information is often worth more than a single act of sabotage.
+
+@ENEMYFIGHTERS
+@title=Enemy Fighters Intercept
+@width=360
+@button=Ok
+Hostile aircraft rise to meet the mission. The target is no longer the only danger in the sky.
+
+@ENEMYINVESTIGATE
+@title=Investigate %STRING0
+@width=360
+@button=Ok
+Your operative can slip into the city's administrative life and return with a picture of its defenses, production, and resources.
+
+@ENGINEERS
+@title=The Age of Engineers
+@width=360
+@button=Ok
+Your builders have become engineers: surveyors, bridge-makers, excavators, and shapers of whole landscapes. The map itself is now a material of policy.
+
+@ETERNALALLIES
+@title=An Alliance Beyond Convenience
+@width=360
+@button=Ok
+Years of shared struggle have made the alliance feel older than the rulers who maintain it. To break it now would shock both civilizations.
+
+@EVENTERRAIN
+@title=The Land Has Changed
+@width=360
+@button=Ok
+Forces larger than any city have altered the terrain. The map is not fixed; climate, disaster, and human action can redraw it.
+
+@EXCHANGEGIFT
+@title=An Exchange of Gifts
+@width=360
+@button=Ok
+The meeting turns cordial. Each side offers something of value-not enough to bind the future, but enough to show that trust is still possible.
+
+@EXCHANGEGIFT2
+@title=A Generous Exchange
+@width=360
+@button=Ok
+The gifts are substantial, and the gesture will be remembered. Diplomacy often begins with symbols before it becomes policy.
+
+@EXCHANGEPETTY
+@title=A Token Offering
+@width=360
+@button=Ok
+The offer is small, almost ceremonial. Accept it for what it is, or make clear that your civilization expects more serious terms.
+
+@FIRSTMOVE
+@title=The World Awaits
+@width=360
+@button=Ok
+The map is empty of your story. Move, explore, and choose carefully where the first roots of your civilization will take hold.
+
+@FIRSTPRODUCT
+@title=The First Labor
+@width=360
+@button=Ok
+Your people are ready to build. Choose what this young settlement needs most, and the whole city will bend its effort toward that purpose.
+
+@FIRSTUNIT1
+@title=Your First Company
+@width=360
+@button=Ok
+These are the first organized hands of your civilization. Where they walk, roads may follow; where they settle, history may begin.
+
+@FIRSTUNIT2
+@title=Guardians of the Dawn
+@width=360
+@button=Ok
+Your first warriors stand ready. They are few, but they carry the hopes of a people not yet written into history.
+
+@FOILEDAGAIN
+@title=The Attempt Fails
+@width=360
+@button=Ok
+The operation collapses before the secret can be secured. Doors close, guards move, and the opportunity vanishes into suspicion.
+
+@FOODCARAVAN
+@title=Food on the Road
+@width=360
+@button=Ok
+This caravan carries grain, livestock, and preserved stores instead of luxury goods. Somewhere ahead, full granaries may matter more than gold.
+
+@FURTHERGROWTH
+@title=The City Strains at Its Bounds
+@width=360
+@button=Ok
+%STRING0 is pressing against the limits of its water, streets, and sanitation. Give it the works it needs, and the city can rise into a greater age.
+
+@FUTURETECH
+@title=Beyond the Known Age
+@width=360
+@button=Ok
+Your civilization has reached beyond the established tree of knowledge. Research now pushes into futures no earlier generation could have named.
+
+@GIVETECHNOLOGY
+@title=Knowledge Granted
+@width=360
+@button=Ok
+{otherCiv} places the secrets of {tech} in your hands. Ideas ignore borders once they are shared, and your scholars move quickly to absorb them.
+
+@GLOBALWARMING
+@title=The Climate Is Shifting
+@width=360
+@button=Ok
+Smoke, industry, and pollution have accumulated beyond the planet's ability to quietly absorb them. Coastlines, rainfall, and fertile land now begin to change.
+
+@GOLDENAGE
+@title=A Golden Age Begins
+@width=360
+@button=Ok
+Across the civilization, workshops ring, scholars argue late into the night, and citizens speak of the future with uncommon faith. This is an age later generations may envy.
+
+@GOVERNMENTS
+@title=Forms of Government
+@width=360
+@button=Ok
+Every system of rule trades one strength for another: speed, liberty, control, commerce, stability, or war-making power. Choose the structure that fits the age you intend to build.
+
+@GOVTNAME
+@title=Title of Rule
+@width=360
+@button=Ok
+Every age gives power a different name. Choose the title by which your authority will be proclaimed.
+
+@GRANTCEASE
+@title=Cease-Fire Accepted
+@width=360
+@button=Ok
+They agree to halt the fighting. Troops remain where they stand, but commanders receive orders to hold their fire.
+
+@GREETINGS
+@title=An Envoy Arrives
+@width=360
+@button=Ok
+The banners of %STRING1 appear at the edge of your court. Their envoy requests an audience; what follows may shape decades.
+
+@HELICPTR
+@title=Helicopter Operations
+@width=360
+@button=Ok
+Rotors lift troops over roads, rivers, and broken ground. Mobility has become a weapon in its own right.
+
+@HELLNOWEWONTGO
+@title=Defiance
+@width=360
+@button=Ok
+They reject the demand outright. Fear will not move them, and the next argument may have to be made outside the council chamber.
+
+@HERALDWARNING
+@title=A Herald Brings Warning
+@width=360
+@button=Ok
+A mounted herald arrives under truce, carrying words meant to be heard before armies speak instead.
+
+@HIDDENTERRAIN
+@title=The Land Revealed
+@width=360
+@button=Ok
+What seemed blank on the map has taken form beneath your scouts. Every hill, forest, river, and coast is another choice waiting to be made.
+
+@HISTORIANS
+@title=The Historians Convene
+@width=360
+@button=Ok
+The chroniclers pause to compare the great powers of the age. Armies, cities, discoveries, wealth, and wonders are weighed against one another.
+
+@HISTORIES
+@title=How the Age Remembers You
+@width=360
+@button=Ok
+History is not a single verdict. Some remember conquerors, some builders, some liberators, some tyrants-and time has a way of changing the labels.
+
+@HISTORYRANK
+@title=Your Place in the Age
+@width=360
+@button=Ok
+For now, the historians rank your civilization %STRING0. The judgment is temporary; the game of history is still being played.
+
+@HOWDYALLY
+@title=An Ally at the Door
+@width=360
+@button=Ok
+%STRING1 greets you as a partner in a shared cause. Between allies, even ordinary words carry the weight of promises already made.
+
+@HOWDYPEACE
+@title=A Peaceful Audience
+@width=360
+@button=Ok
+%STRING1 approaches under the protection of peace. There is caution in the room, but no sword has yet been drawn.
+
+@IMPROVEMENTS
+@title=City Improvements
+@width=360
+@button=Ok
+A city becomes powerful through the institutions it builds between its walls: markets, libraries, defenses, temples, factories, and the systems that bind them together.
+
+@INCIDENTALLIED
+@title=An Incident With an Ally
+@width=360
+@button=Ok
+An allied nation is involved in the crisis. What would be a simple dispute between strangers now tests the meaning of your alliance.
+
+@INTRUDERS
+@title=Enemy Forces Detected
+@width=360
+@button=Ok
+Foreign troops have crossed into territory you consider your own. Whether mistake, test, or invasion, their presence demands a response.
+
+@JETCRASH
+@title=Aircraft Lost
+@width=360
+@button=Ok
+Fuel, weather, damage, or distance has won. The aircraft fails to return, and the sky keeps no monument.
+
+@KEEPPLAYING
+@title=Continue Beyond the Verdict
+@width=360
+@button=Ok
+The formal contest may be over, but the world still turns. Continue building, exploring, and reshaping the map for as long as you wish.
+
+@LASTCONTACT
+@title=A Long Silence
+@width=360
+@button=Ok
+It has been years since your courts last exchanged words. Old assumptions may no longer be safe; the world has changed in the silence.
+
+@LAUNCHED
+@title=The Spaceship Launches
+@width=360
+@button=Ok
+Engines ignite beneath a machine built by an entire civilization. The ship leaves Earth carrying more than passengers: it carries your claim on the future.
+
+@LOADBADSAVE
+@title=Damaged Chronicle
+@width=360
+@button=Ok
+This saved game cannot be read safely. The record may be incomplete or corrupted.
+
+@LOADNEWSAVE
+@title=Newer Save Format
+@width=360
+@button=Ok
+This save was created by a newer version of the game and may contain information this build does not understand.
+
+@LOADOLDSAVE
+@title=Older Save Format
+@width=360
+@button=Ok
+This chronicle comes from an older version. It may be converted, but some details may not survive unchanged.
+
+@LOSTWONDER
+@title=The Wonder Is Lost
+@width=360
+@button=Ok
+Another civilization has completed {wonder} first. The plans in {city} are now relics of a race that has ended.
+
+@LOWMEMORY
+@title=Resources Running Low
+@width=360
+@button=Ok
+The game is running short of available memory. Save your progress before continuing into a larger battle or longer session.
+
+@MAJORINCIDENT
+@title=A Major International Incident
+@width=360
+@button=Ok
+The crisis can no longer be dismissed as a misunderstanding. Governments are choosing sides, armies are watching borders, and one decision may widen the conflict.
+
+@MANHATTAN
+@title=The Bomb Becomes Possible
+@width=360
+@button=Ok
+The scientific barrier has been crossed. Nuclear weapons are no longer theory; every great power must now think differently about war, deterrence, and survival.
+
+@MERCBETRAY
+@title=Mercenaries Betray Their Employer
+@width=360
+@button=Ok
+The hired blades have decided that loyalty is worth less than survival or better pay. Their allegiance changes at the worst possible moment.
+
+@MONEYGIFT
+@title=A Gift of Gold
+@width=360
+@button=Ok
+{otherLeader} offers {gold} gold. Coin is never merely coin between nations; it may be gratitude, leverage, apology, or bait.
+
+@MOVECAPITAL
+@title=A New Seat of Power
+@width=360
+@button=Ok
+The old center can no longer carry the weight of the realm. Choose the city from which decrees, taxes, armies, and ambassadors will now radiate.
+
+@MRKTPLCE
+@title=A Marketplace Opens
+@width=360
+@button=Ok
+Stalls, scales, contracts, and caravans crowd a new center of exchange. Wealth now moves through %STRING0 with greater purpose.
+
+@NEWXFORM
+@title=The Land Can Be Remade
+@width=360
+@button=Ok
+Engineering has reached the point where terrain itself can be transformed. What nature placed here need not be what future generations inherit.
+
+@NOTORIOUS
+@title=A Reputation in Ruins
+@width=360
+@button=Ok
+Your promises are now weighed against a history of broken ones. Foreign rulers may bargain with you, but few will do so without suspicion.
+
+@NOVIOLATORS
+@title=A Record of Honor
+@width=360
+@button=Ok
+Your agreements have carried weight because you have made them carry weight. Even rivals must account for a reputation built on kept promises.
+
+@NUCLEARWEAPONS
+@title=The Nuclear Age
+@width=360
+@button=Ok
+Humanity has learned how to release energies once confined to stars and deep earth. From this moment on, war carries the possibility of destruction on an entirely new scale.
+
+@NUKEXPLO
+@title=Nuclear Detonation
+@width=360
+@button=Ok
+For an instant the horizon becomes brighter than day. Buildings vanish, fires race outward, and the political world changes before the smoke has even risen.
+
+@ODDTERRAIN
+@title=Unusual Ground
+@width=360
+@button=Ok
+This terrain does not behave like ordinary land. Study it before committing workers or armies; unfamiliar ground rewards attention.
+
+@OUTAHEREALLY
+@title=Relations Collapse
+@width=360
+@button=Ok
+The meeting ends in fury. Whatever friendship existed has been pushed aside by threat, pride, and the expectation of conflict.
+
+@OVERABARREL
+@title=Negotiating From Weakness
+@width=360
+@button=Ok
+They know the pressure is on you. Every concession they ask reflects the belief that you have fewer alternatives than they do.
+
+@OVERRULECEASE
+@title=The Government Blocks the Attack
+@width=360
+@button=Ok
+Your government refuses to tear up the cease-fire. The guns will remain silent unless political conditions change.
+
+@OVERRULEPEACE
+@title=The Government Defends the Treaty
+@width=360
+@button=Ok
+The order to attack is rejected. A signed peace carries weight at home as well as abroad.
+
+@OVERTHROWN
+@title=A Government Falls
+@width=360
+@button=Ok
+The old regime can no longer command obedience. Its seals, titles, and decrees have become scraps of paper; a new political order must be chosen.
+
+@PARADROPRULES1
+@title=Paradrop Range
+@width=360
+@button=Ok
+Airborne troops can leap across terrain that would delay an ordinary army, but only within the reach of aircraft and planning.
+
+@PARADROPRULES2
+@title=Paradrop Risk
+@width=360
+@button=Ok
+A paradrop begins with surprise and ends with isolation. Once committed, the unit may have to survive without immediate support.
+
+@PARADROPTARGET
+@title=Choose Drop Zone
+@width=360
+@button=Ok
+Select the ground where the airborne force will descend. Open terrain, enemy positions, and nearby support all matter.
+
+@PARADROPTARGET1
+@title=Target Beyond Range
+@width=360
+@button=Ok
+That drop zone lies beyond operational reach. Choose ground the aircraft can actually deliver troops to.
+
+@PARADROPTARGET2
+@title=Unsafe Drop Zone
+@width=360
+@button=Ok
+The selected ground cannot receive this paradrop under current conditions. Find another approach.
+
+@PARLEYACCEPT
+@title=Negotiations Accepted
+@width=360
+@button=Ok
+They agree to meet. The room is prepared, the guards remain outside, and the next moves will be made with words.
+
+@PARLEYACCEPT2
+@title=Offer Accepted
+@width=360
+@button=Ok
+The terms are accepted. What was only language a moment ago now becomes policy between nations.
+
+@PARLEYBUSY
+@title=No Audience Available
+@width=360
+@button=Ok
+Their court is occupied with other matters and refuses immediate talks. Try again when events have shifted.
+
+@PARLEYCANCEL
+@title=Negotiation Cancelled
+@width=360
+@button=Ok
+The discussion is ended before agreement. No treaty changes hands, and both sides return to the strategic reality outside the room.
+
+@PARLEYCOUNTEROFFER
+@title=Counteroffer
+@width=360
+@button=Ok
+They reject the exact terms but not the negotiation. A revised proposal is placed on the table.
+
+@PARLEYGOAWAY
+@title=Audience Refused
+@width=360
+@button=Ok
+They will not meet under present conditions. Whatever message you intended to deliver must wait-or be delivered by other means.
+
+@PARLEYNOTHANKS
+@title=Offer Declined
+@width=360
+@button=Ok
+They decline the proposal without ending the audience. Another arrangement may still be possible.
+
+@PARLEYOK
+@title=Proceed
+@width=360
+@button=Ok
+The other side is listening. State the terms clearly; ambiguity is expensive between nations.
+
+@PARLEYREQUEST
+@title=Request Negotiations
+@width=360
+@button=Ok
+Send word that you are willing to talk. The answer may reveal as much as the meeting itself.
+
+@PARLEYWAITING
+@title=Awaiting Their Reply
+@width=360
+@button=Ok
+The message has been delivered. For now, diplomacy is a matter of waiting to see whether the other side opens the door.
+
+@PARTISANS
+@title=Partisans Rise
+@width=360
+@button=Ok
+The city may have fallen, but resistance has not. Armed partisans emerge from streets, hills, and villages to continue the fight under their own initiative.
+
+@PATIENCEALLY
+@title=An Ally's Patience
+@width=360
+@button=Ok
+Even friendship has limits. Repeated demands and provocations are testing how much strain this alliance can bear.
+
+@PEACENOBETRAY
+@title=Peace Refused - Betrayal Remembered
+@width=360
+@button=Ok
+They have not forgotten your previous betrayals. Until time or extraordinary concessions change the balance, they will not trust another peace.
+
+@PEACENODISLIKE
+@title=Peace Refused - Hostility Runs Deep
+@width=360
+@button=Ok
+Their hostility is stronger than their fear of continued war. No treaty will be signed while anger rules the council chamber.
+
+@PEACENOPATIENCE
+@title=Peace Refused - Patience Exhausted
+@width=360
+@button=Ok
+They are done listening. Too many meetings have ended without result, and their envoys will not reopen the question now.
+
+@PEACENOWINNING
+@title=Peace Refused - They Believe They Are Winning
+@width=360
+@button=Ok
+Their commanders smell victory and see no reason to bargain it away. Peace will become attractive only when the war looks different.
+
+@PEARLHARBOR
+@title=A Treacherous Attack
+@width=360
+@button=Ok
+Without warning, forces of %STRING1 strike under the cover of existing peace. The treaty lies in ruins before the first formal declaration is even heard.
+
+@PERHAPSBYE
+@title=The Audience Ends
+@width=360
+@button=Ok
+There is nothing more to be gained from words today. The envoys withdraw, leaving the next move to events beyond the chamber.
+
+@PERHAPSDIDNTPROVE
+@title=Goodwill Was Not Enough
+@width=360
+@button=Ok
+Your gesture was noticed, but it did not erase the larger dispute. Diplomacy may need more than courtesy to move forward.
+
+@PERHAPSSECRET
+@title=Perhaps Knowledge Can Open the Door
+@width=360
+@button=Ok
+If trust is uncertain, perhaps an exchange of knowledge can prove that cooperation still has value.
+
+@PERHAPSSOLIDARITY
+@title=Perhaps We Stand Together
+@width=360
+@button=Ok
+Our interests are not identical, but neither are they opposed. There may be enough common ground here to build something durable.
+
+@PERHAPSTHANKSANYWAY
+@title=No Agreement Today
+@width=360
+@button=Ok
+The terms do not meet our needs. We part without agreement, though the door need not remain closed forever.
+
+@PERHAPSTHROWIN
+@title=Sweeten the Offer
+@width=360
+@button=Ok
+The agreement is close, but not close enough. Add something of value and the balance may finally tip.
+
+@PICKGOVT
+@title=Choose a New Government
+@width=360
+@button=Ok
+The revolution has opened a rare moment in which institutions can be remade. Choose not only who rules, but how power itself will work.
+
+@PLANRETIRE
+@title=Retire From Rule
+@width=360
+@button=Ok
+To retire is to close the book before the last page. Your civilization will be judged as it stands now, with every unfinished dream left unfinished.
+
+@PLANTEDNUKE
+@title=A Nuclear Device Is Planted
+@width=360
+@button=Ok
+The agent has crossed the final line. A hidden nuclear device now waits inside %STRING0; if detonated, the consequences will reach far beyond the mission.
+
+@PLANTEDNUKE2
+@title=The Device Is Armed
+@width=360
+@button=Ok
+There is no ordinary sabotage left here. The weapon is in place, the city is unaware, and history is seconds from changing.
+
+@PLEASECITIES
+@title=Cities Are Requested
+@width=360
+@button=Ok
+The proposed settlement demands cities, not merely coin. Consider the price carefully: every city ceded redraws the future.
+
+@PLEASECITY
+@title=A City Is Requested
+@width=360
+@button=Ok
+Our people ask for one city to be placed under the terms of this agreement. Choose carefully; a city is land, labor, memory, and power.
+
+@POLLUTION
+@title=Pollution Near %STRING0
+@width=360
+@button=Ok
+The wealth of industry has left a dark mark on the land. Clean it before local damage becomes part of a planetary problem.
+
+@PRETEXTALLIED
+@title=A Cause for Allied War
+@width=360
+@button=Ok
+Your diplomats argue that the enemy's actions justify a common response. If the alliance has meaning, they say, it must mean something now.
+
+@PRODCHANGE
+@title=Change Production
+@width=360
+@button=Ok
+Changing course now will waste some of the effort already invested. Redirect the city only if the new need outweighs the lost momentum.
+
+@PRODUCTION
+@title=Choose Production
+@width=360
+@button=Ok
+The workshops of %STRING0 await direction. Decide what the city will devote its labor, timber, metal, and time to creating next.
+
+@PROPOSEALLIANCE
+@title=Propose an Alliance
+@width=360
+@button=Ok
+Peace says we will not fight. Alliance says we will stand together when someone else does. Offer a bond that changes the strategic map.
+
+@PROPOSECEASE
+@title=Propose a Cease-Fire
+@width=360
+@button=Ok
+Enough blood has been spent for the moment. Offer a pause in the fighting and see whether exhaustion can accomplish what persuasion could not.
+
+@PROPOSEPEACE
+@title=Propose Peace
+@width=360
+@button=Ok
+Wars end when one side is destroyed-or when both decide that a future matters more than another battlefield. Offer formal peace.
+
+@RANSOMCITY
+@title=The Price of a City
+@width=360
+@button=Ok
+The victors offer to spare {city} from further ruin—for a price. Pay {gold} gold, or refuse and accept what follows.
+
+@RETIREDIE
+@title=End Your Reign?
+@width=360
+@button=Ok
+This decision ends your rule and sends the civilization to the historians. There is no next turn after this choice.
+
+@REVOLUTION
+@title=The Old Order Breaks
+@width=360
+@button=Ok
+The machinery of government is coming apart. Offices fall silent, factions gather, and the people wait to see what form of rule will rise from the uncertainty.
+
+@SABOTAGEHARD
+@title=A Difficult Sabotage Mission
+@width=360
+@button=Ok
+The target is heavily guarded and failure may cost the agent. Success, however, could cripple a vital part of the enemy city.
+
+@SABOTAGENO
+@title=Sabotage Fails
+@width=360
+@button=Ok
+Security closes around the target before the operation can be completed. The mission is lost, and suspicion spreads through the city.
+
+@SABOTAGEONE
+@title=Sabotage Succeeds
+@width=360
+@button=Ok
+The charge is placed and the target is destroyed. By the time alarms spread through %STRING0, your agent is already moving toward escape.
+
+@SABOTAGEOPTIONS
+@title=Choose a Sabotage Target
+@width=360
+@button=Ok
+The agent has access to vulnerable systems inside %STRING0. Choose what to cripple before the window closes.
+
+@SABOTAGESPECIFIC
+@title=Sabotage a Specific Improvement
+@width=360
+@button=Ok
+Name the target. A single destroyed facility can matter more than a dozen burned warehouses if chosen well.
+
+@SABOTAGETWO
+@title=Sabotage Causes Heavy Damage
+@width=360
+@button=Ok
+The operation tears through more than expected. Production stalls, officials panic, and the city will feel the damage for some time.
+
+@SAVEERROR
+@title=The Chronicle Could Not Be Saved
+@width=360
+@button=Ok
+The game state could not be written successfully. Choose another location or resolve the storage problem before relying on this save.
+
+@SCRAMBLE
+@title=Scramble Fighters
+@width=360
+@button=Ok
+Radar and lookouts report incoming danger. Fighters can launch now to contest the skies before the attack reaches its target.
+
+@SEAFARING
+@title=Beyond the Familiar Coast
+@width=360
+@button=Ok
+Your people have learned to trust hull, sail, star, and current. The horizon is no longer an edge; it is a road.
+
+@SIGNALLIED
+@title=Alliance Forged
+@width=360
+@button=Ok
+The agreement is sealed. From this day, your enemies must reckon not with two separate powers, but with the possibility that each will answer for the other.
+
+@SIGNPEACE
+@title=Peace Is Signed
+@width=360
+@button=Ok
+The treaty is sealed. Borders remain, grievances remain, and armies remain-but for the first time in years, tomorrow need not begin with battle.
+
+@SPYOPTIONS
+@title=Covert Mission
+@width=360
+@button=Ok
+Your agent has reached %STRING0. Choose the mission carefully; information, sabotage, revolt, and theft each carry different risks and consequences.
+
+@STARTWONDER
+@title=A Wonder Is Begun
+@width=360
+@button=Ok
+Scaffolds rise in {city} for {wonder}. The work is greater than any ordinary building; if completed, generations will measure themselves against it.
+
+@STEALHARD
+@title=The Archives Are Guarded
+@width=360
+@button=Ok
+Security is tight and the mission is perilous. The knowledge is valuable precisely because the enemy knows what it is worth.
+
+@STEALNONE
+@title=No Useful Secret Found
+@width=360
+@button=Ok
+The spy searches archives, workshops, and private studies, but finds nothing your civilization does not already know.
+
+@STEALSPECIFIC
+@title=Choose a Secret to Steal
+@width=360
+@button=Ok
+Your agent has reached the heart of the rival archives. Choose carefully; there may be time to carry out only one secret.
+
+@STEALTHESE
+@title=Secrets Within Reach
+@width=360
+@button=Ok
+These technologies are exposed to your agent. One stolen idea can alter armies, economies, and the balance of an age.
+
+@STILLWONDER
+@title=The Work Continues
+@width=360
+@button=Ok
+{city} still labors on {wonder}. Stone by stone, beam by beam, the impossible is becoming real.
+
+@STILLWONDER1
+@title=A Monument Taking Shape
+@width=360
+@button=Ok
+The outline of {wonder} now dominates {city}. Citizens can see the future landmark rising above their streets.
+
+@STILLWONDER2
+@title=The Final Stage
+@width=360
+@button=Ok
+Only the hardest work remains on %STRING0. Complete it, and the achievement will belong to your civilization for as long as memory endures.
+
+@SUPPLYNONE
+@title=No Export Surplus
+@width=360
+@button=Ok
+%STRING0 has no worthwhile surplus ready for long-distance trade. Let its economy grow before sending another caravan.
+
+@SUPPLYSEARCH
+@title=Seeking a Market
+@width=360
+@button=Ok
+Merchants compare rumors, prices, and distant demand. The right destination can turn an ordinary cargo into a national windfall.
+
+@SUPPLYSHOW
+@title=Goods Available
+@width=360
+@button=Ok
+The warehouses of %STRING0 are ready to export these goods. Choose what the wider world is most likely to value.
+
+@SURPRISEBARB
+@title=An Ambush From the Ruins
+@width=360
+@button=Ok
+The silence breaks into horns and shouting. Armed raiders pour from hiding, and your explorers have only moments to form ranks.
+
+@SURPRISEMERCS
+@title=Warriors From the Wild
+@width=360
+@button=Ok
+A hard-bitten band emerges from the settlement, impressed by your growing power. They offer their weapons and experience to your cause.
+
+@SURPRISEMETALS
+@title=A Cache of Wealth
+@width=360
+@button=Ok
+Beneath rotting timbers lies a hoard of worked metal, coin, and trade goods. What another people abandoned will now strengthen your treasury.
+
+@SURPRISENOMADS
+@title=Wanderers Join Your People
+@width=360
+@button=Ok
+A wandering people has watched your banners from afar. They ask for a place among your civilization and offer their wagons, livestock, and knowledge of the land.
+
+@SURPRISENOTHING
+@title=Only Wind in the Ruins
+@width=360
+@button=Ok
+Cold ashes, fallen walls, and weeds are all that remain. Whoever lived here vanished long ago, leaving no wealth but the warning of impermanence.
+
+@SURPRISESCROLLS
+@title=Forgotten Knowledge
+@width=360
+@button=Ok
+Inside a dry chamber, your scouts find preserved tablets and manuscripts. Ideas thought lost to time are carried back to your scholars.
+
+@SURPRISETRIBE
+@title=A Settlement Joins Your Realm
+@width=360
+@button=Ok
+The people here have heard of your civilization and choose union over isolation. Their homes, fields, and hopes now become part of your story.
+
+@SWITCHWONDER
+@title=Redirect the Great Work
+@width=360
+@button=Ok
+The craftsmen of %STRING0 can turn their accumulated effort toward another Wonder. Choose quickly; history rarely waits for indecision.
+
+@SWORDFGT
+@title=Close Combat
+@width=360
+@button=Ok
+The distance collapses. Formation, nerve, steel, and exhaustion decide what maps and speeches cannot.
+
+@TAUNTALLY
+@title=An Ally Speaks Harshly
+@width=360
+@button=Ok
+Even allies can wound with words. Decide whether this insult is noise, warning, or the first crack in something larger.
+
+@TECHGIFT2
+@title=A Gift of Knowledge
+@width=360
+@button=Ok
+The offer is not gold or land, but understanding: %STRING0. Accepting it may shorten years of research in a single diplomatic gesture.
+
+@TOOMANYCITIES
+@title=The World Is Full of Cities
+@width=360
+@button=Ok
+No more cities can be supported by the current world limits. Expand by developing, joining, or conquering what already exists.
+
+@TOOMANYUNITS
+@title=Too Many Units
+@width=360
+@button=Ok
+The world has reached its supported unit limit. New forces cannot be created until others leave the field.
+
+@UNFORTUNATE
+@title=An Unfortunate Turn
+@width=360
+@button=Ok
+The meeting has gone badly. Neither side leaves satisfied, and the next contact may begin from a colder place.
+
+@UNITKILLED
+@title=A Unit Falls
+@width=360
+@button=Ok
+%STRING0 is gone. Survivors scatter, standards vanish, and the line must close around an empty place.
+
+@UNOVERCEASE
+@title=The Restraint Is Lifted
+@width=360
+@button=Ok
+The political barrier that preserved the cease-fire has fallen away. Military action is once again possible.
+
+@UNOVERPEACE
+@title=The Treaty No Longer Shields Them
+@width=360
+@button=Ok
+Domestic opposition to breaking the peace has collapsed. The decision now rests with you.
+
+@UPYOURSTOO
+@title=The Insult Is Returned
+@width=360
+@button=Ok
+Courtesy has left the room. What began as negotiation is hardening into pride, and pride has started many unnecessary wars.
+
+@USEWEAPONS
+@title=Use Nuclear Weapons?
+@width=360
+@button=Ok
+This attack will not be an ordinary act of war. A city, its people, and the land around it may be transformed in a single flash. Confirm only if you accept the world that follows.
+
+@VIOLATORS
+@title=Treaty Breakers
+@width=360
+@button=Ok
+The diplomatic world remembers who tears up agreements when they become inconvenient. Betrayal is a weapon that dulls every time it is used.
+
+@WAITPRODUCTION
+@title=Awaiting Production
+@width=360
+@button=Ok
+The unit or project is not ready yet. Logistics has its own clock, and the battlefield must sometimes wait for the workshops.
+
+@WALLCEASE
+@title=Peace Enforced by Great Walls
+@width=360
+@button=Ok
+The balance of power surrounding the Great Wall makes open aggression politically difficult. The road to war is blocked for now.
+
+@WALLFORCE
+@title=The Great Wall Checks Aggression
+@width=360
+@button=Ok
+The enemy's position is protected by a diplomatic order built around the Great Wall. Force alone cannot easily break the political barrier.
+
+@WALLOVERCEASE
+@title=The Great Wall Preserves the Truce
+@width=360
+@button=Ok
+Pressure for war collides with a stronger diplomatic reality. The cease-fire survives.
+
+@WATERSUPPLY
+@title=Poison the Water Supply
+@width=360
+@button=Ok
+The agent has access to the city's water system. This attack would strike civilians as surely as soldiers and will be remembered accordingly.
+
+@WELCOMEALLY
+@title=Welcome, Ally
+@width=360
+@button=Ok
+Your ally is received with open gates and honored banners. Today's meeting begins from trust rather than suspicion.
+
+@WELCOMEPEACE
+@title=Welcome Under Peace
+@width=360
+@button=Ok
+The envoys are admitted without hostility. Peace has given both sides the luxury of speaking before acting.
+
+@WITHDRAWN
+@title=The Envoy Withdraws
+@width=360
+@button=Ok
+The delegation rises, gathers its papers, and leaves without ceremony. Whatever chance existed for agreement has passed for now.
+
+@WORTHLESS
+@title=Offer Rejected
+@width=360
+@button=Ok
+They dismiss the offer as unworthy of further discussion. If you want movement, the terms will have to change.
+
+@WRONGVERSION
+@title=Version Mismatch
+@width=360
+@button=Ok
+This file belongs to a different game version. Update the game or use a compatible save.
+
+@YOURNUKES
+@title=Your Nuclear Forces
+@width=360
+@button=Ok
+You possess weapons capable of ending cities in moments. Their existence is power; their use will be something else entirely.
