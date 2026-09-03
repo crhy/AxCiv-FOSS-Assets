@@ -56,34 +56,53 @@ public static class MapImage
         }
         else
         {
-            //drawCoasts
-            var coastIndex = new[] { 0, 0, 0, 0 };
-            foreach (var (neighbour, ind) in neighbours.Zip(CoastMap))
+            if (terrainSet.HighResBaseTiles && terrainSet.ShallowEdge.Length == 4)
             {
-                if (neighbour != null && neighbour.Type != TerrainType.Ocean)
+                // The classic coast sprites are a bright pixel-art stipple that
+                // reads as a diagonal net over the photographic water. Instead,
+                // fade a soft shallows band in along each diagonal edge that
+                // actually meets land.
+                for (var index = 0; index < directNeighbours.Length; index++)
                 {
-                    foreach (var (index, valueVariable) in ind)
+                    var neighbour = directNeighbours[index];
+                    if (neighbour != null && neighbour.Type != TerrainType.Ocean
+                        && (neighbour.IsVisible(civilizationId) || map.MapRevealed))
                     {
-                        coastIndex[index] += valueVariable;
+                        DrawLayer(tilePic, terrainSet.ShallowEdge[index], TileRec);
                     }
                 }
             }
+            else
+            {
+                //drawCoasts
+                var coastIndex = new[] { 0, 0, 0, 0 };
+                foreach (var (neighbour, ind) in neighbours.Zip(CoastMap))
+                {
+                    if (neighbour != null && neighbour.Type != TerrainType.Ocean)
+                    {
+                        foreach (var (index, valueVariable) in ind)
+                        {
+                            coastIndex[index] += valueVariable;
+                        }
+                    }
+                }
 
-            // NW+N+NE tiles
-            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[0], 0]),
-                new Rectangle(16, 0, 32, 16));
+                // NW+N+NE tiles
+                DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[0], 0]),
+                    new Rectangle(16, 0, 32, 16));
 
-            // SW+S+SE tiles
-            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[1], 1]),
-                new Rectangle(16, 16, 32, 16));
+                // SW+S+SE tiles
+                DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[1], 1]),
+                    new Rectangle(16, 16, 32, 16));
 
-            // SW+W+NW tiles
-            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[2], 2]),
-                new Rectangle(0, 8, 32, 16));
+                // SW+W+NW tiles
+                DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[2], 2]),
+                    new Rectangle(0, 8, 32, 16));
 
-            // NE+E+SE tiles
-            DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[3], 3]),
-                new Rectangle(32, 8, 32, 16));
+                // NE+E+SE tiles
+                DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[3], 3]),
+                    new Rectangle(32, 8, 32, 16));
+            }
 
             // River mouth
             // If river is next to ocean, draw river mouth on this tile.
@@ -280,6 +299,23 @@ public static class MapImage
             logicalDestination.Y * scaleY,
             logicalDestination.Width * scaleX,
             logicalDestination.Height * scaleY);
+
+        // Small classic-sheet sprites (shields, special resources, huts) go onto
+        // a tile composed several times larger than 64x32. Left to ImageDraw's
+        // bilinear scaling they come out badly blurred; point-scale them up
+        // first so they stay crisp against the high-resolution terrain.
+        if (layer.Width + 0.5f < destination.Width && layer.Height + 0.5f < destination.Height)
+        {
+            var crispWidth = (int)MathF.Round(destination.Width);
+            var crispHeight = (int)MathF.Round(destination.Height);
+            var crisp = layer.Copy();
+            crisp.ResizeNN(crispWidth, crispHeight);
+            target.Draw(crisp, new Rectangle(0, 0, crispWidth, crispHeight),
+                new Rectangle(destination.X, destination.Y, crispWidth, crispHeight), Color.White);
+            crisp.Unload();
+            return;
+        }
+
         var source = new Rectangle(0, 0, layer.Width, layer.Height);
         target.Draw(layer, source, destination, Color.White);
     }

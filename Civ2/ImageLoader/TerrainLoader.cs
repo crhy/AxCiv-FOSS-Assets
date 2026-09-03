@@ -121,6 +121,7 @@ namespace Civ2.ImageLoader
 
             terrain.BaseTiles = active.PicSources["base1"].Select(t => MapIndexChange((BitmapStorage)t, index, active)).ToArray();
             var fossTerrainApplied = ApplyFossTerrainTextures(terrain, index, active);
+            terrain.HighResBaseTiles = fossTerrainApplied;
 
             terrain.Specials = new[]
             {
@@ -141,10 +142,10 @@ namespace Civ2.ImageLoader
 
             terrain.DitherMaps = new[]
             {
-                BuildDitherMaps(terrain.DitherMask[0], terrain.BaseTiles, 32, 0, terrain.Blank),
-                BuildDitherMaps(terrain.DitherMask[1], terrain.BaseTiles, 32, 16, terrain.Blank),
-                BuildDitherMaps(terrain.DitherMask[2], terrain.BaseTiles, 0, 16, terrain.Blank),
-                BuildDitherMaps(terrain.DitherMask[3], terrain.BaseTiles, 0, 0, terrain.Blank),
+                BuildDitherMaps(terrain.DitherMask[0], terrain.BaseTiles, 32, 0, terrain.Blank, fossTerrainApplied),
+                BuildDitherMaps(terrain.DitherMask[1], terrain.BaseTiles, 32, 16, terrain.Blank, fossTerrainApplied),
+                BuildDitherMaps(terrain.DitherMask[2], terrain.BaseTiles, 0, 16, terrain.Blank, fossTerrainApplied),
+                BuildDitherMaps(terrain.DitherMask[3], terrain.BaseTiles, 0, 0, terrain.Blank, fossTerrainApplied),
             };
 
             terrain.River = active.PicSources["river"].Select(r => MapIndexChange((BitmapStorage)r, index, active)).ToArray();
@@ -202,6 +203,19 @@ namespace Civ2.ImageLoader
             terrain.GrasslandShield = MapIndexChange((BitmapStorage)active.PicSources["shield"][0], index, active);
             terrain.Huts = MapIndexChange((BitmapStorage)active.PicSources["hut"][0], index, active);
 
+            if (fossTerrainApplied)
+            {
+                var edgeWidth = terrain.TileWidth * terrain.RenderScale;
+                var edgeHeight = terrain.TileHeight * terrain.RenderScale;
+                terrain.ShallowEdge = new[]
+                {
+                    BuildShallowEdge(edgeWidth, edgeHeight, 0),
+                    BuildShallowEdge(edgeWidth, edgeHeight, 1),
+                    BuildShallowEdge(edgeWidth, edgeHeight, 2),
+                    BuildShallowEdge(edgeWidth, edgeHeight, 3),
+                };
+            }
+
             return terrain;
         }
 
@@ -237,10 +251,20 @@ namespace Civ2.ImageLoader
                     continue;
                 }
 
+                // The bundled terrain diamonds are rendered as turf slabs with a
+                // dark soil rim around the edge. Zoom a little past that rim
+                // before fitting the art to the tile, otherwise every tile shows
+                // its own border and the map reads as a grid of separate slabs.
+                const float keep = 0.82f;
+                replacement.Crop(new Rectangle(
+                    replacement.Width * (1f - keep) / 2f,
+                    replacement.Height * (1f - keep) / 2f,
+                    replacement.Width * keep,
+                    replacement.Height * keep));
+
                 replacement.Resize(terrain.TileWidth * terrain.RenderScale,
                     terrain.TileHeight * terrain.RenderScale);
-                ApplyOriginalTileTransparency(replacement,
-                    Images.ExtractBitmap(terrain.BaseTiles[terrainIndex], active));
+                ApplyDiamondAlpha(replacement);
                 terrain.BaseTiles[terrainIndex] = new MemoryStorage(replacement,
                     $"FossTerrain-{terrainIndex}-{terrain.RenderScale}-{artPath}");
                 applied = true;
@@ -423,24 +447,90 @@ namespace Civ2.ImageLoader
             return null;
         }
 
-        private static void ApplyOriginalTileTransparency(Image replacement, Image originalTile)
+        /// <summary>
+        /// Cuts the diamond out of a rectangular replacement texture with a hard
+        /// edge, kept a pixel or two oversized so neighbouring tiles overlap
+        /// along the join instead of leaving the view canvas showing through.
+        /// A soft edge here bled the darker photo pixels just outside the
+        /// diamond into a visible outline once the tile was drawn.
+        /// </summary>
+        private static void ApplyDiamondAlpha(Image image)
         {
-            for (var y = 0; y < replacement.Height; y++)
+            var width = image.Width;
+            var height = image.Height;
+
+            // ~1.5px of outward dilation in the taxicab distance field.
+            var dilate = 3.0 / height;
+
+            for (var y = 0; y < height; y++)
             {
-                for (var x = 0; x < replacement.Width; x++)
+                var ny = (y + 0.5) / height * 2.0 - 1.0;
+                for (var x = 0; x < width; x++)
                 {
-                    var sourceX = x * originalTile.Width / replacement.Width;
-                    var sourceY = y * originalTile.Height / replacement.Height;
-                    if (originalTile.GetColor(sourceX, sourceY).A == 0)
+                    var nx = (x + 0.5) / width * 2.0 - 1.0;
+
+                    // Taxicab distance from tile centre: 1.0 on the diamond edge.
+                    var d = Math.Abs(nx) + Math.Abs(ny);
+                    if (d <= 1.0 + dilate)
                     {
-                        replacement.DrawPixel(x, y, Color.Blank);
+                        continue;
+                    }
+
+                    var src = image.GetColor(x, y);
+                    if (src.A != 0)
+                    {
+                        image.DrawPixel(x, y, new Color(src.R, src.G, src.B, (byte)0));
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// One shallow-water rim: a full tile-sized transparent image with a soft
+        /// pale band fading in along a single diagonal edge. <paramref name="quadrant"/>
+        /// is 0=NE, 1=SE, 2=SW, 3=NW, matching the dither quadrant order.
+        /// </summary>
+        private static Image BuildShallowEdge(int width, int height, int quadrant)
+        {
+            var eastHalf = quadrant is 0 or 1;
+            var southHalf = quadrant is 1 or 2;
+
+            // How far in from the edge the band reaches, and its peak opacity.
+            const double band = 0.5;
+            const double maxAlpha = 0.5;
+
+            var shallow = Image.GenColor(width, height, Color.Blank);
+            for (var y = 0; y < height; y++)
+            {
+                var ny = (y + 0.5) / height * 2.0 - 1.0;
+                for (var x = 0; x < width; x++)
+                {
+                    var nx = (x + 0.5) / width * 2.0 - 1.0;
+
+                    var inQuadrant = (eastHalf ? nx >= 0.0 : nx <= 0.0)
+                                     && (southHalf ? ny >= 0.0 : ny <= 0.0);
+                    if (!inQuadrant)
+                    {
+                        continue;
+                    }
+
+                    var d = Math.Abs(nx) + Math.Abs(ny);
+                    if (d >= 1.0)
+                    {
+                        continue;
+                    }
+
+                    var f = Math.Clamp((d - (1.0 - band)) / band, 0.0, 1.0);
+                    var alpha = (byte)Math.Clamp((int)Math.Round(f * f * maxAlpha * 255.0), 0, 255);
+                    shallow.DrawPixel(x, y, new Color((byte)168, (byte)216, (byte)230, alpha));
+                }
+            }
+
+            return shallow;
+        }
+
         private static DitherMap BuildDitherMaps(Image mask, IImageSource[] baseTiles, int offsetX, int offsetY,
-            IImageSource terrainBlank)
+            IImageSource terrainBlank, bool feather)
         {
             var totalTiles = baseTiles.Length + 1;
             var ditherMaps = new Image[totalTiles];
@@ -453,13 +543,53 @@ namespace Civ2.ImageLoader
                     32 * scaleX, 16 * scaleY);
                 ditherMaps[i] = Image.FromImage(baseImage, scaledSampleRect);
 
-                var scaledMask = mask.Copy();
-                if (scaledMask.Width != ditherMaps[i].Width || scaledMask.Height != ditherMaps[i].Height)
+                if (feather)
                 {
-                    scaledMask.ResizeNN(ditherMaps[i].Width, ditherMaps[i].Height);
+                    // Multiply the quadrant's own alpha by a soft ramp that is
+                    // strongest along the shared diamond edge and gone by
+                    // roughly half way to the centre, so the neighbouring
+                    // terrain blends across the join instead of the classic
+                    // hard checkerboard stipple. Multiplying (rather than
+                    // AlphaMask, which replaces) keeps the diamond cut, so the
+                    // darker pixels just outside the neighbour's diamond are
+                    // not resurrected into an outline.
+                    const double band = 0.55;
+                    const double maxStrength = 0.72;
+                    var mw = ditherMaps[i].Width;
+                    var mh = ditherMaps[i].Height;
+                    for (var py = 0; py < mh; py++)
+                    {
+                        var tileY = offsetY + (py + 0.5) / mh * 16.0;
+                        var ny = tileY / 16.0 - 1.0;
+                        for (var px = 0; px < mw; px++)
+                        {
+                            var tileX = offsetX + (px + 0.5) / mw * 32.0;
+                            var nx = tileX / 32.0 - 1.0;
+
+                            var d = Math.Abs(nx) + Math.Abs(ny);
+                            var ramp = 0.0;
+                            if (d < 1.0)
+                            {
+                                var t = Math.Clamp((d - (1.0 - band)) / band, 0.0, 1.0);
+                                ramp = t * t * maxStrength;
+                            }
+
+                            var src = ditherMaps[i].GetColor(px, py);
+                            var a = (byte)Math.Clamp((int)Math.Round(src.A * ramp), 0, 255);
+                            ditherMaps[i].DrawPixel(px, py, new Color(src.R, src.G, src.B, a));
+                        }
+                    }
                 }
-                ditherMaps[i].AlphaMask(scaledMask);
-                scaledMask.Unload();
+                else
+                {
+                    var scaledMask = mask.Copy();
+                    if (scaledMask.Width != ditherMaps[i].Width || scaledMask.Height != ditherMaps[i].Height)
+                    {
+                        scaledMask.ResizeNN(ditherMaps[i].Width, ditherMaps[i].Height);
+                    }
+                    ditherMaps[i].AlphaMask(scaledMask);
+                    scaledMask.Unload();
+                }
             }
 
             var sampleRect = new Rectangle(offsetX, offsetY, 32, 16);

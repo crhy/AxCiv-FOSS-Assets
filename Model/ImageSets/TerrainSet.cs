@@ -34,6 +34,15 @@ namespace Model.ImageSets
         public int HalfWidth { get; }
 
         public IImageSource[] BaseTiles { get; set; } = [];
+
+        /// <summary>
+        /// True once <see cref="BaseTiles"/> hold the bundled high-resolution
+        /// photographic diamonds rather than the classic 8-bit sheet cells. The
+        /// tile compositor softens terrain dithering and skips the legacy coast
+        /// stipple on open water when this is set, both of which only read well
+        /// against the low-contrast classic art.
+        /// </summary>
+        public bool HighResBaseTiles { get; set; }
         public IImageSource[][] Specials { get; set; } = [];
         public IImageSource Blank { get; set; } = null!;
         public DitherMap[] DitherMaps { get; set; } = [];
@@ -43,6 +52,15 @@ namespace Model.ImageSets
         public IImageSource[] Mountains { get; set; } = [];
         public IImageSource[] Hills { get; set; } = [];
         public IImageSource[,] Coast { get; set; } = new IImageSource[0, 0];
+
+        /// <summary>
+        /// Four procedurally built shallow-water rims, one per diagonal edge of
+        /// the tile (NE, SE, SW, NW), used in place of <see cref="Coast"/> when
+        /// <see cref="HighResBaseTiles"/> is set. Each is a full tile-sized
+        /// image, transparent except for a soft pale band along its own edge,
+        /// composed onto an ocean tile wherever that edge meets land.
+        /// </summary>
+        public Image[] ShallowEdge { get; set; } = [];
         public IImageSource Pollution { get; set; } = null!;
         public IImageSource GrasslandShield { get; set; } = null!;
 
