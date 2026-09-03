@@ -55,6 +55,7 @@ namespace RaylibUI
             if (hasCivDir)
             {
                 _activeScreen = SetupMainScreen();
+                TryAutoStartGame();
             }
             else
             {
@@ -144,11 +145,29 @@ namespace RaylibUI
         // Press F10 to write a PNG of the current frame. Handy for bug reports and
         // for capturing the UI without an external screen-grabber; the directory
         // comes from RHYCIV_SHOT_DIR when set, otherwise the working directory.
+        // When RHYCIV_SHOT_INTERVAL (seconds) is also set, a frame is written on
+        // that cadence with no keypress - a capture aid for headless UI review.
         private int _screenshotCounter;
+        private double _nextAutoShot = -1;
 
         private void CaptureScreenshotIfRequested()
         {
-            if (!Input.IsKeyPressed(KeyboardKey.F10))
+            var byKey = Input.IsKeyPressed(KeyboardKey.F10);
+
+            var byTimer = false;
+            if (double.TryParse(Environment.GetEnvironmentVariable("RHYCIV_SHOT_INTERVAL"),
+                    out var interval) && interval > 0)
+            {
+                var now = Time.GetTime();
+                if (_nextAutoShot < 0) _nextAutoShot = now + interval;
+                if (now >= _nextAutoShot)
+                {
+                    byTimer = true;
+                    _nextAutoShot = now + interval;
+                }
+            }
+
+            if (!byKey && !byTimer)
             {
                 return;
             }
