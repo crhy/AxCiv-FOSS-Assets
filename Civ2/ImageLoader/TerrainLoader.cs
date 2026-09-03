@@ -204,7 +204,9 @@ namespace Civ2.ImageLoader
             terrain.GrasslandShield = MapIndexChange((BitmapStorage)active.PicSources["shield"][0], index, active);
             if (fossTerrainApplied)
             {
-                var shieldPath = FindFossArtPath("grassshield.png") ?? FindFossArtPath("shield.png");
+                var shieldPath = FindFossArtPath("grassshield.jpg")
+                                 ?? FindFossArtPath("grassshield.png")
+                                 ?? FindFossArtPath("shield.png");
                 if (shieldPath != null)
                 {
                     var composedShield = ComposeShieldTile(terrain, shieldPath);
@@ -220,16 +222,23 @@ namespace Civ2.ImageLoader
 
             if (fossTerrainApplied)
             {
-                var edgeWidth = terrain.TileWidth * terrain.RenderScale;
-                var edgeHeight = terrain.TileHeight * terrain.RenderScale;
-                terrain.ShallowEdge = new Image[4][];
-                for (var edge = 0; edge < 4; edge++)
+                terrain.CoastMarch = LoadCoastMarch(terrain);
+
+                // The procedural shorelines are the fallback for when the
+                // marching-squares tileset is not on disk.
+                if (terrain.CoastMarch.Length != CoastMarchShapes.Length)
                 {
-                    terrain.ShallowEdge[edge] = new Image[CoastVariants];
-                    for (var variant = 0; variant < CoastVariants; variant++)
+                    var edgeWidth = terrain.TileWidth * terrain.RenderScale;
+                    var edgeHeight = terrain.TileHeight * terrain.RenderScale;
+                    terrain.ShallowEdge = new Image[4][];
+                    for (var edge = 0; edge < 4; edge++)
                     {
-                        terrain.ShallowEdge[edge][variant] =
-                            BuildShallowEdge(edgeWidth, edgeHeight, edge, variant);
+                        terrain.ShallowEdge[edge] = new Image[CoastVariants];
+                        for (var variant = 0; variant < CoastVariants; variant++)
+                        {
+                            terrain.ShallowEdge[edge][variant] =
+                                BuildShallowEdge(edgeWidth, edgeHeight, edge, variant);
+                        }
                     }
                 }
             }
@@ -459,11 +468,10 @@ namespace Civ2.ImageLoader
         }
 
         /// <summary>
-        /// Composes the grassland-shield marker from its painting. The art is
-        /// delivered on a magenta chroma key, so anything close to magenta is
-        /// cleared (and its colour zeroed so a resize cannot bleed pink), then
-        /// the shield is fitted low in the tile so its grass tuft sits on the
-        /// ground.
+        /// Composes the grassland-shield marker from its photo. The art is a
+        /// round turf-set shield centred in a square grass frame, so it is
+        /// cropped to a soft-edged disc (the grass at the rim fades into the
+        /// map's own grass) and eased a little toward neutral.
         /// </summary>
         private static Image? ComposeShieldTile(TerrainSet terrain, string path)
         {
@@ -473,8 +481,7 @@ namespace Civ2.ImageLoader
                 return null;
             }
 
-            // The source PNG has no alpha channel, so re-draw it onto a blank
-            // RGBA canvas before keying out the magenta.
+            // Photo has no alpha channel; re-draw onto a blank RGBA canvas.
             var art = Image.GenColor(loaded.Width, loaded.Height, Color.Blank);
             art.Draw(loaded,
                 new Rectangle(0, 0, loaded.Width, loaded.Height),
@@ -482,28 +489,31 @@ namespace Civ2.ImageLoader
                 Color.White);
             loaded.Unload();
 
-            // Key out the magenta, and pull the shield most of the way toward
-            // neutral grey so the marker does not draw the eye the way the full
-            // painted colours did.
+            var cx = art.Width / 2.0;
+            var cy = art.Height / 2.0;
+            var radius = Math.Min(cx, cy) * 0.94;
+            var feather = Math.Min(cx, cy) * 0.12;
+
             for (var y = 0; y < art.Height; y++)
             {
                 for (var x = 0; x < art.Width; x++)
                 {
-                    var c = art.GetColor(x, y);
-                    var magenta = Math.Min(c.R, c.B) - c.G; // ~255 for pure magenta
-                    if (magenta > 120)
+                    var dist = Math.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+                    var edge = 1.0 - Math.Clamp((dist - (radius - feather)) / feather, 0.0, 1.0);
+                    if (edge <= 0.0)
                     {
                         art.DrawPixel(x, y, new Color((byte)0, (byte)0, (byte)0, (byte)0));
                         continue;
                     }
 
-                    var a = magenta > 88
-                        ? (byte)Math.Clamp((int)Math.Round((120 - magenta) / 32.0 * 255.0), 0, 255)
-                        : c.A;
+                    var c = art.GetColor(x, y);
 
-                    const double desat = 0.7;
+                    // A light nudge toward neutral so the marker sits back.
+                    const double desat = 0.25;
                     var lum = 0.299 * c.R + 0.587 * c.G + 0.114 * c.B;
                     byte Mix(byte ch) => (byte)Math.Clamp((int)Math.Round(ch + (lum - ch) * desat), 0, 255);
+
+                    var a = (byte)Math.Clamp((int)Math.Round(c.A * edge), 0, 255);
                     art.DrawPixel(x, y, new Color(Mix(c.R), Mix(c.G), Mix(c.B), a));
                 }
             }
@@ -511,21 +521,98 @@ namespace Civ2.ImageLoader
             var targetWidth = terrain.TileWidth * terrain.RenderScale;
             var targetHeight = terrain.TileHeight * terrain.RenderScale;
 
-            var scale = MathF.Min(targetWidth * 0.34f / art.Width, targetHeight * 0.56f / art.Height);
+            var scale = MathF.Min(targetWidth * 0.44f / art.Width, targetHeight * 0.78f / art.Height);
             var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
             var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
             art.Resize(drawWidth, drawHeight);
 
             var canvas = Image.GenColor(targetWidth, targetHeight, Color.Blank);
             var offsetX = (targetWidth - drawWidth) / 2f;
-            // Rest the grass base a little below the tile's middle.
-            var offsetY = targetHeight * 0.60f - drawHeight;
+            var offsetY = (targetHeight - drawHeight) / 2f;
             canvas.Draw(art,
                 new Rectangle(0, 0, drawWidth, drawHeight),
                 new Rectangle(offsetX, offsetY, drawWidth, drawHeight),
                 Color.White);
             art.Unload();
             return canvas;
+        }
+
+        /// <summary>
+        /// Filenames for the 16 marching-squares coastline diamonds, indexed by
+        /// vertex land mask (N=8, E=4, S=2, W=1).
+        /// </summary>
+        private static readonly string[] CoastMarchShapes =
+        [
+            "coast_00_ocean.png", "coast_01_corner_land_W.png", "coast_02_corner_land_S.png",
+            "coast_03_edge_land_SW.png", "coast_04_corner_land_E.png", "coast_05_diagonal_E_W.png",
+            "coast_06_edge_land_SE.png", "coast_07_inner_water_N.png", "coast_08_corner_land_N.png",
+            "coast_09_edge_land_NW.png", "coast_10_diagonal_N_S.png", "coast_11_inner_water_E.png",
+            "coast_12_edge_land_NE.png", "coast_13_inner_water_S.png", "coast_14_inner_water_W.png",
+            "coast_15_land.png",
+        ];
+
+        /// <summary>
+        /// Loads the coastline diamonds, each scaled to the working tile size.
+        /// The art is already a 2:1 diamond with a hair of overlap dilation
+        /// baked in, so it is not re-cut. Returns an empty array if any tile is
+        /// missing, so the caller can fall back to the procedural shoreline.
+        /// </summary>
+        private static IImageSource[] LoadCoastMarch(TerrainSet terrain)
+        {
+            var tiles = new IImageSource[CoastMarchShapes.Length];
+            var width = terrain.TileWidth * terrain.RenderScale;
+            var height = terrain.TileHeight * terrain.RenderScale;
+
+            for (var i = 0; i < CoastMarchShapes.Length; i++)
+            {
+                var path = FindCoastPath(CoastMarchShapes[i]);
+                if (path == null)
+                {
+                    return [];
+                }
+
+                var img = Images.LoadImageFromFile(path).Image;
+                if (img.Width <= 1 || img.Height <= 1)
+                {
+                    return [];
+                }
+
+                img.Resize(width, height);
+                tiles[i] = new MemoryStorage(img, $"CoastMarch-{i}-{terrain.RenderScale}");
+            }
+
+            return tiles;
+        }
+
+        private static string? FindCoastPath(string fileName)
+        {
+            var roots = Settings.SearchPaths
+                .Concat([
+                    Environment.CurrentDirectory,
+                    AppContext.BaseDirectory,
+                    Path.Combine(Environment.CurrentDirectory, "RaylibUI")
+                ])
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var root in roots)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(root, "Terrain", "Coast"),
+                             Path.Combine(root, "FOSSart", "Terrain", "Coast"),
+                             Path.Combine(root, "RaylibUI", "FOSSart", "Terrain", "Coast")
+                         })
+                {
+                    var path = Path.Combine(candidate, fileName);
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private static string? FindFossArtPath(string fileName)

@@ -32,12 +32,34 @@ public static class MapImage
     internal static TileDetails MakeTileGraphic(Tile tile, Map map,
         TerrainSet terrainSet, IGame game, int civilizationId)
     {
-        // Define base bitmap for drawing
-        var tilePic = Images.ExtractBitmap(terrainSet.BaseTiles[(int)tile.Type]).Copy();
-
         var directNeighbours = map.DirectNeighbours(tile, true).ToArray();
 
         var neighbours = map.Neighbours(tile, nullForInvalid: true).ToArray();
+
+        // For an ocean tile, when the marching-squares coastline set is loaded,
+        // the whole tile is one of 16 pre-rendered diamonds chosen by the land
+        // state of its four vertices (N=8, E=4, S=2, W=1). Each vertex is land
+        // if any of the three tiles that meet there is land. neighbours are in
+        // NE, E, SE, S, SW, W, NW, N order.
+        var useMarchCoast = tile.Type == TerrainType.Ocean
+                            && terrainSet.HighResBaseTiles
+                            && terrainSet.CoastMarch.Length == 16;
+        Image tilePic;
+        if (useMarchCoast)
+        {
+            bool Land(int i) => neighbours[i] is { Type: not TerrainType.Ocean } n
+                                && (n.IsVisible(civilizationId) || map.MapRevealed);
+            var north = Land(0) || Land(7) || Land(6);
+            var east = Land(0) || Land(1) || Land(2);
+            var south = Land(2) || Land(3) || Land(4);
+            var west = Land(4) || Land(5) || Land(6);
+            var mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
+            tilePic = Images.ExtractBitmap(terrainSet.CoastMarch[mask]).Copy();
+        }
+        else
+        {
+            tilePic = Images.ExtractBitmap(terrainSet.BaseTiles[(int)tile.Type]).Copy();
+        }
 
         // Dither
         if (tile.Type != TerrainType.Ocean)
@@ -53,6 +75,11 @@ public static class MapImage
                     }
                 }
             }
+        }
+        else if (useMarchCoast)
+        {
+            // The coastline sprite already carries sand, surf and open water;
+            // nothing else is composited on the water body.
         }
         else
         {
@@ -112,9 +139,11 @@ public static class MapImage
                 DrawLayer(tilePic, Images.ExtractBitmap(terrainSet.Coast[coastIndex[3], 3]),
                     new Rectangle(32, 8, 32, 16));
             }
+        }
 
-            // River mouth
-            // If river is next to ocean, draw river mouth on this tile.
+        // River mouth: if a river runs into this ocean tile, draw its mouth here.
+        if (tile.Type == TerrainType.Ocean)
+        {
             for (var index = 0; index < directNeighbours.Length; index++)
             {
                 var neighbour = directNeighbours[index];

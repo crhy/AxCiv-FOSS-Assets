@@ -54,6 +54,15 @@ namespace Model.ImageSets
         public IImageSource[,] Coast { get; set; } = new IImageSource[0, 0];
 
         /// <summary>
+        /// The 16 marching-squares coastline diamonds, indexed by the land mask
+        /// of the tile's four vertices (N=8, E=4, S=2, W=1). When present, an
+        /// ocean tile is drawn as <c>CoastMarch[mask]</c> in full instead of a
+        /// water base plus <see cref="ShallowEdge"/> overlays; each sprite
+        /// already carries its own sand, surf and open water.
+        /// </summary>
+        public IImageSource[] CoastMarch { get; set; } = [];
+
+        /// <summary>
         /// Procedurally painted shorelines, indexed [edge][variant]. Edge is the
         /// diagonal of the tile the shore runs along (0 NE, 1 SE, 2 SW, 3 NW);
         /// each edge carries several interchangeable variants so a long coast
