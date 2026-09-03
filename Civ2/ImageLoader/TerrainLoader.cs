@@ -157,6 +157,7 @@ namespace Civ2.ImageLoader
             if (fossTerrainApplied)
             {
                 ApplyFossOverlayArt(terrain);
+                ApplyFossSpecialArt(terrain);
             }
 
             terrain.Coast = new IImageSource[8, 4];
@@ -201,19 +202,36 @@ namespace Civ2.ImageLoader
 
             //Note airbase and fortress are now loaded directly by the cities loader
             terrain.GrasslandShield = MapIndexChange((BitmapStorage)active.PicSources["shield"][0], index, active);
+            if (fossTerrainApplied)
+            {
+                var shieldPath = FindFossArtPath("grassshield.png") ?? FindFossArtPath("shield.png");
+                if (shieldPath != null)
+                {
+                    var composedShield = ComposeShieldTile(terrain, shieldPath);
+                    if (composedShield != null)
+                    {
+                        terrain.GrasslandShield = new MemoryStorage(composedShield.Value,
+                            $"FossShield-{terrain.RenderScale}");
+                    }
+                }
+            }
+
             terrain.Huts = MapIndexChange((BitmapStorage)active.PicSources["hut"][0], index, active);
 
             if (fossTerrainApplied)
             {
                 var edgeWidth = terrain.TileWidth * terrain.RenderScale;
                 var edgeHeight = terrain.TileHeight * terrain.RenderScale;
-                terrain.ShallowEdge = new[]
+                terrain.ShallowEdge = new Image[4][];
+                for (var edge = 0; edge < 4; edge++)
                 {
-                    BuildShallowEdge(edgeWidth, edgeHeight, 0),
-                    BuildShallowEdge(edgeWidth, edgeHeight, 1),
-                    BuildShallowEdge(edgeWidth, edgeHeight, 2),
-                    BuildShallowEdge(edgeWidth, edgeHeight, 3),
-                };
+                    terrain.ShallowEdge[edge] = new Image[CoastVariants];
+                    for (var variant = 0; variant < CoastVariants; variant++)
+                    {
+                        terrain.ShallowEdge[edge][variant] =
+                            BuildShallowEdge(edgeWidth, edgeHeight, edge, variant);
+                    }
+                }
             }
 
             return terrain;
@@ -379,6 +397,223 @@ namespace Civ2.ImageLoader
             return canvas;
         }
 
+        /// <summary>
+        /// Terrain names for the bundled special-resource paintings, indexed by
+        /// <see cref="Model.Core.Mapping.TerrainType"/>. Null where the terrain
+        /// carries no painted special (forest is drawn as grassland plus a tree
+        /// overlay and has no cutout of its own).
+        /// </summary>
+        private static readonly string?[] FossSpecialTerrainNames =
+        [
+            // Forest has no cutout of its own; its Civ II specials are pheasant
+            // and silk, so it borrows the grassland paintings (pheasant, then
+            // sheep as the nearest available stand-in for silk).
+            "desert", "plains", "grassland", "grassland", "hills",
+            "mountains", "tundra", "glacier", "swamp", "jungle", "ocean"
+        ];
+
+        /// <summary>
+        /// Swaps the special-resource cutouts (fish, whales, bison, furs, oasis,
+        /// …) for the bundled high-resolution paintings, composed once at the
+        /// working tile size. The classic path bakes each into a 64x32 sheet
+        /// cell, so the tile compositor was upscaling a thumbnail.
+        /// </summary>
+        private static void ApplyFossSpecialArt(TerrainSet terrain)
+        {
+            if (terrain.Specials.Length < 2)
+            {
+                return;
+            }
+
+            for (var type = 0; type < FossSpecialTerrainNames.Length; type++)
+            {
+                var name = FossSpecialTerrainNames[type];
+                if (name == null)
+                {
+                    continue;
+                }
+
+                for (var slot = 0; slot < 2; slot++)
+                {
+                    if (type >= terrain.Specials[slot].Length)
+                    {
+                        continue;
+                    }
+
+                    var path = FindFossSpecialPath($"{name}_{slot + 1}.png");
+                    if (path == null)
+                    {
+                        continue;
+                    }
+
+                    var composed = ComposeSpecialTile(terrain, path, 0.62f, 0.94f);
+                    if (composed == null)
+                    {
+                        continue;
+                    }
+
+                    terrain.Specials[slot][type] = new MemoryStorage(composed.Value,
+                        $"FossSpecial-{name}-{slot}-{terrain.RenderScale}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Composes the grassland-shield marker from its painting. The art is
+        /// delivered on a magenta chroma key, so anything close to magenta is
+        /// cleared (and its colour zeroed so a resize cannot bleed pink), then
+        /// the shield is fitted low in the tile so its grass tuft sits on the
+        /// ground.
+        /// </summary>
+        private static Image? ComposeShieldTile(TerrainSet terrain, string path)
+        {
+            var loaded = Images.LoadImageFromFile(path).Image;
+            if (loaded.Width <= 1 || loaded.Height <= 1)
+            {
+                return null;
+            }
+
+            // The source PNG has no alpha channel, so re-draw it onto a blank
+            // RGBA canvas before keying out the magenta.
+            var art = Image.GenColor(loaded.Width, loaded.Height, Color.Blank);
+            art.Draw(loaded,
+                new Rectangle(0, 0, loaded.Width, loaded.Height),
+                new Rectangle(0, 0, loaded.Width, loaded.Height),
+                Color.White);
+            loaded.Unload();
+
+            for (var y = 0; y < art.Height; y++)
+            {
+                for (var x = 0; x < art.Width; x++)
+                {
+                    var c = art.GetColor(x, y);
+                    var magenta = Math.Min(c.R, c.B) - c.G; // ~255 for pure magenta
+                    if (magenta > 120)
+                    {
+                        art.DrawPixel(x, y, new Color((byte)0, (byte)0, (byte)0, (byte)0));
+                    }
+                    else if (magenta > 88)
+                    {
+                        var a = (byte)Math.Clamp((int)Math.Round((120 - magenta) / 32.0 * 255.0), 0, 255);
+                        art.DrawPixel(x, y, new Color(c.R, c.G, c.B, a));
+                    }
+                }
+            }
+
+            var targetWidth = terrain.TileWidth * terrain.RenderScale;
+            var targetHeight = terrain.TileHeight * terrain.RenderScale;
+
+            var scale = MathF.Min(targetWidth * 0.5f / art.Width, targetHeight * 0.82f / art.Height);
+            var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
+            var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
+            art.Resize(drawWidth, drawHeight);
+
+            var canvas = Image.GenColor(targetWidth, targetHeight, Color.Blank);
+            var offsetX = (targetWidth - drawWidth) / 2f;
+            // Rest the grass base a little below the tile's middle.
+            var offsetY = targetHeight * 0.60f - drawHeight;
+            canvas.Draw(art,
+                new Rectangle(0, 0, drawWidth, drawHeight),
+                new Rectangle(offsetX, offsetY, drawWidth, drawHeight),
+                Color.White);
+            art.Unload();
+            return canvas;
+        }
+
+        private static string? FindFossArtPath(string fileName)
+        {
+            var roots = Settings.SearchPaths
+                .Concat([
+                    Environment.CurrentDirectory,
+                    AppContext.BaseDirectory,
+                    Path.Combine(Environment.CurrentDirectory, "RaylibUI")
+                ])
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var root in roots)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(root, fileName),
+                             Path.Combine(root, "FOSSart", fileName),
+                             Path.Combine(root, "RaylibUI", "FOSSart", fileName)
+                         })
+                {
+                    if (File.Exists(candidate))
+                    {
+                        return candidate;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static string? FindFossSpecialPath(string fileName)
+        {
+            var roots = Settings.SearchPaths
+                .Concat([
+                    Environment.CurrentDirectory,
+                    AppContext.BaseDirectory,
+                    Path.Combine(Environment.CurrentDirectory, "RaylibUI")
+                ])
+                .Where(root => !string.IsNullOrWhiteSpace(root))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var root in roots)
+            {
+                foreach (var candidate in new[]
+                         {
+                             Path.Combine(root, "Terrain", "Specials"),
+                             Path.Combine(root, "FOSSart", "Terrain", "Specials"),
+                             Path.Combine(root, "RaylibUI", "FOSSart", "Terrain", "Specials")
+                         })
+                {
+                    var path = Path.Combine(candidate, fileName);
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Fits a square painting into a tile-sized transparent canvas, centred
+        /// and nudged up a little so it reads as an object standing on the
+        /// ground. <paramref name="widthFrac"/> and <paramref name="heightFrac"/>
+        /// bound its footprint as fractions of the tile.
+        /// </summary>
+        private static Image? ComposeSpecialTile(TerrainSet terrain, string path, float widthFrac, float heightFrac)
+        {
+            var art = Images.LoadImageFromFile(path).Image;
+            if (art.Width <= 1 || art.Height <= 1)
+            {
+                return null;
+            }
+
+            var targetWidth = terrain.TileWidth * terrain.RenderScale;
+            var targetHeight = terrain.TileHeight * terrain.RenderScale;
+
+            var scale = MathF.Min(targetWidth * widthFrac / art.Width, targetHeight * heightFrac / art.Height);
+            var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
+            var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
+            art.Resize(drawWidth, drawHeight);
+
+            var canvas = Image.GenColor(targetWidth, targetHeight, Color.Blank);
+            var offsetX = (targetWidth - drawWidth) / 2f;
+            var offsetY = (targetHeight - drawHeight) / 2f - targetHeight * 0.06f;
+            canvas.Draw(art,
+                new Rectangle(0, 0, drawWidth, drawHeight),
+                new Rectangle(offsetX, offsetY, drawWidth, drawHeight),
+                Color.White);
+            art.Unload();
+            return canvas;
+        }
+
         private static string? FindFossOverlayPath(string directory, string fileName)
         {
             var roots = Settings.SearchPaths
@@ -485,21 +720,83 @@ namespace Civ2.ImageLoader
             }
         }
 
+        /// <summary>Interchangeable shoreline variants generated per tile edge.</summary>
+        private const int CoastVariants = 7;
+
+        private static double CoastHash(int n)
+        {
+            unchecked
+            {
+                n = (n << 13) ^ n;
+                var m = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+                return m / 2147483647.0;
+            }
+        }
+
+        private static double CoastNoise(double x)
+        {
+            var i = (int)Math.Floor(x);
+            var f = x - i;
+            var u = f * f * (3.0 - 2.0 * f);
+            return CoastHash(i) * (1.0 - u) + CoastHash(i + 1) * u;
+        }
+
+        private static double CoastFbm(double x) =>
+            0.6 * CoastNoise(x) + 0.3 * CoastNoise(x * 2.03 + 11.1) + 0.1 * CoastNoise(x * 4.07 + 27.4);
+
+        private static double CoastSmooth(double a, double b, double x)
+        {
+            if (Math.Abs(a - b) < 1e-9)
+            {
+                return x < a ? 0.0 : 1.0;
+            }
+
+            var t = Math.Clamp((x - a) / (b - a), 0.0, 1.0);
+            return t * t * (3.0 - 2.0 * t);
+        }
+
+        private static double CoastLerp(double a, double b, double t) => a + (b - a) * t;
+
         /// <summary>
-        /// One shallow-water rim: a full tile-sized transparent image with a soft
-        /// pale band fading in along a single diagonal edge. <paramref name="quadrant"/>
-        /// is 0=NE, 1=SE, 2=SW, 3=NW, matching the dither quadrant order.
+        /// One painted shoreline: a full tile-sized transparent image carrying a
+        /// ragged surf line, a deep-to-shallow water wash, a couple of breaking
+        /// wave crests and a scatter of foam-collared rocks, all along a single
+        /// diagonal edge (<paramref name="quadrant"/> 0 NE, 1 SE, 2 SW, 3 NW).
+        /// Everything is procedural and seeded from
+        /// <paramref name="quadrant"/> and <paramref name="variant"/> so no two
+        /// variants of an edge match.
         /// </summary>
-        private static Image BuildShallowEdge(int width, int height, int quadrant)
+        private static Image BuildShallowEdge(int width, int height, int quadrant, int variant)
         {
             var eastHalf = quadrant is 0 or 1;
             var southHalf = quadrant is 1 or 2;
+            var seed = quadrant * 1013 + variant * 5779;
+            var phase = seed * 0.137 + variant * 12.91;
+            var swayPhase = variant * 4.19 + quadrant * 1.6;
 
-            // How far in from the edge the band reaches, and its peak opacity.
-            const double band = 0.5;
-            const double maxAlpha = 0.5;
+            // Reach of the whole effect and of its zones, in taxicab-distance units.
+            const double band = 0.62;
+            const double foamWidth = 0.16;
 
-            var shallow = Image.GenColor(width, height, Color.Blank);
+            // Open-water blue the shallows must dissolve into.
+            const double deepR = 40, deepG = 96, deepB = 150;
+
+            // Roughly half the shoreline variants are rocky; the rest are clean
+            // sand and surf so the coast never reads as one dark rim.
+            var rocky = CoastHash(seed * 3 + 91) > 0.46;
+            var rockCount = rocky ? 1 + (int)(CoastHash(seed * 61 + 7) * 2.0) : 0;
+            var rocks = new (double Along, double Size, double Rough, double Reach)[rockCount];
+            for (var r = 0; r < rockCount; r++)
+            {
+                var big = CoastHash(seed * 17 + r * 131 + 5) > 0.6;
+                rocks[r] = (
+                    Along: -0.46 + 0.92 * ((r + 0.2 + 0.6 * CoastHash(seed * 29 + r * 71 + 3)) / Math.Max(1, rockCount)),
+                    Size: (big ? 0.30 : 0.16) + 0.06 * CoastHash(seed * 53 + r * 197),
+                    Rough: CoastHash(seed * 7 + r * 313 + 1) * 25.0,
+                    Reach: 0.07 + 0.08 * CoastHash(seed * 97 + r * 43));
+            }
+
+            var img = Image.GenColor(width, height, Color.Blank);
             for (var y = 0; y < height; y++)
             {
                 var ny = (y + 0.5) / height * 2.0 - 1.0;
@@ -515,18 +812,172 @@ namespace Civ2.ImageLoader
                     }
 
                     var d = Math.Abs(nx) + Math.Abs(ny);
-                    if (d >= 1.0)
+                    if (d >= 1.02)
                     {
                         continue;
                     }
 
-                    var f = Math.Clamp((d - (1.0 - band)) / band, 0.0, 1.0);
-                    var alpha = (byte)Math.Clamp((int)Math.Round(f * f * maxAlpha * 255.0), 0, 255);
-                    shallow.DrawPixel(x, y, new Color((byte)168, (byte)216, (byte)230, alpha));
+                    var inward = 1.0 - d; // 0 at the waterline, grows toward the tile centre
+                    var along = quadrant switch
+                    {
+                        0 => nx + ny,
+                        1 => nx - ny,
+                        2 => -(nx + ny),
+                        _ => -(nx - ny),
+                    };
+
+                    // Ragged waterline: a big cove/headland sway plus finer chop
+                    // and noise. Only ever bites into the water so land is never
+                    // overdrawn. Eased down near the vertices so one tile's
+                    // shoreline meets the next without a hard step, but not
+                    // pinned flat, which reads as a regular scallop.
+                    var anchor = 0.5 + 0.5 * (1.0 - Math.Abs(along));
+                    var wob = (0.024 * Math.Sin(along * 1.7 + swayPhase)
+                               + 0.016 * Math.Sin(along * 5.9 + phase * 1.9)
+                               + 0.034 * (CoastFbm(along * 3.1 + phase) - 0.5)
+                               + 0.011 * (CoastNoise(along * 26.0 + phase) - 0.5)) * anchor;
+                    var local = inward - wob;
+
+                    double rr = 0, gg = 0, bb = 0, aa = 0;
+
+                    // Bright turquoise shallows fading through teal into open
+                    // water: strong near the sand, gone by the band edge.
+                    if (local >= 0.0 && local < band)
+                    {
+                        var k = local / band;
+                        var t1 = Math.Clamp(k / 0.28, 0.0, 1.0);
+                        var t2 = Math.Clamp((k - 0.28) / 0.72, 0.0, 1.0);
+                        var midR = CoastLerp(120, 32, t1);
+                        var midG = CoastLerp(232, 150, t1);
+                        var midB = CoastLerp(222, 170, t1);
+                        rr = CoastLerp(midR, deepR, t2);
+                        gg = CoastLerp(midG, deepG, t2);
+                        bb = CoastLerp(midB, deepB, t2);
+                        aa = Math.Pow(1.0 - k, 1.25) * 0.9;
+                    }
+
+                    // Damp, dark sand right at the waterline.
+                    if (local > -0.02 && local < 0.05)
+                    {
+                        var wet = (1.0 - Math.Clamp(local / 0.05, 0.0, 1.0)) * 0.55;
+                        rr = CoastLerp(rr, 74, wet);
+                        gg = CoastLerp(gg, 96, wet);
+                        bb = CoastLerp(bb, 96, wet);
+                        aa = Math.Max(aa, wet);
+                    }
+
+                    // Heavy broken surf washing up the shore.
+                    if (local > -0.03 && local < foamWidth)
+                    {
+                        var f = 1.0 - Math.Clamp(local / foamWidth, 0.0, 1.0);
+                        var froth = CoastNoise(along * 30.0 + phase * 3.0)
+                                    * CoastNoise(along * 9.0 - phase + local * 50.0);
+                        var lace = CoastNoise(along * 70.0 + phase) > 0.32 ? 1.0 : 0.15;
+                        var foam = Math.Pow(f, 1.25) * (0.45 + 0.55 * froth) * lace;
+                        var fa = Math.Min(1.0, foam * 1.35);
+                        if (fa > aa)
+                        {
+                            aa = fa;
+                        }
+
+                        rr = CoastLerp(rr, 248, foam);
+                        gg = CoastLerp(gg, 252, foam);
+                        bb = CoastLerp(bb, 253, foam);
+                    }
+
+                    // Two or three breaking crests running parallel to the shore.
+                    for (var w = 1; w <= 3; w++)
+                    {
+                        var crest = 0.06 + w * (band / 4.2)
+                                    + 0.026 * Math.Sin(along * 6.0 + w * 2.0 + swayPhase)
+                                    + 0.024 * (CoastFbm(along * 4.0 + w * 13 + phase) - 0.5);
+                        var dist = Math.Abs(local - crest);
+                        if (dist >= 0.028)
+                        {
+                            continue;
+                        }
+
+                        var lip = 1.0 - dist / 0.028;
+                        var brk = CoastNoise(along * 13.0 + w * 4.0 + phase);
+                        var c = lip * lip * (0.1 + 0.9 * brk) * 0.85;
+                        if (c > aa)
+                        {
+                            aa = c;
+                        }
+
+                        rr = CoastLerp(rr, 242, c);
+                        gg = CoastLerp(gg, 249, c);
+                        bb = CoastLerp(bb, 252, c);
+                    }
+
+                    // Rocks straddling the waterline with a foam collar where the
+                    // water breaks against them and a lit, spray-flecked crown.
+                    foreach (var rock in rocks)
+                    {
+                        var da = along - rock.Along;
+                        var db = local - 0.07;
+                        var ang = Math.Atan2(db, da);
+                        var radius = rock.Size * (0.60 + 0.40 * CoastNoise(ang * 3.0 + rock.Rough));
+                        var rd = Math.Sqrt(da * da * 1.0 + db * db * 2.0);
+                        var collar = rock.Reach + 0.06;   // wide burst of spray where the swell breaks
+
+                        if (rd < radius)
+                        {
+                            // Lit from the north-west, spray-flecked, warm grey.
+                            var crown = Math.Clamp((radius - rd) / radius, 0.0, 1.0);
+                            var facing = 0.5 - 0.5 * Math.Cos(ang - 2.3);
+                            var lit = 0.24 + 0.40 * crown + 0.34 * facing
+                                      + 0.20 * CoastNoise(da * 40.0 + db * 46.0 + rock.Rough);
+                            lit = Math.Clamp(lit, 0.0, 1.0);
+                            rr = CoastLerp(52, 178, lit);
+                            gg = CoastLerp(48, 168, lit);
+                            bb = CoastLerp(44, 156, lit);
+                            aa = 1.0;
+                        }
+                        else if (rd < radius + collar)
+                        {
+                            var ring = 1.0 - (rd - radius) / collar;
+                            // heavier on the seaward side, torn up by noise
+                            var seaward = 0.55 + 0.45 * Math.Cos(ang - 0.8);
+                            var spray = Math.Pow(ring, 1.4)
+                                        * (0.35 + 0.65 * CoastNoise(ang * 5.0 + rd * 60.0 + rock.Rough * 1.7))
+                                        * seaward;
+                            if (spray > aa)
+                            {
+                                aa = spray;
+                            }
+
+                            rr = CoastLerp(rr, 249, spray);
+                            gg = CoastLerp(gg, 252, spray);
+                            bb = CoastLerp(bb, 254, spray);
+                        }
+                    }
+
+                    if (aa <= 0.004)
+                    {
+                        continue;
+                    }
+
+                    // Ease off toward the two vertices so neighbouring shore
+                    // images do not clash, and make sure nothing reaches mid-tile.
+                    aa *= 1.0 - CoastSmooth(0.88, 1.06, Math.Abs(along));
+                    aa *= 1.0 - CoastSmooth(band * 0.86, band, local);
+
+                    var a = (byte)Math.Clamp((int)Math.Round(aa * 255.0), 0, 255);
+                    if (a == 0)
+                    {
+                        continue;
+                    }
+
+                    img.DrawPixel(x, y, new Color(
+                        (byte)Math.Clamp((int)Math.Round(rr), 0, 255),
+                        (byte)Math.Clamp((int)Math.Round(gg), 0, 255),
+                        (byte)Math.Clamp((int)Math.Round(bb), 0, 255),
+                        a));
                 }
             }
 
-            return shallow;
+            return img;
         }
 
         private static DitherMap BuildDitherMaps(Image mask, IImageSource[] baseTiles, int offsetX, int offsetY,

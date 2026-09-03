@@ -54,13 +54,15 @@ namespace Model.ImageSets
         public IImageSource[,] Coast { get; set; } = new IImageSource[0, 0];
 
         /// <summary>
-        /// Four procedurally built shallow-water rims, one per diagonal edge of
-        /// the tile (NE, SE, SW, NW), used in place of <see cref="Coast"/> when
-        /// <see cref="HighResBaseTiles"/> is set. Each is a full tile-sized
-        /// image, transparent except for a soft pale band along its own edge,
-        /// composed onto an ocean tile wherever that edge meets land.
+        /// Procedurally painted shorelines, indexed [edge][variant]. Edge is the
+        /// diagonal of the tile the shore runs along (0 NE, 1 SE, 2 SW, 3 NW);
+        /// each edge carries several interchangeable variants so a long coast
+        /// does not visibly repeat. Used in place of <see cref="Coast"/> when
+        /// <see cref="HighResBaseTiles"/> is set. Every image is full tile sized
+        /// and transparent except for the surf, shallows and rocks along its own
+        /// edge, composed onto an ocean tile wherever that edge meets land.
         /// </summary>
-        public Image[] ShallowEdge { get; set; } = [];
+        public Image[][] ShallowEdge { get; set; } = [];
         public IImageSource Pollution { get; set; } = null!;
         public IImageSource GrasslandShield { get; set; } = null!;
 

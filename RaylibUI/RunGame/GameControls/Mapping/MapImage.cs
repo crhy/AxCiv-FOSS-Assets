@@ -60,15 +60,24 @@ public static class MapImage
             {
                 // The classic coast sprites are a bright pixel-art stipple that
                 // reads as a diagonal net over the photographic water. Instead,
-                // fade a soft shallows band in along each diagonal edge that
-                // actually meets land.
+                // paint a procedural shoreline along each diagonal edge that
+                // meets land, picking a variant per tile so a long coast does
+                // not repeat.
                 for (var index = 0; index < directNeighbours.Length; index++)
                 {
                     var neighbour = directNeighbours[index];
                     if (neighbour != null && neighbour.Type != TerrainType.Ocean
                         && (neighbour.IsVisible(civilizationId) || map.MapRevealed))
                     {
-                        DrawLayer(tilePic, terrainSet.ShallowEdge[index], TileRec);
+                        var variants = terrainSet.ShallowEdge[index];
+                        if (variants.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        var pick = (int)((uint)(tile.XIndex * 92821 + tile.Y * 68917 + index * 40507)
+                                         % (uint)variants.Length);
+                        DrawLayer(tilePic, variants[pick], TileRec);
                     }
                 }
             }
