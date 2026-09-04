@@ -11,7 +11,7 @@ internal static class BuiltInDialogs
 {
     public static void AddFallbacks(Dictionary<string, PopupBox> dialogs)
     {
-        Add(dialogs, "MAINMENU", "rhYciv", ["New game", "Load map", "Custom world", "Load scenario", "Load game"], ["OK", "Exit"]);
+        Add(dialogs, "MAINMENU", "rhYciv", ["New game", "Load map", "Custom world", "Load scenario", "Load game", "Quick start"], ["OK", "Exit"]);
         Add(dialogs, "SIZEOFMAP", "World size", ["Small", "Medium", "Large"], ["Custom", "OK", "Cancel"]);
         Add(dialogs, "CUSTOMSIZE", "Custom world size", ["Width", "Height"], ["OK", "Cancel"]);
         Add(dialogs, "DIFFICULTY", "Difficulty", ["Chieftain", "Warlord", "Prince", "King", "Emperor", "Deity"], ["OK", "Cancel"]);

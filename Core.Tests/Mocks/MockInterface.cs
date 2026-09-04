@@ -189,6 +189,11 @@ internal class MockInterface : IUserInterface
         throw new NotImplementedException();
     }
 
+    public IInterfaceAction StartInstantGame()
+    {
+        throw new NotImplementedException();
+    }
+
     public void LoadPlayerColours()
     {
         throw new NotImplementedException();

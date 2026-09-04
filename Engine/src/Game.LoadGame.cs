@@ -29,7 +29,11 @@ namespace Civ2engine
             TurnNumber = 0;
             Date = new Date(0, 0, difficulty);
             _barbarianActivity = (BarbarianActivityType)barbarianActivity;
-            _difficultyLevel = difficulty;
+            // This used to set a private field that shadowed the public property,
+            // so every new game reported Chieftain however it was configured, and
+            // everything reading Game.DifficultyLevel - barbarian veterans, city
+            // happiness, corruption distance - played at the easiest setting.
+            DifficultyLevel = difficulty;
             
             var tile0 = _maps[0].Tile[0, 0];
             
@@ -37,7 +41,7 @@ namespace Civ2engine
 
             CityNames = NameLoader.LoadCityNames(gamePaths);
 
-            Players = civilizations.Select(c => new AiPlayer(_difficultyLevel, c, tile0, this, new AiInterface( this,c, _difficultyLevel, Script))).Cast<IPlayer>()
+            Players = civilizations.Select(c => new AiPlayer(DifficultyLevel, c, tile0, this, new AiInterface( this,c, DifficultyLevel, Script))).Cast<IPlayer>()
                 .ToArray();
 
             TerrainImprovements = TerrainImprovementFunctions.GetStandardImprovements(Rules); 

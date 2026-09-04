@@ -68,6 +68,11 @@ public interface IUserInterface
     IInterfaceAction HandleLoadGame(IGame game, Rules rules, Ruleset ruleset, Dictionary<string, string?> viewData);
     IInterfaceAction HandleLoadScenario(IGame game, string scnName, Ruleset ruleset);
     IInterfaceAction InitNewGame(bool quickStart);
+
+    /// <summary>
+    /// Build and start a game from fixed defaults with no setup dialogs at all.
+    /// </summary>
+    IInterfaceAction StartInstantGame();
     IImageSource? GetImprovementImage(Improvement improvement, int firstWonderIndex);
     IImageSource? GetAdvanceImage(Advance advance);
     string GetScientistName(int civilizationEpoch);

@@ -45,6 +45,9 @@ public class MainMenu : BaseDialogHandler
                 return civDialogHandlers[LoadScenario.DialogTitle].Show(civ2Interface);
             case 4:
                 return civDialogHandlers[LoadGame.DialogTitle].Show(civ2Interface);
+            case 5:
+                Initialization.ClearInitializationConfig();
+                return civ2Interface.MainApp.SetActiveRuleSet(0).StartInstantGame();
         }
         return new MenuAction(Dialog);
     }

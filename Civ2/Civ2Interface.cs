@@ -3,6 +3,7 @@ using Civ2.Dialogs.NewGame;
 using Civ2.Menu;
 using Civ2.Rules;
 using Civ2engine;
+using Civ2engine.NewGame;
 using Civ2engine.Enums;
 using Civ2engine.IO;
 using Model;
@@ -529,6 +530,51 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         }
 
         return DialogHandlers[WorldSizeHandler.Title].Show(this);
+    }
+
+    /// <summary>
+    /// The quick start: a fixed, deliberately hard setup that skips every setup
+    /// dialog and drops the player straight onto the map with their opening
+    /// settlers. Deity, a large world, eight civilisations, playing the Celts.
+    /// </summary>
+    public IInterfaceAction StartInstantGame()
+    {
+        Initialization.LoadGraphicsAssets(this);
+
+        var config = Initialization.ConfigObject;
+        config.QuickStart = true;
+        config.WorldSize = [75, 120];      // the Large option in SIZEOFMAP
+        config.DifficultyLevel = 5;        // Deity, the last DIFFICULTY option
+        config.BarbarianActivity = 1;
+
+        // Eight civilisations in total, or as many as the ruleset has colours for.
+        config.NumberOfCivs = Math.Min(8, PlayerColours.Length - 1);
+
+        var celts = config.Rules.Leaders.FirstOrDefault(l =>
+                        string.Equals(l.Plural, "Celts", StringComparison.OrdinalIgnoreCase))
+                    ?? config.Random.ChooseFrom(config.Rules.Leaders);
+        config.Gender = celts.Female ? 1 : 0;
+        config.PlayerCiv = Initialization.MakeCivilization(config, celts, true, celts.Color);
+
+        Initialization.CompleteConfig();
+
+        // Init.Show does this before starting; the quick start bypasses that
+        // dialog, so the same correction has to happen here or the player ends up
+        // holding a colour slot that no civilisation occupies.
+        if (config.PlayerCiv.Id >= config.Civilizations.Count)
+        {
+            var correctIndex = config.Civilizations.Count - 1;
+            (PlayerColours[config.PlayerCiv.Id], PlayerColours[correctIndex]) =
+                (PlayerColours[correctIndex], PlayerColours[config.PlayerCiv.Id]);
+            config.PlayerCiv.Id = correctIndex;
+        }
+
+        var maps = MapGenerator.GenerateMap(config).GetAwaiter().GetResult();
+        var game = NewGameInitialisation.StartNewGame(config, maps,
+            config.Civilizations.OrderBy(c => c.Id).ToList(), MainApp.ActiveRuleSet.Paths);
+        Initialization.GameInstance = game;
+
+        return new StartGame(game, Initialization.ViewData);
     }
 
     public IImageSource? GetImprovementImage(Improvement improvement, int firstWonderIndex)

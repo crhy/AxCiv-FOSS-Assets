@@ -24,7 +24,6 @@ namespace Civ2engine
         private readonly Options _options;
         private readonly Rules _rules;
         private readonly Scenario _scenarioData;
-        private int _difficultyLevel;
         private readonly BarbarianActivityType _barbarianActivity;
         public FastRandom Random { get; set; } = new();
         public List<City> AllCities { get; } = new();

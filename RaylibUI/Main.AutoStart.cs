@@ -32,6 +32,29 @@ namespace RaylibUI
                 return false;
             }
 
+            // RHYCIV_AUTOSTART=quick exercises the menu's Quick start entry rather
+            // than this harness's own settings, so that path can be checked without
+            // clicking through the menu.
+            if (string.Equals(Environment.GetEnvironmentVariable("RHYCIV_AUTOSTART"), "quick",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                var quickAction = civ2.StartInstantGame();
+                if (quickAction is not Model.InterfaceActions.StartGame started)
+                {
+                    Console.WriteLine("autostart: quick start did not produce a game");
+                    return false;
+                }
+
+                var quickGame = started.Game;
+                Console.WriteLine(
+                    $"autostart: quick start, {quickGame.Maps[0].XDim}x{quickGame.Maps[0].YDim} world, " +
+                    $"{quickGame.AllCivilizations.Count} civs incl. barbarians, " +
+                    $"player '{quickGame.GetPlayerCiv.TribeName}', difficulty {quickGame.DifficultyLevel}, " +
+                    $"units {quickGame.GetPlayerCiv.Units.Count}");
+                StartGame(quickGame, CivInit.ViewData);
+                return true;
+            }
+
             CivInit.LoadGraphicsAssets(civ2);
 
             var config = CivInit.ConfigObject;
