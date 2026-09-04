@@ -69,6 +69,16 @@ public class CityCitizensBox : BaseControl
         {
             spacing = Math.Min(((int)_props.CitizensBox.Width - 4 - iconWidth) / (_city.Size - 1), iconWidth + 1);
         }
+        else
+        {
+            spacing = iconWidth + 1;
+        }
+
+        // Centre the row in its panel. The citizens used to start hard against the
+        // left edge whatever the city's size, so a small city sat in the corner of a
+        // wide empty strip.
+        var rowWidth = iconWidth + spacing * Math.Max(0, _icons.Length - 1);
+        var leading = Math.Max(2f, (_props.CitizensBox.Width - rowWidth) / 2f);
 
         for (var i = 0; i < _icons.Length; i++)
         {
@@ -82,7 +92,7 @@ public class CityCitizensBox : BaseControl
             }
             _icons[i].Image = [_active.PicSources["people"][_citizenIndex[i] + 11 * _epoch]];
 
-            _icons[i].Location = new((2 + i * spacing) * _cityWindow.Scale, 7 * _cityWindow.Scale);
+            _icons[i].Location = new((leading + i * spacing) * _cityWindow.Scale, 7 * _cityWindow.Scale);
             _icons[i].Scale = baseIconScale * Math.Min(_cityWindow.Scale, 1.25f);
         }
 

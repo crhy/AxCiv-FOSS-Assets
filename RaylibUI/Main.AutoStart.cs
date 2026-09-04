@@ -218,6 +218,11 @@ namespace RaylibUI
                     Console.WriteLine($"test-city: shields set to {last.ShieldsProgress}/{last.ItemInProduction.Cost}");
                 }
 
+                Console.WriteLine($"test-city: units in city {last.UnitsInCity.Count} " +
+                                  $"[{string.Join(", ", last.UnitsInCity.Select(u => $"{u.Name} dead={u.Dead} home={(u.HomeCity == null ? "NONE" : u.HomeCity.Name)}"))}]");
+                Console.WriteLine($"test-city: supported {last.SupportedUnits.Count} " +
+                                  $"[{string.Join(", ", last.SupportedUnits.Select(u => $"{u.Name} dead={u.Dead}"))}]");
+
                 screen.ShowCityWindow(last);
                 Console.WriteLine("test-city: city window opened");
             }

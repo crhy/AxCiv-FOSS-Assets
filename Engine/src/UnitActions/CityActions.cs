@@ -10,6 +10,7 @@ using Model.Constants;
 using Model.Core;
 using Model.Core.Advances;
 using Model.Core.Cities;
+using Model.Core.GameRules;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
@@ -74,6 +75,35 @@ namespace Civ2engine.UnitActions
             }
         }
 
+        /// <summary>
+        /// Give a new city the commodities it supplies and demands. Only the save
+        /// readers ever set these, so every city founded in play showed an empty
+        /// Supplies and Demands line. Civ II derives them from the city's makeup;
+        /// until caravans exist to trade them this picks a stable set from the
+        /// ruleset's list, seeded by where the city stands so it survives a save and
+        /// reload and differs between neighbours.
+        /// </summary>
+        private static void AssignTradeCommodities(City city, Rules rules)
+        {
+            var commodities = rules.CaravanCommoditie;
+            if (commodities.Length == 0)
+            {
+                return;
+            }
+
+            const int wanted = 3;
+            var seed = city.Location.X * 7919 + city.Location.Y * 104729 + city.Owner.Id;
+            var order = Enumerable.Range(0, commodities.Length)
+                .OrderBy(i => HashCode.Combine(seed, i))
+                .ToArray();
+
+            var supplied = order.Take(Math.Min(wanted, order.Length)).ToArray();
+            var demanded = order.Skip(supplied.Length).Take(Math.Min(wanted, order.Length - supplied.Length)).ToArray();
+
+            city.CommoditySupplied = supplied.Select(i => commodities[i]).ToArray();
+            city.CommodityDemanded = demanded.Select(i => commodities[i]).ToArray();
+        }
+
         public static City BuildCity(Unit unit, IGame game, string name)
         {
             var tile = unit.CurrentLocation;
@@ -117,6 +147,8 @@ namespace Civ2engine.UnitActions
             game.History.CityBuilt(tile.CityHere);
             int currentCityCount = game.CitiesBuiltSoFar.GetValueOrDefault(city.Owner, 0);
             game.CitiesBuiltSoFar[city.Owner] = currentCityCount + 1;
+
+            AssignTradeCommodities(city, game.Rules);
 
             city.AutoAddDistributionWorkers(game.Rules);
             city.CalculateOutput(city.Owner.Government, game);

@@ -50,7 +50,7 @@ public class UnitsPresentBox : Listbox
                 Elements = [
                     new ListboxGroupElement { Unit = unit, Game = cityWindow.CurrentGameScreen.Game,
                         ScaleIcon = ImageUtils.ZoomScale(0) * 0.82f},
-                    new ListboxGroupElement { Text = ShortCityName(cityWindow.City), Xoffset = 0, 
+                    new ListboxGroupElement { Text = ShortCityName(unit.HomeCity), Xoffset = 0, 
                         HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Bottom }],
                 Height = (int)Math.Ceiling(properties.Box.Height / properties.Rows * cityWindow.Scale)
             };
@@ -93,8 +93,19 @@ public class UnitsPresentBox : Listbox
     /// </summary>
     /// <param name="city"></param>
     /// <returns></returns>
-    private static string ShortCityName(City city)
+    /// <summary>
+    /// The caption under a unit is its own home city, which is what Civ II shows and
+    /// what makes the box useful. It used to be the city being looked at, so a unit
+    /// merely passing through was labelled as if it belonged here - and a unit with
+    /// no home at all still got a name.
+    /// </summary>
+    private static string ShortCityName(City? city)
     {
-        return city == null ? "NON" : city.Name.Length < 3 ? city.Name : city.Name[..3];
+        if (city == null)
+        {
+            return string.Empty;
+        }
+
+        return city.Name.Length < 3 ? city.Name : city.Name[..3];
     }
 }

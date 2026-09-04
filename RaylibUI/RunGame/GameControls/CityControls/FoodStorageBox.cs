@@ -76,19 +76,9 @@ public class FoodStorageBox : BaseControl
         wheat_spacing = (int)(wheat_spacing * _cityWindow.Scale);
         var boxWidth = _city.Size * wheat_spacing + _iconWidth + 7 * _cityWindow.Scale;
 
-        // 1st horizontal line
+        // The window's food storage panel is the frame now; this box used to draw a
+        // second one of its own inside it, sized to the city rather than the panel.
         var posX = Bounds.X + Width / 2f - boxWidth / 2f;
-        var posY = Bounds.Y + 15 * _cityWindow.Scale;
-        Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX + boxWidth, posY), 1f, _pen1);
-        // 2nd horizontal line
-        posY = Bounds.Y + 160 * _cityWindow.Scale;
-        Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX + boxWidth, posY), 1f, _pen2);
-        // 1st vertical line
-        posY = Bounds.Y + 15 * _cityWindow.Scale;
-        int lineHeight = (int)(144 * _cityWindow.Scale);
-        Graphics.DrawLineEx(new Vector2(posX, posY),new Vector2(posX , posY + lineHeight), 1f, _pen1);
-        // 2nd vertical line
-        Graphics.DrawLineEx(new Vector2(posX + boxWidth, posY),new Vector2(posX + boxWidth, posY + lineHeight), 1f, _pen2);
 
         // Draw wheat icons
         var foodStore = _city.FoodInStorage;
