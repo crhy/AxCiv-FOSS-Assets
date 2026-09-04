@@ -6,6 +6,7 @@ using Model.Interface;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
+using Raylib_CSharp.Rendering;
 using Raylib_CSharp.Transformations;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.Controls;
@@ -205,6 +206,84 @@ public class CityWindow : BaseDialog
         _supportLabel.Visible = true;
         _supportLabel.Text = $"{Labels.For(LabelIndex.UnitsSupported)}: {City.SupportedUnits.Count}";
 
+    }
+
+    /// <summary>
+    /// The inset panels the city screen is organised into. Civ II groups the screen
+    /// into sunken areas - green for the land, blue for production, grey for the
+    /// lists - and without them every control floated on one flat sheet of stone
+    /// with nothing to say which reading belonged to which heading. Each rectangle
+    /// is in the layout's own 640x421 space and stops short of its heading, so the
+    /// headings stay on the window's stone and stay legible.
+    /// </summary>
+    private static readonly (Rectangle Box, PanelTone Tone)[] Panels =
+    [
+        (new Rectangle(3, 0, 433, 44), PanelTone.Neutral),      // citizens
+        (new Rectangle(5, 62, 192, 126), PanelTone.Land),       // resource map
+        (new Rectangle(196, 44, 240, 166), PanelTone.Neutral),  // city resources
+        (new Rectangle(437, 13, 195, 150), PanelTone.Land),     // food storage
+        (new Rectangle(437, 207, 195, 145), PanelTone.Build),   // production shields
+        (new Rectangle(5, 227, 188, 58), PanelTone.Neutral),    // units supported
+        (new Rectangle(193, 227, 242, 186), PanelTone.Neutral), // units present
+        (new Rectangle(5, 304, 188, 110), PanelTone.Neutral),   // city improvements
+    ];
+
+    private enum PanelTone
+    {
+        Neutral,
+        Land,
+        Build
+    }
+
+    private static Color FillFor(PanelTone tone) => tone switch
+    {
+        PanelTone.Land => new Color(34, 74, 38, 255),
+        PanelTone.Build => new Color(26, 34, 92, 255),
+        _ => new Color(84, 82, 78, 255)
+    };
+
+    public override void Draw(bool pulse)
+    {
+        if (BackgroundImage != null)
+        {
+            Graphics.DrawTexture(BackgroundImage.Value, (int)Location.X, (int)Location.Y, Color.White);
+        }
+
+        DrawPanels();
+
+        foreach (var control in Controls)
+        {
+            control.Draw(pulse);
+        }
+    }
+
+    private void DrawPanels()
+    {
+        var originX = Location.X + LayoutPadding.Left;
+        var originY = Location.Y + LayoutPadding.Top;
+
+        foreach (var (box, tone) in Panels)
+        {
+            var rect = new Rectangle(
+                originX + box.X * _scale,
+                originY + box.Y * _scale,
+                box.Width * _scale,
+                box.Height * _scale);
+
+            Graphics.DrawRectangleRec(rect, FillFor(tone));
+
+            // A shallow bevel: dark along the top and left, light along the bottom
+            // and right, so the panel reads as sunk into the window.
+            var edge = Math.Max(1f, _scale);
+            Graphics.DrawRectangleRec(new Rectangle(rect.X, rect.Y, rect.Width, edge),
+                new Color(0, 0, 0, 120));
+            Graphics.DrawRectangleRec(new Rectangle(rect.X, rect.Y, edge, rect.Height),
+                new Color(0, 0, 0, 120));
+            Graphics.DrawRectangleRec(new Rectangle(rect.X, rect.Y + rect.Height - edge, rect.Width, edge),
+                new Color(255, 255, 255, 70));
+            Graphics.DrawRectangleRec(new Rectangle(rect.X + rect.Width - edge, rect.Y, edge, rect.Height),
+                new Color(255, 255, 255, 70));
+        }
     }
 
     public override void OnKeyPress(KeyboardKey key)
