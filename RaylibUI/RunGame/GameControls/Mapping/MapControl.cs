@@ -634,11 +634,25 @@ public class MapControl : BaseControl
     {
         _pathPreviewKey = null;
         _pathPreview = null;
-        var nextView = _animationQueue.Count > 0
-            ? _animationQueue.Dequeue()
-            : _gameScreen.ViewAnchor is { } anchor
-                ? new StaticView(_gameScreen, _currentView, _viewHeight, _viewWidth, ForceRedraw, anchor)
-                : _gameScreen.ActiveMode.GetDefaultView(_gameScreen, _currentView, _viewHeight, _viewWidth, ForceRedraw);
+
+        IGameView nextView;
+        if (_animationQueue.Count > 0)
+        {
+            // An animation was composed before this redraw was asked for, so it
+            // carries the old terrain. Taking it here used to drop the request on
+            // the floor -- reading ForceRedraw clears it -- which left the base
+            // image at the previous zoom while the units and cities drawn over it
+            // scaled to the new one. Hand the request on to the next view instead.
+            nextView = _animationQueue.Dequeue();
+        }
+        else
+        {
+            var force = ForceRedraw;
+            nextView = _gameScreen.ViewAnchor is { } anchor
+                ? new StaticView(_gameScreen, _currentView, _viewHeight, _viewWidth, force, anchor)
+                : _gameScreen.ActiveMode.GetDefaultView(_gameScreen, _currentView, _viewHeight, _viewWidth, force);
+        }
+
         if (nextView != _currentView)
         {
             _currentView.Dispose();
