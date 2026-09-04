@@ -330,6 +330,12 @@ public class MapControl : BaseControl
         }
     }
 
+    // City name and population size on the map. The number is deliberately close to
+    // the name rather than two thirds of it, and both grow with zoom until the cap.
+    private const int CityNameFontBase = 22;
+    private const int CitySizeFontBase = 18;
+    private const int MapLabelZoomCap = 16;
+
     private Rectangle _currentBounds;
 
     private DateTime _animationStart;
@@ -374,16 +380,8 @@ public class MapControl : BaseControl
                 element.Draw(element.Location + paddedLoc, scale: ImageUtils.ZoomScale(zoom));
                 _cityDetails.Add(data);
 
-                var size = data.Size.ToString();
-                // Let the size number keep growing with zoom instead of freezing
-                // at 18px on top of a huge tile.
-                var fontSize = Math.Clamp(14.ZoomScale(zoom), TextRendering.MinimumFittedFontSize, 14.ZoomScale(Math.Clamp(zoom, 0, 14)));
-                var textSize = TextRendering.Measure(Fonts.TnRbold, size, fontSize, 0);
-                var citySizeRectLoc = paddedLoc + data.Location + data.SizeRectLoc.ZoomScale(zoom);
-                var textPosition = citySizeRectLoc;
-                Graphics.DrawRectangle((int)citySizeRectLoc.X, (int)citySizeRectLoc.Y, (int)textSize.X, (int)textSize.Y, data.Color.TextColour);
-                Graphics.DrawRectangleLines((int)citySizeRectLoc.X - 1, (int)citySizeRectLoc.Y, (int)textSize.X + 2, (int)textSize.Y, Color.Black);
-                global::RaylibUI.TextRendering.Draw(Fonts.TnRbold, size, textPosition, fontSize, 0, Color.Black);
+                // The population box is drawn with the name below, so the two can be
+                // laid out as one label rather than colliding.
             }
             else if (element.IsTerrain || !_currentView.ActionTiles.Contains(element.Tile) || element.Tile.IsCityPresent)
             {
@@ -394,15 +392,39 @@ public class MapControl : BaseControl
         foreach (var cityData in _cityDetails)
         {
             var name = cityData.Name;
-            // Grow the city name with zoom rather than capping at 24px when the
-            // tile itself is several times that tall.
-            var fontSize = Math.Clamp(20.ZoomScale(zoom), TextRendering.MinimumMapFontSize, 20.ZoomScale(Math.Clamp(zoom, 0, 14)));
+            var fontSize = Math.Clamp(CityNameFontBase.ZoomScale(zoom),
+                TextRendering.MinimumMapFontSize,
+                CityNameFontBase.ZoomScale(Math.Clamp(zoom, 0, MapLabelZoomCap)));
             var textSize = TextRendering.Measure(_active.Look.DefaultFont, name, fontSize, 1);
-            // Anchor to the city's logical footprint, not the source texture, so
-            // high-resolution FOSS city art does not push the label off the tile.
-            var textPosition = paddedLoc + cityData.Location + new Vector2(cityData.LogicalSize.X.ZoomScale(zoom) / 2f , cityData.LogicalSize.Y.ZoomScale(zoom)) - textSize /2f;
+
+            var size = cityData.Size.ToString();
+            var sizeFontSize = Math.Clamp(CitySizeFontBase.ZoomScale(zoom),
+                TextRendering.MinimumFittedFontSize,
+                CitySizeFontBase.ZoomScale(Math.Clamp(zoom, 0, MapLabelZoomCap)));
+            var sizeTextSize = TextRendering.Measure(Fonts.TnRbold, size, sizeFontSize, 0);
+            var boxPadding = Math.Max(2f, sizeFontSize * 0.22f);
+            var boxSize = sizeTextSize + new Vector2(boxPadding * 2f, 0f);
+            var gap = Math.Max(2f, sizeFontSize * 0.25f);
+
+            // Name and population are laid out as one label and centred together on
+            // the city's logical footprint, rather than the number being dropped at a
+            // fixed offset that landed on top of the name once both grew with zoom.
+            var totalWidth = textSize.X + gap + boxSize.X;
+            var anchor = paddedLoc + cityData.Location +
+                         new Vector2(cityData.LogicalSize.X.ZoomScale(zoom) / 2f,
+                             cityData.LogicalSize.Y.ZoomScale(zoom));
+            var textPosition = anchor - new Vector2(totalWidth / 2f, textSize.Y / 2f);
 
             global::RaylibUI.TextRendering.DrawWithShadow(_active.Look.DefaultFont, name, textPosition, fontSize, 1, cityData.Color.TextColour, Color.Black, new Vector2(1, 1));
+
+            var boxLocation = new Vector2(textPosition.X + textSize.X + gap,
+                textPosition.Y + (textSize.Y - boxSize.Y) / 2f);
+            Graphics.DrawRectangle((int)boxLocation.X, (int)boxLocation.Y, (int)boxSize.X, (int)boxSize.Y,
+                cityData.Color.TextColour);
+            Graphics.DrawRectangleLines((int)boxLocation.X - 1, (int)boxLocation.Y - 1,
+                (int)boxSize.X + 2, (int)boxSize.Y + 2, Color.Black);
+            global::RaylibUI.TextRendering.Draw(Fonts.TnRbold, size,
+                boxLocation + new Vector2(boxPadding, 0f), sizeFontSize, 0, Color.Black);
         }
 
         foreach (var animation in _currentView.CurrentAnimations)

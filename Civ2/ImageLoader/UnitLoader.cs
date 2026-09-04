@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using Civ2engine;
 using Civ2engine.IO;

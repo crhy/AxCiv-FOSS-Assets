@@ -695,7 +695,12 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
     public override UnitShield UnitShield(int unitType) => new()
     {
         ShieldInFrontOfUnit = false,
-        Offset = UnitImages.Units[unitType].FlagLoc + new Vector2(4, 0),
+        // Up and to the left of the unit. The flag anchor sits at the foot of the
+        // 64x48 unit box, so hanging the 18x24 shield off it put the shield below
+        // the box entirely, over whatever the tile beneath was showing. Everything
+        // else - the health bar, the orders letter, the stack and shadow copies -
+        // is placed relative to this, so they all move with it.
+        Offset = new Vector2(2, 4),
         StackingOffset = new(UnitImages.Units[unitType].FlagLoc.X < UnitImages.UnitRectangle.Width / 2 ? -3 : 5, 0),
         ShadowOffset = new(UnitImages.Units[unitType].FlagLoc.X < UnitImages.UnitRectangle.Width / 2 ? 0 : 1, 1),
         DrawShadow = true,
