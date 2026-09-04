@@ -18,6 +18,9 @@ cd "$repo_root"
 echo "Auditing redistributable assets..."
 python3 scripts/generate_asset_manifest.py --check
 
+echo "Verifying Civilopedia text..."
+python3 scripts/build_civilopedia_text.py --check
+
 echo "Restoring dependencies..."
 "$dotnet_cmd" restore Civ2clone.sln
 

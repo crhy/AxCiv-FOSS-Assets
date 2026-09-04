@@ -52,6 +52,17 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             FREECIV_URL,
             "scripts/import_freeciv_rules.py",
         )
+    if relative in {
+        "RaylibUI/FOSSart/Standalone/describe.txt",
+        "RaylibUI/FOSSart/Standalone/pedia.txt",
+    }:
+        return (
+            "project-original-text",
+            "rhYciv contributors",
+            "GPL-3.0-only",
+            "docs/CIVILOPEDIA-TEXT.md",
+            "scripts/build_civilopedia_text.py",
+        )
     if relative.startswith("RaylibUI/FOSSart/Standalone/") and Path(relative).name in {
         "CITIES.png", "ICONS.png", "TERRAIN1.png", "TERRAIN2.png", "UNITS.png"
     }:
