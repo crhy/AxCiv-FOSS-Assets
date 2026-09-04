@@ -86,6 +86,8 @@ namespace Civ2engine
 
                 _activeCiv = AllCivilizations[_activeCivId];
 
+                CheckElimination(_activeCiv);
+
                 if (!_activeCiv.Alive)
                 {
                     if (!Options.DontRestartIfEliminated)
@@ -106,6 +108,31 @@ namespace Civ2engine
 
                 StartPlayerTurn(activePlayer);
                 return;
+            }
+        }
+
+        /// <summary>
+        /// A civilization that holds no cities and no units is out of the game.
+        /// Nothing marked this before, so losing everything simply handed the
+        /// turn on and play continued without you. Turn 1 is exempt so a civ
+        /// still placing its first settlers is never judged.
+        /// </summary>
+        private void CheckElimination(Civilization civ)
+        {
+            if (!civ.Alive || civ.PlayerType == PlayerType.Barbarians || TurnNumber <= 1)
+            {
+                return;
+            }
+
+            if (civ.Cities.Count > 0 || civ.Units.Count > 0)
+            {
+                return;
+            }
+
+            civ.Alive = false;
+            if (civ.Id >= 0 && civ.Id < Players.Length)
+            {
+                Players[civ.Id].CivilizationDestroyed();
             }
         }
 

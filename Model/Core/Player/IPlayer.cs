@@ -36,6 +36,17 @@ namespace Model.Core.Player
         void WaitingAtEndOfTurn();
         void NotifyAdvanceResearched(int advance);
         void FoodShortage(City city);
+
+        /// <summary>
+        /// The city has a full food box but cannot grow without an Aqueduct or
+        /// Sewer System.
+        /// </summary>
+        void CityGrowthHalted(City city);
+
+        /// <summary>
+        /// This player's civilization has lost its last city and unit.
+        /// </summary>
+        void CivilizationDestroyed();
         void CityDecrease(City city);
         void TurnStart(int turnNumber);
 

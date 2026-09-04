@@ -41,7 +41,7 @@ civ.getTech(26).AddEffect(civ.core.Effects.PopulationPollutionModifier, -1)
 --35 - Gunpowder,          8,-2,  Inv, Iro, 1, 0    ; Gun
 --36 - Horseback Riding,   4,-1,  nil, nil, 0, 0    ; Hor
 --37 - Industrialization,  6, 0,  RR,  Ban, 2, 1    ; Ind
-civ.getTech(37).AddEffect(civ.core.Effects.PopulationPollutionModifier, 2)
+civ.getTech(37).AddEffect(civ.core.Effects.PopulationPollutionModifier, 1)
 civ.getTech(37).AddEffect(civ.core.Effects.Epoch, 2)
 --38 - Invention,          6, 0,  Eng, Lit, 1, 4    ; Inv
 civ.getTech(38).AddEffect(civ.core.Effects.Epoch, 1)
@@ -84,7 +84,6 @@ civ.getTech(62).AddEffect(civ.core.Effects.PopulationPollutionModifier, 1)
 --72 - Robotics,           5,-2,  Cmp, Mob, 3, 0    ; Rob
 --73 - Rocketry,           6,-2,  AFl, E2,  3, 0    ; Roc
 --74 - Sanitation,         4, 2,  Med, Eng, 2, 1    ; San
-civ.getTech(74).AddEffect(civ.core.Effects.PopulationPollutionModifier, -1)
 --75 - Seafaring,          4, 1,  Map, Pot, 0, 1    ; Sea
 --76 - Space Flight,       4, 1,  Cmp, Roc, 3, 3    ; SFl
 --77 - Stealth,            3,-2,  Sup, Rob, 3, 0    ; Sth

@@ -233,6 +233,14 @@ namespace Civ2engine
         {
         }
 
+        public void CityGrowthHalted(City city)
+        {
+        }
+
+        public void CivilizationDestroyed()
+        {
+        }
+
         public void CityDecrease(City city)
         {
         }

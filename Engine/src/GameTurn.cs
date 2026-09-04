@@ -62,8 +62,18 @@ namespace Civ2engine
                     var maxFood = (city.Size + 1) * foodRows;
                     if (city.FoodInStorage >= maxFood)
                     {
-                        city.GrowCity(game);
-                        city.ResetFoodStorage(foodRows);
+                        if (city.CanGrow(rules))
+                        {
+                            city.GrowCity(game);
+                            city.ResetFoodStorage(foodRows);
+                        }
+                        else
+                        {
+                            // Civ II keeps the food box full and stalls the city
+                            // until an Aqueduct / Sewer System is built.
+                            city.FoodInStorage = maxFood;
+                            player.CityGrowthHalted(city);
+                        }
                     }
                 }
 

@@ -218,6 +218,24 @@ namespace Civ2engine
         public static bool ImprovementExists(this City city, Effects improvement) =>
             city.OrderedImprovements.Values.Any(i => i.Effects.ContainsKey(improvement));
 
+        /// <summary>
+        /// Civ II stalls a city at <see cref="CosmicRules.ToExceedCitySizeAqueductNeeded"/>
+        /// without an Aqueduct and at <see cref="CosmicRules.SewerNeeded"/> without
+        /// a Sewer System. A city already over a cap does not shrink, it simply
+        /// cannot grow further until the works are built.
+        /// </summary>
+        public static bool CanGrow(this City city, Rules rules)
+        {
+            if (city.Size >= rules.Cosmic.SewerNeeded &&
+                !city.ImprovementExists((int)ImprovementType.SewerSystem))
+            {
+                return false;
+            }
+
+            return city.Size < rules.Cosmic.ToExceedCitySizeAqueductNeeded ||
+                   city.ImprovementExists((int)ImprovementType.Aqueduct);
+        }
+
         public static void ShrinkCity(this City city, IGame game)
         {
             city.Size -= 1;

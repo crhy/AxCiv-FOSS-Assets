@@ -23,7 +23,9 @@ public class MovingPieces : IGameMode
     private readonly GameScreen _gameScreen;
     private readonly LabelControl _title;
     private DateTime? _downTime;
-    private readonly TimeSpan _holdTime = TimeSpan.FromMilliseconds(15);
+    // A deliberate press-and-hold, not an ordinary click. At the old 15ms even a
+    // quick tap on the map registered as a Go To order.
+    private readonly TimeSpan _holdTime = TimeSpan.FromMilliseconds(300);
 
     public MovingPieces(GameScreen gameScreen)
     {

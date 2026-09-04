@@ -9,6 +9,12 @@ Before there were borders, monuments, or chronicles, there was only a people ben
 ^
 From this first campfire, raise a civilization whose memory will outlive the ages.
 
+@CIVDESTROYED
+@title=Your Civilization Has Fallen
+@width=420
+@button=Ok
+The last city is gone and the last organized resistance has ended. The civilization you guided now passes from politics into memory.
+
 @NAMECITY
 @title=A New City
 @width=320

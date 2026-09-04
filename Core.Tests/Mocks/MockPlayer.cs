@@ -82,6 +82,14 @@ public class MockPlayer : IPlayer
     {
     }
 
+    public void CityGrowthHalted(City city)
+    {
+    }
+
+    public void CivilizationDestroyed()
+    {
+    }
+
     public void CityDecrease(City city)
     {
     }

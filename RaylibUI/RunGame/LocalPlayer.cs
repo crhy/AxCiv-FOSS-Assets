@@ -203,6 +203,16 @@ public class LocalPlayer : IPlayer
         _gameScreen.ShowCityDialog("FOODSHORTAGE", city);
     }
 
+    public void CityGrowthHalted(City city)
+    {
+        _gameScreen.ShowCityDialog("FURTHERGROWTH", city);
+    }
+
+    public void CivilizationDestroyed()
+    {
+        _gameScreen.ShowPopup("CIVDESTROYED");
+    }
+
     public void CityDecrease(City city)
     {
         _gameScreen.ShowCityDialog("DECREASE", city);

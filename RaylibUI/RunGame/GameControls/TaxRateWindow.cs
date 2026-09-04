@@ -37,12 +37,15 @@ public class TaxRateWindow : BaseDialog
         _taxLocked = false;
         _sciLocked = false;
         _luxLocked = false;
+        // Keep in step with RulesParser.BuildTaxRateLimits.
         _max = _civ.Government switch
         {
             0 or 1 => 60,    // anarchy, despotism
             2 => 70,    // monarchy
-            3 or 4 or 5 => 80,    // communism, fundam., republic
-            6 => 90, // democracy
+            3 => 80,    // communism
+            4 => 60,    // fundamentalism
+            5 => 80,    // republic
+            6 => 90,    // democracy
             _ => throw new ArgumentOutOfRangeException($"Not expected government value: {_civ.Government}")
         };
 

@@ -279,22 +279,29 @@ namespace Civ2engine.IO
             }).ToArray();
         }
 
+        /// <summary>
+        /// Civ II maximum tax / luxury / science rate per government, in tenths.
+        /// 0 Anarchy, 1 Despotism, 2 Monarchy, 3 Communism, 4 Fundamentalism,
+        /// 5 Republic, 6 Democracy. Keep in step with the cap table in
+        /// RaylibUI TaxRateWindow.
+        /// </summary>
         private static Dictionary<string, int> BuildTaxRateLimits(int idx)
         {
             var limit = idx switch
             {
-                < 2 => 6,
-                3 => 7,
-                6 => 10,
+                0 or 1 => 6, // anarchy, despotism
+                2 => 7,      // monarchy
+                3 => 8,      // communism
+                4 => 6,      // fundamentalism
+                5 => 8,      // republic
+                6 => 9,      // democracy
                 _ => 8
             };
-
-            var sciLimit = idx == 4 ? 5 : limit;
 
             return new Dictionary<string, int>
             {
                 { "Tax", limit },
-                { "Science", sciLimit },
+                { "Science", limit },
                 { "Luxuries", limit },
             };
         }
@@ -303,12 +310,12 @@ namespace Civ2engine.IO
         {
             switch (idx)
             {
-                case 4: //Fundamentalism
                 case 6: //Democracy
                     return 0;
-                case 3: //Communism
+                case 3: //Communism - Civ II really does remove distance corruption
                     return Rules.Cosmic.CommunismEquivalentPalaceDistance;
                 default:
+                    //Fundamentalism included: Civ II gives it Monarchy-like corruption
                     return -1;
             }
         }
