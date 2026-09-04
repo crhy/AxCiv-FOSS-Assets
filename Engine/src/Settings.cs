@@ -29,6 +29,20 @@ namespace Civ2engine
             }
         }
         
+        /// <summary>
+        /// Writable per-user storage for crash reports, beside the saves and for the
+        /// same reason: the bundled ruleset directory is read-only under Flatpak.
+        /// </summary>
+        public static string CrashLogFolder
+        {
+            get
+            {
+                var path = Path.Combine(ApplicationDataFolder, "Logs");
+                Directory.CreateDirectory(path);
+                return path;
+            }
+        }
+
         private const string SettingsFileName = "appsettings.json";
 
         // Game settings from App.config

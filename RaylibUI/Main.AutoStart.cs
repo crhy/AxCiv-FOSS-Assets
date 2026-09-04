@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Civ2engine.MapObjects;
 using Civ2;
 using Civ2engine;
 using Civ2engine.NewGame;
@@ -80,26 +82,17 @@ namespace RaylibUI
                 gameScreen.MapControl.ForceRedraw = true;
             }
 
-            // RHYCIV_TEST_CITY=1 founds a city with the first available settler
-            // and opens its city screen, so crashes on that path can be
-            // reproduced without playing to them.
-            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY"))
+            // RHYCIV_TEST_CITY=N founds N cities and opens the last one's city
+            // screen, so crashes on that path can be reproduced without playing to
+            // them. N defaults to 1. Each city after the first is founded from a
+            // separate settler walked far enough away to clear the adjacency rule,
+            // which is the path the second-city crash report describes.
+            var testCityValue = Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY");
+            if (!string.IsNullOrWhiteSpace(testCityValue)
                 && _activeScreen is RunGame.GameScreen cityScreen)
             {
-                var settler = game.GetPlayerCiv.Units.FirstOrDefault();
-                if (settler != null)
-                {
-                    Console.WriteLine($"test-city: founding with unit type {settler.Type}");
-                    var built = Civ2engine.UnitActions.CityActions.BuildCity(settler, game, "Testopolis");
-                    Console.WriteLine($"test-city: founded '{built.Name}' size {built.Size}, production " +
-                                      (built.ItemInProduction == null ? "<null>" : built.ItemInProduction.ToString()));
-                    cityScreen.ShowCityWindow(built);
-                    Console.WriteLine("test-city: city window opened");
-                }
-                else
-                {
-                    Console.WriteLine("test-city: no unit available");
-                }
+                var wanted = int.TryParse(testCityValue, out var count) ? Math.Max(1, count) : 1;
+                RunCityFoundingHarness(game, cityScreen, wanted);
             }
 
             // RHYCIV_TEST_POPUP=NAME[,NAME...] pops the named GAME.TXT dialog(s)
@@ -122,5 +115,104 @@ namespace RaylibUI
 
             return true;
         }
+
+        /// <summary>
+        /// Founds <paramref name="wanted"/> cities for the human player, reporting each
+        /// step so an unhandled exception can be pinned to the city it happened on.
+        /// </summary>
+        private static void RunCityFoundingHarness(Game game, RunGame.GameScreen screen, int wanted)
+        {
+            var civ = game.GetPlayerCiv;
+            Model.Core.Cities.City? last = null;
+
+            for (var founded = 0; founded < wanted; founded++)
+            {
+                var settler = civ.Units.FirstOrDefault(u =>
+                    !u.Dead && u.AiRole == Model.Constants.AiRoleType.Settle);
+                if (settler == null)
+                {
+                    Console.WriteLine($"test-city: no settler left after {founded} cities");
+                    break;
+                }
+
+                // Walk clear of every existing city: founding adjacent to one is
+                // rejected, and the walk itself exercises the movement path.
+                var attempts = 0;
+                while (attempts++ < 40 && !CanFoundHere(settler.CurrentLocation, civ))
+                {
+                    var step = settler.CurrentLocation.Neighbours()
+                        .FirstOrDefault(t => t.Type != Model.Core.Mapping.TerrainType.Ocean &&
+                                             !t.Terrain.Impassable);
+                    if (step == null)
+                    {
+                        break;
+                    }
+
+                    settler.X = step.X;
+                    settler.Y = step.Y;
+                    settler.CurrentLocation = step;
+                }
+
+                if (!CanFoundHere(settler.CurrentLocation, civ))
+                {
+                    Console.WriteLine($"test-city: could not find a legal site for city {founded + 1}");
+                    break;
+                }
+
+                var name = Civ2engine.UnitActions.CityActions.GetCityName(civ, game);
+                Console.WriteLine($"test-city: founding city {founded + 1} '{name}' at " +
+                                  $"{settler.CurrentLocation.X},{settler.CurrentLocation.Y}");
+                last = Civ2engine.UnitActions.CityActions.BuildCity(settler, game, name);
+                Console.WriteLine($"test-city: founded '{last.Name}' size {last.Size}, production " +
+                                  (last.ItemInProduction == null ? "<null>" : last.ItemInProduction.ToString()));
+
+                // Everything the real order does after BuildCity.
+                last.Location.SetVisible(civ.Id);
+                last.Location.UpdatePlayer(civ.Id);
+                Console.WriteLine($"test-city: city {founded + 1} tile published");
+            }
+
+            if (last != null)
+            {
+                screen.ShowCityWindow(last);
+                Console.WriteLine("test-city: city window opened");
+            }
+
+            // Founding the last settler's city leaves nobody awaiting orders, so the
+            // real order's ChooseNextUnit call runs the first end of turn. That is
+            // the step the second-city crash report actually reaches, and skipping
+            // it is why this harness could not reproduce the report before.
+            Console.WriteLine("test-city: choosing next unit (may end the turn)");
+            game.ChooseNextUnit();
+            Console.WriteLine($"test-city: next unit chosen, turn {game.TurnNumber}");
+
+            // With the last settler spent nobody is awaiting orders, so the player's
+            // next act is to end the turn. RHYCIV_TEST_TURNS=N runs that many.
+            var turns = int.TryParse(Environment.GetEnvironmentVariable("RHYCIV_TEST_TURNS"), out var t)
+                ? t
+                : 0;
+            for (var i = 0; i < turns; i++)
+            {
+                Console.WriteLine($"test-city: ending turn {game.TurnNumber}");
+                if (game.ProcessEndOfTurn())
+                {
+                    game.ChoseNextCiv();
+                }
+
+                Console.WriteLine($"test-city: turn is now {game.TurnNumber}");
+            }
+        }
+
+        private static bool CanFoundHere(Model.Core.Mapping.Tile tile, Model.Core.Civilization civ)
+        {
+            if (tile.Type == Model.Core.Mapping.TerrainType.Ocean || tile.Terrain.Impassable ||
+                tile.CityHere != null)
+            {
+                return false;
+            }
+
+            return !tile.Neighbours().Any(t => t.IsCityPresent);
+        }
+
     }
 }
