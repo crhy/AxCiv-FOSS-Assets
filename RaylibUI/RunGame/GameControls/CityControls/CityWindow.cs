@@ -28,6 +28,8 @@ public class CityWindow : BaseDialog
     private readonly IUserInterface _active;
     private readonly int _iconW, _iconH;
     private float _scale = 1.5f;  // scale city window size (1=normal, 1.5=large)
+    private bool _backdropResolved;
+    private Raylib_CSharp.Images.Image? _backdrop;
     private const float _scaleMax = 1.5f;
     private const float _scaleMin = 1.0f;
     private const float _scaleDelta = 0.5f;
@@ -144,6 +146,32 @@ public class CityWindow : BaseDialog
     public float Scale => _scale;
     public City City { get; }
 
+    /// <summary>
+    /// The classic city-screen backdrop is a 640x421 'city' sheet that the
+    /// standalone asset set does not ship. Resolve it once and fall back to the
+    /// plain painted dialog base rather than throwing every frame — a missing
+    /// backdrop hard-crashed the game the moment a city screen was opened.
+    /// </summary>
+    private Raylib_CSharp.Images.Image? GetBackdrop()
+    {
+        if (_backdropResolved)
+        {
+            return _backdrop;
+        }
+
+        _backdropResolved = true;
+        try
+        {
+            _backdrop = Images.ExtractBitmap(_cityWindowProps.Image, _active);
+        }
+        catch (Exception)
+        {
+            _backdrop = null;
+        }
+
+        return _backdrop;
+    }
+
     public override void Resize(int width, int height)
     {
         _headerLabel.FontSize = Math.Max(_active.Look.CityHeaderLabelFontSizeSmall, (int)(_active.Look.CityHeaderLabelFontSizeNormal * _scale));
@@ -151,7 +179,7 @@ public class CityWindow : BaseDialog
         LayoutPadding = _active.GetPadding(_headerLabel.TextSize.Y, false);
 
         BackgroundImage = ImageUtils.PaintDialogBase(_active, Width, Height, LayoutPadding,
-            Images.ExtractBitmap(_cityWindowProps.Image, _active));
+            GetBackdrop());
 
         _exitIcon.Location = new(11, 5);
         _shrinkIcon.Location = new(11 + (_iconW + 2) * _scale, 5);

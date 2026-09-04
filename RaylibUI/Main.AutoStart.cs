@@ -80,6 +80,28 @@ namespace RaylibUI
                 gameScreen.MapControl.ForceRedraw = true;
             }
 
+            // RHYCIV_TEST_CITY=1 founds a city with the first available settler
+            // and opens its city screen, so crashes on that path can be
+            // reproduced without playing to them.
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY"))
+                && _activeScreen is RunGame.GameScreen cityScreen)
+            {
+                var settler = game.GetPlayerCiv.Units.FirstOrDefault();
+                if (settler != null)
+                {
+                    Console.WriteLine($"test-city: founding with unit type {settler.Type}");
+                    var built = Civ2engine.UnitActions.CityActions.BuildCity(settler, game, "Testopolis");
+                    Console.WriteLine($"test-city: founded '{built.Name}' size {built.Size}, production " +
+                                      (built.ItemInProduction == null ? "<null>" : built.ItemInProduction.ToString()));
+                    cityScreen.ShowCityWindow(built);
+                    Console.WriteLine("test-city: city window opened");
+                }
+                else
+                {
+                    Console.WriteLine("test-city: no unit available");
+                }
+            }
+
             // RHYCIV_TEST_POPUP=NAME[,NAME...] pops the named GAME.TXT dialog(s)
             // right after start, with placeholder text, so prompt layout can be
             // reviewed without playing to the event that triggers it.
