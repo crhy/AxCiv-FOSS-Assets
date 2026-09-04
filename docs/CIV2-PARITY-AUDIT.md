@@ -33,9 +33,9 @@ progress** (this pass), **open**.
 | 7 | AI production choice (`City_Production_Complete`) | AI | open |
 | 8 | AI expansion strategy: site evaluation, escorting, target count | AI | open |
 | 9 | AI terrain improvement | AI | open |
-| 10 | Paradrop | unit action | open |
+| 10 | Paradrop | unit action | done |
 | 11 | Airlift | unit action | open |
-| 12 | Amphibious-assault enforcement (marine-only ship attack) | rules | open |
+| 12 | Amphibious-assault enforcement (marine-only ship attack) | rules | done |
 | 13 | Submarine visibility | rules | open |
 | 14 | Nuclear strike (area effect, fallout) | rules | open |
 | 15 | Revolution and anarchy | government | open |
@@ -48,8 +48,48 @@ progress** (this pass), **open**.
 | 22 | AI Lua per-order/per-move `print` spam | AI perf | open |
 
 Items 1, 2 and 3 were implemented across the 2026-09-01 passes; see their
-sections below for what landed and what's still open within them. Item 4
-(Leonardo's Workshop unit-upgrade pass) is next.
+sections below for what landed and what's still open within them. Items 10 and
+12 landed in the 2026-09-04 Civilopedia-parity pass, together with the combat
+arithmetic fixes recorded as C1-C4 in the deep audit. Item 4 (Leonardo's
+Workshop unit-upgrade pass) is next.
+
+## Civilopedia as the parity contract
+
+`docs/CIVILOPEDIA-TEXT.md` is now written and shipped, so the game states in
+plain words what each unit, building, terrain type and government does. That
+makes it the player-facing specification, and any divergence is no longer an
+internal inconsistency but a broken promise the player can read. The
+2026-09-04 pass worked through it and fixed everything it named that was cheap
+to fix; what it names and the engine still does not do is listed here.
+
+| Civilopedia promise | Engine | Where |
+|---|---|---|
+| City Walls "multiply the defense of units inside it" | fixed 2026-09-04 | `UnitExtensions.DefenseFactor` |
+| Terrain defence values shown per terrain entry | fixed 2026-09-04 | `Tile.Defense` |
+| Pikemen "enhanced defense against mounted units" | fixed 2026-09-04 | `UnitExtensions.IsMountedAttacker` |
+| Paratroopers "can make paradrops" | fixed 2026-09-04 | `ParadropFunctions` |
+| Marines "can attack directly from ships" | fixed 2026-09-04 | `MovementFunctions.AttackAtTile` |
+| Barracks restore a damaged unit "much more quickly" | fixed 2026-09-04 | `Game.Actions.HealRestingUnit` |
+| Fanatics "free support under Fundamentalism" | already faithful | `RulesParser`, `CityExtensions` |
+| Trireme "must remain near land" | already faithful | `Game.Actions.ResolveShipsLostAtSea` |
+| Despotism and Anarchy lose a point on any 3+ tile | already faithful | `TileResourceExtensions` |
+| Fundamentalism suppresses unhappiness, costs half research, supports ten units | already faithful | `CityHappiness`, `RulesParser` |
+| Alpine Troops "treat all terrain as roads" | already faithful | `MovementFunctions` |
+| Howitzer "attacks ignore City Walls" | already faithful | `UnitExtensions.DefenseFactor` |
+| AEGIS "enhanced defense against air units" | already faithful | `UnitExtensions.DefenseFactor` |
+| Diplomat and Spy missions: embassy, investigate, sabotage, steal, incite, bribe | **absent** | backlog #5, issue #20 |
+| Caravan and Freight: trade routes, help build wonder | **absent** | backlog #6 |
+| Submarine stealth - invisible to units that cannot spot it | **absent** | backlog #13 |
+| Nuclear "devastate a target area ... leave serious pollution" | **absent** | backlog #14 |
+| Leonardo's Workshop upgrades obsolete units | **absent** | backlog #4 |
+| Marco Polo's Embassy, United Nations, Eiffel Tower | **absent**, needs diplomacy | backlog #19 |
+| Statue of Liberty, and government change generally | **absent**, needs revolution | backlog #15, #20 |
+| Airlift between cities with Airports | **absent** | backlog #11 |
+| Capitalization converts shields to gold | **absent** | issue #28 |
+
+The Civilopedia text hedges on every one of these - each says the behaviour is
+"intended" - so no entry currently claims something the engine contradicts
+outright. They are promises not yet kept rather than statements that are false.
 
 ## Rules that were already faithful
 

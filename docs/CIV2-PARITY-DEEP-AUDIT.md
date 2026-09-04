@@ -36,6 +36,15 @@ case · **missing** Civ II mechanic absent · **faithful** matches Civ II.
 | Units | faithful | 0 | 1 | 0 |
 | Victory & loss | diverges | 1 | 0 | 0 |
 
+### Fixed since this audit was written
+
+C1 through C4 were all corrected in the 2026-09-04 Civilopedia-parity pass, and
+each carries a regression test in `Core.Tests/Units/UnitExtensionsTests.cs`. That
+pass also found one divergence this audit missed: **City Walls added their effect
+value rather than multiplying by it**, so the shipped 200 gave a garrison a flat
++2 defence instead of ×3. It is fixed in the same place as C3. The summary table
+above has not been re-scored.
+
 ### Highest-impact findings not already in the ranked backlog
 
 1. **City growth is uncapped** (CG1) — no Aqueduct/Sewer limit; cities pass
@@ -60,7 +69,7 @@ case · **missing** Civ II mechanic absent · **faithful** matches Civ II.
 Every named modifier from the reference is present and mostly correct. What is
 off is the arithmetic that combines them.
 
-### C1 · major · per-round hit probability is not `A / (A + D)`
+### C1 · ~~major~~ fixed 2026-09-04 · per-round hit probability is not `A / (A + D)`
 
 `MovementFunctions.cs:400`. The round is decided by
 `probAttackerWins = (A*8 - 1) / (2*D*8)` (mirrored when the attacker is
@@ -70,7 +79,7 @@ Civ II rolls `rand(A + D)` each round; the attacker wins the round with
 probability exactly `A/(A+D)` — 0.67 for A2 vs D1. The substitute biases every
 unequal fight toward the favourite.
 
-### C2 · major · terrain defence is integer-divided
+### C2 · ~~major~~ fixed 2026-09-04 · terrain defence is integer-divided
 
 `Tile.cs:153` — `Defense => (River ? EffectiveTerrain.Defense + 1 :
 EffectiveTerrain.Defense) / 2`, an `int`. Forest / Jungle / Swamp carry
@@ -80,7 +89,7 @@ rules-value 3, so `3 / 2 = 1`. A river on grassland is `(2 + 1) / 2 = 1`.
 Civ II: value 3 is a ×1.5 terrain bonus and a river adds +25% defence. Both
 vanish here, so units in forest or on a river defend as if in the open.
 
-### C3 · major · Fortress / Fortified / City Walls take the max, not the product
+### C3 · ~~major~~ fixed 2026-09-04 · Fortress / Fortified / City Walls take the max, not the product
 
 `UnitExtensions.cs:73-111` — `bestGroundFactor = max(fortress, fortified,
 walls)`, then `df += bestGroundFactor`. A fortified unit inside City Walls gets
@@ -89,7 +98,7 @@ the walls term only; the ×1.5 for fortification is discarded.
 Civ II: these stack multiplicatively — City Walls ×3 *and* fortified ×1.5 both
 apply. Walled cities and fortresses defend well below the reference.
 
-### C4 · minor · Pikemen bonus is ×1.5 and misses Dragoons / Cavalry
+### C4 · ~~minor~~ fixed 2026-09-04 · Pikemen bonus is ×1.5 and misses Dragoons / Cavalry
 
 `UnitExtensions.cs:59-62, 192` — the "mounted attacker" test is
 `2 moves AND 10 HP AND 1 firepower`. Dragoons and Cavalry have 20 HP, so Pikemen
