@@ -633,6 +633,38 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         UnitImages.ShieldShadow = new MemoryStorage(shieldShadow, "Unit-Shield-Shadow", replacementColour);
     }
 
+    /// <summary>
+    /// The most common opaque colour in an image, which for a flag is its cloth.
+    /// </summary>
+    private Color DominantColour(IImageSource source, Color fallback)
+    {
+        var colours = Images.ExtractBitmap(source, this).LoadColors();
+        var counts = new Dictionary<int, int>();
+        foreach (var colour in colours)
+        {
+            if (colour.A < 160)
+            {
+                continue;
+            }
+
+            var key = (colour.R << 16) | (colour.G << 8) | colour.B;
+            counts[key] = counts.GetValueOrDefault(key) + 1;
+        }
+
+        Image.UnloadColors(colours);
+
+        if (counts.Count == 0)
+        {
+            return fallback;
+        }
+
+        var best = counts.MaxBy(pair => pair.Value).Key;
+        return new Color((byte)(best >> 16), (byte)((best >> 8) & 0xFF), (byte)(best & 0xFF), (byte)255);
+    }
+
+    private static Color Darken(Color colour) =>
+        new((byte)(colour.R * 0.55f), (byte)(colour.G * 0.55f), (byte)(colour.B * 0.55f), (byte)255);
+
     public override void LoadPlayerColours()
     {
         var playerColours = new PlayerColour[9];
@@ -641,12 +673,13 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
             var imageColours = Images.ExtractBitmap(PicSources["textColours"][col], this).LoadColors();
             var textColour = imageColours[0];
 
-            imageColours = Images.ExtractBitmap(PicSources["flags"][col], this).LoadColors();
-            var lightColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][col], this).Width + 8];
-
-            imageColours = Images.ExtractBitmap(PicSources["flags"][9 + col], this).LoadColors();
-            var darkColour = imageColours[3 * Images.ExtractBitmap(PicSources["flags"][9 + col], this).Width + 5];
-            Image.UnloadColors(imageColours);
+            // Take the flag's own dominant colour rather than one fixed pixel. The
+            // classic sheet had the cloth filling its box, so row three column eight
+            // was always on it; this art set is scaled and bottom-anchored inside a
+            // 14x22 slot, so that pixel is transparent for most flags and every unit
+            // shield came out black.
+            var lightColour = DominantColour(PicSources["flags"][col], textColour);
+            var darkColour = DominantColour(PicSources["flags"][9 + col], Darken(lightColour));
 
             playerColours[col] = new PlayerColour
             {

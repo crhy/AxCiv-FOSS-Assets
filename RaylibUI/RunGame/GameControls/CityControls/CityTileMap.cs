@@ -261,8 +261,12 @@ public class CityTileMap : BaseControl
                 var dstRec = new Rectangle(locationX,
                     locationY, dim.TileWidth, dim.TileHeight);
                 
+                // Take the whole composed tile, not a 64x32 window into it. Terrain is
+                // composed at a scale that follows the zoom now, so sampling the classic
+                // tile rectangle grabbed a corner of a much larger image and the city's
+                // resource map came out mostly empty while the main map looked right.
                 image.Draw(tileImage.Image,
-                    MapImage.TileRec,
+                    new Rectangle(0, 0, tileImage.Image.Width, tileImage.Image.Height),
                     dstRec,
                     Color.White);
                 if (tile.CityHere != null)

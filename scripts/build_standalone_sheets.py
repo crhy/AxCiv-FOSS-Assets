@@ -29,9 +29,21 @@ TERRAIN_FILES = (
     "jungle", "ocean",
 )
 
+# One entry per colour slot, matching the flag painted into the same column of
+# CITIES.png just below. These are read back as the text colour a civilisation's
+# city name, size marker and unit shield are drawn in, so a slot whose colour
+# disagrees with its flag gives a civilisation two identities at once: slot 5 was
+# orange here and cyan on the flag, which is what the Celts were showing.
 PLAYER_COLORS = (
-    (96, 96, 96), (229, 45, 45), (48, 92, 214), (239, 196, 45), (53, 174, 78),
-    (238, 137, 38), (131, 75, 183), (70, 190, 194), (226, 92, 159),
+    (198, 42, 42),    # 0 red     - barbarians
+    (238, 238, 238),  # 1 white
+    (56, 152, 40),    # 2 green
+    (34, 96, 206),    # 3 blue
+    (226, 176, 26),   # 4 yellow
+    (36, 158, 214),   # 5 cyan
+    (240, 110, 18),   # 6 orange
+    (134, 62, 178),   # 7 purple
+    (128, 72, 24),    # 8 brown
 )
 
 
