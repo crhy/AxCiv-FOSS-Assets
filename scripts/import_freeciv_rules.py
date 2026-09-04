@@ -14,6 +14,22 @@ from collections import OrderedDict
 from pathlib import Path
 
 
+# Civilization II's own tribe colours. Its RULES.TXT walks the canonical tribe
+# order and cycles the seven player colours - 1 white, 2 green, 3 blue, 4 yellow,
+# 5 teal, 6 orange, 7 purple - so each colour is shared by three tribes. The
+# nations arrive here in a different order, so the colour is looked up by name
+# rather than derived from position; anything Civ II does not have falls back to
+# the positional cycle.
+CIV2_TRIBE_COLOURS = {
+    "Romans": 1, "Babylonians": 2, "Germans": 3, "Egyptians": 4,
+    "Americans": 5, "Greeks": 6, "Indians": 7,
+    "Russians": 1, "Zulus": 2, "French": 3, "Aztecs": 4,
+    "Chinese": 5, "English": 6, "Mongols": 7,
+    "Celts": 1, "Japanese": 2, "Vikings": 3, "Spanish": 4,
+    "Persians": 5, "Carthaginians": 6, "Sioux": 7,
+}
+
+
 def sections(path: Path) -> OrderedDict[str, str]:
     result: OrderedDict[str, list[str]] = OrderedDict()
     current: list[str] | None = None
@@ -198,7 +214,8 @@ def build_rules(source: Path) -> tuple[str, str]:
         leaders = re.findall(r'"([^"\\]+)"\s*,\s*"(Male|Female)"', field_block(block, "leaders"))
         male = next((name for name, sex in leaders if sex == "Male"), leaders[0][0] if leaders else f"Leader {index + 1}")
         female = next((name for name, sex in leaders if sex == "Female"), male)
-        lines.append(f"{male}, {female}, 0, {index % 8 + 1}, {index % 4}, {plural}, {adjective}, 1, 1, 1")
+        colour = CIV2_TRIBE_COLOURS.get(plural, index % 7 + 1)
+        lines.append(f"{male}, {female}, 0, {colour}, {index % 4}, {plural}, {adjective}, 1, 1, 1")
         city_values = quoted_list(field_block(block, "cities"))
         city_names = [re.sub(r"\s*\([^)]*\)\s*$", "", city) for city in city_values[:32]]
         city_sections.append((plural.upper(), city_names or [f"{adjective} City"]))

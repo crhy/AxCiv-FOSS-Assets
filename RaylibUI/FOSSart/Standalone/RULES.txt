@@ -285,27 +285,27 @@ Republic, Consul, Consul
 Democracy, President, President
 
 @LEADERS
-Abraham Lincoln, Eleanor Roosevelt, 0, 1, 0, Americans, American, 1, 1, 1
-Motecuhzoma, Tecuichpo, 0, 2, 1, Aztecs, Aztec, 1, 1, 1
-Hammurabi, Sammur-Amat, 0, 3, 2, Babylonians, Babylonian, 1, 1, 1
-Hannibal Barca, Dido, 0, 4, 3, Carthaginians, Carthaginian, 1, 1, 1
-Cunobelinos, Boudica, 0, 5, 0, Celts, Celtic, 1, 1, 1
-Mao Zedong, Wu Zetian, 0, 6, 1, Chinese, Chinese, 1, 1, 1
-Ramesses II, Cleopatra VII, 0, 7, 2, Egyptians, Egyptian, 1, 1, 1
-Henry VIII, Elizabeth I, 0, 8, 3, English, English, 1, 1, 1
-Napoléon Bonaparte, Jeanne d'Arc, 0, 1, 0, French, French, 1, 1, 1
-Friedrich I Barbarossa, Maria Theresia, 0, 2, 1, Germans, German, 1, 1, 1
-Megas Alexandros, Olympias, 0, 3, 2, Greeks, Greek, 1, 1, 1
-Mohandas Gandhi, Indira Gandhi, 0, 4, 3, Indians, Indian, 1, 1, 1
-Tokugawa Ieyasu, Suiko, 0, 5, 0, Japanese, Japanese, 1, 1, 1
-Chinggis, Börte, 0, 6, 1, Mongols, Mongol, 1, 1, 1
-Khshayarsha I, Purandokht, 0, 7, 2, Persians, Persian, 1, 1, 1
-Caesar, Livia, 0, 8, 3, Romans, Roman, 1, 1, 1
+Abraham Lincoln, Eleanor Roosevelt, 0, 5, 0, Americans, American, 1, 1, 1
+Motecuhzoma, Tecuichpo, 0, 4, 1, Aztecs, Aztec, 1, 1, 1
+Hammurabi, Sammur-Amat, 0, 2, 2, Babylonians, Babylonian, 1, 1, 1
+Hannibal Barca, Dido, 0, 6, 3, Carthaginians, Carthaginian, 1, 1, 1
+Cunobelinos, Boudica, 0, 1, 0, Celts, Celtic, 1, 1, 1
+Mao Zedong, Wu Zetian, 0, 5, 1, Chinese, Chinese, 1, 1, 1
+Ramesses II, Cleopatra VII, 0, 4, 2, Egyptians, Egyptian, 1, 1, 1
+Henry VIII, Elizabeth I, 0, 6, 3, English, English, 1, 1, 1
+Napoléon Bonaparte, Jeanne d'Arc, 0, 3, 0, French, French, 1, 1, 1
+Friedrich I Barbarossa, Maria Theresia, 0, 3, 1, Germans, German, 1, 1, 1
+Megas Alexandros, Olympias, 0, 6, 2, Greeks, Greek, 1, 1, 1
+Mohandas Gandhi, Indira Gandhi, 0, 7, 3, Indians, Indian, 1, 1, 1
+Tokugawa Ieyasu, Suiko, 0, 2, 0, Japanese, Japanese, 1, 1, 1
+Chinggis, Börte, 0, 7, 1, Mongols, Mongol, 1, 1, 1
+Khshayarsha I, Purandokht, 0, 5, 2, Persians, Persian, 1, 1, 1
+Caesar, Livia, 0, 1, 3, Romans, Roman, 1, 1, 1
 Vladimir Lenin, Ekaterina II, 0, 1, 0, Russians, Russian, 1, 1, 1
-Sitting Bull, Black Shawl, 0, 2, 1, Sioux, Sioux, 1, 1, 1
-Felipe II, Isabel I, 0, 3, 2, Spanish, Spanish, 1, 1, 1
-Knutr, Gunnhildr, 0, 4, 3, Vikings, Viking, 1, 1, 1
-Shaka kaSenzangakhona, Nandi, 0, 5, 0, Zulus, Zulu, 1, 1, 1
+Sitting Bull, Black Shawl, 0, 7, 1, Sioux, Sioux, 1, 1, 1
+Felipe II, Isabel I, 0, 4, 2, Spanish, Spanish, 1, 1, 1
+Knutr, Gunnhildr, 0, 3, 3, Vikings, Viking, 1, 1, 1
+Shaka kaSenzangakhona, Nandi, 0, 2, 0, Zulus, Zulu, 1, 1, 1
 
 @ORDERS
 Fortify,F

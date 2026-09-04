@@ -560,13 +560,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
                         string.Equals(l.Plural, "Celts", StringComparison.OrdinalIgnoreCase))
                     ?? config.Random.ChooseFrom(config.Rules.Leaders);
         config.Gender = celts.Female ? 1 : 0;
-
-        // Colour slot one, which is white. A tribe's colour in RULES.txt is just its
-        // position in the nation list wrapped to eight, so the Celts land on cyan by
-        // alphabetical accident rather than by anything meaningful; the quick start
-        // pins its own tribe to white.
-        const int whiteColourSlot = 1;
-        config.PlayerCiv = Initialization.MakeCivilization(config, celts, true, whiteColourSlot);
+        config.PlayerCiv = Initialization.MakeCivilization(config, celts, true, celts.Color);
 
         Initialization.CompleteConfig();
 
