@@ -295,21 +295,19 @@ public class ProductionBox : BaseControl
         var shieldTop = ShieldBoxTop * scale;
         var shieldBottom = Height - Padding * scale;
         var lines = (int)((shieldBottom - shieldTop) / _shieldHeight);
-        var requiredLines = activeOrder.Cost;
-        var shieldsPerRow = _shieldBoxRows;
         if (lines <= 0)
         {
             return;
         }
 
-        if (lines > requiredLines)
-        {
-            lines = requiredLines;
-        }
-        else
-        {
-            shieldsPerRow = (int)Math.Ceiling(_totalCost / (decimal)lines);
-        }
+        // Civ II's shield box is RowsShieldBox rows tall whatever is being built, and
+        // spreads the cost across them: ten shields for Warriors is one per row, six
+        // hundred for a wonder is sixty. The old arithmetic treated the cost as a row
+        // count and the row count as shields per row, which drew a hundred slots for
+        // a ten-shield unit.
+        var rows = Math.Max(1, Math.Min(lines, _shieldBoxRows));
+        var shieldsPerRow = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)rows));
+        lines = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)shieldsPerRow));
 
         var posX = Bounds.X + Padding * scale;
         var posY = Bounds.Y + shieldTop;
@@ -351,6 +349,8 @@ public class ProductionBox : BaseControl
 
     public void UpdateData(IProductionOrder itemInProduction)
     {
-        _totalCost = itemInProduction.Cost * _shieldBoxRows;
+        // The rules cost is the shield cost. It used to be multiplied by the shield
+        // box's row count here, which drew a box ten times too big for the item.
+        _totalCost = itemInProduction.Cost;
     }
 }

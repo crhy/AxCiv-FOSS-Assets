@@ -134,7 +134,7 @@ namespace Civ2engine.Production
 
         public override ListboxGroup GetBuildListEntry(IUserInterface active, City city, int shieldRows = 10)
         {
-            var shieldCost = Math.Max(1, shieldRows) * Improvement.Cost;
+            var shieldCost = Improvement.Cost;
             var turns = Math.Max(1, (int)Math.Ceiling(Math.Max(0, shieldCost - city.ShieldsProgress) /
                                                       (decimal)Math.Max(1, city.Production)));
             return new ListboxGroup

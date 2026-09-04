@@ -134,7 +134,11 @@ namespace Civ2engine
                 city.ShieldsProgress += shields;
 
 
-                if (city.ShieldsProgress >= city.ItemInProduction.Cost * shieldRows)
+                // RULES.txt costs are already shields: Warriors 10, Temple 40,
+                // Cure for Cancer 600, exactly as Civ II charges. Multiplying by the
+                // shield box's row count made everything ten times its price, so a
+                // city producing a handful of shields a turn never finished anything.
+                if (city.ShieldsProgress >= city.ItemInProduction.Cost)
                 {
                     if (city.ItemInProduction.CompleteProduction(city, rules))
                     {

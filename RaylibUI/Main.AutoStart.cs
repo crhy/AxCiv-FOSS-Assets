@@ -212,6 +212,12 @@ namespace RaylibUI
                     Console.WriteLine($"test-city: grown to size {last.Size}");
                 }
 
+                if (int.TryParse(Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY_SHIELDS"), out var sh))
+                {
+                    last.ShieldsProgress = sh;
+                    Console.WriteLine($"test-city: shields set to {last.ShieldsProgress}/{last.ItemInProduction.Cost}");
+                }
+
                 screen.ShowCityWindow(last);
                 Console.WriteLine("test-city: city window opened");
             }
@@ -238,6 +244,14 @@ namespace RaylibUI
                 }
 
                 Console.WriteLine($"test-city: turn is now {game.TurnNumber}");
+                foreach (var c in civ.Cities)
+                {
+                    Console.WriteLine($"test-city:   {c.Name} size {c.Size} shields {c.ShieldsProgress}" +
+                                      $"/{c.ItemInProduction.Cost} producing {c.ItemInProduction.GetDescription()}" +
+                                      $" (+{c.Production}/turn) disorder={c.CivilDisorder}");
+                }
+
+                Console.WriteLine($"test-city:   units {civ.Units.Count(u => !u.Dead)}");
             }
         }
 

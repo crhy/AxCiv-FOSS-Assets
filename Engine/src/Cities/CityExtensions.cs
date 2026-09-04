@@ -242,8 +242,10 @@ namespace Civ2engine
             if (city.Size <= 0)
             {
                 //Destroy city
-                city.Location.CityHere = null;
+                var location = city.Location;
+                location.CityHere = null;
                 city.Owner.Cities.Remove(city);
+                game.AllCities.Remove(city);
 
                 // Setting Tile.WorkedBy removes that tile from City.WorkedTiles as a side-effect.
                 // Enumerate a snapshot so razing/shrinking a city during combat cannot modify the
@@ -254,6 +256,21 @@ namespace Civ2engine
                 }
 
                 city.EliminateCityUnits(game);
+
+                // The map draws cities from each player's remembered copy of the tile.
+                // UpdateTiles only refreshes players who can currently see it, so anyone
+                // watching from a distance went on being shown a city that no longer
+                // exists. A razing is worth telling everyone who knew the place about.
+                foreach (var player in game.Players)
+                {
+                    var civId = player.Civilization.Id;
+                    if (location.PlayerKnowledge is { } knowledge &&
+                        civId < knowledge.Length && knowledge[civId] != null)
+                    {
+                        location.UpdatePlayer(civId);
+                        player.MapChanged([location]);
+                    }
+                }
             }
             else
             {

@@ -63,8 +63,8 @@ namespace Civ2engine.UnitActions
                 return;
             }
 
-            var totalCost = Math.Max(1, city.ItemInProduction.Cost * Math.Max(1, shieldRows));
-            var shieldCredit = Math.Max(1, unit.TypeDefinition.Cost * Math.Max(1, shieldRows) / 2);
+            var totalCost = Math.Max(1, city.ItemInProduction.Cost);
+            var shieldCredit = Math.Max(1, unit.TypeDefinition.Cost / 2);
             city.ShieldsProgress = Math.Min(totalCost, city.ShieldsProgress + shieldCredit);
 
             var queuedItem = city.ConstructionQueue.Current;

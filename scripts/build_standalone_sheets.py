@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import resource_icons
+
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 
@@ -328,6 +330,12 @@ def build_icons() -> None:
         for column in range(4):
             x = 49 + 15 * column
             draw.rectangle((x, row_y, x + 13, row_y + 13), fill=tuple(max(0, c - 18 * column) if i < 3 else c for i, c in enumerate(color)), outline=(25, 25, 25, 255))
+
+    # Food, shield and trade icons where the city window actually reads them. The
+    # rows above put art at x=49 and up, but Civ2Interface takes the large and loss
+    # icons from x=1, 16 and 31, which was bare sheet background: the food and trade
+    # bars, the food storage box and the production shield box all drew grey blanks.
+    resource_icons.draw_all(lambda x, y, rgba: sheet.putpixel((x, y), rgba))
 
     draw.rectangle((1, 389, 16, 404), fill=(185, 65, 65, 255), outline=(245, 245, 245, 255))
     draw.line((5, 393, 12, 400), fill=(255, 255, 255, 255), width=2)
