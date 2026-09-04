@@ -175,16 +175,30 @@ public class CityTileMap : BaseControl
                 //Play bad action sound?
                 return;
             }
+
+            // The citizen comes off the land and becomes a specialist rather than
+            // vanishing. Without this the city quietly lost a worker's output and
+            // gained nothing, and the specialist count could never rise.
+            if (city.NoOfSpecialistsx4 / 4 >= city.Size)
+            {
+                return;
+            }
+
             tile.WorkedBy = null;
+            city.NoOfSpecialistsx4 += 4;
+            city.GetSpecialistTypes();
         }
         else
         {
-            // if equal we still allow since worked tiles include the city centre
-            if (city.WorkedTiles.Count > city.Size)
+            // Putting a citizen back on the land takes one off the specialists.
+            if (city.NoOfSpecialistsx4 < 4)
             {
                 // Play bad action?
                 return;
             }
+
+            city.NoOfSpecialistsx4 -= 4;
+            city.GetSpecialistTypes();
             tile.WorkedBy = city;
         }
 

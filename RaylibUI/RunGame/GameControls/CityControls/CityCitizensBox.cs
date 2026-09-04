@@ -17,7 +17,8 @@ public class CityCitizensBox : BaseControl
     private readonly IUserInterface _active;
     private readonly ImageBox[] _icons;
     private readonly City _city;
-    private readonly int _epoch, _specialistsStart;
+    private readonly int _epoch;
+    private int _specialistsStart;
     private readonly int[] _citizenIndex;
     
     public CityCitizensBox(CityWindow cityWindow) : base(cityWindow)
@@ -51,6 +52,7 @@ public class CityCitizensBox : BaseControl
     public override void OnResize()
     {
         var people = _city.GetPeopleTypes(_cityWindow.CurrentGameScreen.Game);
+        _specialistsStart = _city.Size - (_city.NoOfSpecialistsx4 / 4);
         var pos = _props.CitizensBox.ScaleAll(_cityWindow.Scale);
         Location = new(_cityWindow.LayoutPadding.Left + pos.X, _cityWindow.LayoutPadding.Top + pos.Y);
         Width = (int)pos.Width;
@@ -90,13 +92,28 @@ public class CityCitizensBox : BaseControl
         }
     }
 
-    private void OnClick(object? sender, MouseEventArgs e) 
+    private void OnClick(object? sender, MouseEventArgs e)
     {
-        // Change specialist
         var index = Array.IndexOf(_icons, sender);
+        if (index < 0)
+        {
+            return;
+        }
+
         if (index >= _specialistsStart)
         {
+            // Already a specialist: cycle entertainer, taxman, scientist.
             ChangeSpecialist(index, 1, IsShiftDown());
+            return;
+        }
+
+        // A working citizen becomes an entertainer. This is how Civ II clears civil
+        // disorder from the city screen, and nothing in the interface could do it:
+        // the specialist count was only ever decreased, never raised.
+        if (_city.MakeSpecialist(_cityWindow.CurrentGameScreen.Game.Rules))
+        {
+            _cityWindow.UpdateProduction();
+            OnResize();
         }
     }
 

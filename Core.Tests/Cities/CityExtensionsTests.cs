@@ -400,4 +400,78 @@ public class CityExtensionsTests
         Assert.Equal(0, coworker.Building);
         Assert.Equal((int)OrderType.NoOrders, coworker.Order);
     }
+
+    private City BuildWorkingCity(Map map, Civilization civ, int size)
+    {
+        var location = map.Tile[10, 4];
+        var city = new City { Owner = civ, Location = location, Size = size, Name = "Test" };
+        location.CityHere = city;
+        location.WorkedBy = city;
+        return city;
+    }
+
+    [Fact]
+    public void MakeSpecialist_TakesACitizenOffTheLand()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var city = BuildWorkingCity(map, civ, 4);
+        city.AutoAddDistributionWorkers(rules);
+
+        var workedBefore = city.WorkedTiles.Count;
+
+        Assert.True(city.MakeSpecialist(rules));
+        Assert.Equal(4, city.NoOfSpecialistsx4);
+        Assert.Equal(workedBefore - 1, city.WorkedTiles.Count);
+        // The freed citizen becomes an entertainer.
+        Assert.Equal(PeopleType.Elvis, city.GetSpecialistTypes().Single());
+    }
+
+    [Fact]
+    public void MakeSpecialist_NeverGivesUpTheCityCentre()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var city = BuildWorkingCity(map, civ, 1);
+        city.AutoAddDistributionWorkers(rules);
+
+        Assert.True(city.MakeSpecialist(rules));
+        Assert.Contains(city.Location, city.WorkedTiles);
+    }
+
+    [Fact]
+    public void MakeSpecialist_StopsWhenEveryCitizenIsASpecialist()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var city = BuildWorkingCity(map, civ, 2);
+        city.AutoAddDistributionWorkers(rules);
+
+        Assert.True(city.MakeSpecialist(rules));
+        Assert.True(city.MakeSpecialist(rules));
+        Assert.False(city.MakeSpecialist(rules));
+        Assert.Equal(2, city.NoOfSpecialistsx4 / 4);
+    }
+
+    [Fact]
+    public void MakeWorker_PutsASpecialistBackOnTheLand()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var city = BuildWorkingCity(map, civ, 3);
+        city.AutoAddDistributionWorkers(rules);
+        var workedBefore = city.WorkedTiles.Count;
+
+        Assert.True(city.MakeSpecialist(rules));
+        Assert.True(city.MakeWorker(rules));
+
+        Assert.Equal(0, city.NoOfSpecialistsx4);
+        Assert.Equal(workedBefore, city.WorkedTiles.Count);
+    }
+
+    [Fact]
+    public void MakeWorker_DoesNothingWithoutASpecialist()
+    {
+        var (game, rules, civ, map) = SetupGame();
+        var city = BuildWorkingCity(map, civ, 3);
+        city.AutoAddDistributionWorkers(rules);
+
+        Assert.False(city.MakeWorker(rules));
+    }
 }

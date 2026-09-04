@@ -367,15 +367,21 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         _cityWindowLayout.Buttons.Add("View", new(Labels.For(LabelIndex.View), new(517, 389, infoButtonWidth, buttonHeight)));
         _cityWindowLayout.Buttons.Add("Exit", new("Exit", new(575, 389, infoButtonWidth, buttonHeight)));
 
+        // The classic city dialog was dark, so its section headings were gold on
+        // near-black. This build's panel is light stone and gold on it is all but
+        // invisible, so the headings are dark with a light shadow instead.
+        var headingColour = new Color(46, 34, 16, 255);
+        var headingShadow = new Color(245, 240, 226, 200);
+
         _cityWindowLayout.Labels.Add("FoodStorage", new(Labels.For(LabelIndex.FoodStorage), new(437, 0, 195, 12), new Color(75, 155, 35, 255), Color.Black));
-        _cityWindowLayout.Labels.Add("CityImprovements", new(Labels.For(LabelIndex.CityImprovements), new(3, 291, 189, 12), new Color(223, 187, 63, 255), new Color(67, 67, 67, 255)));
-        _cityWindowLayout.Labels.Add("UnitsPresent", new(Labels.For(LabelIndex.UnitsPresent), new(0, 0, 232, 12), new Color(223, 187, 63, 255), new Color(67, 67, 67, 255)));
-        _cityWindowLayout.Labels.Add("UnitsSupported", new(Labels.For(LabelIndex.UnitsSupported), new(3, 215, 189, 12), new Color(223, 187, 63, 255), new Color(67, 67, 67, 255)));
+        _cityWindowLayout.Labels.Add("CityImprovements", new(Labels.For(LabelIndex.CityImprovements), new(3, 291, 189, 12), headingColour, headingShadow));
+        _cityWindowLayout.Labels.Add("UnitsPresent", new(Labels.For(LabelIndex.UnitsPresent), new(0, 0, 232, 12), headingColour, headingShadow));
+        _cityWindowLayout.Labels.Add("UnitsSupported", new(Labels.For(LabelIndex.UnitsSupported), new(3, 215, 189, 12), headingColour, headingShadow));
         _cityWindowLayout.Labels.Add("ItemInProduction", new("", new(0, 4, 195, 12), new Color(63, 79, 167, 255), Color.Black));
         _cityWindowLayout.Labels.Add("Supplies", new(Labels.For(LabelIndex.Supplies), new(0, 130, 232, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
         _cityWindowLayout.Labels.Add("Demands", new(Labels.For(LabelIndex.Demands), new(0, 143, 232, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
-        _cityWindowLayout.Labels.Add("ResourceMap", new(Labels.For(LabelIndex.ResourceMap), new(0, 125, 189, 12), new Color(223, 187, 63, 255), new Color(0, 51, 0, 255)));
-        _cityWindowLayout.Labels.Add("Citizens", new(Labels.For(LabelIndex.Citizens), new(0, 46, 189, 12), new Color(223, 187, 63, 255), new Color(67, 67, 67, 255)));
+        _cityWindowLayout.Labels.Add("ResourceMap", new(Labels.For(LabelIndex.ResourceMap), new(0, 125, 189, 12), headingColour, headingShadow));
+        _cityWindowLayout.Labels.Add("Citizens", new(Labels.For(LabelIndex.Citizens), new(0, 46, 189, 12), headingColour, headingShadow));
 
 
         return _cityWindowLayout;

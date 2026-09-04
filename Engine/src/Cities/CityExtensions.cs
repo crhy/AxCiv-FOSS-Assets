@@ -347,6 +347,55 @@ namespace Civ2engine
             unworked.WorkedBy = null;
         }
 
+        /// <summary>
+        /// Take a citizen off the land and make it a specialist, which is Civ II's
+        /// direct answer to civil disorder: the new entertainer stops working a tile
+        /// and starts producing luxury instead. The tile given up is the least
+        /// productive one the city works, and never the city centre.
+        /// </summary>
+        public static bool MakeSpecialist(this City city, Rules gameRules)
+        {
+            if (city.NoOfSpecialistsx4 / 4 >= city.Size)
+            {
+                return false;
+            }
+
+            var tiles = city.WorkedTiles.Where(t => t != city.Location).ToList();
+            if (tiles.Count == 0)
+            {
+                return false;
+            }
+
+            var organization = city.GetOrganizationLevel(gameRules);
+            var worst = tiles.OrderBy(t =>
+                t.GetFood(organization == 0) + t.GetShields(organization == 0) +
+                t.GetTrade(organization)).First();
+
+            worst.WorkedBy = null;
+            city.NoOfSpecialistsx4 += 4;
+
+            // GetSpecialistTypes normalises the array to the new count, defaulting
+            // the added entry to an entertainer.
+            city.GetSpecialistTypes();
+            return true;
+        }
+
+        /// <summary>
+        /// Put a specialist back to work on the best free tile in the city radius.
+        /// </summary>
+        public static bool MakeWorker(this City city, Rules gameRules)
+        {
+            if (city.NoOfSpecialistsx4 < 4)
+            {
+                return false;
+            }
+
+            city.NoOfSpecialistsx4 -= 4;
+            city.GetSpecialistTypes();
+            city.AutoAddDistributionWorkers(gameRules);
+            return true;
+        }
+
         public static void AutoAddDistributionWorkers(this City city, Rules gameRules)
         {
             // First determine how many workers are to be added

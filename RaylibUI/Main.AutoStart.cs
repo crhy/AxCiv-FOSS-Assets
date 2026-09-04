@@ -197,6 +197,21 @@ namespace RaylibUI
 
             if (last != null)
             {
+                // RHYCIV_TEST_CITY_SIZE grows the city before its window opens, so the
+                // citizen row has something in it to inspect.
+                if (int.TryParse(Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY_SIZE"), out var size)
+                    && size > last.Size)
+                {
+                    while (last.Size < size)
+                    {
+                        last.Size++;
+                        last.AutoAddDistributionWorkers(game.Rules);
+                    }
+
+                    last.CalculateOutput(last.Owner.Government, game);
+                    Console.WriteLine($"test-city: grown to size {last.Size}");
+                }
+
                 screen.ShowCityWindow(last);
                 Console.WriteLine("test-city: city window opened");
             }

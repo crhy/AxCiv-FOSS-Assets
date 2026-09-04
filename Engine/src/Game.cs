@@ -23,7 +23,10 @@ namespace Civ2engine
     {
         private readonly Options _options;
         private readonly Rules _rules;
-        private readonly Scenario _scenarioData;
+        // Only the load-game constructor assigned this, so every new game carried a
+        // null here and the first city capture threw on ScenarioData. A plain
+        // Scenario is what a non-scenario game wants anyway: every restriction off.
+        private readonly Scenario _scenarioData = new();
         private readonly BarbarianActivityType _barbarianActivity;
         public FastRandom Random { get; set; } = new();
         public List<City> AllCities { get; } = new();
