@@ -283,6 +283,16 @@ namespace Civ2engine.UnitActions
                 return false;
             }
 
+            // Only Marines storm a shore straight off a transport. Every other land
+            // unit has to be put ashore first, which is the whole point of the
+            // amphibious flag and of holding a beachhead.
+            if (unit.InShip != null && unit.Domain == UnitGas.Ground &&
+                !unit.CanMakeAmphibiousAssaults && tileTo.Type != TerrainType.Ocean)
+            {
+                game.Players[unit.Owner.Id].MoveBlocked(unit, BlockedReason.NotAmphibious);
+                return false;
+            }
+
 
             if (tileTo.CityHere != null)
             {
@@ -397,7 +407,12 @@ namespace Civ2engine.UnitActions
                 fpD = 1;
             }
             
-            var probAttackerWins = defenseFactor >= attackFactor ? (attackFactor * 8 - 1) / (2 * defenseFactor * 8) : 1 - (defenseFactor * 8 + 1) / (2 * attackFactor * 8);
+            // Civ II rolls rand(A + D) each round, so the attacker takes the round
+            // with probability exactly A / (A + D). The curve this replaced was
+            // symmetric about even odds but over-rewarded the stronger unit
+            // everywhere else -- A2 against D1 paid 0.72 instead of 0.67.
+            var oddsTotal = attackFactor + defenseFactor;
+            var probAttackerWins = oddsTotal <= 0 ? 0.5 : (double)attackFactor / oddsTotal;
 
             // Battle -> Loop through combat rounds until a unit loses its HP
             var random = new Random();

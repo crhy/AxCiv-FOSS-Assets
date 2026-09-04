@@ -435,10 +435,23 @@ namespace Civ2engine
                 return;
             }
 
-            var inFriendlyCity = unit.CurrentLocation.CityHere?.Owner == unit.Owner;
+            var city = unit.CurrentLocation.CityHere;
+            var inFriendlyCity = city?.Owner == unit.Owner;
             var resting = unit.Order is (int)OrderType.Sleep or (int)OrderType.Fortify or (int)OrderType.Fortified;
             if (!resting && !inFriendlyCity)
             {
+                return;
+            }
+
+            // A city with the support building for the unit's domain -- Barracks for
+            // land, Port Facility for sea, Airport for air -- restores it outright
+            // rather than a couple of hit points a turn. They are recognised by the
+            // same domain-matched Veteran effect that decides veteran production.
+            if (inFriendlyCity && city!.Improvements.Any(i =>
+                    i.Effects.TryGetValue(Effects.Veteran, out var domain) &&
+                    domain == (int)unit.Domain))
+            {
+                unit.HitPointsLost = 0;
                 return;
             }
 

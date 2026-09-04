@@ -88,34 +88,121 @@ public class UnitExtensionsTests
         Assert.Equal(15, unit.DefenseFactor(attacker, tile, 50));
     }
 
-    [Fact]
-    public void DefenseFactor_CityWallsBonus()
-    {
-        var unit = new Unit { TypeDefinition = new UnitDefinition { Defense = 10, Domain = UnitGas.Ground, Flags = new bool[15] } };
-        var attacker = new Unit { TypeDefinition = new UnitDefinition { Domain = UnitGas.Ground, Flags = new bool[15] } };
-        var map = new Map(true, 0);
-        var tile = new Tile(0, 0, new Terrain { Defense = 2, Specials = [] }, 0, map, 0, new bool[2]);
-        var city = new City { Owner = new Civilization { Id = 1 } };
-        var walls = new Improvement
+    private static Unit Defender(int defense = 10, int order = 0, bool[]? flags = null) =>
+        new()
         {
-            Type = 1,
-            Effects =
+            TypeDefinition = new UnitDefinition
+                { Defense = defense, Domain = UnitGas.Ground, Flags = flags ?? new bool[15] },
+            Order = order
+        };
+
+    private static Unit GroundAttacker(int movesPerTurn = 1, int firepower = 1, int hitpoints = 10) =>
+        new()
+        {
+            TypeDefinition = new UnitDefinition
             {
-                [Effects.Walled] = 300
+                Domain = UnitGas.Ground, Flags = new bool[15],
+                AttackPerTurn = movesPerTurn, Firepwr = firepower, Hitp = hitpoints
             }
         };
-        city.AddImprovement(walls);
+
+    private static Tile TerrainTile(int terrainDefense = 2, bool river = false) =>
+        new(0, 0, new Terrain { Defense = terrainDefense, Specials = [] }, 0, new Map(true, 0), 0, new bool[2])
+            { River = river };
+
+    private static Tile WalledCityTile(int wallEffect = 200)
+    {
+        var tile = TerrainTile();
+        var city = new City { Owner = new Civilization { Id = 1 } };
+        city.AddImprovement(new Improvement { Type = 1, Effects = { [Effects.Walled] = wallEffect } });
         tile.CityHere = city;
-        
-        // 10 + (300 / 100) = 13. ??? Wait, line 66 in UnitExtensions.cs: 
-        // var totalWallDefence = tile.CityHere.Improvements.Sum(i => i.Effects.GetValueOrDefault(Effects.Walled, 0)) / 100m;
-        // It's NOT a multiplier of df, it's an additive factor?
-        // Let's check: df += bestGroundFactor;
-        // And bestGroundFactor = totalWallDefence if totalWallDefence > bestGroundFactor.
-        // If totalWallDefence is 3.0, and df is 10.0, it becomes 13.0.
-        // That seems WRONG for City Walls (usually 3x defense).
-        // Let's re-read UnitExtensions.cs.
-        
-        Assert.Equal(13, unit.DefenseFactor(attacker, tile, 0));
+        return tile;
+    }
+
+    [Fact]
+    public void DefenseFactor_CityWalls_MultiplyRatherThanAddTheirEffectValue()
+    {
+        // The shipped City Walls effect is 200, which Civ II reads as x3. Adding the
+        // effect value on its own made walls a flat +2 whatever the garrison was.
+        Assert.Equal(30, Defender().DefenseFactor(GroundAttacker(), WalledCityTile(), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_CityWalls_StackWithFortification()
+    {
+        // x3 for the walls and x1.5 for being dug in: Civ II applies both.
+        Assert.Equal(45, Defender(order: (int)OrderType.Fortified)
+            .DefenseFactor(GroundAttacker(), WalledCityTile(), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_Fortress_StacksWithFortification()
+    {
+        // Fortress x2 and fortified x1.5.
+        Assert.Equal(30, Defender(order: (int)OrderType.Fortified)
+            .DefenseFactor(GroundAttacker(), TerrainTile(), 100));
+    }
+
+    [Fact]
+    public void DefenseFactor_CityWalls_IgnoredByHowitzerStyleAttacker()
+    {
+        var flags = new bool[15];
+        flags[6] = true; // NegatesCityWalls
+        var howitzer = new Unit
+        {
+            TypeDefinition = new UnitDefinition { Domain = UnitGas.Ground, Flags = flags }
+        };
+
+        Assert.Equal(10, Defender().DefenseFactor(howitzer, WalledCityTile(), 0));
+    }
+
+    [Theory]
+    [InlineData(2, 10)]  // Desert, Plains, Grassland: x1
+    [InlineData(3, 15)]  // Forest, Jungle, Swamp: x1.5, which integer division flattened to x1
+    [InlineData(4, 20)]  // Hills: x2
+    [InlineData(6, 30)]  // Mountains: x3
+    public void DefenseFactor_TerrainKeepsItsHalfSteps(int terrainDefense, int expected)
+    {
+        Assert.Equal(expected, Defender().DefenseFactor(GroundAttacker(), TerrainTile(terrainDefense), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_RiverAddsAQuarter()
+    {
+        // Grassland x1 and a river's +25%.
+        Assert.Equal(12, Defender().DefenseFactor(GroundAttacker(), TerrainTile(river: true), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_PikemenDoubleAgainstMountedAttackers()
+    {
+        var flags = new bool[15];
+        flags[10] = true; // X2OnDefenseVersusHorse
+        var pikemen = Defender(flags: flags);
+
+        // Knights: two moves, one hit point, one firepower.
+        Assert.Equal(20, pikemen.DefenseFactor(GroundAttacker(movesPerTurn: 2), TerrainTile(), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_PikemenBonusReachesDragoonsAndCavalry()
+    {
+        var flags = new bool[15];
+        flags[10] = true;
+        var pikemen = Defender(flags: flags);
+
+        // Cavalry carry two hit points; requiring one used to exclude them.
+        Assert.Equal(20, pikemen.DefenseFactor(GroundAttacker(movesPerTurn: 2, hitpoints: 20), TerrainTile(), 0));
+    }
+
+    [Fact]
+    public void DefenseFactor_PikemenBonusDoesNotApplyToSiegeArtillery()
+    {
+        var flags = new bool[15];
+        flags[10] = true;
+        var pikemen = Defender(flags: flags);
+
+        // A Howitzer also has two moves; its two firepower is what excludes it.
+        Assert.Equal(10, pikemen.DefenseFactor(GroundAttacker(movesPerTurn: 2, firepower: 2), TerrainTile(), 0));
     }
 }

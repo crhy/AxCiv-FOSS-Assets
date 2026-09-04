@@ -150,7 +150,14 @@ namespace Model.Core.Mapping
         public string? SpecialsName => Special != -1 && Special < _terrain.Specials.Length ? _terrain.Specials[Special].Name : null;
 
         public int MoveCost => EffectiveTerrain.MoveCost;
-        public int Defense => (River ? EffectiveTerrain.Defense + 1 : EffectiveTerrain.Defense) / 2;
+
+        /// <summary>
+        /// Terrain defence multiplier. The rules value counts half-steps, so Forest,
+        /// Jungle and Swamp's 3 is x1.5 and Mountains' 6 is x3. Integer division used
+        /// to flatten every half-step to x1; a river adds a further 25% on top, which
+        /// is how Civ II applies it rather than as one more half-step.
+        /// </summary>
+        public decimal Defense => EffectiveTerrain.Defense / 2m * (River ? 1.25m : 1m);
 
         
         public bool Resource { get; set; }

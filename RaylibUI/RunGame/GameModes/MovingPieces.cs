@@ -9,6 +9,7 @@ using Civ2engine.UnitActions;
 using Model.Core;
 using Model.Controls;
 using Model.Core.Mapping;
+using Model.Core.Units;
 using Raylib_CSharp.Interact;
 using Raylib_CSharp.Transformations;
 using RaylibUI.BasicTypes.Controls;
@@ -76,8 +77,30 @@ public class MovingPieces : IGameMode
         return new UnitReadyView(gameScreen, currentView, viewHeight, viewWidth, gameScreen.Player.ActiveUnit!, forceRedraw);
     }
 
+    /// <summary>
+    /// Set by the Paradrop order while the player picks a drop zone. The next left
+    /// click on the map is consumed as the target rather than as a move.
+    /// </summary>
+    public Unit? AwaitingParadrop { get; set; }
+
     public bool MapClicked(Tile tile, MouseButton mouseButton)
     {
+        if (AwaitingParadrop is { } jumper)
+        {
+            AwaitingParadrop = null;
+            if (mouseButton == MouseButton.Left && ParadropFunctions.TryParadrop(_gameScreen.Game, jumper, tile))
+            {
+                if (!jumper.AwaitingOrders)
+                {
+                    _gameScreen.Game.ChooseNextUnit();
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
         if (mouseButton == MouseButton.Right && IsShiftDown())
         {
             MassMoveSameType(tile);

@@ -53,12 +53,10 @@ public static class UnitExtensions
         // Bonus for veteran units
         if (defendingUnit.Veteran) df *= 1.5m;
 
-        // Pikemen-style bonus. Civ II applies x1.5 -- not x2 -- and only against a
-        // land attacker with two movement points, one hit point and one firepower,
-        // which is how the rules identify a mounted unit without a dedicated flag.
+        // Pikemen-style bonus: Civ II doubles the defence against every mounted unit.
         if (defendingUnit.X2OnDefenseVersusHorse && IsMountedAttacker(attackingUnit))
         {
-            df *= 1.5m;
+            df *= 2m;
         }
 
         // AEGIS-style bonus: x3 against aircraft, x5 against missiles.
@@ -67,29 +65,22 @@ public static class UnitExtensions
             df *= attackingUnit.DestroyedAfterAttacking ? 5m : 3m;
         }
 
-        // City walls bonus (applies only to land units)
+        // Prepared-position bonuses (land units only)
         if (defendingUnit.Domain == UnitGas.Ground)
         {
-            var bestGroundFactor = 0m;
-            // Fortress bonus (Applies only to land units. Unit doesn't have to be fortified. Doesn't count if air unit is attacking.)
+            // A unit is either behind city walls or in a fortress, never both, so
+            // those two take the better of the pair. Fortification is a separate
+            // bonus that Civ II multiplies on top rather than choosing between.
+            var positionFactor = 1m;
+
+            // Fortress. The unit does not have to be fortified, and the bonus does
+            // not apply when the attack comes from the air.
             if (groundDefMultiplier != 0 && attackingUnit.Domain != UnitGas.Air)
             {
-                bestGroundFactor = df * groundDefMultiplier / 100;
+                positionFactor = 1m + groundDefMultiplier / 100m;
             }
 
-            // Fortified bonus
-            if (defendingUnit.Order == (int)OrderType.Fortified)
-            {
-                var fortifiedFactor = df / 2m;
-                if (fortifiedFactor > bestGroundFactor)
-                {
-                    bestGroundFactor = fortifiedFactor;
-                }
-            }
-
-            //City walls (Note these are summed)
-            if (tile.CityHere != null &&
-                defendingUnit.Domain == UnitGas.Ground && !attackingUnit.NegatesCityWalls)
+            if (tile.CityHere != null && !attackingUnit.NegatesCityWalls)
             {
                 var wallEffect =
                     tile.CityHere.Improvements.Sum(i => i.Effects.GetValueOrDefault(Effects.Walled, 0));
@@ -101,14 +92,24 @@ public static class UnitExtensions
                     wallEffect = FreeCityWallEffect;
                 }
 
-                var totalWallDefence = wallEffect / 100m;
-                if (totalWallDefence > bestGroundFactor)
+                // Walls multiply the defence they protect. Adding the effect value
+                // on its own made City Walls a flat +2 whatever the garrison was.
+                if (wallEffect != 0)
                 {
-                    bestGroundFactor = totalWallDefence;
+                    var wallFactor = 1m + wallEffect / 100m;
+                    if (wallFactor > positionFactor)
+                    {
+                        positionFactor = wallFactor;
+                    }
                 }
             }
 
-            df += bestGroundFactor;
+            if (defendingUnit.Order == (int)OrderType.Fortified)
+            {
+                positionFactor *= 1.5m;
+            }
+
+            df *= positionFactor;
         }
 
         // Helicopters are vulnerable to anti air
@@ -185,16 +186,17 @@ public static class UnitExtensions
 
     /// <summary>
     /// Civ II has no explicit "is a horse" flag. A mounted attacker is a land unit
-    /// with two movement points, a single hit point and a single firepower, which
-    /// selects exactly the Horsemen-through-Cavalry line in the standard rules
-    /// while still working for custom rulesets.
+    /// with two movement points and a single firepower, which selects exactly the
+    /// Horsemen-through-Cavalry line in the standard rules while still working for
+    /// custom rulesets. Hit points are deliberately not part of the test: Dragoons
+    /// and Cavalry carry two, and requiring one excluded the very units Pikemen
+    /// exist to stop. The firepower term is what keeps the Howitzer out.
     /// </summary>
     private static bool IsMountedAttacker(Unit attackingUnit)
     {
         var definition = attackingUnit.TypeDefinition;
         return attackingUnit.Domain == UnitGas.Ground &&
                definition.AttackPerTurn == 2 &&
-               definition.Hitp == 10 &&
                definition.Firepwr == 1;
     }
 }

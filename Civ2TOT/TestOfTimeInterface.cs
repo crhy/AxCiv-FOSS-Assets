@@ -427,7 +427,7 @@ public class TestOfTimeInterface(IMain main) : Civ2Interface(main)
                 new("&Pillage|Shift+P", new Shortcut(Key.P, shift: true), Key.P),
                 new("&Unload|u", new Shortcut(Key.U), Key.U),
                 new("&Go To|g", new Shortcut(Key.G), Key.G),
-                new("&Paradrop|p", new Shortcut(Key.P), Key.P),
+                new("&Paradrop|p", new Shortcut(Key.P), Key.P, ParadropOrder, omitIfNoCommand: true),
                 new("Air&lift|l", new Shortcut(Key.L), Key.L),
                 new("Teleport|n", new Shortcut(Key.N), Key.None),
                 new("Set &Home City|h", new Shortcut(Key.H), Key.H),

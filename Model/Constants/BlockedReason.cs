@@ -7,5 +7,6 @@ namespace Civ2engine.Enums
         ZeroAttackStrength = 2,
         CannotAttackAirUnits = 3,
         EdgeOfMap = 4,
+        NotAmphibious = 5,
     }
 }
