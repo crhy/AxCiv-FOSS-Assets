@@ -20,6 +20,107 @@ from pathlib import Path
 # nations arrive here in a different order, so the colour is looked up by name
 # rather than derived from position; anything Civ II does not have falls back to
 # the positional cycle.
+# Civilization II sorts its advances into four kinds and shows a badge for each
+# when you choose what to research next. This was keyword-guessed with a
+# depth-parity fallback, which put two thirds of them into a pair of catch-alls.
+# The four kinds, and every advance the brief names, are explicit here; the
+# fifteen it does not name are placed by what it says each kind covers - science
+# and theory, engineering and infrastructure, warfare, and government and
+# economics. Names use this ruleset's own spellings.
+ACADEMIC, APPLIED, MILITARY, SOCIAL = 0, 1, 2, 3
+
+ADVANCE_CATEGORIES = {
+    "Advanced Flight": APPLIED,
+    "Alphabet": ACADEMIC,
+    "Amphibious Warfare": MILITARY,
+    "Astronomy": ACADEMIC,
+    "Atomic Theory": ACADEMIC,
+    "Automobile": APPLIED,
+    "Banking": SOCIAL,
+    "Bridge Building": APPLIED,
+    "Bronze Working": APPLIED,
+    "Ceremonial Burial": SOCIAL,
+    "Chemistry": ACADEMIC,
+    "Chivalry": MILITARY,
+    "Code of Laws": SOCIAL,
+    "Combined Arms": MILITARY,
+    "Combustion": APPLIED,
+    "Communism": SOCIAL,
+    "Computers": APPLIED,
+    "Conscription": MILITARY,
+    "Construction": APPLIED,
+    "Currency": SOCIAL,
+    "Democracy": SOCIAL,
+    "Economics": SOCIAL,
+    "Electricity": APPLIED,
+    "Electronics": APPLIED,
+    "Engineering": APPLIED,
+    "Environmentalism": SOCIAL,
+    "Espionage": MILITARY,
+    "Explosives": APPLIED,
+    "Feudalism": MILITARY,
+    "Flight": APPLIED,
+    "Fundamentalism": SOCIAL,
+    "Fusion Power": ACADEMIC,
+    "Genetic Engineering": ACADEMIC,
+    "Guerilla Warfare": MILITARY,
+    "Gunpowder": MILITARY,
+    "Horseback Riding": MILITARY,
+    "Industrialization": SOCIAL,
+    "Invention": APPLIED,
+    "Iron Working": APPLIED,
+    "Labor Union": SOCIAL,
+    "Laser": ACADEMIC,
+    "Leadership": MILITARY,
+    "Literacy": ACADEMIC,
+    "Machine Tools": APPLIED,
+    "Magnetism": ACADEMIC,
+    "Map Making": APPLIED,
+    "Masonry": APPLIED,
+    "Mass Production": APPLIED,
+    "Mathematics": ACADEMIC,
+    "Medicine": ACADEMIC,
+    "Metallurgy": MILITARY,
+    "Miniaturization": APPLIED,
+    "Mobile Warfare": MILITARY,
+    "Monarchy": SOCIAL,
+    "Monotheism": SOCIAL,
+    "Mysticism": SOCIAL,
+    "Navigation": APPLIED,
+    "Nuclear Fission": ACADEMIC,
+    "Nuclear Power": ACADEMIC,
+    "Philosophy": SOCIAL,
+    "Physics": ACADEMIC,
+    "Plastics": APPLIED,
+    "Polytheism": SOCIAL,
+    "Pottery": APPLIED,
+    "Radio": APPLIED,
+    "Railroad": APPLIED,
+    "Recycling": SOCIAL,
+    "Refining": APPLIED,
+    "Refrigeration": APPLIED,
+    "Robotics": MILITARY,
+    "Rocketry": MILITARY,
+    "Sanitation": APPLIED,
+    "Seafaring": APPLIED,
+    "Space Flight": ACADEMIC,
+    "Stealth": MILITARY,
+    "Steam Engine": ACADEMIC,
+    "Steel": APPLIED,
+    "Superconductors": ACADEMIC,
+    "Tactics": MILITARY,
+    "The Corporation": SOCIAL,
+    "The Republic": SOCIAL,
+    "The Wheel": APPLIED,
+    "Theology": SOCIAL,
+    "Theory of Gravity": ACADEMIC,
+    "Trade": SOCIAL,
+    "University": ACADEMIC,
+    "Warrior Code": MILITARY,
+    "Writing": ACADEMIC,
+}
+
+
 CIV2_TRIBE_COLOURS = {
     "Romans": 1, "Babylonians": 2, "Germans": 3, "Egyptians": 4,
     "Americans": 5, "Greeks": 6, "Indians": 7,
@@ -114,14 +215,11 @@ def build_rules(source: Path) -> tuple[str, str]:
         "3", "2", "2", "10", "10", "1", "2", "7", "14", "8", "12", "10", "20", "3", "3", "10",
         "0", "50", "50", "10", "75", "5", "1", "1", "1", "1", "1", "1", "1", "1", "", "@CIVILIZE"
     ]
-    military = {"warfare", "weapon", "gun", "tactics", "leadership", "conscription", "chivalry"}
-    economic = {"trade", "currency", "bank", "econom", "corporation", "industrial"}
-    social = {"law", "government", "democracy", "republic", "communism", "theology", "philosophy"}
     for name in tech_names:
         depth = depths[name]
         epoch = 0 if depth <= 3 else 1 if depth <= 6 else 2 if depth <= 9 else 3
         lower = name.lower()
-        category = 0 if any(word in lower for word in military) else 1 if any(word in lower for word in economic) else 2 if any(word in lower for word in social) else 3 if depth % 2 == 0 else 4
+        category = ADVANCE_CATEGORIES.get(name, APPLIED)
         req1, req2 = prereqs[name]
         lines.append(f"{name}, 4, 0, {codes.get(req1, 'nil')}, {codes.get(req2, 'nil')}, {epoch}, {category} ; {codes[name]}")
 

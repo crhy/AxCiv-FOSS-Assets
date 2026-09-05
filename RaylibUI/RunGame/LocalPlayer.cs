@@ -149,11 +149,25 @@ public class LocalPlayer : IPlayer
             });
     }
 
+    /// <summary>
+    /// The badge shown beside an advance in the research list, saying what kind of
+    /// advance it is. This used to read a 36x20 patch of the ICONS sheet, which the
+    /// standalone set fills with plain coloured rectangles, so every advance was a
+    /// flat swatch (#48).
+    /// </summary>
+    private static readonly string[] AdvanceCategoryArt =
+        ["academic", "applied", "military", "social"];
+
     private static IImageSource GetClassicAdvanceIcon(Advance advance)
     {
-        var x = 343 + advance.KnowledgeCategory * 37;
-        var y = 211 + advance.Epoch * 21;
-        return new BitmapStorage("icons", x, y, 36, 20);
+        var category = advance.KnowledgeCategory;
+        if (category < 0 || category >= AdvanceCategoryArt.Length)
+        {
+            category = 1;
+        }
+
+        return new BitmapStorage(
+            System.IO.Path.Combine("Icons", "AdvanceCategories", $"{AdvanceCategoryArt[category]}.png"));
     }
 
     public void CantProduce(City city, IProductionOrder? newItem)
