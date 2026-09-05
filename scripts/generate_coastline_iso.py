@@ -126,6 +126,17 @@ def build(N, E, Sc, Wc):
     shelf = ((n_shelf - 0.5) * 55 * smoothstep(-4, -30, d)
              * smoothstep(-148, -100, d))
     d_col = d + shelf
+
+    # Narrow the shelf and trim the beach before the ramp is applied, leaving every
+    # texture term below on the distances it was tuned for. Untouched, the ramp did
+    # not reach deep ocean until 150 world pixels out - half a tile - so an ocean
+    # tile touching land was bright edge to edge, and everything landward of the
+    # shoreline was sand, putting the beach half a tile out to sea. Kept in step
+    # with scripts/tune_coastline.py, which applies the same move to painted tiles
+    # on machines without Pillow.
+    SHELF_REACH = 0.38          # sea is at full depth by about 57px rather than 150
+    BEACH_TRIM = 46.0           # world pixels of sand trimmed back towards the land
+    d_col = np.where(d_col < 0, d_col / SHELF_REACH, d_col - BEACH_TRIM)
     img = ramp(d_col)
 
     n_grain, n_grain2 = F_grain(U, V), F_grain2(U, V)
