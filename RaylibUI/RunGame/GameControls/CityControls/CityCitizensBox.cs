@@ -18,8 +18,15 @@ public class CityCitizensBox : BaseControl
     private readonly ImageBox[] _icons;
     private readonly City _city;
     private readonly int _epoch;
-    private int _specialistsStart;
     private readonly int[] _citizenIndex;
+
+    /// <summary>
+    /// Index of the first specialist in the citizen row. This is derived on every
+    /// use rather than cached: the resource map changes the specialist count
+    /// without laying this control out again, so a cached copy went stale and a
+    /// click ran off the end of the specialist list.
+    /// </summary>
+    private int SpecialistsStart => Math.Max(0, _city.Size - (_city.NoOfSpecialistsx4 / 4));
     
     public CityCitizensBox(CityWindow cityWindow) : base(cityWindow)
     {
@@ -29,14 +36,13 @@ public class CityCitizensBox : BaseControl
         _props = _cityWindow.CityWindowProps;
 
         _epoch = _city.Owner.Epoch;
-        _specialistsStart = _city.Size - (_city.NoOfSpecialistsx4 / 4);
         _citizenIndex = new int[_city.Size];
         _icons = new ImageBox[_city.Size];
         for (var i = 0; i < _icons.Length; i++)
         {
-            if (i >= _specialistsStart)
+            if (i >= SpecialistsStart)
             {
-                var specialistIndex = i - _specialistsStart;
+                var specialistIndex = i - SpecialistsStart;
                 var specialists = _city.GetSpecialistTypes();
                 _citizenIndex[i] = specialistIndex < specialists.Length
                     ? (int)specialists[specialistIndex]
@@ -47,12 +53,16 @@ public class CityCitizensBox : BaseControl
             _icons[i].Click += OnClick;
             Controls.Add(_icons[i]);
         }
+
+        // Taking a citizen off a tile in the resource map turns it into a specialist,
+        // and that happens without this control being laid out again, so the row went
+        // on showing the old faces until something else resized it.
+        _cityWindow.ResourceProductionChanged += (_, _) => OnResize();
     }
 
     public override void OnResize()
     {
         var people = _city.GetPeopleTypes(_cityWindow.CurrentGameScreen.Game);
-        _specialistsStart = _city.Size - (_city.NoOfSpecialistsx4 / 4);
         var pos = _props.CitizensBox.ScaleAll(_cityWindow.Scale);
         Location = new(_cityWindow.LayoutPadding.Left + pos.X, _cityWindow.LayoutPadding.Top + pos.Y);
         Width = (int)pos.Width;
@@ -80,15 +90,30 @@ public class CityCitizensBox : BaseControl
         var rowWidth = iconWidth + spacing * Math.Max(0, _icons.Length - 1);
         var leading = Math.Max(2f, (_props.CitizensBox.Width - rowWidth) / 2f);
 
+        // The icon array was sized when the window opened; the city can grow or
+        // starve while it is still up, so only lay out the citizens that exist and
+        // hide any spare icons.
+        var specialists = _city.GetSpecialistTypes();
+        var specialistsStart = SpecialistsStart;
         for (var i = 0; i < _icons.Length; i++)
         {
-            if (i < _specialistsStart)
+            if (i >= _city.Size || i >= people.Length)
+            {
+                _icons[i].Visible = false;
+                continue;
+            }
+
+            _icons[i].Visible = true;
+            if (i < specialistsStart)
             {
                 _citizenIndex[i] = (int)people[i] + i % 2;
             }
             else
             {
-                _citizenIndex[i] = (int)_city.GetSpecialistTypes()[i - _specialistsStart];
+                var specialistIndex = i - specialistsStart;
+                _citizenIndex[i] = specialistIndex < specialists.Length
+                    ? (int)specialists[specialistIndex]
+                    : (int)PeopleType.Elvis;
             }
             _icons[i].Image = [_active.PicSources["people"][_citizenIndex[i] + 11 * _epoch]];
 
@@ -105,12 +130,12 @@ public class CityCitizensBox : BaseControl
     private void OnClick(object? sender, MouseEventArgs e)
     {
         var index = Array.IndexOf(_icons, sender);
-        if (index < 0)
+        if (index < 0 || index >= _city.Size)
         {
             return;
         }
 
-        if (index >= _specialistsStart)
+        if (index >= SpecialistsStart)
         {
             // Already a specialist: cycle entertainer, taxman, scientist.
             ChangeSpecialist(index, 1, IsShiftDown());
@@ -132,7 +157,7 @@ public class CityCitizensBox : BaseControl
         var mouse = Input.GetMousePosition();
         var index = Array.FindIndex(_icons,
             icon => ShapeHelper.CheckCollisionPointRec(mouse, icon.Bounds));
-        if (index < _specialistsStart)
+        if (index < 0 || index >= _city.Size || index < SpecialistsStart)
         {
             return false;
         }
@@ -143,8 +168,14 @@ public class CityCitizensBox : BaseControl
 
     private void ChangeSpecialist(int citizenIndex, int direction, bool changeAll)
     {
-        var specialistIndex = citizenIndex - _specialistsStart;
-        var current = (int)_city.GetSpecialistTypes()[specialistIndex];
+        var specialists = _city.GetSpecialistTypes();
+        var specialistIndex = citizenIndex - SpecialistsStart;
+        if (specialistIndex < 0 || specialistIndex >= specialists.Length)
+        {
+            return;
+        }
+
+        var current = (int)specialists[specialistIndex];
         var next = (int)PeopleType.Elvis +
                    ((current - (int)PeopleType.Elvis + direction + 3) % 3);
 
