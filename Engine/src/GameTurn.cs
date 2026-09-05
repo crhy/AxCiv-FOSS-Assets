@@ -252,15 +252,21 @@ namespace Civ2engine
             if (currentScienceCost > 0 && activeCiv.Science >= currentScienceCost)
             {
                 var completedAdvance = activeCiv.ReseachingAdvance;
-                player.NotifyAdvanceResearched(completedAdvance);
                 game.GiveAdvance(completedAdvance, activeCiv);
                 activeCiv.Science = Math.Max(0, activeCiv.Science - currentScienceCost);
 
+                // What to research next has to be worked out after the advance is
+                // granted, so its own unlocks are on the list. Both of these push a
+                // window and the last one pushed is the one the player meets first,
+                // so the discovery goes second: announce the advance, then ask what
+                // follows it, rather than asking before saying what was found.
                 var researchPossibilities = AdvanceFunctions.CalculateAvailableResearch(game, activeCiv);
                 if (researchPossibilities.Count > 0)
                 {
                     player.SelectNewAdvance(researchPossibilities);
                 }
+
+                player.NotifyAdvanceResearched(completedAdvance);
             }
         }
     }
