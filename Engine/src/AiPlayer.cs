@@ -241,6 +241,10 @@ namespace Civ2engine
         {
         }
 
+
+        public void CivilizationVictorious()
+        {
+        }
         public void CityDecrease(City city)
         {
         }

@@ -47,6 +47,11 @@ namespace Model.Core.Player
         /// This player's civilization has lost its last city and unit.
         /// </summary>
         void CivilizationDestroyed();
+
+        /// <summary>
+        /// Every rival has been eliminated and this civilisation holds the world.
+        /// </summary>
+        void CivilizationVictorious();
         void CityDecrease(City city);
         void TurnStart(int turnNumber);
 

@@ -140,6 +140,29 @@ namespace Civ2engine
             {
                 Players[civ.Id].CivilizationDestroyed();
             }
+
+            CheckConquest();
+        }
+
+        /// <summary>
+        /// Conquest: one civilisation left standing and the world is theirs. The
+        /// barbarians hold nothing and never count towards it.
+        /// </summary>
+        private void CheckConquest()
+        {
+            var survivors = AllCivilizations
+                .Where(c => c.Alive && c.PlayerType != PlayerType.Barbarians)
+                .ToList();
+            if (survivors.Count != 1)
+            {
+                return;
+            }
+
+            var winner = survivors[0];
+            if (winner.Id >= 0 && winner.Id < Players.Length)
+            {
+                Players[winner.Id].CivilizationVictorious();
+            }
         }
 
         public void StartPlayerTurn(IPlayer activePlayer)

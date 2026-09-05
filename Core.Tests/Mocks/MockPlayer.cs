@@ -90,6 +90,10 @@ public class MockPlayer : IPlayer
     {
     }
 
+
+    public void CivilizationVictorious()
+    {
+    }
     public void CityDecrease(City city)
     {
     }

@@ -161,6 +161,8 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
         PicSources.Add("backgroundImage", [new BitmapStorage(Path.Combine("Backgrounds", "NewCartographerBackground.png"))]);
         PicSources.Add("backgroundImageSmall1", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
         PicSources.Add("backgroundImageSmall2", [new BitmapStorage(Path.Combine("Backgrounds", "panel.jpg"))]);
+        PicSources.Add("victoryConquest",
+            [new BitmapStorage(Path.Combine("Backgrounds", "victory_conquest.png"))]);
         PicSources.Add("cityBuiltAncient", [new BitmapStorage(Path.Combine("Cities", "Aztec", "city_01.png"))]);
         PicSources.Add("cityBuiltModern", [new BitmapStorage(Path.Combine("Cities", "USA", "city_04.png"))]);
         foreach (var panelName in new[]

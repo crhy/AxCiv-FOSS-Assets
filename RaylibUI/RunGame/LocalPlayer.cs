@@ -213,6 +213,13 @@ public class LocalPlayer : IPlayer
         _gameScreen.ShowPopup("CIVDESTROYED");
     }
 
+    public void CivilizationVictorious()
+    {
+        _gameScreen.ShowPopup("CONQUEST",
+            dialogImage: new DialogImageElements(
+                [_gameScreen.Main.ActiveInterface.PicSources["victoryConquest"][0]]));
+    }
+
     public void CityDecrease(City city)
     {
         _gameScreen.ShowCityDialog("DECREASE", city);

@@ -9,6 +9,13 @@ Before there were borders, monuments, or chronicles, there was only a people ben
 ^
 From this first campfire, raise a civilization whose memory will outlive the ages.
 
+@CONQUEST
+@title=The World Is Yours
+@width=560
+@button=Ok
+Every rival banner has fallen. From the first stone laid to the towers that now
+catch the last of the sun, one people carried the world forward, and there is no
+longer anyone left to contest it.
 @CIVDESTROYED
 @title=Your Civilization Has Fallen
 @width=420
