@@ -55,20 +55,12 @@ namespace RaylibUI
                     { ["Zoom"] = Environment.GetEnvironmentVariable("RHYCIV_AUTOSTART_ZOOM") ?? "0" };
                 StartGame(quickGame, CivInit.ViewData);
 
-                if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY"))
+                var quickCityValue = Environment.GetEnvironmentVariable("RHYCIV_TEST_CITY");
+                if (!string.IsNullOrWhiteSpace(quickCityValue)
                     && _activeScreen is RunGame.GameScreen quickScreen)
                 {
-                    var settler = quickGame.GetPlayerCiv.Units.FirstOrDefault(u =>
-                        !u.Dead && u.AiRole == Model.Constants.AiRoleType.Settle);
-                    if (settler != null)
-                    {
-                        var built = Civ2engine.UnitActions.CityActions.BuildCity(settler, quickGame,
-                            Civ2engine.UnitActions.CityActions.GetCityName(quickGame.GetPlayerCiv, quickGame));
-                        built.Location.SetVisible(quickGame.GetPlayerCiv.Id);
-                        built.Location.UpdatePlayer(quickGame.GetPlayerCiv.Id);
-                        quickScreen.ForceRedraw();
-                        Console.WriteLine($"test-city: quick start founded '{built.Name}'");
-                    }
+                    RunCityFoundingHarness((Game)quickGame, quickScreen,
+                        int.TryParse(quickCityValue, out var quickWanted) ? Math.Max(1, quickWanted) : 1);
                 }
 
                 return true;

@@ -56,6 +56,7 @@ public class ProductionBox : BaseControl
         _label = new CityLabel(_cityWindow, _cityWindow.CityWindowProps.Labels["ItemInProduction"]);
 
         _buyButton = new CityButton(cityWindow, "Buy") { ManualLayout = true };
+        _buyButton.Click += (_, _) => OfferToBuy();
         _changeButton = new CityButton(cityWindow, "Change") { ManualLayout = true };
         _changeButton.Click += (_, _) =>
         {
@@ -345,6 +346,72 @@ public class ProductionBox : BaseControl
                 count++;
             }
         }
+    }
+
+    /// <summary>
+    /// Civ II's price for finishing the current item this turn: twice the shields
+    /// still owed plus a quadratic term, doubled for a wonder, and doubled again
+    /// when nothing has been put toward it yet.
+    /// </summary>
+    public static int BuyCost(IProductionOrder order, int shieldsProgress)
+    {
+        var remaining = Math.Max(0, order.Cost - shieldsProgress);
+        if (remaining == 0)
+        {
+            return 0;
+        }
+
+        var cost = 2 * remaining + remaining * remaining / 20;
+        if (order is BuildingProductionOrder { Improvement.IsWonder: true })
+        {
+            cost *= 2;
+        }
+
+        if (shieldsProgress <= 0)
+        {
+            cost *= 2;
+        }
+
+        return cost;
+    }
+
+    private void OfferToBuy()
+    {
+        var order = _city.ItemInProduction;
+        var cost = BuyCost(order, _city.ShieldsProgress);
+        if (cost <= 0)
+        {
+            return;
+        }
+
+        var treasury = _city.Owner.Money;
+        if (cost > treasury)
+        {
+            _cityWindow.CurrentGameScreen.ShowPopup("NOBUYGOLD",
+                replaceNumbers: [cost, treasury], replaceStrings: [order.Title]);
+            return;
+        }
+
+        _cityWindow.CurrentGameScreen.ShowPopup("BUYCOST", handleButtonClick: (button, _, _, _) =>
+        {
+            if (button != Labels.Ok)
+            {
+                return;
+            }
+
+            // Re-check: the dialog is not modal to the rest of the turn.
+            var priceNow = BuyCost(_city.ItemInProduction, _city.ShieldsProgress);
+            if (priceNow <= 0 || priceNow > _city.Owner.Money)
+            {
+                return;
+            }
+
+            _city.Owner.Money -= priceNow;
+            _city.ShieldsProgress = _city.ItemInProduction.Cost;
+            _cityWindow.UpdateProduction();
+            UpdateData(_city.ItemInProduction);
+            OnResize();
+        }, replaceNumbers: [cost, treasury], replaceStrings: [order.Title]);
     }
 
     public void UpdateData(IProductionOrder itemInProduction)

@@ -31,8 +31,16 @@ namespace Civ2engine
             var foodRows = rules.Cosmic.RowsFoodBox;
             var shieldRows = rules.Cosmic.RowsShieldBox;
 
-            foreach (var city in activeCiv.Cities)
+            // A city that starves to nothing removes itself from this list, so walk a
+            // snapshot: enumerating the live collection threw the moment any city was
+            // lost to famine during its owner's turn.
+            foreach (var city in activeCiv.Cities.ToList())
             {
+                if (city.Size <= 0 || !activeCiv.Cities.Contains(city))
+                {
+                    continue;
+                }
+
                 city.ImprovementSold = false;
 
                 // Change food in storage

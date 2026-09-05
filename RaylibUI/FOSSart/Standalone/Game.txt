@@ -28,6 +28,19 @@ A city is more than stone and timber; it is a promise to the future. Give this n
 %STRING0 is founded in %STRING1.
 ^
 Its people look to you to make it prosper.
+@BUYCOST
+@title=Hurry Production
+@width=380
+@button=Ok
+@button=Cancel
+Completing %STRING0 at once will cost %NUMBER0 gold.
+^
+The treasury holds %NUMBER1 gold.
+@NOBUYGOLD
+@title=Hurry Production
+@width=380
+@button=Ok
+Completing %STRING0 at once would cost %NUMBER0 gold, and the treasury holds only %NUMBER1.
 @ONLYSETTLERS
 @title=Not This Unit
 @width=300
