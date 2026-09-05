@@ -74,14 +74,21 @@ G_speck  = grid(300)
 G_shell  = grid(150)
 
 # ---------------- colour ramp -------------------------------------------------
+# Signed distance to the waterline, in world pixels, to colour. Landward of the
+# shoreline the tile used to be sand all the way out, which is why an ocean tile
+# touching land showed a broad flat cream band: half the diamond sits on the land
+# side of a marching-squares shoreline, and all of it was beach. A real shore is a
+# narrow strip that gives way to whatever grows behind it, so the land end now
+# runs sand, then dune growth, then the grassland tile's own colour, and the
+# coast tile carries on into its neighbour instead of stopping at a hard edge.
 STOPS = [
     (-420, (  5,  28,  60)), (-150, (  5,  28,  60)), (-130, (  7,  44,  82)),
     (-108, ( 10,  66, 110)), ( -84, ( 14,  94, 138)), ( -64, ( 19, 126, 164)),
     ( -48, ( 26, 160, 184)), ( -36, ( 42, 192, 196)), ( -26, ( 66, 214, 206)),
     ( -18, (100, 228, 214)), ( -11, (140, 236, 220)), (  -5, (176, 226, 205)),
-    (  -1, (166, 146, 116)), (   4, (146, 124,  96)), (  13, (178, 154, 122)),
-    (  32, (210, 190, 154)), (  72, (233, 219, 187)), ( 150, (245, 234, 208)),
-    ( 420, (245, 234, 208)),
+    (  -1, (150, 132, 104)), (   3, (176, 156, 124)), (  10, (214, 196, 160)),
+    (  22, (222, 206, 170)), (  34, (196, 186, 132)), (  48, (140, 150,  74)),
+    (  70, ( 96, 112,  34)), ( 150, ( 81,  99,  19)), ( 420, ( 81,  99,  19)),
 ]
 _ds = np.array([s[0] for s in STOPS], float)
 _cs = np.array([s[1] for s in STOPS], float)
@@ -116,12 +123,12 @@ AMP = 0.115
 
 # How the painted coast is pulled in towards the land. The sea reaches full depth
 # at 150 / SHELF_REACH world pixels, so a smaller number is a narrower shelf.
-# BEACH_TRIM is how far the sand is pushed back towards the land in world pixels,
-# and LAND_REACH stretches what is left so the beach still fades into the shore
-# rather than stopping dead.
-SHELF_REACH = 0.34
-BEACH_TRIM = 74.0
-LAND_REACH = 0.55
+# BEACH_TRIM is how far the shoreline is pushed back towards the land in world
+# pixels. LAND_REACH scales what is left; at 1.0 the land side keeps the spacing
+# the ramp's sand and grass stops were written for.
+SHELF_REACH = 0.32
+BEACH_TRIM = 16.0
+LAND_REACH = 1.0
 
 def build(N, E, Sc, Wc):
     """Corners in world order TL,TR,BR,BL == screen N,E,S,W."""

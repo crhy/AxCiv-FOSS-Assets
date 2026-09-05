@@ -124,7 +124,13 @@ namespace Civ2engine
                 return;
             }
 
-            if (civ.Cities.Count > 0 || civ.Units.Count > 0)
+            // Only a living unit counts. A unit killed in combat is marked dead and
+            // taken off the map, but it is left in its owner's unit list - only
+            // disbanding removes it - so counting the list meant a civilisation that
+            // had ever built anything could never be eliminated. Barbarians running
+            // down the last settler ended the game in every sense except the one the
+            // player sees.
+            if (civ.Cities.Count > 0 || civ.Units.Any(unit => !unit.Dead))
             {
                 return;
             }
