@@ -100,8 +100,15 @@ namespace Civ2engine
         public bool ProcessEndOfTurn()
         {
             var player = Players[_activeCiv.Id];
-            foreach (var unit in _activeCiv.Units)
+            // Snapshot: following a GoTo can pop a goody hut that hands the player new
+            // units, and combat can kill them, both of which modify Units mid-loop.
+            foreach (var unit in _activeCiv.Units.ToList())
             {
+                if (unit.Dead)
+                {
+                    continue;
+                }
+
                 if (unit is { MovePoints: > 0, CurrentLocation: not null } && !_doNothingOrders.Contains(unit.Order))
                 {
                     switch ((OrderType)unit.Order)
@@ -132,6 +139,7 @@ namespace Civ2engine
                                 return false;
                             }
 
+                            var startedAt = unit.CurrentLocation;
                             path.Follow(this, unit);
 
                             if (unit.Dead)
@@ -143,6 +151,19 @@ namespace Civ2engine
                             {
                                 ClearGotoOrder(unit);
                                 break;
+                            }
+
+                            if (unit.CurrentLocation == startedAt)
+                            {
+                                // The path exists but the next square is blocked - an enemy
+                                // in the way, or a zone of control. Keeping the GoTo order
+                                // handed the unit straight back to the player, who could
+                                // neither move it nor end the turn, because ending the turn
+                                // came back here and offered the same stuck unit again.
+                                // Drop the order so it is genuinely awaiting orders.
+                                ClearGotoOrder(unit);
+                                player.SetUnitActive(unit, true);
+                                return false;
                             }
 
                             if (unit.MovePoints > 0)
@@ -212,11 +233,7 @@ namespace Civ2engine
             var workTile = FindAutomatedSettlerWorkTile(unit, currentTile, nearbyCity?.Location);
             if (workTile != null)
             {
-                MovementFunctions.MoveC2(this, unit, workTile.X - currentTile.X, workTile.Y - currentTile.Y);
-                if (!unit.Dead)
-                {
-                    unit.Order = (int)OrderType.Automate;
-                }
+                StepAutomatedSettler(unit, currentTile, workTile);
                 return;
             }
 
@@ -229,11 +246,7 @@ namespace Civ2engine
 
                 if (moreFertile != null)
                 {
-                    MovementFunctions.MoveC2(this, unit, moreFertile.X - currentTile.X, moreFertile.Y - currentTile.Y);
-                    if (!unit.Dead)
-                    {
-                        unit.Order = (int)OrderType.Automate;
-                    }
+                    StepAutomatedSettler(unit, currentTile, moreFertile);
                 }
                 else
                 {
@@ -266,6 +279,38 @@ namespace Civ2engine
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Move an automated settler one square, and hand it back to the player if it
+        /// could not go.
+        ///
+        /// A move can be refused - an enemy zone of control, or a settler with no
+        /// attack meeting the unit standing in its way. The order used to be restored
+        /// regardless and no movement spent, so the settler chose the same blocked
+        /// square every turn for the rest of the game. Automated units are not
+        /// awaiting orders, so it was never offered for selection either: it simply
+        /// sat there, unmoving and unreachable, which is what being chased by
+        /// barbarians into a corner looked like.
+        /// </summary>
+        private void StepAutomatedSettler(Unit unit, Tile from, Tile to)
+        {
+            MovementFunctions.MoveC2(this, unit, to.X - from.X, to.Y - from.Y);
+            if (unit.Dead)
+            {
+                return;
+            }
+
+            if (unit.CurrentLocation != from)
+            {
+                unit.Order = (int)OrderType.Automate;
+                return;
+            }
+
+            // It could not move. Give it back rather than automating it into the same
+            // wall next turn.
+            unit.Order = (int)OrderType.NoOrders;
+            unit.WaitOrder = false;
         }
 
         private Tile? FindAutomatedSettlerWorkTile(Unit unit, Tile currentTile, Tile? nearbyCityTile)

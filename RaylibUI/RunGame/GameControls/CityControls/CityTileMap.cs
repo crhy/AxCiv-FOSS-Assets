@@ -304,8 +304,12 @@ public class CityTileMap : BaseControl
 
                 if (tile.WorkedBy != null && tile.WorkedBy != city)
                 {
-                    image.Draw(Images.ExtractBitmap(gameScreen.Main.ActiveInterface.MapImages.ViewPiece, _active),
-                        MapImage.TileRec, dstRec, Color.Red);
+                    // Take the whole marker, not a 64x32 window into it: the art is a
+                    // full map tile now, so the classic rectangle sampled a corner.
+                    var marker = Images.ExtractBitmap(
+                        gameScreen.Main.ActiveInterface.MapImages.ViewPiece, _active);
+                    image.Draw(marker, new Rectangle(0, 0, marker.Width, marker.Height),
+                        dstRec, Color.Red);
                 }
             }
         }

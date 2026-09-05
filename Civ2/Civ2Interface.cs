@@ -253,7 +253,10 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
                 Box = new Rectangle(193, 215, 242, 198),
                 UnitsPresent = new UnitBox
                 {
-                    Box = new Rectangle(0, 0, 232, 84),
+                    // Below the panel's heading, not on top of it: the box shared its
+                    // origin with the "Units Present" label, so the first row of units
+                    // was drawn over the words.
+                    Box = new Rectangle(0, 15, 232, 84),
                     Rows = 2,
                     Columns = 5
                 }
@@ -352,8 +355,11 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
             },
             UnitSupport = new UnitBox
             {
-                Box = new Rectangle(7, 215, 184, 69),
-                Rows = 2,
+                // Likewise clear of its own heading, and one row rather than two: the
+                // panel is 58 tall, so two rows left each unit half the height of one
+                // in the Units Present box beside it.
+                Box = new Rectangle(7, 229, 184, 54),
+                Rows = 1,
                 Columns = 4
             },
         };

@@ -123,9 +123,10 @@ public class UnitsPresentBox : Listbox
             return cityWindow.Scale;
         }
 
-        var cellWidth = properties.Box.Width / properties.Columns;
+        // Fit the row, not the column. Civ II sizes these to the height of the row
+        // and lets neighbours overlap a little; fitting the cell width as well
+        // shrank every unit to about seven tenths of the size it should be.
         var cellHeight = properties.Box.Height / properties.Rows;
-        var fit = Math.Min(cellWidth / unit.Width, cellHeight / unit.Height);
-        return Math.Max(0.1f, fit * cityWindow.Scale);
+        return Math.Max(0.1f, cellHeight / unit.Height * cityWindow.Scale);
     }
 }

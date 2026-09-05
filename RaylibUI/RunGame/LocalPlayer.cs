@@ -261,16 +261,33 @@ public class LocalPlayer : IPlayer
 
     public void TurnStart(int turnNumber)
     {
+        _lastBlocked = (null, BlockedReason.NotBlocked);
         _gameScreen.TurnStarting(turnNumber);
     }
 
     public void SetUnitActive(Unit? unit, bool move)
     {
         ActiveUnit = unit;
-        if (_gameScreen.Game.GetActiveCiv == this.Civilization)
+
+        if (_gameScreen.Game.GetActiveCiv != Civilization)
         {
-            _gameScreen.ActiveMode = _gameScreen.Moving;
+            return;
         }
+
+        // ActiveUnit refuses a unit that has ended its turn, and used to leave the
+        // previous one in place. Switching to Moving anyway left the map in
+        // unit-moving mode pointing at a unit that was not there, so nothing
+        // responded to the keyboard and no unit could be picked. Fall back to the
+        // view piece instead, which the player can always move.
+        if (unit != null && !ReferenceEquals(_activeUnit, unit))
+        {
+            _activeUnit = null;
+            if (unit.CurrentLocation != null) ActiveTile = unit.CurrentLocation;
+            _gameScreen.ActiveMode = _gameScreen.ViewPiece;
+            return;
+        }
+
+        _gameScreen.ActiveMode = _gameScreen.Moving;
     }
 
     public void UnitLost(Unit unit, Unit? killedBy)
@@ -293,9 +310,58 @@ public class LocalPlayer : IPlayer
         OnUnitEvent?.Invoke(this, combatEventArgs);
     }
 
+    private (Unit? Unit, BlockedReason Reason) _lastBlocked;
+
     public void MoveBlocked(Unit unit, BlockedReason blockedReason)
     {
         OnUnitEvent?.Invoke(this, new MovementBlockedEventArgs(unit, blockedReason));
+        ReportBlockedMove(unit, blockedReason);
+    }
+
+    /// <summary>
+    /// Say why a move was refused. The engine has always raised this, but nothing
+    /// listened, so a unit that could not move simply did nothing and looked stuck.
+    /// Repeats are suppressed - a unit bumping the same zone of control every turn
+    /// should not stack up popups.
+    /// </summary>
+    private void ReportBlockedMove(Unit unit, BlockedReason blockedReason)
+    {
+        var message = blockedReason switch
+        {
+            BlockedReason.Zoc =>
+                $"Your {unit.Name} cannot move directly between two squares that are both " +
+                "next to an enemy unit. Move to a square you already occupy, or attack.",
+            BlockedReason.ZeroAttackStrength =>
+                $"Your {unit.Name} has no attack strength and cannot move onto an enemy unit.",
+            BlockedReason.CannotAttackAirUnits =>
+                $"Your {unit.Name} cannot attack air units.",
+            BlockedReason.NotAmphibious =>
+                $"Your {unit.Name} cannot make an amphibious assault from aboard ship.",
+            BlockedReason.EdgeOfMap =>
+                $"Your {unit.Name} has reached the edge of the world.",
+            _ => null
+        };
+
+        if (message == null || (_lastBlocked.Unit == unit && _lastBlocked.Reason == blockedReason))
+        {
+            return;
+        }
+
+        _lastBlocked = (unit, blockedReason);
+
+        var elements = new DialogElements
+        {
+            Name = "MOVEBLOCKED_DYNAMIC",
+            Title = "Blocked",
+            Width = 420,
+            Button = [Labels.Ok],
+            Text = [message],
+            LineStyles = [TextStyles.Left]
+        };
+
+        CivDialog? dialog = null;
+        dialog = new CivDialog(_gameScreen.Main, elements, (_, _, _, _) => _gameScreen.CloseDialog(dialog));
+        _gameScreen.ShowDialog(dialog, stack: true);
     }
 
     public event EventHandler<UnitEventArgs> OnUnitEvent;
