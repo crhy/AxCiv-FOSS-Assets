@@ -1,11 +1,16 @@
 import os
+from pathlib import Path
 import numpy as np
 from PIL import Image
 
 W, H = 300, 150          # diamond footprint (2:1 isometric)
 SS = 3                   # supersample factor
 PAD = 300                # padded canvas size for the 300x300 variant
-OUT = "/mnt/user-data/outputs/coastline_iso"
+# Where the tiles land. The sixteen coast_*.png go on to
+# RaylibUI/FOSSart/Terrain/Coast; the padded variant, contact sheet and demo are
+# review aids and stay out of the shipped asset set.
+OUT = os.environ.get("COASTLINE_OUT",
+                     str(Path(__file__).resolve().parents[1] / "build" / "coastline_iso"))
 os.makedirs(OUT, exist_ok=True)
 os.makedirs(OUT + "/padded_300x300", exist_ok=True)
 
@@ -109,6 +114,15 @@ V = np.clip(V_raw, 0, 1)         # so downsampling can't pull in a halo
 
 AMP = 0.115
 
+# How the painted coast is pulled in towards the land. The sea reaches full depth
+# at 150 / SHELF_REACH world pixels, so a smaller number is a narrower shelf.
+# BEACH_TRIM is how far the sand is pushed back towards the land in world pixels,
+# and LAND_REACH stretches what is left so the beach still fades into the shore
+# rather than stopping dead.
+SHELF_REACH = 0.34
+BEACH_TRIM = 74.0
+LAND_REACH = 0.55
+
 def build(N, E, Sc, Wc):
     """Corners in world order TL,TR,BR,BL == screen N,E,S,W."""
     TL, TR, BR, BL = N, E, Sc, Wc
@@ -122,21 +136,21 @@ def build(N, E, Sc, Wc):
                   0.16 * (F_coast2(U, V) - 0.5)) * 2.0
     d = np.clip((f - 0.5 + warp) / gmag, -150.0, 150.0)
 
+    # Pull the whole coast in before anything is painted. Untouched, the sea did not
+    # reach full depth until 150 world pixels out - half a tile - so an ocean tile
+    # touching land was bright edge to edge, and everything landward of the
+    # shoreline was sand, putting the beach half a tile out to sea.
+    #
+    # This moves the distance itself rather than only the colour ramp, so the wet
+    # sand, the foam lace, the surf lip and the swell all follow the waterline to
+    # its new place. Moving the ramp alone left those where they were and stranded
+    # the wet-sand tint out on dry beach as a teal smear.
+    d = np.where(d < 0, d / SHELF_REACH, (d - BEACH_TRIM) / LAND_REACH)
+
     n_shelf = F_shelf(U, V)
     shelf = ((n_shelf - 0.5) * 55 * smoothstep(-4, -30, d)
              * smoothstep(-148, -100, d))
     d_col = d + shelf
-
-    # Narrow the shelf and trim the beach before the ramp is applied, leaving every
-    # texture term below on the distances it was tuned for. Untouched, the ramp did
-    # not reach deep ocean until 150 world pixels out - half a tile - so an ocean
-    # tile touching land was bright edge to edge, and everything landward of the
-    # shoreline was sand, putting the beach half a tile out to sea. Kept in step
-    # with scripts/tune_coastline.py, which applies the same move to painted tiles
-    # on machines without Pillow.
-    SHELF_REACH = 0.38          # sea is at full depth by about 57px rather than 150
-    BEACH_TRIM = 46.0           # world pixels of sand trimmed back towards the land
-    d_col = np.where(d_col < 0, d_col / SHELF_REACH, d_col - BEACH_TRIM)
     img = ramp(d_col)
 
     n_grain, n_grain2 = F_grain(U, V), F_grain2(U, V)
