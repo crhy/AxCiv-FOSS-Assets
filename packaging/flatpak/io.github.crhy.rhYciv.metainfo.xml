@@ -27,6 +27,12 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
+    <release version="0.7.1-beta.2" date="2026-09-05">
+      <description>
+        <p>Units could get stuck where nothing would move them and nothing would select them, from three separate faults: an automated settler whose move was refused kept its order and spent no movement, so it chose the same blocked square every turn forever; a unit blocked on the next square of a GoTo was handed back with the order still set, so ending the turn came straight back and offered it again; and the map switched to unit-moving mode even when the unit had been refused. Blocked moves were also silent, and now say why.</p>
+        <p>The city window has drawn medallions for food, gold, science, production and trade in place of the fourteen-pixel sprites it read out of the icon sheet, and the resource overlay on the city map is sized against the tile rather than a fixed multiple of whichever icon file it happened to load. Unit art in the window was blurry and drawn at a twentieth of its proper size, because the interface took the small classic sprite while applying the high-resolution art's scale to it. The shield box fills across before it fills down, so a ten-shield unit is one row of ten rather than ten rows of one. About shows the build version.</p>
+      </description>
+    </release>
     <release version="0.7.1-beta.1" date="2026-09-05">
       <description>
         <p>Advances are sorted into Civilization II's four kinds - academic, applied, military and social - and each carries its own badge in the research list, replacing the flat coloured swatch that stood in for one. The categories themselves were guessed from keywords in an advance's name, leaving two thirds of them in catch-all buckets; they are an explicit table now, and eighty-three of the eighty-eight changed. The marker under the pointer is drawn at map resolution instead of a magnified 64x32 sprite inside an opaque square, and units in the city window are sized to their boxes and centred in them.</p>
