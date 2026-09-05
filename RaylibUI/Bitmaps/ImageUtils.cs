@@ -768,9 +768,19 @@ public static class ImageUtils
             return unitImage.MapImage ?? unitImage.Image;
         }
 
-        // UI controls need the small classic unit sheet even if map rendering uses
-        // 1024px FOSS art. UnitLoader keeps UnitImage.Image/UiImage on the classic
-        // Civ2 sprite and stores FOSS art separately in UnitImage.MapImage.
+        // The UI used to insist on the small classic sheet sprite here while the map
+        // drew the 1024px FOSS art. That was wrong twice over. The sprite was blurry
+        // wherever the city window scaled it up, and worse, DrawScale, DrawOffset
+        // and LogicalSize are all derived for the FOSS art - DrawScale is roughly
+        // 48/1024 - so applying them to a sprite that was already the logical size
+        // drew it at a twentieth of its proper size. That is why units were tiny in
+        // the production box and in the change-production list. Use the same art the
+        // map uses and the metadata matches the texture it was measured against.
+        if (unitImage.MapImage is { } highResolution)
+        {
+            return highResolution;
+        }
+
         if (unitImage.UiImage is { } uiImage)
         {
             return uiImage;

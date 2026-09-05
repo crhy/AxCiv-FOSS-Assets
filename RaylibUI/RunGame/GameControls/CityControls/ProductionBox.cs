@@ -20,6 +20,7 @@ public class ProductionBox : BaseControl
 {
     private readonly CityWindow _cityWindow;
     private readonly Texture2D _shieldIcon;
+    private float _shieldScale = 1f;
     private readonly IUserInterface _active;
     private int _totalCost;
     private readonly int _shieldBoxRows;
@@ -32,8 +33,10 @@ public class ProductionBox : BaseControl
     private readonly IList<IProductionOrder> _canProduce;
     private readonly ImageBox _icon;
     private const float ShieldBoxTop = 42f;
-    private const float ProductionIconSlotWidth = 34f;
-    private const float ProductionIconSlotHeight = 28f;
+    // The gap between the Buy and Change buttons. This was 34x28, which left the
+    // item being built as a thumbnail barely larger than a shield.
+    private const float ProductionIconSlotWidth = 48f;
+    private const float ProductionIconSlotHeight = 40f;
     private const float BuyButtonX = 5f;
     private const float ChangeButtonX = 120f;
     private const float ProductionButtonY = 16f;
@@ -106,8 +109,10 @@ public class ProductionBox : BaseControl
         Height = (int)(_properties.Box.Height * _cityWindow.Scale);
         base.OnResize();
 
-        _shieldWidth = _shieldIcon.Width * _cityWindow.Scale;
-        _shieldHeight = _shieldIcon.Height * _cityWindow.Scale;
+        _shieldScale = ResourceIconScale.ToHeight(_shieldIcon,
+            ResourceIconScale.LargeLogicalSize * _cityWindow.Scale);
+        _shieldWidth = _shieldIcon.Width * _shieldScale;
+        _shieldHeight = _shieldIcon.Height * _shieldScale;
 
         var activeOrder = GetDisplayedOrder();
         _label.Visible = true;
@@ -294,18 +299,23 @@ public class ProductionBox : BaseControl
             return;
         }
 
-        // Civ II's shield box is RowsShieldBox rows tall whatever is being built, and
-        // spreads the cost across them: ten shields for Warriors is one per row, six
-        // hundred for a wonder is sixty. The old arithmetic treated the cost as a row
-        // count and the row count as shields per row, which drew a hundred slots for
-        // a ten-shield unit.
-        var rows = Math.Max(1, Math.Min(lines, _shieldBoxRows));
-        var shieldsPerRow = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)rows));
-        lines = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)shieldsPerRow));
-
         var posX = Bounds.X + Padding * scale;
         var posY = Bounds.Y + shieldTop;
         var drawWidth = Width - 2 * Padding * scale;
+
+        // Civ II fills the box across before it fills it down: a ten-shield Warriors
+        // is one row of ten, not ten rows of one. Deriving the row count from
+        // RowsShieldBox did the opposite and drew a single vertical column for
+        // anything cheap. Fill each row to the width instead, and only pack more
+        // shields per row when the cost will not fit in the rows available.
+        var maxRows = Math.Max(1, Math.Min(lines, _shieldBoxRows));
+        var shieldsPerRow = Math.Max(1, (int)(drawWidth / Math.Max(1f, _shieldWidth)));
+        if (_totalCost > shieldsPerRow * maxRows)
+        {
+            shieldsPerRow = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)maxRows));
+        }
+        shieldsPerRow = Math.Min(shieldsPerRow, Math.Max(1, _totalCost));
+        lines = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)shieldsPerRow));
         var spacing = (int)_shieldWidth;
         var requiredWidth = shieldsPerRow * spacing;
 
@@ -335,7 +345,7 @@ public class ProductionBox : BaseControl
             {
                 Graphics.DrawTextureEx(_shieldIcon,
                     new Vector2((int)posX + spacing * col, (int)(Bounds.Y + shieldTop + 3 * scale + _shieldHeight * row)),
-                    0f, scale, Color.White);
+                    0f, _shieldScale, Color.White);
                 count++;
             }
         }

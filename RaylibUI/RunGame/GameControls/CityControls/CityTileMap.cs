@@ -332,9 +332,15 @@ public class CityTileMap : BaseControl
         var resourceXOffset = 8;
         var resourceWidth = resources.First().Value.Width;
         var resourceHeight = resources.First().Value.Height;
-        const float resourceScale = 1.45f;
-        var drawResourceWidth = (int)Math.Round(resourceWidth * resourceScale);
-        var drawResourceHeight = (int)Math.Round(resourceHeight * resourceScale);
+
+        // Sized against the tile rather than against the icon file. The icons used
+        // to be 10 pixels square and were drawn at a fixed 1.45x, which both tied
+        // the overlay to one particular piece of art and left it too small to read
+        // on the city map. A third of the tile height is about as large as three
+        // food plus two shields can get and still fit across one tile.
+        var drawResourceHeight = Math.Max(8, (int)Math.Round(dim.TileHeight / 3.0));
+        var drawResourceWidth = Math.Max(8,
+            (int)Math.Round(drawResourceHeight * resourceWidth / (double)resourceHeight));
         var resourceYOffset = dim.HalfHeight - drawResourceHeight / 2;
         var resourceRect = new Rectangle(0, 0, resourceWidth, resourceHeight);
         foreach (var workedTile in city.WorkedTiles)

@@ -19,7 +19,8 @@ public class FoodStorageBox : BaseControl
     private float _iconWidth, _iconHeight;
     private readonly int _boxRows;
     private readonly Rectangle _panelBounds;
-    private float IconScale => Math.Min(_cityWindow.Scale, 1.25f);
+    private float IconScale => ResourceIconScale.ToHeight(_foodIcon,
+        ResourceIconScale.LargeLogicalSize * Math.Min(_cityWindow.Scale, 1.25f));
 
     public FoodStorageBox(CityWindow cityWindow) : base(cityWindow, true)
     {

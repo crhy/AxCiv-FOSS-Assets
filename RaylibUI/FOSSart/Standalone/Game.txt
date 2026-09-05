@@ -13,6 +13,8 @@ From this first campfire, raise a civilization whose memory will outlive the age
 @title=About rhYciv
 @width=460
 @button=Ok
+Version %STRING0
+^
 rhYciv is an open reimplementation of the turn-based strategy game Civilization
 II, built on the axx0/Civ2-clone engine and shipped with its own rules, art and
 text so that it runs on nothing but itself.

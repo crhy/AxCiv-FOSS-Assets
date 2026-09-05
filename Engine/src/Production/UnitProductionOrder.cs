@@ -106,7 +106,7 @@ namespace Civ2engine.Production
             {
                 Elements =
                 [
-                    new() { Icon = GetIcon(activeInterface), Width = 70, ScaleIcon = HasFossArtIcon(activeInterface) ? 0.028f : 0.75f },
+                    new() { Icon = GetIcon(activeInterface), Width = 80, ScaleIcon = HasFossArtIcon(activeInterface) ? BuildListIconScale : 1f },
                     new() { Text = unitDefinition.Name, Width = 200, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
                     new()
                     {
@@ -117,8 +117,13 @@ namespace Civ2engine.Production
                         VerticalAlignment = VerticalAlignment.Center
                     }
                 ],
-                Height = 38
+                Height = BuildListRowHeight
             };
         }
+
+        // The change-production list showed each unit at a twentieth of the row's
+        // height, which is unreadable for art that is otherwise 1024 pixels square.
+        private const int BuildListRowHeight = 52;
+        private const float BuildListIconScale = (BuildListRowHeight - 4) / 1024f;
     }
 }

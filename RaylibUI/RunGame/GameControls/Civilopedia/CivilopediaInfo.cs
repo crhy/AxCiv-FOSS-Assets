@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Civ2engine;
 using Civ2engine.IO;
 using Civ2engine.Terrains;
+using Model;
 using Model.Controls;
 using Model.Controls.Civilopedia;
 using Model.Core.Advances;
@@ -263,7 +264,7 @@ public sealed class CivilopediaInfo : BaseControl
                     (int)prereqLabel.Location.X + prereqLabel.Width, (int)offsetY);
                 Controls.Add(costLabel);
 
-                var shieldImg = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Shields").LargeImage), true);
+                var shieldImg = ResourceIcon(window, active, "Shields", costLabel.Height);
                 shieldImg.Location = new((int)costLabel.Location.X + costLabel.Width, (int)offsetY + (costLabel.Height - shieldImg.Height) / 2f);
                 Controls.Add(shieldImg);
 
@@ -330,7 +331,7 @@ public sealed class CivilopediaInfo : BaseControl
                     (int)prereqLabel.Location.X + prereqLabel.Width, (int)offsetY);
                 Controls.Add(costLabel);
 
-                shieldImg = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Shields").LargeImage), true);
+                shieldImg = ResourceIcon(window, active, "Shields", costLabel.Height);
                 shieldImg.Location = new((int)costLabel.Location.X + costLabel.Width, (int)offsetY + (costLabel.Height - shieldImg.Height) / 2f);
                 Controls.Add(shieldImg);
 
@@ -483,7 +484,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(foodLabel);
                     var food = new PediaLabel(window, $"{t.Food} ", 200, (int)offsetY);
                     Controls.Add(food);
-                    var foodIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Food").LargeImage), true);
+                    var foodIcon = ResourceIcon(window, active, "Food", food.Height);
                     foodIcon.Location = new((int)food.Location.X + food.Width,
                         (int)offsetY + (food.Height - foodIcon.Height) / 2f);
                     Controls.Add(foodIcon);
@@ -493,7 +494,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(shieldsLabel);
                     var shields = new PediaLabel(window, $"{t.Shields} ", 200, (int)offsetY);
                     Controls.Add(shields);
-                    var shldIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Shields").LargeImage), true);
+                    var shldIcon = ResourceIcon(window, active, "Shields", shields.Height);
                     shldIcon.Location = new((int)shields.Location.X + shields.Width,
                         (int)offsetY + (shields.Height - shldIcon.Height) / 2f);
                     Controls.Add(shldIcon);
@@ -503,7 +504,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(tradeLabel);
                     var trade = new PediaLabel(window, $"{t.Trade} ", 200, (int)offsetY);
                     Controls.Add(trade);
-                    var trdIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Trade").LargeImage), true);
+                    var trdIcon = ResourceIcon(window, active, "Trade", trade.Height);
                     trdIcon.Location = new((int)trade.Location.X + trade.Width,
                         (int)offsetY + (trade.Height - trdIcon.Height) / 2f);
                     Controls.Add(trdIcon);
@@ -644,7 +645,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(foodLabel);
                     var food = new PediaLabel(window, $"{s.Food} ", 200, (int)offsetY);
                     Controls.Add(food);
-                    var foodIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Food").LargeImage), true);
+                    var foodIcon = ResourceIcon(window, active, "Food", food.Height);
                     foodIcon.Location = new((int)food.Location.X + food.Width,
                         (int)offsetY + (food.Height - foodIcon.Height) / 2f);
                     Controls.Add(foodIcon);
@@ -654,7 +655,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(shieldsLabel);
                     var shields = new PediaLabel(window, $"{s.Shields} ", 200, (int)offsetY);
                     Controls.Add(shields);
-                    var shldIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Shields").LargeImage), true);
+                    var shldIcon = ResourceIcon(window, active, "Shields", shields.Height);
                     shldIcon.Location = new((int)shields.Location.X + shields.Width,
                         (int)offsetY + (shields.Height - shldIcon.Height) / 2f);
                     Controls.Add(shldIcon);
@@ -664,7 +665,7 @@ public sealed class CivilopediaInfo : BaseControl
                     Controls.Add(tradeLabel);
                     var trade = new PediaLabel(window, $"{s.Trade} ", 200, (int)offsetY);
                     Controls.Add(trade);
-                    var trdIcon = new ImageBox(window, new(active.ResourceImages.First(i => i.Name == "Trade").LargeImage), true);
+                    var trdIcon = ResourceIcon(window, active, "Trade", trade.Height);
                     trdIcon.Location = new((int)trade.Location.X + trade.Width,
                         (int)offsetY + (trade.Height - trdIcon.Height) / 2f);
                     Controls.Add(trdIcon);
@@ -735,6 +736,21 @@ public sealed class CivilopediaInfo : BaseControl
             default: throw new NotImplementedException();
         }
     }
+    /// <summary>
+    /// A resource medallion sized to sit beside a line of text. The icons ship at
+    /// high resolution now rather than as 14-pixel sheet patches, so nothing may
+    /// take their native size; each caller says how tall it wants the badge, which
+    /// is the height of the label it sits next to.
+    /// </summary>
+    private static ImageBox ResourceIcon(CivilopediaWindow window, IUserInterface active,
+        string name, float targetHeight)
+    {
+        var source = active.ResourceImages.First(i => i.Name == name).LargeImage;
+        var texture = TextureCache.GetImage(source);
+        var scale = texture.Height > 0 ? targetHeight / texture.Height : 1f;
+        return new ImageBox(window, new DialogImageElements(source, scale), true);
+    }
+
     private void AddUnitStat(CivilopediaWindow window, string label, string value, IImageSource? valueIcon, int x, ref float y)
     {
         var labelControl = new PediaLabel(window, label, x, (int)y);

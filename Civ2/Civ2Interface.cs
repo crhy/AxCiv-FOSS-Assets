@@ -331,7 +331,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
                                 Name = "Tax",
                                 GetResourceLabel = (val, city) =>
                                     city.Owner.TaxRate + "% " + Labels.For(LabelIndex.Tax) + ":" + val,
-                                Icon = new BitmapStorage("ICONS", 16, 320, 14)
+                                Icon = ResourceIcon("gold")
                             },
 
                             new()
@@ -339,7 +339,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
                                 Name = "Lux",
                                 GetResourceLabel = (val, city) =>
                                     city.Owner.LuxRate + "% " + Labels.For(LabelIndex.Lux) + ":" + val,
-                                Icon = new BitmapStorage("ICONS", 1, 320, 14)
+                                Icon = ResourceIcon("lux")
                             },
 
                             new()
@@ -347,7 +347,7 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
                                 Name = "Science",
                                 GetResourceLabel = (val, city) =>
                                     city.Owner.LuxRate + "% " + Labels.For(LabelIndex.Sci) + ":" + val,
-                                Icon = new BitmapStorage("ICONS", 31, 320, 14)
+                                Icon = ResourceIcon("science")
                             }
                         ]
                     }
@@ -393,20 +393,32 @@ public abstract class Civ2Interface(IMain main) : IUserInterface
         return _cityWindowLayout;
     }
 
+    /// <summary>
+    /// The resource medallions. These used to be 14x14 and 10x10 patches of the
+    /// ICONS sheet, which is all the original artwork was, and they were far too
+    /// coarse for a window that now scales well past 1:1. They are single files at
+    /// <see cref="ResourceIconSize"/> square instead, so every place that draws one
+    /// fits it to the space it has rather than taking its native size.
+    /// </summary>
+    public const int ResourceIconSize = 96;
+
+    private static BitmapStorage ResourceIcon(string name) =>
+        new(System.IO.Path.Combine("Icons", "Resources", $"{name}.png"));
+
     public IList<ResourceImage> ResourceImages { get; } = new List<ResourceImage>
     {
-        new(name: "Food", 
-            largeImage: new BitmapStorage("ICONS", 1, 305, 14),
-            smallImage: new BitmapStorage("ICONS",49, 334, 10),
-            lossImage: new BitmapStorage("ICONS",1, 290, 14)),
-        new(name: "Shields", 
-            largeImage: new BitmapStorage("ICONS", 16, 305, 14),
-            smallImage: new BitmapStorage("ICONS", 60, 334, 10),
-            lossImage: new BitmapStorage("ICONS", 16, 290, 14)),
-        new(name: "Trade", 
-            largeImage: new BitmapStorage("ICONS", 31, 305, 14),
-            smallImage: new BitmapStorage("ICONS", 71, 334, 10),
-            lossImage: new BitmapStorage("ICONS", 31, 290, 14))
+        new(name: "Food",
+            largeImage: ResourceIcon("food"),
+            smallImage: ResourceIcon("food"),
+            lossImage: ResourceIcon("food_loss")),
+        new(name: "Shields",
+            largeImage: ResourceIcon("production"),
+            smallImage: ResourceIcon("production"),
+            lossImage: ResourceIcon("production_loss")),
+        new(name: "Trade",
+            largeImage: ResourceIcon("trade"),
+            smallImage: ResourceIcon("trade"),
+            lossImage: ResourceIcon("trade_loss"))
     };
 
     public PopupBox? GetDialog(string dialogName)
