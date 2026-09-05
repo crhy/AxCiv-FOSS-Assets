@@ -5,7 +5,9 @@ using Civ2engine.Enums;
 using Civ2engine.MapObjects;
 using Model.Constants;
 using Model.Core;
+using Civ2engine.Production;
 using Model.Core.Cities;
+using Model.Core.Production;
 using Model.Core.GameRules;
 using Model.Core.Mapping;
 using Model.Core.Units;
@@ -411,6 +413,39 @@ namespace Civ2engine
             city.GetSpecialistTypes();
             city.AutoAddDistributionWorkers(gameRules);
             return true;
+        }
+
+        /// <summary>
+        /// Units, buildings and wonders are three separate things to be building.
+        /// </summary>
+        private static int ProductionCategory(IProductionOrder order) =>
+            order is BuildingProductionOrder { Improvement.IsWonder: true } ? 2
+                : order.Type == ItemType.Unit ? 0 : 1;
+
+        /// <summary>
+        /// Switch what a city is building, charging Civ II's penalty for crossing
+        /// between units, buildings and wonders. Switching within a category is
+        /// free, and the penalty is charged once a turn however often the choice
+        /// changes. The rate comes from the ruleset's own ShieldPenaltyTypeChange,
+        /// which was parsed and then never read.
+        /// </summary>
+        public static void ChangeProduction(this City city, IProductionOrder next, Rules rules)
+        {
+            var current = city.ItemInProduction;
+            if (next == null || ReferenceEquals(next, current))
+            {
+                return;
+            }
+
+            if (current != null && !city.ProductionChanged &&
+                ProductionCategory(current) != ProductionCategory(next))
+            {
+                var penalty = Math.Clamp(rules.Cosmic.ShieldPenaltyTypeChange, 0, 100);
+                city.ShieldsProgress -= city.ShieldsProgress * penalty / 100;
+                city.ProductionChanged = true;
+            }
+
+            city.ItemInProduction = next;
         }
 
         public static void AutoAddDistributionWorkers(this City city, Rules gameRules)

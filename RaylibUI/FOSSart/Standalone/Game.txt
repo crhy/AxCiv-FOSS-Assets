@@ -9,6 +9,19 @@ Before there were borders, monuments, or chronicles, there was only a people ben
 ^
 From this first campfire, raise a civilization whose memory will outlive the ages.
 
+@ABOUT
+@title=About rhYciv
+@width=460
+@button=Ok
+rhYciv is an open reimplementation of the turn-based strategy game Civilization
+II, built on the axx0/Civ2-clone engine and shipped with its own rules, art and
+text so that it runs on nothing but itself.
+^
+Released under the GPL. The bundled ruleset derives from Freeciv; the art and
+the written material are the project's own. Full attribution for every shipped
+file is in ASSET-MANIFEST.tsv, and the licences are in LICENSE and NOTICE.md.
+^
+github.com/crhy/rhYciv
 @CONQUEST
 @title=The World Is Yours
 @width=560

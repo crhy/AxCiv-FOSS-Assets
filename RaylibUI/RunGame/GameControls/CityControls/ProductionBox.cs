@@ -213,27 +213,19 @@ public class ProductionBox : BaseControl
         var previousOrder = _city.ItemInProduction;
         if (previousOrder != selectedOrder)
         {
-            var retainedShields = GetRetainedShieldsWhenChangingProduction(previousOrder, selectedOrder);
+            // The engine charges the change: it knows the ruleset's penalty rate,
+            // counts wonders as their own category, and only charges once a turn.
+            // Halving here on ItemType alone made a switch to a wonder free and
+            // charged again every time the player changed their mind.
+            _city.ChangeProduction(selectedOrder, _cityWindow.CurrentGameScreen.Game.Rules);
+            var retainedShields = Math.Max(0, _city.ShieldsProgress);
 
-            _city.ItemInProduction = selectedOrder;
-            _city.ShieldsProgress = retainedShields;
             _city.ConstructionQueue.Clear();
             _city.ConstructionQueue.Enqueue(selectedOrder, _shieldBoxRows);
             SynchronizeQueueProgress(selectedOrder, retainedShields);
 
             ChangeProductionDisplay();
         }
-    }
-
-    private int GetRetainedShieldsWhenChangingProduction(IProductionOrder previousOrder, IProductionOrder selectedOrder)
-    {
-        var currentProgress = Math.Max(0, _city.ShieldsProgress);
-        if (previousOrder.Type == selectedOrder.Type)
-        {
-            return currentProgress;
-        }
-
-        return currentProgress / 2;
     }
 
     private void SynchronizeQueueProgress(IProductionOrder selectedOrder, int retainedShields)
@@ -244,8 +236,9 @@ public class ProductionBox : BaseControl
             return;
         }
 
-        var totalCost = selectedOrder.Cost * Math.Max(1, _shieldBoxRows);
-        current.RemainingCost = Math.Max(0, totalCost - retainedShields);
+        // The rules cost is the shield cost; multiplying by the shield box's rows
+        // here left the queue believing everything cost ten times its price.
+        current.RemainingCost = Math.Max(0, selectedOrder.Cost - retainedShields);
         current.Status = retainedShields > 0 ? ItemStatus.InProgress : ItemStatus.Queued;
     }
 

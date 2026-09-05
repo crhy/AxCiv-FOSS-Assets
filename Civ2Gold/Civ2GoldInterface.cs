@@ -435,7 +435,7 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
                 new("-", Shortcut.None, Key.None),
                 new("Game &Concepts", Shortcut.None, Key.C, commandId: CivilopediaConcepts),
                 new("-", Shortcut.None, Key.None),
-                new("&About rhYciv", Shortcut.None, Key.A)
+                new("&About rhYciv", Shortcut.None, Key.A, commandId: AboutGame)
             },
         }
     ];

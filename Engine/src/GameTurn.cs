@@ -42,6 +42,7 @@ namespace Civ2engine
                 }
 
                 city.ImprovementSold = false;
+                city.ProductionChanged = false;
 
                 // Change food in storage
                 city.FoodInStorage += city.SurplusHunger;

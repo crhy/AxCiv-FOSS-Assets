@@ -1,3 +1,4 @@
+using Civ2engine;
 using Civ2engine.Production;
 using Civ2engine.UnitActions;
 using Model.Core;
@@ -133,5 +134,71 @@ public class CityActionsTest
         Assert.Equal(1, game.Object.CitiesBuiltSoFar[civ]);
         Assert.Equal(city, tile.CityHere);
         Assert.Equal(city, tile.WorkedBy);
+    }
+
+    private static Mock<IProductionOrder> Order(ItemType type, int cost = 40)
+    {
+        var order = new Mock<IProductionOrder>();
+        order.Setup(o => o.Type).Returns(type);
+        order.Setup(o => o.Cost).Returns(cost);
+        return order;
+    }
+
+    private static (City city, Rules rules) CityReadyToBuild()
+    {
+        var rules = new Rules { Advances = [], Improvements = [], Governments = [] };
+        rules.Cosmic.ShieldPenaltyTypeChange = 50;
+        var city = new City
+        {
+            Owner = new Civilization { Id = 1 },
+            ItemInProduction = Order(ItemType.Unit).Object,
+            ShieldsProgress = 40
+        };
+        return (city, rules);
+    }
+
+    [Fact]
+    public void ChangeProduction_ChargesHalfWhenCrossingCategories()
+    {
+        var (city, rules) = CityReadyToBuild();
+
+        city.ChangeProduction(Order(ItemType.Building).Object, rules);
+
+        Assert.Equal(20, city.ShieldsProgress);
+        Assert.True(city.ProductionChanged);
+    }
+
+    [Fact]
+    public void ChangeProduction_IsFreeWithinACategory()
+    {
+        var (city, rules) = CityReadyToBuild();
+
+        city.ChangeProduction(Order(ItemType.Unit, cost: 60).Object, rules);
+
+        Assert.Equal(40, city.ShieldsProgress);
+        Assert.False(city.ProductionChanged);
+    }
+
+    [Fact]
+    public void ChangeProduction_ChargesOnlyOnceInATurn()
+    {
+        var (city, rules) = CityReadyToBuild();
+
+        city.ChangeProduction(Order(ItemType.Building).Object, rules);
+        city.ChangeProduction(Order(ItemType.Unit, cost: 10).Object, rules);
+
+        // Half once, not half twice: changing your mind again is free.
+        Assert.Equal(20, city.ShieldsProgress);
+    }
+
+    [Fact]
+    public void ChangeProduction_UsesTheRulesetsOwnRate()
+    {
+        var (city, rules) = CityReadyToBuild();
+        rules.Cosmic.ShieldPenaltyTypeChange = 25;
+
+        city.ChangeProduction(Order(ItemType.Building).Object, rules);
+
+        Assert.Equal(30, city.ShieldsProgress);
     }
 }

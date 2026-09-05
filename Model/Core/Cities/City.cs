@@ -14,6 +14,13 @@ namespace Model.Core.Cities
         public bool AutobuildMilitaryRule { get; set; }
         public bool StolenTech { get; set; }
         public bool ImprovementSold { get; set; }
+
+        /// <summary>
+        /// Whether this city has already paid the penalty for switching what it
+        /// builds this turn. Civ II charges it once, so flipping back and forth in
+        /// one turn costs no more than a single change.
+        /// </summary>
+        public bool ProductionChanged { get; set; }
         public bool WeLoveKingDay { get; set; }
         public bool CivilDisorder { get; set; }
         public bool CanBuildHydro { get; set; }
