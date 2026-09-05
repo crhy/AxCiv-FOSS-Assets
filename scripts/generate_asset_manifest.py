@@ -64,7 +64,8 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             "scripts/build_civilopedia_text.py",
         )
     if relative.startswith("RaylibUI/FOSSart/Standalone/") and Path(relative).name in {
-        "CITIES.png", "ICONS.png", "TERRAIN1.png", "TERRAIN2.png", "UNITS.png"
+        "CITIES.png", "ICONS.png", "TERRAIN1.png", "TERRAIN2.png", "UNITS.png",
+        "VIEWPIECE.png"
     }:
         return (
             "generated-layout-adapter",

@@ -69,7 +69,16 @@ public class ListboxControlGroup : ControlGroup
             }
             else if (element.Unit is not null)
             {
-                Controls.Add(new UnitDisplay(controller, element.Unit, element.Game!, new(0, 0), _active, element.ScaleIcon, true));
+                // Centre the unit in the cell it was given. It used to be pinned to
+                // the corner, so a sprite smaller than its cell sat up and to the
+                // left of where the box implied it was.
+                var display = new UnitDisplay(controller, element.Unit, element.Game!, new(0, 0),
+                    _active, element.ScaleIcon, true);
+                var cellWidth = element.Width ?? display.Width;
+                var cellHeight = group.Height ?? display.Height;
+                display.Location = new(Math.Max(0, (cellWidth - display.Width) / 2f),
+                    Math.Max(0, (cellHeight - display.Height) / 2f));
+                Controls.Add(display);
             }
         }
 

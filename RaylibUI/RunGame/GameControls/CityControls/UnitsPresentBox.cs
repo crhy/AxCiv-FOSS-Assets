@@ -49,7 +49,7 @@ public class UnitsPresentBox : Listbox
             {
                 Elements = [
                     new ListboxGroupElement { Unit = unit, Game = cityWindow.CurrentGameScreen.Game,
-                        ScaleIcon = ImageUtils.ZoomScale(0) * 0.82f},
+                        ScaleIcon = UnitScaleFor(cityWindow, properties)},
                     new ListboxGroupElement { Text = ShortCityName(unit.HomeCity), Xoffset = 0, 
                         HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Bottom }],
                 Height = (int)Math.Ceiling(properties.Box.Height / properties.Rows * cityWindow.Scale)
@@ -107,5 +107,25 @@ public class UnitsPresentBox : Listbox
         }
 
         return city.Name.Length < 3 ? city.Name : city.Name[..3];
+    }
+
+    /// <summary>
+    /// How large to draw a unit in one cell of this box. The old value was a fixed
+    /// 0.82 that took no account of the city window's scale, so at the default 1.5
+    /// the box grew and the units in it did not. This fills the cell it is given
+    /// and grows with the window.
+    /// </summary>
+    private static float UnitScaleFor(CityWindow cityWindow, UnitBox properties)
+    {
+        var unit = cityWindow.MainWindow.ActiveInterface.UnitImages.UnitRectangle;
+        if (unit.Width <= 0 || unit.Height <= 0 || properties.Rows <= 0 || properties.Columns <= 0)
+        {
+            return cityWindow.Scale;
+        }
+
+        var cellWidth = properties.Box.Width / properties.Columns;
+        var cellHeight = properties.Box.Height / properties.Rows;
+        var fit = Math.Min(cellWidth / unit.Width, cellHeight / unit.Height);
+        return Math.Max(0.1f, fit * cityWindow.Scale);
     }
 }

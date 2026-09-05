@@ -343,11 +343,6 @@ def build_icons() -> None:
             x = 49 + 15 * column
             draw.rectangle((x, row_y, x + 13, row_y + 13), fill=tuple(max(0, c - 18 * column) if i < 3 else c for i, c in enumerate(color)), outline=(25, 25, 25, 255))
 
-    # Food, shield and trade icons where the city window actually reads them. The
-    # rows above put art at x=49 and up, but Civ2Interface takes the large and loss
-    # icons from x=1, 16 and 31, which was bare sheet background: the food and trade
-    # bars, the food storage box and the production shield box all drew grey blanks.
-    resource_icons.draw_all(lambda x, y, rgba: sheet.putpixel((x, y), rgba))
 
     draw.rectangle((1, 389, 16, 404), fill=(185, 65, 65, 255), outline=(245, 245, 245, 255))
     draw.line((5, 393, 12, 400), fill=(255, 255, 255, 255), width=2)
@@ -364,7 +359,41 @@ def build_icons() -> None:
         for column in range(5):
             x, y = 343 + 37 * column, 211 + 21 * row
             draw.rectangle((x, y, x + 35, y + 19), fill=(55 + 35 * column, 65 + 30 * row, 120 + 15 * column, 255), outline=(225, 225, 225, 255))
+    # The view-piece cursor. Drawn onto a transparent scratch tile and pasted, so
+    # the corners of its 64x32 slot stay clear: cutting the diamond straight out of
+    # the sheet took the background with it and the cursor showed as a grey box.
+    marker = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    ImageDraw.Draw(marker).polygon([(0, 16), (32, 0), (63, 16), (32, 31)],
+                                   outline=(245, 245, 245, 255), fill=(40, 55, 70, 90))
+    sheet.paste(marker, (199, 256))
+
+    # Last, so nothing is drawn over them: the trade arrow above used to clip the
+    # small trade icon.
+    resource_icons.draw_all(lambda x, y, rgba: sheet.putpixel((x, y), rgba))
+
     sheet.save(OUT / "ICONS.png", optimize=True)
+    build_view_piece_cursor()
+
+
+def build_view_piece_cursor() -> None:
+    """The marker drawn on the tile under the pointer.
+
+    It came out of the 64x32 ICONS slot, so at the zoom this build reaches it was
+    a five-times magnification of a stair-stepped outline, inside an opaque square
+    that covered the map around it. This is the same diamond at map-art
+    resolution with a soft dark backing to hold it against pale terrain.
+    """
+    w, h, ss = 300, 150, 4
+    big = Image.new("RGBA", (w * ss, h * ss), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(big)
+    points = [(0, h * ss // 2), (w * ss // 2, 0), (w * ss - 1, h * ss // 2), (w * ss // 2, h * ss - 1)]
+
+    draw.line(points + [points[0]], fill=(15, 20, 28, 210), width=9 * ss // 2)
+    draw.line(points + [points[0]], fill=(248, 250, 252, 255), width=3 * ss // 2)
+
+    cursor = big.resize((w, h), Image.LANCZOS)
+    cursor.save(OUT / "VIEWPIECE.png", optimize=True)
+
 
 
 def build_backgrounds() -> None:

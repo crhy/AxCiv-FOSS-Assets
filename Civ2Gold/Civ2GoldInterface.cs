@@ -141,7 +141,10 @@ public class Civ2GoldInterface(IMain main) : Civ2Interface(main)
             .ToArray<IImageSource>());
         PicSources.Add("riverMouth", Enumerable.Range(0, 4).Select(col =>
             new BitmapStorage("TERRAIN2", new Rectangle(1 + 65 * col, 331, 64, 32))).ToArray<IImageSource>());
-        PicSources.Add("viewPiece", [new BitmapStorage("ICONS", new Rectangle(199, 256, 64, 32))]);
+        // The tile marker at map-art resolution rather than a 64x32 slot of the icon
+        // sheet, which at this build's zoom was a five-times magnification of a
+        // stair-stepped outline inside an opaque square (#57).
+        PicSources.Add("viewPiece", [new BitmapStorage("VIEWPIECE")]);
         PicSources.Add("gridlines", [new BitmapStorage("ICONS", new Rectangle(183, 430, 64, 32))]);
         PicSources.Add("gridlines,visible", [new BitmapStorage("ICONS", new Rectangle(248, 430, 64, 32))]);
         PicSources.Add("battleAnim", Enumerable.Range(0, 8).Select(col =>
