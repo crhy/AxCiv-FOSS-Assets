@@ -27,6 +27,11 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
+    <release version="0.6.0-beta.1" date="2026-09-05">
+      <description>
+        <p>A playability pass driven by play-testing. Cities can finish what they build: rules costs are charged as shields rather than ten times that, so a Warrior takes ten turns at one shield a turn instead of a hundred. Civil disorder can be cleared from the city screen by making a citizen an entertainer, which nothing in the interface could do before. Hurrying production with gold works. Four crashes are fixed, among them a null scenario record that threw the first time any city changed hands, and a city starving during its owner's turn. The city screen is reorganised into the panels it is meant to have, its resource map draws the same terrain as the main map, and the food, shield and trade icons are no longer blank grey squares. Every civilisation now wears its Civilization II colour, and unit shields are drawn in it instead of black. A quick start entry drops straight into a Deity game as the Celts. Crashes now write a report naming the line.</p>
+      </description>
+    </release>
     <release version="0.5.0-beta.1" date="2026-09-03">
       <description>
         <p>The Civilopedia is populated and readable in game for the first time: original descriptive copy for 251 entries covering every advance, unit, city improvement, wonder, terrain type and special resource, and government, plus a new Concepts section on terrain development and government strategy. Every figure in the text is cross-checked against the bundled ruleset, and the two data files the game reads are generated from a single source document that the quality gate keeps in step.</p>
