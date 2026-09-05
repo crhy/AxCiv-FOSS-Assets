@@ -5,7 +5,7 @@
     and in packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml.
   -->
   <PropertyGroup>
-    <VersionPrefix>0.7.1</VersionPrefix>
-    <VersionSuffix>beta.2</VersionSuffix>
+    <VersionPrefix>0.7.2</VersionPrefix>
+    <VersionSuffix>beta.1</VersionSuffix>
   </PropertyGroup>
 </Project>
