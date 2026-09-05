@@ -292,6 +292,7 @@ Continue
 @title=Choose Your Research
 @width=360
 @button=Ok
+@button=Info
 Our %STRING0 await your direction.
 @FINDCITY
 @title=Find City

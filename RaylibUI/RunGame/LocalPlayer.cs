@@ -87,6 +87,16 @@ public class LocalPlayer : IPlayer
 
     public void SelectNewAdvance(List<Advance> researchPossibilities)
     {
+        ShowResearchChoice(researchPossibilities, 0);
+    }
+
+    /// <summary>
+    /// The research chooser, with an Info button that opens the Civilopedia page
+    /// for whichever advance is highlighted. Reading about a choice puts the
+    /// chooser back underneath, so the pedia closes onto the question again.
+    /// </summary>
+    private void ShowResearchChoice(List<Advance> researchPossibilities, int preselected)
+    {
         var activeInterface = _gameScreen.Main.ActiveInterface;
         _gameScreen.ShowPopup("RESEARCH", (s, i, arg3, arg4) =>
             {
@@ -96,6 +106,15 @@ public class LocalPlayer : IPlayer
                 }
 
                 var selectedIndex = Math.Clamp(i, 0, researchPossibilities.Count - 1);
+
+                if (s == "Info")
+                {
+                    // Pushed first so it sits under the pedia page pushed next.
+                    ShowResearchChoice(researchPossibilities, selectedIndex);
+                    NotifyAdvanceResearched(researchPossibilities[selectedIndex].Index);
+                    return;
+                }
+
                 Civilization.ReseachingAdvance = researchPossibilities[selectedIndex].Index;
                 if (Civilization.ScienceRate <= 0)
                 {
@@ -125,7 +144,8 @@ public class LocalPlayer : IPlayer
                     Elements = [new() { Icon = GetClassicAdvanceIcon(a), Width = 2 * 36 + 2 },
                                 new() { Text = a.Name, VerticalAlignment = VerticalAlignment.Center } ],
                     Height = 36
-                }).ToList()
+                }).ToList(),
+                SelectedId = Math.Clamp(preselected, 0, Math.Max(0, researchPossibilities.Count - 1))
             });
     }
 
