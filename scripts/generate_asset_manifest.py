@@ -116,10 +116,15 @@ def assets() -> list[Path]:
         *sorted((REPOSITORY / "UI.Classic" / "Fonts").glob("*.ttf")),
     ]
     files.extend(
-        path for path in sorted(FOSS_ART.rglob("*"))
+        path for path in FOSS_ART.rglob("*")
         if path.is_file() and path.name not in {"SOURCES.md", "ASSET-MANIFEST.tsv"}
     )
-    return sorted(files)
+    # Sort on the POSIX relative path, not on the Path objects. Comparing Path
+    # objects uses the platform's own rules, and on Windows those are
+    # case-insensitive: "Overlays" sorts after "ocean.jpg" there and before it on
+    # Linux. That reorders the manifest rows, so the committed file looked stale
+    # on Windows and only on Windows.
+    return sorted(files, key=lambda path: path.relative_to(REPOSITORY).as_posix())
 
 
 def render() -> str:
