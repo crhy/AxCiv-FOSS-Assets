@@ -41,6 +41,13 @@ namespace RhyCiv.Engine
             // End turn if no units awaiting orders
             if (nextUnit == null)
             {
+                // Nothing left to move, so nothing should still be selected. The
+                // ActiveUnit setter refuses a unit whose turn has ended and leaves
+                // the previous one in place, so without this the unit that just
+                // spent its last move point stayed active and went on blinking for
+                // the rest of the turn.
+                player.SetUnitActive(null, false);
+
                 var anyUnitsMoved = units.Any(u => u.MovePointsLost > 0);
                 if ((!anyUnitsMoved || Options.AlwaysWaitAtEndOfTurn))
                 {

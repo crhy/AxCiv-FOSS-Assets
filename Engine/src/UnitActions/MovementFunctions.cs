@@ -76,7 +76,11 @@ namespace RhyCiv.Engine.UnitActions
 
         private static void CheckForUnitTurnEnded(IGame game, Unit activeUnit)
         {
-            if (activeUnit.MovePoints <= 0 || activeUnit.Dead)
+            // TurnEnded, not just MovePoints: a unit can finish its turn by taking
+            // an order that occupies it -- fortifying, or starting a road, mine or
+            // irrigation -- while still holding movement it cannot use. Checking
+            // only the points left those units selected and blinking.
+            if (activeUnit.TurnEnded || activeUnit.Dead)
             {
                 game.ChooseNextUnit();
             }
