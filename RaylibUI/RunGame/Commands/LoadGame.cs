@@ -1,5 +1,6 @@
 using Model.Input;
 using RhyCiv.Engine;
+using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.IO;
 using Model.Controls;
 using Raylib_CSharp.Interact;
@@ -27,6 +28,7 @@ public class LoadGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
         
         try
         {
+            SessionLog.Record($"loading {Path.GetFileName(arg)}");
             RhyCiv.Engine.SaveLoad.LoadGame.LoadFrom(arg, GameScreen.Main);
         }
         catch (Exception e)

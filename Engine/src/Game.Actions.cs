@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.Enums;
 using RhyCiv.Engine.Events;
 using RhyCiv.Engine.MapObjects;
@@ -167,6 +168,9 @@ namespace RhyCiv.Engine
 
         public void StartPlayerTurn(IPlayer activePlayer)
         {
+            SessionLog.Record(
+                $"turn {TurnNumber} begins for {activePlayer.Civilization.TribeName} " +
+                $"({activePlayer.Civilization.Cities.Count} cities, {activePlayer.Civilization.Units.Count} units)");
             activePlayer.TurnStart(TurnNumber);
 
             //If there are any units waiting to move goto move them

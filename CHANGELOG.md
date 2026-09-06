@@ -67,6 +67,8 @@ carry a shorter, user-facing summary of each release; this file is the full reco
 
 - The Civilopedia's city-improvement pages no longer offer a Description button.
   The description is already on the page it navigated away from. (#104)
+- The app icon is the new shield logo, with its background removed so it sits
+  correctly on a desktop, a dock and a store listing rather than as a black tile.
 - The AppStream metainfo lists only 0.1.0 onward. AppStream orders releases by
   version rather than document order, so the pre-0.1.0 betas outranked 0.1.0 and
   software centres reported the wrong version. Those releases remain on GitHub
@@ -74,6 +76,14 @@ carry a shorter, user-facing summary of each release; this file is the full reco
 
 ### Added
 
+- **Crashes that no handler can catch are now reported.** A fault in a native
+  library or the graphics driver kills the process outright, so the existing crash
+  handler — which covers managed exceptions — never runs and the player is left
+  with nothing to send. The game now keeps a running record of what it is doing,
+  flushed as it happens: version, platform, each turn, each command, each dialog,
+  and every save or load. A session that ends properly deletes it; one still
+  present at the next launch is promoted to a crash report carrying the last thing
+  the game managed to do. Managed crash reports carry the same recent activity.
 - `RHYCIV_TEST_PRODUCTION` and `RHYCIV_TEST_ADVANCES` in the review harness, which
   open the Change Production list over the city window with a chosen number of
   advances already granted. The dialog is the hardest part of the city screen to

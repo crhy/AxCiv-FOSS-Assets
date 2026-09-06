@@ -1,5 +1,6 @@
 using RhyCiv.UI.Classic.ImageLoader;
 using RhyCiv.Engine;
+using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.Enums;
 using RhyCiv.Engine.Events;
 using RhyCiv.Engine.IO;
@@ -247,6 +248,7 @@ public class GameScreen : BaseScreen
 
         if (activeCommand.Status <= CommandStatus.Default)
         {
+            SessionLog.Record($"command {activeCommand.Id}");
             activeCommand.Action();
         }
         else
@@ -363,6 +365,7 @@ public class GameScreen : BaseScreen
 
     public CityWindow ShowCityWindow(City city)
     {
+        SessionLog.Record($"city window for {city.Name} (size {city.Size})");
         var cityDialog = new CityWindow(this, city);
         ShowDialog(cityDialog);
         return cityDialog;
@@ -521,6 +524,8 @@ public class GameScreen : BaseScreen
         DialogImageElements? dialogImage = null,
         ListboxDefinition? listBox = null)
     {
+        SessionLog.Record($"popup {dialogName}");
+
         if (_currentPopupDialog != null)
         {
             _queuedPopups.Enqueue(() => ShowPopup(dialogName, handleButtonClick, replaceNumbers, replaceStrings,

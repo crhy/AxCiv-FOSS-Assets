@@ -1,5 +1,6 @@
 using Model.Input;
 using RhyCiv.Engine;
+using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.IO;
 using RhyCiv.Engine.SaveLoad;
 using Model.Controls;
@@ -38,6 +39,7 @@ public class SaveGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
         var game = GameScreen.Game;
             
         var viewData = new Dictionary<string, string> {{ "Zoom", GameScreen.Zoom.ToString() }};
+        SessionLog.Record($"saving to {Path.GetFileName(filePath)}");
         // Never write straight to the destination: a save that fails part way
         // through must not destroy the save it was replacing. See AtomicFile.
         AtomicFile.Write(filePath,
