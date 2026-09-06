@@ -457,7 +457,9 @@ namespace RhyCiv.Engine
         private static bool HasAdvance(Civilization civilization, AdvanceType advance) =>
             (int)advance < civilization.Advances.Length && civilization.Advances[(int)advance];
 
-        private static void HealRestingUnit(Unit unit)
+        // internal rather than private so the healing and wake-on-recovery rules can be
+        // tested directly; the turn loop is the only caller.
+        internal static void HealRestingUnit(Unit unit)
         {
             if (unit.HitPointsLost <= 0)
             {
@@ -486,6 +488,16 @@ namespace RhyCiv.Engine
 
             var healed = inFriendlyCity ? 2 : 1;
             unit.HitPointsLost = Math.Max(0, unit.HitPointsLost - healed);
+
+            // A unit put to sleep to recover wakes once it is whole again, rather
+            // than being left asleep for a player who has stopped thinking about it.
+            // A unit that was already at full health when it was told to sleep never
+            // reaches this method -- it returns at the top -- so sleeping on watch
+            // still lasts until the player wakes it.
+            if (unit.HitPointsLost == 0 && unit.Order == (int)OrderType.Sleep)
+            {
+                unit.Order = (int)OrderType.NoOrders;
+            }
         }
 
         private void ProcessBarbarianTurn(IPlayer activePlayer)

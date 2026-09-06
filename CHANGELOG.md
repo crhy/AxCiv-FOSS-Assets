@@ -22,6 +22,10 @@ carry a shorter, user-facing summary of each release; this file is the full reco
   the window was rescaled, so a disbanded unit stayed listed until something else
   resized the window. If the disbanded unit was the active one, the map now moves
   to the next unit instead of leaving it blinking where it stood. (#94)
+- A unit put to sleep to recover now wakes when it is back to full health, instead
+  of staying asleep for a player who has stopped thinking about it. A unit that was
+  already healthy when told to sleep is unaffected and stays asleep until woken,
+  and a fortified unit stays fortified. (#96)
 
 ### Changed
 
