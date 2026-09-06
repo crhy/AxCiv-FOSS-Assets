@@ -64,7 +64,7 @@ public class ListboxControlGroup : ControlGroup
                     imagebox.Height = (int)group.Height;
                 }
 
-                FitIcon(imagebox, element.ScaleIcon, def.ImageShift && index % 2 == 1);
+                FitIcon(imagebox, element.ScaleIcon, def.ImageShift && index % 2 == 1, element.FitIconToCell);
                 Controls.Add(imagebox);
             }
             else if (element.Unit is not null)
@@ -144,7 +144,7 @@ public class ListboxControlGroup : ControlGroup
             child.Height = element.Height ?? (Height > 0 ? Height : child.GetPreferredHeight());
             if (child is ImageBox imageBox)
             {
-                FitIcon(imageBox, element.ScaleIcon, false);
+                FitIcon(imageBox, element.ScaleIcon, false, element.FitIconToCell);
             }
             offset += child.Width;
         }
@@ -167,7 +167,7 @@ public class ListboxControlGroup : ControlGroup
         base.Draw(pulse);
     }
 
-    private void FitIcon(ImageBox imageBox, float baseScale, bool shiftToRightHalf)
+    private void FitIcon(ImageBox imageBox, float baseScale, bool shiftToRightHalf, bool fitToCell = false)
     {
         var slotWidth = imageBox.Width;
         var slotHeight = imageBox.Height;
@@ -181,7 +181,9 @@ public class ListboxControlGroup : ControlGroup
         {
             var maxWidth = Math.Max(1, slotWidth - 4);
             var maxHeight = Math.Max(1, slotHeight - 4);
-            if (imageWidth > maxWidth || imageHeight > maxHeight)
+            // Without fitToCell an icon is only ever shrunk, so art smaller than
+            // its cell stays small however much room it has.
+            if (fitToCell || imageWidth > maxWidth || imageHeight > maxHeight)
             {
                 var fitScale = Math.Min(maxWidth / (float)imageWidth, maxHeight / (float)imageHeight);
                 imageBox.Scale *= Math.Max(0.05f, fitScale);

@@ -4,6 +4,7 @@ using System.Linq;
 using RhyCiv.Engine.MapObjects;
 using RhyCiv.UI.Classic;
 using RhyCiv.Engine;
+using RhyCiv.Engine.Advances;
 using RhyCiv.Engine.NewGame;
 using CivInit = RhyCiv.UI.Classic.Rules.Initialization;
 
@@ -234,8 +235,27 @@ namespace RaylibUI
                 Console.WriteLine($"test-city: supported {last.SupportedUnits.Count} " +
                                   $"[{string.Join(", ", last.SupportedUnits.Select(u => $"{u.Name} dead={u.Dead}"))}]");
 
-                screen.ShowCityWindow(last);
+                var openedWindow = screen.ShowCityWindow(last);
                 Console.WriteLine("test-city: city window opened");
+
+                // RHYCIV_TEST_PRODUCTION=1 opens the Change Production list on top,
+                // optionally after granting the first N advances so the list carries
+                // more than a settler and a warrior. The list is the hardest part of
+                // the city screen to reach by hand and the easiest to get wrong.
+                if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHYCIV_TEST_PRODUCTION")))
+                {
+                    if (int.TryParse(Environment.GetEnvironmentVariable("RHYCIV_TEST_ADVANCES"), out var advances))
+                    {
+                        for (var index = 0; index < Math.Min(advances, game.Rules.Advances.Length); index++)
+                        {
+                            game.GiveAdvance(index, civ);
+                        }
+                        Console.WriteLine($"test-city: granted {advances} advances");
+                    }
+
+                    openedWindow.ShowChangeProduction();
+                    Console.WriteLine("test-city: change production dialog opened");
+                }
             }
 
             // Founding the last settler's city leaves nobody awaiting orders, so the

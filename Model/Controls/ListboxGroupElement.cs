@@ -22,6 +22,15 @@ public class ListboxGroupElement
     public float ScaleIcon { get; set; } = 1.0f;
 
     /// <summary>
+    /// Scale the icon to fill its cell, up as well as down, ignoring
+    /// <see cref="ScaleIcon"/>. Use this where the row has a size it wants the art
+    /// to meet, rather than a fixed multiplier tuned to one particular source
+    /// resolution: a hard-coded multiplier silently becomes wrong the moment the
+    /// art behind it is redrawn at a different size.
+    /// </summary>
+    public bool FitIconToCell { get; set; }
+
+    /// <summary>
     /// Custom width of control.
     /// </summary>
     public int? Width { get; set; }

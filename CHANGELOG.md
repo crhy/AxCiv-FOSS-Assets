@@ -31,6 +31,15 @@ carry a shorter, user-facing summary of each release; this file is the full reco
   are discovered, so an item unlocked mid-game used to land at the bottom of sixty
   entries rather than in its usual place — which is how a buildable Temple went
   unnoticed after Ceremonial Burial. (#91)
+- **Crash:** researching an advance that enables a terrain improvement — fortresses,
+  for one — took the game down with a NullReferenceException. The notification went
+  through a player interface that nothing in the solution implements, so the field
+  was always null and the message could never be shown.
+- Units and improvements in the Change Production list are drawn at a readable
+  size. Their icons were scaled by a constant that divided by 1024, the size the
+  art used to be; it is now 300 square, so units rendered at about fourteen pixels
+  and improvement icons at roughly one. Icons are now fitted to the row, so the
+  same thing cannot happen again when art is redrawn at a new size. (#81)
 
 ### Changed
 

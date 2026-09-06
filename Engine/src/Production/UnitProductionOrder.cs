@@ -106,7 +106,7 @@ namespace RhyCiv.Engine.Production
             {
                 Elements =
                 [
-                    new() { Icon = GetIcon(activeInterface), Width = 80, ScaleIcon = HasFossArtIcon(activeInterface) ? BuildListIconScale : 1f },
+                    new() { Icon = GetIcon(activeInterface), Width = 80, FitIconToCell = true },
                     new() { Text = unitDefinition.Name, Width = 200, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
                     new()
                     {
@@ -121,9 +121,9 @@ namespace RhyCiv.Engine.Production
             };
         }
 
-        // The change-production list showed each unit at a twentieth of the row's
-        // height, which is unreadable for art that is otherwise 1024 pixels square.
+        // The icon is fitted to the row rather than multiplied by a constant. The
+        // previous constant divided by 1024, the size the unit art used to be; the
+        // art is now 300 square, so every unit rendered at about fourteen pixels.
         private const int BuildListRowHeight = 52;
-        private const float BuildListIconScale = (BuildListRowHeight - 4) / 1024f;
     }
 }

@@ -61,29 +61,7 @@ public class ProductionBox : BaseControl
         _buyButton = new CityButton(cityWindow, "Buy") { ManualLayout = true };
         _buyButton.Click += (_, _) => OfferToBuy();
         _changeButton = new CityButton(cityWindow, "Change") { ManualLayout = true };
-        _changeButton.Click += (_, _) =>
-        {
-            cityWindow.CurrentGameScreen.ShowPopup(
-                "PRODUCTION", handleButtonClick: BuildDialogClosed, replaceStrings: [_city.Name], listBox: new ListboxDefinition
-                {
-                    ImageShift = false,
-                    Rows = Math.Min(9, _canProduce.Count),
-                    Looks = new ListboxLooks
-                    {
-                        Font = _active.Look.CityWindowFont,
-                        FontSize = 16,
-                        TextColorFront = Color.Black,
-                        TextColorShadow = Color.Blank,
-                        TextShadowOffset = Vector2.Zero,
-                        SelectedTextFont = _active.Look.DefaultFont,
-                        SelectedTextBackgroundColor = new Color(107, 107, 107, 255),
-                        SelectedTextColorFront = Color.White,
-                        SelectedTextColorShadow = Color.Black
-                    },
-                    Groups = _canProduce.Select(p => p.GetBuildListEntry(_active, _city, _shieldBoxRows)).ToList(),
-                    SelectedId = _canProduce.IndexOf(_city.ItemInProduction)
-                });
-        };
+        _changeButton.Click += (_, _) => ShowChangeProductionDialog();
 
         _icon = new ImageBox(_cityWindow, _city.ItemInProduction.GetIcon(_active));
 
@@ -191,6 +169,36 @@ public class ProductionBox : BaseControl
         // shields the production-completion code uses so the city box updates
         // immediately for normal production and disband contributions.
         return _city.ShieldsProgress;
+    }
+
+
+    /// <summary>
+    /// Opens the Change Production list. Separate from the button handler so the
+    /// review harness can bring it up without a click; it is the busiest dialog in
+    /// the game and needs to be inspectable.
+    /// </summary>
+    public void ShowChangeProductionDialog()
+    {
+        _cityWindow.CurrentGameScreen.ShowPopup(
+                "PRODUCTION", handleButtonClick: BuildDialogClosed, replaceStrings: [_city.Name], listBox: new ListboxDefinition
+                {
+                    ImageShift = false,
+                    Rows = Math.Min(9, _canProduce.Count),
+                    Looks = new ListboxLooks
+                    {
+                        Font = _active.Look.CityWindowFont,
+                        FontSize = 16,
+                        TextColorFront = Color.Black,
+                        TextColorShadow = Color.Blank,
+                        TextShadowOffset = Vector2.Zero,
+                        SelectedTextFont = _active.Look.DefaultFont,
+                        SelectedTextBackgroundColor = new Color(107, 107, 107, 255),
+                        SelectedTextColorFront = Color.White,
+                        SelectedTextColorShadow = Color.Black
+                    },
+                    Groups = _canProduce.Select(p => p.GetBuildListEntry(_active, _city, _shieldBoxRows)).ToList(),
+                    SelectedId = _canProduce.IndexOf(_city.ItemInProduction)
+                });
     }
 
     private void ChangeProductionDisplay()

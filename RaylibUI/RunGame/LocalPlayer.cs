@@ -183,12 +183,27 @@ public class LocalPlayer : IPlayer
     public IInterfaceCommands Ui { get; }
     public List<Unit> WaitingList { get; } = new();
 
+    /// <summary>
+    /// Announces a terrain improvement that an advance has just made available.
+    /// <para>
+    /// This went through <see cref="Ui"/>, which nothing ever assigns -- no type in
+    /// the solution implements <see cref="IInterfaceCommands"/> -- so researching an
+    /// advance that enables an improvement with a message threw a
+    /// NullReferenceException and took the game down. It now uses the same popup
+    /// path as the rest of this class.
+    /// </para>
+    /// </summary>
     public void NotifyImprovementEnabled(TerrainImprovement improvement, int level)
     {
+        if (level < 0 || level >= improvement.Levels.Count)
+        {
+            return;
+        }
+
         var dialogKey = improvement.Levels[level].EnabledMessage;
         if (!string.IsNullOrWhiteSpace(dialogKey))
         {
-            Ui.ShowDialog(dialogKey);
+            _gameScreen.ShowPopup(dialogKey);
         }
     }
 

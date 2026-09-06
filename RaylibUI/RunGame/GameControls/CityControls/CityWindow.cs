@@ -354,6 +354,10 @@ public class CityWindow : BaseDialog
         base.OnKeyPress(key);
     }
 
+    /// <summary>Opens this city's Change Production list. Used by the review harness.</summary>
+    public void ShowChangeProduction() =>
+        Controls.OfType<ProductionBox>().FirstOrDefault()?.ShowChangeProductionDialog();
+
     public void UpdateProduction()
     {
         City.CalculateOutput(City.Owner.Government, CurrentGameScreen.Game);

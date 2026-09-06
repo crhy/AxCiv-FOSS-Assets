@@ -132,6 +132,8 @@ namespace RhyCiv.Engine.Production
             return Improvement.Name;
         }
 
+        private const int BuildListRowHeight = 52;
+
         public override ListboxGroup GetBuildListEntry(IUserInterface active, City city, int shieldRows = 10)
         {
             var shieldCost = Improvement.Cost;
@@ -139,11 +141,12 @@ namespace RhyCiv.Engine.Production
                                                       (decimal)Math.Max(1, city.Production)));
             return new ListboxGroup
             {
-                Elements = [ new() { Icon = GetIcon(active), Width = 70, ScaleIcon = HasFossArtIcon() ? 0.028f : 0.48f },
+                Elements = [ new() { Icon = GetIcon(active), Width = 70, FitIconToCell = true },
                              new() { Text = Improvement.Name, Width = 260, TextSizeOverride = 18, VerticalAlignment = VerticalAlignment.Center },
                              new() { Text = $"({turns} Turns, {shieldCost} Shields, {Improvement.Upkeep} Gold)", TextSizeOverride = 16,
                                  HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center } ],
-                Height = 38,
+                // Matches the unit rows, so the list does not change stride halfway down.
+                Height = BuildListRowHeight,
             };
         }
     }

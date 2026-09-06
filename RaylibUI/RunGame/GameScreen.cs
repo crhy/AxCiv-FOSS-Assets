@@ -361,10 +361,11 @@ public class GameScreen : BaseScreen
             replaceStrings: replaceStrings);
     }
 
-    public void ShowCityWindow(City city)
+    public CityWindow ShowCityWindow(City city)
     {
         var cityDialog = new CityWindow(this, city);
         ShowDialog(cityDialog);
+        return cityDialog;
     }
 
     public void TriggerMapEvent(MapEventArgs args)
