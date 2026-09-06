@@ -100,7 +100,14 @@ public static class TileResourceExtensions
 
         public static int GetShields(this Tile tile, bool lowOrganization)
         {
-            decimal shields = tile.Type == TerrainType.Grassland && !tile.HasShield ? 0 :  tile.EffectiveTerrain.Shields;
+            // Grassland yields no shields on its own -- the ruleset gives it zero --
+            // and the shield special is the exception: in Civ II a shielded grassland
+            // square produces one, which is the entire reason the marker is drawn on
+            // it. Reading the terrain's own figure for a shielded square therefore
+            // returned zero, so the marker promised production the square never gave.
+            decimal shields = tile.Type == TerrainType.Grassland
+                ? (tile.HasShield ? tile.EffectiveTerrain.Shields + 1 : 0)
+                : tile.EffectiveTerrain.Shields;
 
             var productionEffects = tile.EffectsList.Where(e => e.Target == ImprovementConstants.Shields).ToList();
 

@@ -563,6 +563,15 @@ namespace RhyCiv.UI.Classic.ImageLoader
         /// cropped to a soft-edged disc (the grass at the rim fades into the
         /// map's own grass) and eased a little toward neutral.
         /// </summary>
+        /// <summary>
+        /// Width of the grassland shield marker as a fraction of the tile. It is a
+        /// marker saying the square yields a shield, not a feature of the terrain,
+        /// so it should read at a glance without competing with what is drawn on the
+        /// tile. It was at 0.44, which covered most of the square. The height limit
+        /// is twice this, because the tile is 2:1.
+        /// </summary>
+        private const float GrassShieldTileFraction = 0.22f;
+
         private static Image? ComposeShieldTile(TerrainSet terrain, string path)
         {
             var loaded = Images.LoadImageFromFile(path).Image;
@@ -611,7 +620,8 @@ namespace RhyCiv.UI.Classic.ImageLoader
             var targetWidth = terrain.TileWidth * terrain.RenderScale;
             var targetHeight = terrain.TileHeight * terrain.RenderScale;
 
-            var scale = MathF.Min(targetWidth * 0.44f / art.Width, targetHeight * 0.78f / art.Height);
+            var scale = MathF.Min(targetWidth * GrassShieldTileFraction / art.Width,
+                                  targetHeight * GrassShieldTileFraction * 2f / art.Height);
             var drawWidth = Math.Max(1, (int)MathF.Round(art.Width * scale));
             var drawHeight = Math.Max(1, (int)MathF.Round(art.Height * scale));
             art.Resize(drawWidth, drawHeight);
