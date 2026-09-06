@@ -8,6 +8,7 @@ using RhyCiv.Engine.MapObjects;
 using RhyCiv.Engine.Terrains;
 using RhyCiv.Engine.UnitActions;
 using Model.Constants;
+using Model.Core.Cities;
 using Model.Core.Mapping;
 using Model.Core.Player;
 using Model.Core.Units;
@@ -266,12 +267,34 @@ namespace RhyCiv.Engine
                 return;
             }
 
-            var nearbyCity = currentTile.CityRadius().FirstOrDefault(t => t.CityHere != null)?.CityHere;
+            // Our own cities only. This did not check the owner, so after the
+            // barbarians took a city the settler beside it carried on improving the
+            // land -- developing terrain for whoever had just captured the place.
+            var nearbyCity = currentTile.CityRadius()
+                .Select(tile => tile.CityHere)
+                .FirstOrDefault(city => city != null && city.OwnerId == unit.Owner.Id);
+
             var workTile = FindAutomatedSettlerWorkTile(unit, currentTile, nearbyCity?.Location);
             if (workTile != null)
             {
                 StepAutomatedSettler(unit, currentTile, workTile);
                 return;
+            }
+
+            // Nothing of ours to work on here. Walk to the nearest city we still
+            // hold rather than loitering next to one we have lost.
+            if (nearbyCity == null && NearestOwnCity(unit) is { } refuge)
+            {
+                var towards = MovementFunctions.GetPossibleMoves(currentTile, unit)
+                    .Where(tile => tile.Type != TerrainType.Ocean && !tile.Terrain.Impassable)
+                    .MinBy(tile => DistanceBetween(tile, refuge.Location));
+
+                if (towards != null && DistanceBetween(towards, refuge.Location) <
+                    DistanceBetween(currentTile, refuge.Location))
+                {
+                    StepAutomatedSettler(unit, currentTile, towards);
+                    return;
+                }
             }
 
             if (nearbyCity == null && currentTile.Type != TerrainType.Ocean)
@@ -330,6 +353,26 @@ namespace RhyCiv.Engine
         /// sat there, unmoving and unreachable, which is what being chased by
         /// barbarians into a corner looked like.
         /// </summary>
+        /// <summary>The closest city this unit's owner still holds, if any.</summary>
+        private static City? NearestOwnCity(Unit unit)
+        {
+            var from = unit.CurrentLocation;
+            return unit.Owner.Cities
+                .Where(city => city.Location != null)
+                .MinBy(city => DistanceBetween(from, city.Location));
+        }
+
+        /// <summary>
+        /// Squared straight-line distance, which is all that is needed to compare
+        /// two candidates and avoids a square root per tile considered.
+        /// </summary>
+        private static int DistanceBetween(Tile from, Tile to)
+        {
+            var dx = from.X - to.X;
+            var dy = from.Y - to.Y;
+            return dx * dx + dy * dy;
+        }
+
         private void StepAutomatedSettler(Unit unit, Tile from, Tile to)
         {
             MovementFunctions.MoveC2(this, unit, to.X - from.X, to.Y - from.Y);
