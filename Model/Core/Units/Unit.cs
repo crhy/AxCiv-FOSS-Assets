@@ -142,6 +142,14 @@ namespace Model.Core.Units
         public string AttackSound => TypeDefinition.AttackSound;
         public List<Unit> CarriedUnits { get; } = new();
 
+        /// <summary>
+        /// Where the unit stands, or null if it has never been placed. Use this
+        /// rather than <see cref="CurrentLocation"/> wherever a unit may legitimately
+        /// have no tile -- notably when handling one that has just died, where
+        /// throwing would replace a death notice with a crash.
+        /// </summary>
+        public Tile? CurrentLocationOrNull => _currentLocation;
+
         public Tile CurrentLocation
         {
             get => _currentLocation ?? throw new InvalidOperationException("Unit has no current location.");

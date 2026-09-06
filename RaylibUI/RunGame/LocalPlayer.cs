@@ -1,5 +1,6 @@
 using RhyCiv.Engine;
 using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.Enums;
 using RhyCiv.Engine.Events;
 using RhyCiv.Engine.IO;
@@ -319,12 +320,53 @@ public class LocalPlayer : IPlayer
 
     public void UnitLost(Unit unit, Unit? killedBy)
     {
-        //TODO: How do we use this
+        UnitsLost([unit], killedBy);
     }
 
+    /// <summary>
+    /// Units belonging to this player have died — in combat, or with the city that
+    /// supported them when it was captured.
+    /// <para>
+    /// Both of these were unimplemented. The engine took the units off the map and
+    /// nothing told the interface, so the tiles they had stood on were never
+    /// repainted and they appeared to survive whatever had killed them. Losing a
+    /// city to the barbarians left its supported units apparently still standing.
+    /// </para>
+    /// </summary>
     public void UnitsLost(List<Unit> deadUnits, Unit? killedBy)
     {
-        //TODO: How do we use this
+        if (deadUnits.Count == 0)
+        {
+            return;
+        }
+
+        SessionLog.Record($"lost {deadUnits.Count} unit(s)" +
+                          (killedBy == null ? "" : $" to {killedBy.Name}"));
+
+        // Nothing should still be selected if it has just died: the map would go on
+        // blinking a unit that is no longer there, and the side panel would describe
+        // it as though it could still be given orders.
+        if (ActiveUnit is { } active && deadUnits.Contains(active))
+        {
+            SetUnitActive(null, false);
+        }
+
+        // Unit.Dead takes a unit off its tile but asks for no redraw, so the tile
+        // keeps the last frame it was drawn with.
+        var tiles = deadUnits
+            .Select(unit => unit.CurrentLocationOrNull)
+            .OfType<Tile>()
+            .Distinct()
+            .ToList();
+
+        if (tiles.Count > 0)
+        {
+            MapChanged(tiles);
+        }
+        else
+        {
+            _gameScreen.ForceRedraw();
+        }
     }
 
     public void UnitMoved(Unit unit, Tile tileTo, Tile tileFrom)

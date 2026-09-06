@@ -118,20 +118,16 @@ namespace RhyCiv.Engine
         /// turn on and play continued without you. Turn 1 is exempt so a civ
         /// still placing its first settlers is never judged.
         /// </summary>
-        private void CheckElimination(Civilization civ)
+        // internal so the defeat rule can be tested directly; ChooseNextCivilizationOnce
+        // is the only caller.
+        internal void CheckElimination(Civilization civ)
         {
             if (!civ.Alive || civ.PlayerType == PlayerType.Barbarians || TurnNumber <= 1)
             {
                 return;
             }
 
-            // Only a living unit counts. A unit killed in combat is marked dead and
-            // taken off the map, but it is left in its owner's unit list - only
-            // disbanding removes it - so counting the list meant a civilisation that
-            // had ever built anything could never be eliminated. Barbarians running
-            // down the last settler ended the game in every sense except the one the
-            // player sees.
-            if (civ.Cities.Count > 0 || civ.Units.Any(unit => !unit.Dead))
+            if (!IsDefeated(civ))
             {
                 return;
             }
@@ -144,6 +140,25 @@ namespace RhyCiv.Engine
 
             CheckConquest();
         }
+
+        /// <summary>
+        /// Whether a civilisation has no way back: no cities, and no settler left to
+        /// found one.
+        /// <para>
+        /// Holding units is not by itself survival. A civilisation reduced to a
+        /// couple of warriors can never build anything again, and was previously
+        /// left playing on with no possible future and nothing to say so.
+        /// </para>
+        /// <para>
+        /// Only a living unit counts. A unit killed in combat is marked dead and
+        /// taken off the map but left in its owner's unit list -- only disbanding
+        /// removes it -- so counting the list meant a civilisation that had ever
+        /// built anything could never be eliminated at all.
+        /// </para>
+        /// </summary>
+        internal static bool IsDefeated(Civilization civ) =>
+            civ.Cities.Count == 0 &&
+            !civ.Units.Any(unit => !unit.Dead && unit.AiRole == AiRoleType.Settle);
 
         /// <summary>
         /// Conquest: one civilisation left standing and the world is theirs. The
