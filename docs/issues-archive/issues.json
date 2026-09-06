@@ -1,0 +1,1552 @@
+{
+  "repository": "crhy/rhYciv",
+  "exported_at": "2026-09-06T04:34:51+00:00",
+  "counts": {
+    "total": 77,
+    "issues": 74,
+    "pull_requests": 3,
+    "open": 48,
+    "closed": 29
+  },
+  "entries": [
+    {
+      "number": 2,
+      "type": "issue",
+      "title": "Finish Civ 2 re-implementation: flatpak + early betas",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-27T00:55:11Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/2",
+      "body": "From ToDoAI: 'Finish the Open Source Civ 2 app, create a flatpak, get early betas ready for testing.'",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-27T22:23:51Z",
+          "body": "Triage: **long-term application milestone**. First inventory code versus asset-only content and confirm every asset/license is redistributable. Define a small playable Civ-II-style MVP, make its build deterministic, add rules/save/load smoke tests, package it as a Flatpak with complete AppStream/icon/screenshot metadata, then publish signed prerelease bundles and a focused beta checklist. “Early beta” is reached when a clean system can install, start, play a short scenario, save/reload, and report diagnostics."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-08-28T20:47:43Z",
+          "body": "The game is really close to playable.  This is not a long-term goal.  This is a short term goal."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T07:58:37Z",
+          "body": "The active source TODOs have now been split into focused parity work: #4 unit stacks, #5 pollution/global warming, #6 city economy formulas, #7 AI behavior, #8 air fuel and combat feedback, #9 research and key-civilization costs, #10 UI notifications/details, and #11 scenario scripting. The current implementation pass also addresses research progress display, growth thresholds, specialist reassignment, improvement sale values, multi-improvement pillaging, power scoring/history, and save/load state fidelity."
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "type": "issue",
+      "title": "Missing FOSS Art Assets - 20 Original Asset Buckets + 3 Missing Units",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-28T04:05:53Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/3",
+      "body": "# Missing FOSS Art Assets Tracking\n\nThis issue tracks the 20 Original Asset Buckets and 3 missing units needed to fully replace original Civ 2 assets.\n\n## 20 Original Asset Buckets\n\n| # | Asset Bucket | Original Civ 2 File(s) | Details |\n|---|--------------|------------------------|---------|\n| 1 | **Road connection masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 9 scalable road overlay masks |\n| 2 | **Railroad connection masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 9 scalable railroad overlay masks |\n| 3 | **River masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 16 river masks + 4 river mouths |\n| 4 | **Coastline masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 32 mini coast pieces |\n| 5 | **Forest variation masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 16 forest edge/variant tiles |\n| 6 | **Hill variation masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 16 hill edge/variant tiles |\n| 7 | **Mountain variation masks** | `TERRAIN1` / `TERRAIN2` sprite sheets | 16 mountain edge/variant tiles |\n| 8 | **Irrigation overlay** | `TERRAIN1` special tiles | Map overlay art |\n| 9 | **Farmland overlay** | `TERRAIN1` special tiles | Map overlay art |\n| 10 | **Mine overlay** | `TERRAIN1` special tiles | Map overlay art |\n| 11 | **Pollution overlay** | `TERRAIN1` special tiles | Map overlay art |\n| 12 | **Goody hut** | `TERRAIN1` / `TERRAIN2` | Map overlay art |\n| 13 | **City sprites** | `CITIES` sprite sheet | Style/size/walled/capital variants |\n| 14 | **Unit shields and flags** | `ICONS` / `UNITS` sprite sheets | Owner-colorizable shields, shield backs, HP shields, flags |\n| 15 | **Battle animation frames** | `BATTLE` / animation files | 8 combat animation frames |\n| 16 | **Advisor backgrounds** | `Tiles.dll` / `cv.dll` | City report, defense, attitude, trade, science, world wonders |\n| 17 | **Throne room layers** | `pv.dll` | Throne room layers and section masks |\n| 18 | **Civilopedia terrain backgrounds** | `cv.dll` | Ocean/river/continent/improvement pages |\n| 19 | **Dialog/startup illustrations** | `Intro.dll` | Scenario/new-game pictures |\n| 20 | **UI chrome and icons** | `ICONS` / `local buttons.png` / `explorer_icons.png` | Buttons, close/zoom, gold/science/trade, food/shield/trade, grid/view icons, wallpaper/borders |\n\n## 3 Missing Units (in FOSSart/Units/)\n\n| Unit Type | Enum Value | Original Civ 2 File | FOSSart Filename Needed | Status |\n|-----------|------------|---------------------|-------------------------|--------|\n| Archers | 4 | `UNITS` sprite sheet (index 4) | `archers.gif` | **MISSING** |\n| Legions | 5 | `UNITS` sprite sheet (index 5) | `legion.gif` or `legions.gif` | **MISSING** |\n| AegisCruiser | 39 | `UNITS` sprite sheet (index 39) | `aegiscruiser.gif` | **MISSING** |\n\n## Already Available in FOSSart ✅\n- MechInf (14) - `mechinfantry.gif` exists\n\n## Removed from Game (No Art Needed)\n- Spaceship parts (SS Structural, SS Propulsion, SS Fuel, SS Habitation, SS Life Support, SS Solar Panel) - removed\n- Plumbing advance - removed (not in original Civ 2)\n- User Def Tech A/B/C - removed (not needed for FOSS)\n\n---\n\n**Instructions:** When adding assets, place them in `/RaylibUI/FOSSart/` with appropriate subdirectories. Update this issue as items are completed.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T08:35:44Z",
+          "body": "## 4K asset requirements (2026-08-30)\n\nThe rendering pipeline now scales UI/input natively and composes the map at display density. Bundled FOSS terrain remains at 128x64 through the normal-zoom 4K pipeline instead of being reduced to 64x32 first.\n\nThe original-size assets listed in this issue are now the remaining visual bottleneck. New FOSS replacements should target these minimum working sizes:\n\n- full map tiles and full-tile overlays: 128x64 with alpha\n- coast/dither quarter overlays: 64x32 with alpha\n- compact UI icons: at least 2x their current logical dimensions\n- city/unit/map sprites: at least 2x their intended 1920x1080 logical footprint, preferably larger source masters\n- full-screen/advisor art: 3840x2160 or scalable/vector source\n\nKeep source/master files when licensing permits, record author/license metadata, and do not derive or trace replacements from MicroProse assets. Runtime integration should retain the original Civ II logical footprint while sampling the higher-resolution source."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:34Z",
+          "body": "**3 Missing Units — done.** `RaylibUI/FOSSart/Units/` now contains `archers.png`, `legions.png`, and `aegiscruiser.png` (alongside the already-present `mechinfantry.png`). That section of this issue can be checked off.\n\n**Asset buckets — partial.** The 2026-09-01 terrain pass (\"Paint every terrain type\", `7c91f87d`) filled every `TERRAIN1` base-diamond row and most special-resource cutouts from painted source. Still procedural / on a legacy tile: road & railroad connection rosettes, coast/river-mouth transition strokes, the `TERRAIN1` overlay markers (irrigation, farmland, mine, pollution, goody hut), and every `ICONS` map-UI glyph. Full shot list in `docs/TEXTURE-GAP.md`. Buckets 15–19 (battle frames, advisor/throne/pedia backgrounds, dialog illustrations) are untouched."
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "type": "issue",
+      "title": "Add Civ II-style unit stack selection and activation",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:22Z",
+      "closed_at": "2026-08-30T08:17:48Z",
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/4",
+      "body": "Civ II lets the player inspect and choose among multiple units on the same tile. rhYciv currently activates a tile without opening the missing stack-selection dialog.\n\nSource:\n- RaylibUI/RunGame/GameScreen.cs (multiple-units TODO)\n\nAcceptance criteria:\n- Clicking or invoking activation on a tile with multiple friendly units opens a compact Civ II-style unit list.\n- The list shows enough unit state to distinguish entries (type, veteran status, health, orders, movement).\n- Choosing an entry makes that unit active without changing the others.\n- Single-unit tiles retain the current direct-selection behavior.\n- Keyboard and mouse selection both work.\n- Add automated coverage for selection state where practical.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T08:17:47Z",
+          "body": "Implemented and pushed in 8e3295f0 and 4018e337. Multi-unit friendly tiles now open a scrollable keyboard/mouse selection dialog showing unit type, veteran state, health, movement, and current order; choosing a unit clears its wait/manual-selection state without altering the rest of the stack. The full quality gate passes (164/164 tests)."
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "type": "issue",
+      "title": "Implement pollution skulls and Civ II global-warming thresholds",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:23Z",
+      "closed_at": "2026-09-02T07:26:13Z",
+      "labels": [
+        "enhancement",
+        "status:long-term"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/5",
+      "body": "The status panel has a placeholder global-warming icon, while PollutionSkulls and temperature-rise save fields exist without the complete Civ II mechanics.\n\nSource:\n- RaylibUI/RunGame/GameControls/StatusPanel.cs\n- Engine game pollution and save/load fields\n\nAcceptance criteria:\n- Recalculate pollution skull count from polluted map tiles at the same points Civ II does.\n- Show or hide the status icon and select its severity frame using verified Civ II thresholds.\n- Implement the turn-based global-warming risk and terrain consequences.\n- Preserve pollution and warming state across JSON and classic-save loading.\n- Add deterministic tests for threshold selection and warming rolls.\n- Document any behavior that differs between Classic, Fantastic Worlds, and MGE.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T15:24:39Z",
+          "body": "Actually the global warming is pretty gay.  Let's at least have that toggled off by default."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:12Z",
+          "body": "Global warming is out of scope for rhYciv by design. The product is deliberately conquest-focused, `StatusPanel.cs` intentionally carries no warming indicator (see the comment at line 95), and `docs/CIV2-PARITY-AUDIT.md` lists global warming among the explicit by-design omissions. Per the discussion above it should stay off, and it effectively is — the mechanic is unimplemented, so there is nothing to toggle.\n\nClosing as out of scope. If a pollution-**skull** display (tile count only, no warming) turns out to be wanted, that is a small self-contained issue and can be filed separately."
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "type": "issue",
+      "title": "Match Civ II city trade, corruption, waste, and production formulas",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:25Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/6",
+      "body": "Several city-economy calculations remain approximate and can materially change strategy compared with Civ II.\n\nSource:\n- Engine/src/Cities/CityExtensions.cs (capital trade-route and distance-modifier TODOs)\n- RaylibUI production-list turn estimates\n\nAcceptance criteria:\n- Implement the trade-route-to-capital handling used by Civ II.\n- Verify corruption and waste against government, difficulty, city distance, courthouse effects, and capital location.\n- Use scenario RowsShieldBox consistently in sale values, production costs, and UI turn estimates.\n- Add table-driven tests using known city/output examples.\n- Record version-specific differences where Civ II releases disagree.",
+      "comments": []
+    },
+    {
+      "number": 7,
+      "type": "issue",
+      "title": "Complete Civ II-compatible AI terrain work and barbarian tactics",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:26Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:long-term"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/7",
+      "body": "The default AI does not yet reproduce important Civ II worker and barbarian behavior.\n\nSource:\n- Engine/Scripts/default.ai.lua\n- Engine/Scripts/barbarian.ai.lua\n\nAcceptance criteria:\n- AI settlers/engineers choose useful roads, irrigation, mining, railroads, pollution cleanup, and city sites.\n- Decisions respect terrain rules, prerequisites, danger, and existing improvements.\n- Barbarians retreat or reposition when isolated and outmatched, matching observed Civ II behavior.\n- Behavior is deterministic under a fixed random seed.\n- Add scenario tests that verify selected actions rather than only script execution.",
+      "comments": []
+    },
+    {
+      "number": 8,
+      "type": "issue",
+      "title": "Finish air-fuel rules, movement failures, and combat feedback",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:28Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/8",
+      "body": "Movement and combat still omit several player-visible Civ II rules and messages.\n\nSource:\n- Engine/src/UnitActions/MovementFunctions.cs\n- Engine/src/Units/UnitExtensions.cs\n- Engine/src/Game.ActionsUnits.cs\n\nAcceptance criteria:\n- Enforce air-unit fuel exhaustion, carrier/city refueling, and destruction rules.\n- Replace silent movement error paths with the appropriate result and player feedback.\n- Show fighter-scramble, SAM battery, and coastal-fortress combat messages.\n- Verify special defense modifiers and event ordering against Civ II.\n- Add tests for fuel boundaries and each special defensive response.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:36Z",
+          "body": "Partial progress landed in the standalone parity pass (`docs/CIV2-PARITY-AUDIT.md`, \"Combat and unit abilities\"):\n\n- **Air fuel exhaustion** is now enforced at turn boundaries — `Game.Actions.ResolveAirFuel` counts consecutive turns a fuel-ranged air unit is away from a city/airbase/carrier and destroys it when the range is used up. (`MovementFunctions.cs:274` still carries a redundant inline `// TODO` at the per-move check point.)\n- **Ships that must stay near land** — triremes now risk loss at sea with the documented 1-in-2 / 1-in-4 (Seafaring) / 1-in-8 (Navigation) odds, nil under the Lighthouse.\n- Veteran promotion, AEGIS (×3 air / ×5 missile), Pikemen ×1.5 vs mounted, missile self-expend, and the helicopter firepower keying were all fixed.\n\nStill open for this issue: replacing the silent movement-error paths with player feedback, and the fighter-scramble / SAM battery / coastal-fortress combat messages."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:12:50Z",
+          "body": "Adding a data point from the Civilopedia-parity pass (`8ce5b47c`): **`MovementBlockedEventArgs` is raised but nothing consumes it.**\n\n`LocalPlayer.MoveBlocked` fires `OnUnitEvent` with a `MovementBlockedEventArgs`, and grepping the UI finds no handler for that type — so every blocked move is silent today: zone of control, zero attack strength, cannot attack air units, edge of map.\n\nThat pass added a fifth reason, `BlockedReason.NotAmphibious`, for the new rule that only Marines may attack straight off a transport. The rule is enforced correctly, but a player who tries it with a Legion just sees nothing happen, which is a bad way to learn a rule the Civilopedia now states. Worth doing as part of the combat/movement feedback work here."
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "type": "issue",
+      "title": "Verify Civ II research-choice culling and key-civilization science costs",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:29Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/9",
+      "body": "Research selection and cost scaling are not yet fully faithful to Civ II. Difficulty-based choice culling is explicitly unfinished, and science cost currently uses PowerRank as though it were a civilization index when looking up the key civilization.\n\nSource:\n- Engine/src/AdvanceFunctions.cs\n- Engine/src/Statistics/Power.cs\n\nAcceptance criteria:\n- Reproduce the number and culling of offered technologies by difficulty.\n- Identify the key civilization from power rank without conflating rank with civilization ID.\n- Verify cost modifiers for difficulty, tech paradigm, human/AI status, acquired technologies, and future technologies.\n- Cover ties and eliminated civilizations.\n- Add table-driven tests based on observed Civ II research screens.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:37Z",
+          "body": "Confirmed still unfixed on `master`:\n\n- `AdvanceFunctions.cs:190` — `var keyCivAdvances = TotalAdvances(game, civ.PowerRank);` passes `PowerRank` straight into `AllCivilizations[...]` inside `TotalAdvances`, i.e. rank is still being used as a civilization index.\n- `AdvanceFunctions.cs:230` — `CalculateAvailableResearch` still ends with `//TODO: cull list based on difficulty`; the full advance list is always offered."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T08:08:17Z",
+          "body": "Third item for this issue, found in the deep-audit pass: **every advance in `RULES.txt @CIVILIZE` is written with AI value `4`** (the 88 lines are all `Name, 4, 0, ...`). Civ II varies AI research value 2-6 per advance to steer the AI toward key military/economic techs; with every value equal, the AI's \"pick the highest-value tech\" logic has nothing to sort on and research order is effectively arbitrary within an epoch. This compounds T1 (the PowerRank-as-civ-id key-civ lookup) and T2 (no difficulty culling) already noted here."
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "type": "issue",
+      "title": "Complete missing Civ II UI notifications and city/advisor details",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:30Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/10",
+      "body": "Several active Raylib UI paths still have placeholder or missing Civ II feedback.\n\nSource:\n- RaylibUI/RunGame/LocalPlayer.cs\n- RaylibUI/RunGame/GameControls/CityControls/CityView.cs\n- RaylibUI/RunGame/GameControls/Advisors/CityStatusWindow.cs\n- RaylibUI/RunGame/Commands/SaveGame.cs\n\nAcceptance criteria:\n- Implement the pending local-player event and game-over notifications.\n- Place the Statue of Liberty correctly in the city view.\n- Render wonders with the distinct Civ II advisor color.\n- Prompt before overwriting an existing save.\n- Match dialog ordering, default buttons, and keyboard shortcuts to Civ II where known.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T08:17:49Z",
+          "body": "Partial progress in 8e3295f0: the City Status advisor now uses distinct wonder coloring, shows total cities, and uses scenario-accurate shield costs. The issue remains open for the other notification, city-view, and overwrite-prompt acceptance criteria."
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "type": "issue",
+      "title": "Finish scenario scripting APIs and growth-improvement hooks",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T07:58:31Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:long-term"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/11",
+      "body": "Scenario scripting contains incomplete unit and cosmic hooks that limit compatibility with custom Civ II rulesets.\n\nSource:\n- Engine/src/Scripting/ScriptObjects/UnitApi.cs\n- Engine/src/Scripting/CosmicScripts.cs\n- Engine/src/Scripting/ScriptObjects/UnitType.cs\n\nAcceptance criteria:\n- Implement the unfinished unit API operation with validated ownership and lifecycle behavior.\n- Complete cosmic-script handling and update derived unit effects when flags change.\n- Link city growth limits to configured aqueduct and sewer improvements instead of fixed assumptions.\n- Preserve compatible behavior for default rules and custom scenarios.\n- Add script-level tests for success, invalid input, and save/load round trips.",
+      "comments": []
+    },
+    {
+      "number": 12,
+      "type": "issue",
+      "title": "Complete remaining Civ2 UI Additions parity",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T08:11:27Z",
+      "closed_at": null,
+      "labels": [
+        "enhancement",
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/12",
+      "body": "Track every applicable feature from FoxAhead/Civ2-UI-Additions that is not yet complete in rhYciv. The authoritative 44-item status matrix is docs/CIV2-UI-ADDITIONS.md.\n\nCompleted in 8e3295f0, 4018e337, and eabab0b4: default wheel and map controls, stack selection, worker counters, exact research/upkeep/support displays, support sorting, worker-progress transfer, legal-ZOC Go To continuation, Wait rotation, attitude indicators, radio hotkeys, Ctrl quick info, production details, persisted specialist kinds and mass specialist changes, mass move, unit/city PathLines, sentry shading, U stack toggle, 1:1 default zoom, streamed-music progress, original app icon, and persistent runtime color correction.\n\nRemaining applicable work:\n- [ ] Native multiplayer and simultaneous moves (#14-15)\n- [ ] Interactive advisor height resizing (#26)\n- [ ] City Status sortable columns and direct production editing (#31)\n- [ ] Configurable map-overlay notifications for simple popups (#33)\n- [ ] Complete Foreign Minister including treasury display (#37)\n\nAcceptance criteria:\n- Every applicable row in the compatibility matrix is implemented and manually verified in the Raylib client.\n- Features are enabled by default unless they alter game rules.\n- Native replacements are used for obsolete Windows executable patches.\n- No original Civ II or corrected proprietary DLL assets are distributed.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-08-30T08:24:39Z",
+          "body": "Checkpoint eabab0b4 completes five more rows: native streamed-music looping/progress (#7), original rhYciv window/release icon (#8), persistent full-window brightness/saturation/gamma shader controls (#35), unit plus city road/trade-route PathLines (#39), and deterministic protection from the native dye/copper garbage-value bug (#40). Quality gate: 164/164 tests; runtime startup verified with both shaders and the icon loaded."
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "type": "issue",
+      "title": "Cities don't grow?",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T15:25:28Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/13",
+      "body": "And they're way too happy.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:56Z",
+          "body": "A few things that plausibly contributed have since been fixed on `master`:\n\n- The bundled `@ENDWONDER` block was 28 lines of `nil`, so **no wonder ever obsoleted** — including the happiness wonders (Hanging Gardens, Michelangelo's, Shakespeare's, J.S. Bach's, etc.). Once built they made cities permanently content. The block now carries Civ II's obsoleting advances.\n- `FindActiveWonder` now tolerates a city with no owner, fixing a crash in `GetFoodStorage` for freshly-founded cities.\n- `CITY.txt` parsed as one 714-entry list, so every non-American civ threw `KeyNotFoundException` on founding its first city (fixed).\n\nThe growth path itself looks correct — `GameTurn.CitiesTurn` grows a city when `FoodInStorage >= (Size + 1) * RowsFoodBox`. Could you retest on latest `master` (plus PR #22, which fixes a hard crash on founding a city) and say whether cities still stall / stay over-content? If so a save or the turn number where it shows would help."
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "type": "issue",
+      "title": "Performance is pretty trash.  Everything is not as responsive as it should be.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-08-30T15:34:49Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/14",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 15,
+      "type": "issue",
+      "title": "When selecting Go To for a troop, it should be a longer long click.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-08-30T15:35:35Z",
+      "closed_at": "2026-09-04T02:01:25Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/15",
+      "body": "Too many accidentally sending a troop somewhere at the moment.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:57Z",
+          "body": "Root cause: `RaylibUI/RunGame/GameModes/MovingPieces.cs:26` sets `_holdTime = TimeSpan.FromMilliseconds(15)`. At 15 ms a normal click already exceeds the hold threshold, so almost every click on the map registers as a Go To. Bumping this to ~250–400 ms would make it an actual deliberate press-and-hold."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:25Z",
+          "body": "Fixed in `c3d3976e`.\n\n`MovingPieces._holdTime` was `TimeSpan.FromMilliseconds(15)` — below the duration of an ordinary click, so nearly every map click registered as a Go To. Raised to 300ms, which makes it a deliberate press-and-hold."
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "type": "issue",
+      "title": "No lose state.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-08-31T18:19:21Z",
+      "closed_at": "2026-09-04T02:01:32Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/16",
+      "body": "barbarians killed my first two settlers, then the game kept going without me.  LOL",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:58Z",
+          "body": "There is no defeat path for the human. `Game.ChooseNextCivilizationOnce` (`Game.Actions.cs:88`) just `continue`s past a civ whose `Alive` is false — the `!Options.DontRestartIfEliminated` branch right below it is an empty `//Look to restart if possible` comment. Nothing sets `Alive = false` when a civ loses its last city and unit, and nothing raises a game-over for the local player. So losing every unit/city silently hands the turn to the AIs and the game continues.\n\nNeeds: (1) mark a civ eliminated when it holds no cities and no units (with the \"settler in transit\" grace Civ II gives on turn 1), (2) a local-player game-over notification when that civ is the human. Overlaps the game-over notification bullet in #10."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:31Z",
+          "body": "Fixed in `c3d3976e`.\n\nAdded `Game.CheckElimination`, called at the top of each civilization's turn in `ChooseNextCivilizationOnce`: a civ holding no cities **and** no units is marked `Alive = false`. Turn 1 is exempt so a civ still placing its first settlers is never judged, and barbarians are exempt.\n\nAdded `IPlayer.CivilizationDestroyed()`; `LocalPlayer` shows a new `@CIVDESTROYED` dialog (\"Your Civilization Has Fallen\"), so losing your last settler now actually ends your game instead of silently handing the turn to the AIs.\n\nNot covered here: the `!Options.DontRestartIfEliminated` restart path is still the empty comment it was, and there is no scoring/replay screen — that belongs with the game-over notification bullet in #10."
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "type": "issue",
+      "title": "Unit does not stop blinking when it's moves are done for the turn.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-01T00:27:45Z",
+      "closed_at": "2026-09-01T21:12:47Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/17",
+      "body": "Making it hard to know you should advance to the next turn.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-01T21:12:47Z",
+          "body": "This might be working now"
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "type": "issue",
+      "title": "Texture Issues everywhere.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-01T00:28:15Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/18",
+      "body": "<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/87480f9e-98d6-495e-8f02-90af7ad3064d\" />\n<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/4bc4e734-9429-4e7c-988c-9422d7c443d4\" />\n<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/b26ce198-958c-47e1-a212-c780f3bec523\" />",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:27:10Z",
+          "body": "Breaking down what's in the three screenshots (they're from a build predating the standalone clean-room pass):\n\n- **Status / side panel rendered as black checkerboard garbage** — this was the classic MGE `ICONS` wallpaper failing to resolve for the standalone ruleset. The standalone look now fills that chrome with a solid tile, and PR #22 replaces it again with the painted `stonetexture.png`. Should be gone on latest `master`.\n- **Stippled white borders around special-resource tiles** (wheat/oasis patches) — procedural markers drawn by `build_terrain1()`. Still present; painted cutouts landed for most slots in `7c91f87d` but coal / gold / iron / ivory / swamp-2 are still the procedural circle. Tracked in `docs/TEXTURE-GAP.md`.\n- **Gold-diamond checker on the menu bar / dialog frames** — classic wallpaper; superseded by the standalone flat fill and now the stone chrome in PR #22.\n\nLeaving this open for the remaining procedural terrain markers. A fresh screenshot on latest `master` (or the PR #22 branch) would confirm the panel/frame issues are resolved."
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "type": "issue",
+      "title": "Still using old art?",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-01T00:29:09Z",
+      "closed_at": "2026-09-02T07:26:15Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/19",
+      "body": "Check the screenshots issue #18 ",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-02T07:26:14Z",
+          "body": "`master` has finished the clean-room conversion — see `docs/CLEAN-ROOM-STATUS.md` and commits `3f22c039` (Complete clean-room conversion and standalone test fixtures), `d4b5aa5a` (Ship standalone rules and replacement art), and `46db11d7` (Replace legacy PEOPLE sheet with high-res citizens). The bundled ruleset, fonts, city-name lists, and art are all project-original or FOSS-derived; nothing loads original Civ II files.\n\nThe screenshots in #18 predate that work. The remaining rough spots are procedural placeholder markers (special-resource stipple, road/rail rosettes, some overlays), tracked in `docs/TEXTURE-GAP.md` and issue #18. Closing this as answered; #18 stays open for the leftover procedural art."
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "type": "issue",
+      "title": "Diplomat has no options when hitting a city.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-01T00:39:53Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/20",
+      "body": "Should be the default Steal Technology, Investigate City, Purchase City...  Pull the info from ciffanatics",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:12:51Z",
+          "body": "Context from the Civilopedia pass: the game now *tells* the player these missions exist, which raises the cost of them being absent.\n\nThe shipped Diplomat entry reads: \"Their intended missions include establishing embassies, investigating enemy cities, stealing technology, sabotaging production, inciting revolts, and bribing vulnerable units\" — and the Spy entry promises the same set with better effectiveness. Both hedge with \"intended\", so nothing is stated as false, but a player who reads the entry and then walks a Diplomat to a city gets no options at all.\n\nThis is backlog item #5 in `docs/CIV2-PARITY-AUDIT.md`, which now carries a table mapping each Civilopedia promise to its engine status. Diplomat and Spy missions are the largest single gap in it."
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "type": "pull_request",
+      "title": "Add Cloudflare Pages website for rhYciv.org",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-01T00:57:36Z",
+      "closed_at": "2026-09-06T03:10:30Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/pull/21",
+      "body": "Adds a new responsive static website for rhYciv.org / rhYciv.com.\n\nHighlights:\n- modern responsive landing page focused on rhYciv's standalone open-source strategy game\n- current v0.2.0-beta.1 Linux download and install instructions\n- features, roadmap, FOSS art gallery, contribution links, SEO metadata, sitemap, robots.txt, custom 404, and Cloudflare response headers\n- Cloudflare Pages build script that copies current art directly from RaylibUI/FOSSart, so future art replacements can be reflected without duplicating binary assets\n\nCloudflare Pages settings after merge:\n- Production branch: master\n- Framework preset: None\n- Build command: bash website/build.sh\n- Build output directory: website/dist\n\nRecommended canonical domain: rhyCiv.org, with www.rhyciv.org, rhyCiv.com, and www.rhyciv.com redirected to it.",
+      "comments": []
+    },
+    {
+      "number": 22,
+      "type": "pull_request",
+      "title": "Great Library & Darwin's Voyage, stone dialog chrome, city-founding crash fix",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T07:23:11Z",
+      "closed_at": "2026-09-03T08:39:22Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/pull/22",
+      "body": "Three pieces of work plus a dev-tool commit.\n\n## Great Library and Darwin's Voyage (parity backlog item 3)\nBoth wonders were cosmetic. Now:\n- **Great Library** — `Game.ResolveGreatLibrary` runs at the start of the owner's turn and grants every advance that at least two other non-barbarian civs already know, via the existing `GiveAdvance` path. Stops when Electricity obsoletes the wonder. The qualifying-advance set (`WonderFunctions.GreatLibraryAdvances`) is unit-tested.\n- **Darwin's Voyage** — `GameTurn.GrantWonderCompletionAdvances` grants two advances once, at construction, from `CalculateAvailableResearch` (highest AI value first).\n- `CIV2-PARITY-AUDIT.md` updated.\n\n## Stone dialog / side-panel chrome\n`ImageUtils.SetLook` now cuts the MGE-style dialog and status-panel wallpaper from the painted `stonetexture.png` sheet (previously unused): brightness-matched limestone interior crops that keep text contrast, a darkened stone frame under the existing bevel. Falls back to the old flat fill when the sheet is absent. Also removes the black-checkerboard status panel seen in #18.\n\n## Fix hard crash when founding a city — Fixes #24\n`TextFileParser` treated any `@`-prefixed line as a new section, so the `@title=`/`@width=`/`@button=` property lines of standalone-only dialogs (`NAMECITY`, `FOUNDED`, …) were parsed as empty sections. `NAMECITY` got a null title and `CivDialog` dereferenced it — an NRE on every B press. Fixed the parser (a bare `@NAME` starts a section; `@key=value` is a property), stopped `Read.PopupBoxes` double-adding \"OK\", and added a null guard in `CivDialog`.\n\n## F10 screenshot hotkey\nWrites a PNG of the current frame (`RHYCIV_SHOT_DIR` or cwd). Used it to verify the stone work in the running client.\n\nQuality gate: build clean, 173/173 tests.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T07:53:26Z",
+          "body": "Pushed additional commits onto this branch (`799a4e4d`, `5f0c6363`, plus the `71bc4663` release-notes entry):\n\n- **Seamless high-resolution terrain** — crop each bundled terrain slab past its dark soil rim, hard dilated diamond alpha so tiles interlock, feathered neighbour-dither.\n- **Procedural coastline** — turquoise→deep water wash, broken surf, wave crests, foam-collared rocks, ragged waterline; 7 variants/edge picked per tile, replacing the straight legacy strokes.\n- **High-resolution special resources** — `FOSSart/Terrain/Specials` paintings composed at tile size instead of a 64×32 thumbnail; forest borrows the grassland art.\n- **High-resolution grassland-shield** from the new `FOSSart/grassshield.png` (magenta-keyed).\n- **Env-gated autostart + timed-screenshot QA harness** (`RHYCIV_AUTOSTART*`); inert unless the vars are set.\n\n`metainfo.xml` has a `0.4.0-beta.1` entry; `ASSET-MANIFEST.tsv` regenerated (609 files). Build clean, 173/173 tests. Prompt-text overhaul and an in-game verification pass still to come before the beta is cut."
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "type": "issue",
+      "title": "MAINMENU dialog renders mostly off the right edge of the window",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T07:27:44Z",
+      "closed_at": "2026-09-03T09:17:37Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/23",
+      "body": "### What happens\n\nOn launch (standalone / rhYciv Gold interface) the main menu dialog (\"New game / Load map / Custom world / Load scenario / Load game\" with radio buttons) renders with only its left ~quarter inside the window; the OK / Exit buttons are past the right edge and can't be clicked. The dialog also does not respond to Enter/Return, so from a fresh boot there is no visible way to start a game.\n\nObserved at a 1600×900 window. Other wizard dialogs (e.g. CUSTOMCITY \"City style\") render fully on-screen and centred, so this is specific to MAINMENU.\n\n### Leads\n\n- `Civ2/Dialogs/MainMenu.cs:12` — `MainMenu() : base(Title, -0.08, -0.07)`. The other new-game dialogs pass no offset and are fine, so the negative-offset path in `CivDialog` positioning is the prime suspect (applied in the wrong direction, or truncated toward 0 as an `int` `Point` and then interacting with the width below).\n- `CivDialog.cs:32` scales the declared width by `1.5` (`DefaultDialogWidth => 660 // 440*1.5`); combined with `DynamicSizingDialog` growing `_innerPanel.Width` to fit the radio-option labels, the dialog may end up wider than the offset math assumes.\n\n### Also\n\nMAINMENU (and the other `CivDialog` popups) ignore Enter as \"activate default button\" — worth confirming whether that's intended.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:17:37Z",
+          "body": "Fixed in `19bb5831` (branch `work/great-library-stone-ui`).\n\n`MainMenu()` was passing a `(-0.08, -0.07)` position anchor, which `BaseDialog.SetLocation` interprets as \"right edge 8% from the right, bottom edge 7% from the bottom\". Once the inner panel grew to fit the radio labels the dialog overflowed the window from that corner and the OK/Exit buttons landed off-screen. Removed the anchor so MAINMENU centres like every other new-game wizard dialog; verified fully on-screen and clickable at 1600×900.\n\nThe Enter-as-default-button behaviour is a separate item and still applies — `CivDialog.OnKeyPress` only maps Enter when a button literally named `Labels.Ok` exists, and MAINMENU's confirm button is \"OK\". Worth a follow-up to map Enter to the first/confirm button generally."
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "type": "issue",
+      "title": "Founding a city hard-crashes (NRE) — standalone Game.txt dialogs parse with null titles",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T07:27:57Z",
+      "closed_at": "2026-09-03T08:39:23Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/24",
+      "body": "### What happens\n\nPressing **B** to found a city throws `System.NullReferenceException` in `CivDialog..ctor` and takes the whole client down, every time.\n\n### Root cause\n\n`Civ2engine.TextFileParser.ParseFile` treats **any** line starting with `@` as the start of a new section. The bundled `RaylibUI/FOSSart/Standalone/Game.txt` writes dialog properties as `@title=`, `@width=`, `@button=` lines, so for a dialog defined only there — `NAMECITY`, `FOUNDED`, `ONLYSETTLERS`, `CITYATSEA`, `ADJACENTCITY`, `ONLY10`, … — every property line is parsed as its own empty section instead of a property of the dialog. `NAMECITY` ends up with `Title == null`, and `CivDialog`'s constructor calls `title.Contains(...)` with no guard.\n\n`PopupBoxReader.ProcessSection` already has a switch for `width` / `title` / `button` / `options`, so it clearly expected those lines to arrive as content — the two components disagree. Dialogs that also have a `BuiltInDialogs` fallback (MAINMENU, DIFFICULTY, …) get a non-null title from there and so don't crash, which is why only the founding/other Game.txt-only popups blow up.\n\n### Fix\n\nAddressed in PR #22:\n- `TextFileParser` — a bare `@NAME` starts a section; `@key=value` is a property line passed through as content.\n- `Read.PopupBoxes` — stop appending a duplicate \"OK\" when the section declared its own `@button` lines (which now actually reach it).\n- `CivDialog` — null-guard the title defensively.\n\nFull test suite still passes (rules / labels / menu / events files use bare `@NAME` headers only).",
+      "comments": []
+    },
+    {
+      "number": 25,
+      "type": "issue",
+      "title": "Combat resolution diverges from Civ II: per-round odds, terrain defence, wall/fortify stacking",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T08:07:50Z",
+      "closed_at": "2026-09-04T07:11:51Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/25",
+      "body": "From the formula-level parity pass (`docs/CIV2-PARITY-DEEP-AUDIT.md`, section 1). Three distinct issues in combat math.\n\n### 1. Per-round hit probability is not `A / (A + D)`  (major)\n`MovementFunctions.cs:400`\n```\nprobAttackerWins = defenseFactor >= attackFactor\n    ? (attackFactor * 8 - 1) / (2 * defenseFactor * 8)\n    : 1 - (defenseFactor * 8 + 1) / (2 * attackFactor * 8)\n```\nAt A=D this is ~0.5, but at A2 vs D1 it returns ~0.72. Civ II rolls `rand(A+D)` each round and the attacker wins with probability exactly `A/(A+D)` = 0.67. The substitute over-rewards the stronger unit in every unequal fight.\n\n### 2. `Tile.Defense` integer-divides away the ×1.5 / ×1.25 tiers  (major)\n`Tile.cs:153` — `Defense => (River ? EffectiveTerrain.Defense + 1 : EffectiveTerrain.Defense) / 2` is `int`. Forest / Jungle / Swamp have rules-value 3 → `3/2 = 1`. A river on grassland → `(2+1)/2 = 1`. `DefenseFactor` multiplies by this truncated int, so wooded terrain gives no bonus and the river defence bonus is gone entirely. Should be `decimal`/`double` (`terrain.Defense / 2m`).\n\n### 3. Fortress / Fortified / City Walls take `max()`, not the product  (major)\n`UnitExtensions.cs:73-111` — `bestGroundFactor = max(fortress, fortified, walls)`, then `df += bestGroundFactor`. A fortified unit inside City Walls gets the walls term only; the ×1.5 for fortification is discarded. Civ II stacks these multiplicatively (Walls ×3 AND fortified ×1.5).\n\nAll three make defenders — especially in cities and forests — weaker than Civ II. Combined they favour the attacker substantially.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:11:51Z",
+          "body": "Fixed in `8ce5b47c` (v0.5.0-beta.1 line). All three, plus a fourth this issue didn't list.\n\n**1. Per-round odds** — now `A / (A + D)`, the roll Civ II makes. The curve it replaced was symmetric at even odds but over-paid the favourite everywhere else (A2 vs D1 returned 0.72 instead of 0.67).\n\n**2. Terrain defence** — `Tile.Defense` is a decimal multiplier instead of an integer division. The rules value counts half-steps, so Forest/Jungle/Swamp's 3 is ×1.5 again rather than ×1, and a river adds 25% the way Civ II applies it rather than being swallowed as another half-step.\n\n**3. Wall/fortify stacking** — walls or fortress take the better of that pair, then fortification multiplies on top, rather than `max()` of all three.\n\n**4. Not in this issue: City Walls added their effect value instead of multiplying by it.** `totalWallDefence = wallEffect / 100` was added to the defence rather than multiplied by it, so the shipped effect value of 200 gave every garrison a flat **+2** — a Phalanx behind walls defended at 4, not 6. This was arguably the biggest of the four and the deep audit missed it; the existing test even documented it with a `// That seems WRONG for City Walls` comment and asserted the wrong number.\n\nPikemen went the same way in the same pass (was ×1.5, and the mounted test required 1 HP so Dragoons and Cavalry — the units Pikemen exist to stop — were excluded).\n\nRegression tests in `Core.Tests/Units/UnitExtensionsTests.cs`: walls multiply, walls stack with fortify, fortress stacks with fortify, Howitzer ignores walls, terrain half-steps as a theory over all four values, river +25%, and three Pikemen cases."
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "type": "issue",
+      "title": "Cities grow with no Aqueduct / Sewer System size cap",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T08:07:51Z",
+      "closed_at": "2026-09-04T02:01:28Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/26",
+      "body": "`docs/CIV2-PARITY-DEEP-AUDIT.md` CG1.\n\n`CityExtensions.cs:260` / `GameTurn.cs:62-66` — `GrowCity` is just `Size += 1`. `GameTurn.CitiesTurn` grows a city whenever `FoodInStorage >= (Size + 1) * RowsFoodBox` with no other check.\n\n`ToExceedCitySizeAqueductNeeded` (8) and `SewerNeeded` (12) are parsed from `@COSMIC` into `CosmicRules` and exposed to Lua (`CosmicScripts.cs:216-223`), but no C# code reads them.\n\nCiv II: a city stalls at size 8 without an Aqueduct and size 12 without a Sewer System. Also relevant: a city that loses its Aqueduct/Sewer while over the cap doesn't shrink but can't grow.\n\nPartially referenced by #11 (\"Link city growth limits to configured aqueduct and sewer improvements\"); filing focused because it is a concrete, self-contained gameplay bug and a likely contributor to #13.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:27Z",
+          "body": "Fixed in `c3d3976e`.\n\nAdded `CityExtensions.CanGrow(rules)`, which reads the `@COSMIC` values that were already parsed but never used: a city cannot pass `ToExceedCitySizeAqueductNeeded` (8) without an Aqueduct, or `SewerNeeded` (12) without a Sewer System. `GameTurn.CitiesTurn` now consults it — when growth is blocked the food box is held full (the city does not shrink, matching Civ II) and the new `IPlayer.CityGrowthHalted` fires, which the local player shows as the `@FURTHERGROWTH` dialog.\n\nA city that loses its Aqueduct/Sewer while already over the cap keeps its size and simply cannot grow, as in Civ II.\n\nThis may also be part of #13 — worth a retest of city growth on latest `master`."
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "type": "issue",
+      "title": "Production: no category-change penalty, no gold rush-buy",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T08:07:52Z",
+      "closed_at": "2026-09-05T08:16:57Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/27",
+      "body": "`docs/CIV2-PARITY-DEEP-AUDIT.md` P1 / P2. Two Civ II production loops are absent.\n\n### No production-change penalty\n`ShieldPenaltyTypeChange` (50) is parsed from `@COSMIC` and used nowhere. `city.ItemInProduction = ...` is assigned directly in `GameTurn.cs:117`, `AiPlayer.cs:97,120` with no adjustment to `ShieldsProgress`. Civ II wipes ~half the accumulated shields (once) when you switch production between the unit / building / wonder categories; switching within a category is free.\n\n### No gold rush-buy\nNo \"hurry production\" path anywhere in `Engine` or `RaylibUI` (grep for hurry/rush/buy is empty). Civ II lets you complete production with gold at an incremental cost — roughly `2*remaining + remaining^2/20` for a partially-built item, `4*remaining + ...` for a unit from an empty box, and a flat higher rate for wonders. AI also uses this.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:58Z",
+          "body": "Not fixed — worth flagging why, since it's less mechanical than it looks.\n\n**Category-change penalty.** `city.ItemInProduction` is assigned in four places (`GameTurn.cs:120` auto-replace when an item becomes unavailable, `AiPlayer.cs:97,120`, plus the city window for the human) and also by both save-loaders. Hanging the penalty off the property setter would corrupt every loaded game, so it needs:\n1. an explicit `city.ChangeProduction(item, rules)` used only at genuine change sites (not deserialisation, and arguably not the auto-replace path);\n2. a `ProductionPenaltyApplied` flag on `City`, reset each turn — Civ II charges the 50% (`ShieldPenaltyTypeChange`) **once** per turn, and switching within a category is free, so the category of the item at turn start has to be remembered;\n3. `City` gains a persisted field, so `JsonCityData` and the classic `.sav` reader both need the extra column.\n\n**Gold rush-buy** is a feature rather than a fix: a cost formula, a treasury deduction, a City-window button, and an AI policy for when to spend. Nothing in `Engine` or `RaylibUI` has a hurry/rush path today.\n\nHappy to take either on as its own piece of work — the first is maybe an hour, the second a good deal more."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:16:56Z",
+          "body": "Both halves done, shipped in v0.7.0-beta.1.\n\n**Rush-buy** (`8f3b35e2`) — the Buy button had no click handler. It charges `2R + R²/20`, doubled for a wonder, doubled again when nothing has been put toward the item, and re-checks price and treasury before committing.\n\n**Category-change penalty** (`20bee0af`) — this turned out to half-exist in the city screen, and to be wrong three ways:\n- it split on `ItemType` alone, and wonders are Buildings, so switching from a building to a **wonder** counted as staying in category and cost nothing;\n- it hard-coded a half instead of reading `ShieldPenaltyTypeChange`, exactly as this issue said was parsed and unused;\n- there was no once-a-turn guard, so changing your mind twice was charged twice.\n\nIt is one engine call now — `City.ChangeProduction` — which the AI goes through as well, with tests for crossing categories, staying within one, the once-a-turn rule, and the rate coming from the ruleset.\n\nWhile in there: the construction queue was still multiplying remaining cost by the shield box's rows, the last of the ten-times-price arithmetic from #41."
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "type": "issue",
+      "title": "Several city improvements have no effect or the wrong effect",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-02T08:08:14Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/28",
+      "body": "`docs/CIV2-PARITY-DEEP-AUDIT.md` TR1 / TR2 / TR3.\n\n### No effect at all (`improvements.lua`)\n- **Recycling Center** — Civ II: industrial pollution / 3 (`IndustrialPollutionModifier` 3).\n- **Police Station** — Civ II: reduces field/war unhappiness under Republic/Democracy (the happiness pass already reads `PoliceStat`, but the improvement never gets the effect).\n- **Super Highways** — Civ II: +50% trade on tiles with roads.\n- **Hydro Plant / Nuclear Plant** — have `ProductionMultiplier` but not the industrial-pollution halving Civ II gives them (`CalculatePollution`'s own comment says \"Modifier = 2 if city has Hydro Plant or Nuclear Plant\").\n\n### Wrong effect\n- **Supermarket** — modelled as `Food +1 on irrigated tiles`; Civ II is +50% food from **farmland**, and farmland itself should require Supermarket + Refrigeration.\n- **Manufacturing Plant** — `ProductionMultiplier` +25; Civ II is +50%.\n- The four power plants are +25% each and **stack** with no Factory prerequisite; Civ II allows one per city, gated behind a Factory. (Already noted in the wonders/economy parity audit.)\n\n### Pollution tech modifiers (`advances.lua`)\n- Industrialization adds +2 to the population-pollution modifier; Civ II is +1.\n- Sanitation is given -1 population pollution, which is not a Civ II effect.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:30Z",
+          "body": "Partly fixed in `c3d3976e` (the data-only ones):\n\n- **Manufacturing Plant** — `ProductionMultiplier` 25 → **50**.\n- **Recycling Center** — now has `IndustrialPollutionModifier 2`, which `CalculatePollution` turns into a divisor of 3 (`modifier = 1 + sum`). Previously it had no effect at all.\n- **Hydro Plant / Nuclear Plant** — each gains `IndustrialPollutionModifier 1` → divisor 2, the halving Civ II gives them.\n- **Industrialization** — population-pollution modifier +2 → **+1**.\n- **Sanitation** — the non-Civ II `-1` population pollution effect removed.\n\nStill open, because each needs engine support rather than a data value:\n\n- **Super Highways** (+50% trade on road tiles) — there is no tile-trade effect in the `Effects` enum; `TaxMultiplier`/`LuxMultiplier` are city-level. Needs a new effect plus a hook in the tile-yield path.\n- **Supermarket** — currently `Food +1 on irrigated tiles`; Civ II is +50% food from **farmland**, and farmland should require Supermarket + Refrigeration.\n- **Police Station** — the happiness pass reads `PoliceStat` but the improvement never grants it under Republic/Democracy.\n- **Power plants** — the four still stack at +25% each with no Factory prerequisite; Civ II allows one per city, gated behind a Factory."
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "type": "issue",
+      "title": "Government constants: Fundamentalism corruption-free, tax/lux/science caps mostly wrong",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-02T08:08:15Z",
+      "closed_at": "2026-09-04T02:01:29Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/29",
+      "body": "`docs/CIV2-PARITY-DEEP-AUDIT.md` CE2 / CE5.\n\n### Fundamentalism has zero corruption and waste\n`RulesParser.cs:302-314` — `DefaultDistanceFromIndex` returns 0 for both Democracy (idx 6) **and Fundamentalism (idx 4)**, and `ComputeDistanceFactor` short-circuits distance 0 to no corruption / no waste. Civ II Fundamentalism has corruption on the order of Monarchy. (Communism at distance 0 is defensible — Civ II Communism does eliminate corruption.)\n\n### Rate caps\n`RulesParser.cs:282-300` `BuildTaxRateLimits`:\n\n| Government | rhYciv | Civ II |\n|---|--:|--:|\n| Anarchy / Despotism | 60% | 60% ✓ |\n| Monarchy | 80% | 70% |\n| Communism | 70% | 80% |\n| Fundamentalism | 80% (50% sci) | 60% |\n| Republic | 80% | 80% ✓ |\n| Democracy | 100% | 90% |\n\n`RaylibUI/RunGame/GameControls/TaxRateWindow.cs:42` has its own hardcoded cap table — keep the two in sync when fixing.\n\nAlso minor (G2): Republic gets `NumberOfFreeUnitsPerCity = 0`; Civ II Republic supports a small number of units free per city.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:29Z",
+          "body": "Fixed in `c3d3976e`.\n\n- `RulesParser.DefaultDistanceFromIndex` no longer returns 0 for Fundamentalism (idx 4), so it gets ordinary distance-based corruption and waste instead of Democracy's exemption. Communism keeps `CommunismEquivalentPalaceDistance` (Civ II really does zero its distance corruption) and Democracy keeps 0.\n- `BuildTaxRateLimits` rewritten to the Civ II table: Anarchy/Despotism 60, Monarchy 70, Communism 80, Fundamentalism 60, Republic 80, Democracy 90. The separate 50% science cap for Fundamentalism is gone (Civ II caps all three rates equally and models Fundamentalism's science penalty as an output effect, not a rate cap).\n- `TaxRateWindow._max` updated to the same table with a comment pointing at the parser, so the two stay in sync.\n\nThe Republic `NumberOfFreeUnitsPerCity = 0` point (G2) is untouched and still open — say the word and I'll fold it in."
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "type": "issue",
+      "title": "Grass Shields Too Big, should be neutral colors",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:53:49Z",
+      "closed_at": "2026-09-03T09:18:03Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/30",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:18:02Z",
+          "body": "Addressed in `19bb5831`.\n\n`ComposeShieldTile` now (a) shrinks the marker to ~0.34 of the tile width / ~0.56 of the tile height (was 0.5 / 0.82), and (b) desaturates the painting 70% toward its own luminance so it reads as a neutral grey shield instead of the full red/wood/metal Viking colours. Both numbers are single constants in `Civ2/ImageLoader/TerrainLoader.cs` if you want it smaller still or a different tint. Verified on the map — the shields are now small grey markers that don't pull the eye.\n\nIf you'd rather go all the way back to a flat classic-style neutral chip, say so and I'll swap the source for a generated shape rather than the painting."
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "type": "issue",
+      "title": "Fog of War encroaches on visible tiles.  Weird blue pixels.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:54:48Z",
+      "closed_at": "2026-09-03T09:17:41Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/31",
+      "body": "<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/452bac56-aff3-402d-8cfd-ed29988fdd39\" />",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:17:40Z",
+          "body": "Fixed in `19bb5831`.\n\nThe weird blue/black checker pixels at the edge of the explored area were the fog-of-war dither. `BuildDitherMaps` builds the fog quarter (`ditherMaps[^1]`) as a crop of the \"blank\" sheet tile behind the checkerboard alpha mask. On the classic 8-bit sheet the blank tile is inert; against the high-resolution FOSS terrain that blank tile is a blue/transparent checkerboard, so it showed through.\n\nOn the high-resolution path the fog edge is now a plain dark wash `(8,12,26)` shaped by the same soft edge ramp used for the terrain dither, so visible tiles fade to darkness toward unexplored neighbours with no checker artefacts. Classic sheet path is unchanged. Verified."
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "type": "issue",
+      "title": "No In the Beginning Text",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:56:20Z",
+      "closed_at": "2026-09-03T09:17:39Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/32",
+      "body": "The First Dawn Text in the .md file should display",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:17:39Z",
+          "body": "Fixed in `19bb5831`.\n\n`INIT` was registered by `BuiltInDialogs.AddFallbacks` with an empty `Text` array, and `Game.txt` had no `@INIT` section to override it, so the dialog showed a title and a Begin button with no body. Added an `@INIT` section to `RaylibUI/FOSSart/Standalone/Game.txt` carrying the \"First Dawn\" copy from `docs/PROMPT-EVENT-TEXT.md`. It picks up the existing intro-dialog styling in `CivDialog` (large, centred). Verified."
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "type": "issue",
+      "title": "Menu Text is aliased and ugly.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:56:49Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/33",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:19:40Z",
+          "body": "Leads (not fixed — needs a judgement call on font loading):\n\n- The three UI fonts in `Model/Interface/Fonts.cs` already get `Texture.SetFilter(TextureFilter.Bilinear)`, so it isn't a missing filter on those.\n- Most likely the fonts are loaded via `LoadFontEx` at a small `baseSize` (glyph atlas baked small) and then scaled up for larger UI text — bilinear scaling of an under-sized atlas gives the soft/rough edges. Fix: bake the atlas at roughly 2× the largest size it's drawn at (find the `LoadFontEx` calls feeding `Fonts.SetTnr` / `SetArial` / `SetBold`).\n- If it's specifically the top menu bar (`Game / Kingdom / View …`), check `RaylibUI/RunGame/GameControls/Menu/MenuLabel.cs` — if it draws via a path other than `TextRendering.Draw`/`DrawTextEx` it may bypass the filtered fonts entirely.\n\nWhich text exactly reads worst — the top menu bar, the dropdown items, or the dialog body — would narrow it down."
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "type": "issue",
+      "title": "About rhYciv is blank",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:57:18Z",
+      "closed_at": "2026-09-05T08:16:55Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/34",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:18:26Z",
+          "body": "Root cause located: in `Civ2Gold/Civ2GoldInterface.cs:436` the `&About rhYciv` `MenuElement` is declared with **no `commandId:`** — every sibling in that PEDIA menu (`Civilization Advances`, `Wonders`, etc.) passes one (`commandId: CivilopediaAdvances` …). With no command bound, the click resolves to an empty/generic dialog, hence blank.\n\nFix shape (not done — a bit more than a one-liner):\n1. Add `CommandIds.About` in `Model/Controls/Menu/CommandIds.cs`.\n2. Add an `About` command class under `RaylibUI/RunGame/Commands/` (an `AlwaysOnCommand`, like `WorldWonders`) that calls `GameScreen.ShowPopup(\"ABOUT\", …)`.\n3. Register it in the command list where the other `Civilopedia*` commands are registered.\n4. Wire `commandId: CommandIds.About` onto the menu element at `Civ2GoldInterface.cs:436` (and the ToT one at `TestOfTimeInterface.cs:543`).\n5. Add an `@ABOUT` section to `RaylibUI/FOSSart/Standalone/Game.txt` with the app name, version (from `metainfo.xml`), GPL-3.0 licence, and the GitHub URL.\n\nSince the version string would need to come from somewhere at runtime, step 5 could just hard-code it or read `metainfo.xml`."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:34:26Z",
+          "body": "Yeah at least make sure it shows the version that we are playing. Otherwise we can't reliably beta test"
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:16:55Z",
+          "body": "Fixed in `20bee0af`, shipped in v0.7.0-beta.1.\n\nThe menu entry carried **no command id** — same shape as the Paradrop entry — so clicking it did nothing at all. It has one now, and an `@ABOUT` dialog saying what the game is, what it is built on, and where the attribution and licences live."
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "type": "issue",
+      "title": "Military Units Sprites too small in civilopedia.  Need Descriptions.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:58:57Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/35",
+      "body": "When you click info, it should give you some brief historical military context, and strategy advice for in game.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:12:16Z",
+          "body": "Descriptions are done in `fdd968f0` (v0.5.0-beta.1); **the sprite size half of this is still open**, so leaving the issue open for that.\n\nAll 51 units now carry text covering their role, what their special ability is for, and how to use them, and the mechanical facts (\"It can attack directly from a ship onto a defended shore\", \"It defends at double strength against mounted units\") are generated per unit from the actual rules flag bits rather than written by hand, so they cannot drift from the ruleset.\n\nEvery stat in the text was cross-checked against `RULES.txt`: domain, attack, defence, moves, hit points, firepower, air range, transport hold, cost, prerequisite, and the special-ability lines against the flag field. No discrepancies.\n\nTwo things found while writing it that are worth a look:\n\n- `CivilopediaInfo.cs:436` truncates a unit description at 20 wrapped lines. Nothing currently hits it, but the longer entries are not far off.\n- Writing the text turned up four engine divergences from what it promised, now fixed in `8ce5b47c` — see #25.\n\nThe remaining work here is the sprite scale in the Civilopedia unit view."
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "type": "issue",
+      "title": "City Founded Text too small, not centered.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T08:59:55Z",
+      "closed_at": "2026-09-03T09:18:05Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/36",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:18:04Z",
+          "body": "Fixed in `ae8ca519` (shipped in the v0.4.0-beta.1 pre-release).\n\n`CivDialog` now detects a plain message / choice popup (body text, no text-entry / list / picture) and renders it as a large panel: ~62% of the window wide, vertically centred, body text centred, a few points larger, wrapping to the full panel. `@FOUNDED` goes through `ShowPopup` with no options/textbox, so it gets this treatment. Verified — see the 'City Founded' dialog in a fresh game."
+        }
+      ]
+    },
+    {
+      "number": 37,
+      "type": "issue",
+      "title": "Flag Icon for City Blurry",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-03T09:00:32Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/37",
+      "body": "Also the wrong color for Celts, who are white.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:01:57Z",
+          "body": "Investigated; not fixed. The civ colours aren't a table in code — `Civ2GoldInterface.LoadPlayerColours` **samples them out of the flag sprites** in the generated `Standalone/ICONS.png`/`CITIES.png` (`PicSources[\"flags\"]`, `PicSources[\"textColours\"]`), pixel by pixel.\n\nSo \"Celts should be white\" is a change to `scripts/build_standalone_sheets.py` (the flag/text-colour palette it paints) followed by regenerating the standalone sheets — not a one-line constant. Per `RULES.txt` `@LEADERS`, the Celts are colour index **5** (`Cunobelinos, Boudica, 0, 5, 0, Celts, Celtic, …`); the same index is shared by Japanese, Mongols etc., so the palette entry has to be changed for all of them together, which is how Civ II works too.\n\nI can't regenerate the sheets here — `build_standalone_sheets.py` needs Pillow and this machine has no PIL. Two options:\n1. Install Pillow and I'll fix the index-5 palette entry to white and regenerate.\n2. Or leave it until the next art pass.\n\nThe **blurry flag** half is separate: the flag is a small sheet cell scaled up. Same fix as the resource icons got in `ae8ca519` — point-scale it rather than bilinear. That one I can do without Pillow if you want it split out."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:36:07Z",
+          "body": "Yes install pillow and fix the colors. Replicate the color options from the original civ 2 "
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T16:01:58Z",
+          "body": "The flag is still blurry, but the colors are fixed!"
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "type": "issue",
+      "title": "City name and Population Number too small.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-03T09:02:10Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/38",
+      "body": "Also depending on zoom, they lose their spacing and occlude each other.  A maximum zoom they should be much bigger.  Also, text color does not match the flag, and celts should be white color",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:18:06Z",
+          "body": "Partly addressed in `19bb5831`: the city **name** and **size number** fonts were hard-capped at 24 px / 18 px (`MapControl.cs`), so on a zoomed-in map they looked tiny against a much larger tile. They now keep scaling with zoom (capped at the zoom-14 equivalent instead of a fixed pixel size).\n\nStill open on this issue:\n- **Spacing / occlusion at some zooms** — the name label is centred on `cityData.LogicalSize` and the size chip on `data.SizeRectLoc.ZoomScale(zoom)`; they overlap at certain zoom levels. Needs the two to be laid out relative to each other, not independently.\n- **Text colour doesn't match the flag** — `cityData.Color.TextColour` is used for the name; it should be derived from the civ's flag/player colour.\n- **Celts should be white** — civ colour data for the Celts is wrong (also reported in #37). Look at the player-colour table in the standalone rules / `Civ2GoldInterface`.\n\nLeaving open for the colour + layout work."
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "type": "issue",
+      "title": "Tech Discovery and Civilopedia Entries need brief text about the tech.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-03T09:03:55Z",
+      "closed_at": "2026-09-04T07:12:04Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/39",
+      "body": "And maybe a little advice about in game strategy.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:12:03Z",
+          "body": "Done in `fdd968f0` (v0.5.0-beta.1).\n\nAll 88 advances now carry descriptive text with strategy advice, and it reaches the game rather than just a document: the Civilopedia reads `describe.txt` and `pedia.txt`, neither of which existed in the repo, so every entry rendered blank. Both are now generated from `docs/CIVILOPEDIA-TEXT.md` by `scripts/build_civilopedia_text.py`, which `quality_gate.sh` runs with `--check` so they cannot drift from the prose.\n\nWorth knowing: the loader needs **both** files — if either path is missing it clears all six mapping indexes — so the Wonders copy written in `5b8a5879` was inert too until this landed.\n\nCoverage is 251 of 255 entries: 88 advances, 51 units, 35 of 38 city improvements, 28 wonders, 33 terrain and special resources, 7 governments, and a new 9-entry Concepts section on terrain development and government strategy. The four without text are the `Nothing` slot and the three `Unused` spaceship slots, which have no player-facing meaning.\n\nEvery figure was cross-checked against `RULES.txt` — prerequisites, unlocks, costs, upkeep, yields, government rate caps — and the only mismatches found were cosmetic."
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "type": "issue",
+      "title": "Hard Crash after founding second city.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-03T09:04:49Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/40",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-03T09:18:51Z",
+          "body": "Couldn't repro headlessly (the autostart harness doesn't found cities). A hard crash almost certainly writes an unhandled-exception stack trace to the console / stderr — could you paste that? From a terminal:\n\n```\nflatpak run io.github.crhy.rhYciv 2>&1 | tee ~/rhyciv-crash.log\n```\n\nthen reproduce and attach `rhyciv-crash.log` (or just the `Unhandled exception … at …` block).\n\nContext: `bf1a11a6` already fixed a hard crash when founding the **first** city, so this is likely a different path that only the **second** city hits — capital/palace relocation, inter-city trade/road linking, or a happiness/■corruption recalc that iterates existing cities and dereferences something the first city didn't have. The stack will point straight at it."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:11:10Z",
+          "body": "Still can't reproduce this one. I now have a harness that founds a city and opens its screen (`RHYCIV_TEST_CITY=1`, added in `7b52583b`) — that path is clean after the #42 fix.\n\nNote #42 was *a* hard crash reachable right after founding, so it's worth retesting this on latest `master`: if what you hit was actually \"found city → open city screen → crash\", #42 may well have been it.\n\nIf it still crashes on the second city specifically, the console output will name the line:\n\n```\nflatpak run io.github.crhy.rhYciv 2>&1 | tee ~/rhyciv-crash.log\n```"
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:12:32Z",
+          "body": "Still not reproducible here, but there is now a crash log to work from — please retry on latest `master` and send me the file.\n\n`e72b230f` makes the game write its own crash report. `Program.Main` catches unhandled exceptions from the loop, the AppDomain and the task scheduler, prints the stack to stderr, and writes it to a timestamped file under the per-user data folder (beside your saves — the bundled ruleset directory is read-only under Flatpak), naming the path on stderr. So a hard crash should now leave:\n\n```\n~/.var/app/io.github.crhy.rhYciv/data/AxxCiv/Logs/crash-<timestamp>.log\n```\n\nReproduce, then attach whatever is newest in that directory.\n\n**What I ruled out.** The harness now takes `RHYCIV_TEST_CITY=N` (a count, not a flag) and walks each settler clear of existing cities before founding, plus `RHYCIV_TEST_TURNS=N`. On seed 42: founding two cities, publishing both tiles, opening the second city's window and running four turns is clean. So the crash is not in `CityActions.BuildCity`, the city window, or the first few turns with two cities.\n\n```\nRHYCIV_AUTOSTART=1 RHYCIV_AUTOSTART_SEED=42 RHYCIV_TEST_CITY=3 RHYCIV_TEST_TURNS=4 dotnet RaylibUI.dll\n```\n\n**What I did not rule out**, because the harness calls the engine directly and skips it: the UI order path. `BuildCity.Update()` runs every frame and, when the active settler stands next to any city, builds an error dialog image — `Game.Players[city.OwnerId]`, `CityImages.Sets[cityStyleIndex][sizeIncrement]`. That branch is only reachable once a city exists, which fits \"second city\" precisely, and it would fire on moving the settler rather than on pressing B. If the crash happens as you *approach* your first city with the second settler rather than when you confirm the name, that is where I would look first.\n\nDoes it crash when you move next to the city, or only when you confirm the name in the dialog?"
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T08:03:41Z",
+          "body": "The crash logger paid off immediately — thanks for grabbing it. The stack named the line:\n\n```\nSystem.NullReferenceException\n  at MovementFunctions.ExecuteUnitMove ... MovementFunctions.cs:755\n  at MovementFunctions.Moveto ... :549\n  at MovementFunctions.AttackAtTile ... :304\n  at Game.ProcessBarbarianTurn ... Game.Actions.cs:480\n  at Game.ChooseNextCivilizationOnce ... :105\n  at EndTurn.Action() ...\n```\n\nLine 755 is `if (!game.ScenarioData.ForbidTechFromConquests)`, inside the city-capture branch. **`ScenarioData` was null in every new game** — `_scenarioData` was only ever assigned by the load-game constructor, never the new-game one. So the first time any city changed hands, by anyone, the game threw. Loaded saves were fine.\n\nFixed in `bbd3cb9a`: the field initialises to a plain `Scenario`, which is what a non-scenario game wants anyway — every restriction off.\n\n**This is very likely what this issue has been all along.** Founding the second city spends the last settler, which leaves nobody awaiting orders, which is what triggers the first end of turn — and that is where the barbarians move for the first time. That also explains why it never reproduced by founding cities directly: my harness never reached an end of turn, and when I later made it run four, the barbarians happened not to take a city on seed 42.\n\nLeaving this open until you confirm the second city is survivable now. If it still goes down, the new crash log will say where."
+        }
+      ]
+    },
+    {
+      "number": 41,
+      "type": "issue",
+      "title": "No production by default in the city",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:47:53Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/41",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:10:33Z",
+          "body": "Confirmed and narrowed with the new `RHYCIV_TEST_CITY=1` harness (needs `7b52583b` first — the city screen hard-crashed before that, #42).\n\nThe engine **does** set a default: founding a city logs\n\n```\ntest-city: founded 'Testopolis' size 1, production Civ2engine.Production.UnitProductionOrder\n```\n\nso `city.ItemInProduction` is a valid unit order immediately. The problem is that the **city window doesn't render it** — the production area beside the Buy / Change buttons is blank, and the shield-progress box is empty. So this is a display bug in `CityWindow` / the production panel rather than a missing default.\n\nScreenshot of the (now non-crashing) city screen is on #45, which covers the same window's layout problems."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T08:33:04Z",
+          "body": "Related root cause found and fixed in `e4769f28`, though it isn't the default-production part of this issue.\n\n**Nothing could finish building at all.** `GameTurn` compared accumulated shields against `Cost * RowsShieldBox`, but `RULES.txt` costs are already shields — Warriors 10, Temple 40, Cure for Cancer 600, exactly Civ II's prices. So Warriors wanted **100** shields, and a young city making one a turn needed a hundred turns to raise one. Reported from play as \"Warriors did not produce after 148 turns\".\n\nThe same multiplication inflated the disband shield credit, the turn estimates in the Change-production list, and the size of the production shield box (a 10-shield unit drew a 100-slot grid).\n\nWarriors now completes on turn 10 at one shield a turn, verified over a 12-turn headless run:\n\n```\nturn  2  Washington size 1 shields 1/10 producing Warriors (+1/turn)\n...\nturn 11  Washington size 2 shields 0/10 producing Warriors (+2/turn)  units 1 -> 2\n```\n\nWorth noting the interaction with civil disorder: a city in disorder `continue`s past production entirely, so a city stuck in disorder produces nothing. That was unfixable from the city screen until `bbd3cb9a` — see #28 and the entertainer work."
+        }
+      ]
+    },
+    {
+      "number": 42,
+      "type": "issue",
+      "title": "Hard crash when trying to open the city screen.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:48:16Z",
+      "closed_at": "2026-09-04T02:10:31Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/42",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:10:30Z",
+          "body": "Fixed in `7b52583b`.\n\nReproduced with a new QA hook (`RHYCIV_TEST_CITY=1` founds a city and opens its screen). Stack:\n\n```\nUnhandled exception. System.IO.FileNotFoundException: Image file 'city' was not found.\n   at RaylibUtils.Images.ExtractBitmapData(...)\n   at RaylibUI.RunGame.GameControls.CityControls.CityWindow.Resize(...) CityWindow.cs:153\n   at RaylibUI.BaseScreen.Draw(...)\n```\n\n`Civ2Interface.GetCityWindowDefinition` hardcodes `new BitmapStorage(\"city\", new Rectangle(0, 0, 640, 421))` — the classic Civ II city-screen backdrop sheet, which the standalone asset set does not ship (it has `CITIES.png`, not `city`). `CityWindow.Resize` runs on the draw path, so the exception killed the process the instant any city screen opened.\n\nThe backdrop is now resolved once and falls back to the plain painted dialog base when it can't be loaded. City screens open normally.\n\nNote the city screen is still visually unfinished — overlapping labels, an unrendered tile map, no production item shown. That's #41 / #45, not this crash."
+        }
+      ]
+    },
+    {
+      "number": 43,
+      "type": "issue",
+      "title": "Irrigation looks retarded.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:48:48Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/43",
+      "body": "<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/d3a537fa-6bf1-4238-974b-4fbf08c366b2\" />",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:14:44Z",
+          "body": "Root cause identified — it's not a scaling bug, the irrigation art doesn't exist yet.\n\nPer `docs/TEXTURE-GAP.md`, the `TERRAIN1` overlays for **irrigation, farmland, mine, pollution, goody hut and the road / railroad rosettes** are still **generator-drawn vector placeholders** in `scripts/build_standalone_sheets.py`, not painted art. The blue \"><\" chevrons in your screenshot are exactly that placeholder; the thick brown bars are the matching road rosette placeholder.\n\nFixing it means either painting proper overlays (like the terrain diamonds and coastline got) or improving what `build_standalone_sheets.py` draws — then regenerating `Standalone/TERRAIN1.png`.\n\n**Blocker on this machine:** `build_standalone_sheets.py` needs Pillow and there's no PIL installed here, so I can't regenerate the sheets. Same blocker applies to #37 (Celts colour) and the remaining procedural markers in #18. Install Pillow and I can take all three on."
+        }
+      ]
+    },
+    {
+      "number": 44,
+      "type": "issue",
+      "title": "Cursor looks retarded",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:49:10Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/44",
+      "body": "<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/71e8de71-9ff1-405f-9f76-230d8db4a556\" />",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:14:45Z",
+          "body": "Visible in the #43 screenshot too: the active-unit cursor draws as an **opaque grey rectangle** with a white dashed diamond inside it, instead of just the diamond outline over the terrain.\n\nThat reads as a transparency failure on the cursor sprite in the generated `Standalone/ICONS.png` — the rectangle around the diamond should be keyed out. Like #43 it's a sheet-generation problem (`scripts/build_standalone_sheets.py`, `build_icons()`), so it needs Pillow to regenerate; not installed on this machine.\n\nWorth checking when it is: whether the generator writes the cursor cell with an alpha channel at all, or whether it relies on the magenta key that `Images.LoadImageFromFile` applies for PNGs (`ReplaceColor((255,0,255,255) -> alpha 0)`) and is painting grey instead of magenta."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T14:22:28Z",
+          "body": "The view-piece cursor was drawn about five times oversized as a white diagonal band — the new VIEWPIECE art is 300x150 but the map draw path multiplies by zoom assuming the classic 64x32 tile footprint. Fixed in e8a555b4: the marker is now given a render scale derived from `MapImage.TileRec`, so it draws as a one-tile diamond at every zoom."
+        }
+      ]
+    },
+    {
+      "number": 45,
+      "type": "issue",
+      "title": "Text alignment and layout and size is off in several dialogs.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:49:59Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/45",
+      "body": "<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/17e3423a-ed94-449f-8396-22aa338d333b\" />\n\n<img width=\"1920\" height=\"1080\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/f41b07e1-0f49-4154-a68c-0664c23cd6d0\" />",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:11:09Z",
+          "body": "Attaching the current state of the city window (after the #42 crash fix landed, `7b52583b`) since it's the worst offender: overlapping orange labels (\"Citizens\", \"Resource Map\", \"Units Supported\", \"Units Present\", \"City has no walls\") drawn at classic Civ II 640x421 coordinates while the window is scaled 1.5x, an unrendered checkerboard tile map, and a blank production area.\n\nThe root cause for that window specifically: `Civ2Interface.GetCityWindowDefinition` lays everything out against a fixed `640x421` backdrop image which the standalone set doesn't ship, so every label/rect position is anchored to a picture that isn't there, then scaled by `_scale = 1.5f`. It needs a standalone layout rather than the classic one.\n\nIf the other screenshots on this issue are different dialogs, tell me which and I'll take them one at a time — the generic message/choice popups were reworked in `ae8ca519` (large, centred, legible) and should be fine now."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:32:27Z",
+          "body": "Yes I haven't even started working on the city window yet. I'm talking about all the other pop-up dialogues like in the beginning etc"
+        }
+      ]
+    },
+    {
+      "number": 46,
+      "type": "issue",
+      "title": "Game does not save previous radio button selections from the previous game start.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:50:39Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/46",
+      "body": "I keep having to switch to raging hordes.  I always play raging hordes.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:11:12Z",
+          "body": "Confirmed as unimplemented rather than broken: the new-game wizard dialogs (`SIZEOFMAP`, `DIFFICULTY`, `BARBARITY`, `ENEMIES`, …) are built fresh from `BuiltInDialogs.AddFallbacks` / `Game.txt` each time, and `DialogElements.Options.SelectedId` only ever comes from the `@default` directive in the file — nothing writes the player's last choice anywhere.\n\nFix shape: persist the chosen index per dialog name into the existing settings/options store when `HandleDialogResult` runs, and seed `Options.SelectedId` from it in `BaseDialogHandler.UpdatePopupData`. Small and self-contained; the only design question is whether these live in the existing `Settings` JSON or a new \"last new-game choices\" blob."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:30:35Z",
+          "body": "Yes let's make this bug a priority. Because it's an easy fix and it's very annoying"
+        }
+      ]
+    },
+    {
+      "number": 47,
+      "type": "issue",
+      "title": "Dialog to alter the rules is superfluous, for now.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T01:51:00Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/47",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T02:14:46Z",
+          "body": "Which dialog do you mean — `RULES` (\"Game rules: Standard conquest / Advanced options\") or `ADVANCED` (the six checkboxes)? Both are registered in `Civ2/Dialogs/BuiltInDialogs.cs`.\n\nEither can be skipped by removing it from the new-game wizard chain in `Civ2/Dialogs/NewGame/` rather than deleting the dialog, so it's easy to restore later. Say which one and I'll wire the chain past it."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-04T07:30:01Z",
+          "body": "Yes, currently the advanced dialogue does not come up when you click it, so it's pretty useless. I guess we could fix that?"
+        }
+      ]
+    },
+    {
+      "number": 48,
+      "type": "issue",
+      "title": "Need icons for advance categories.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-04T07:06:26Z",
+      "closed_at": "2026-09-05T08:28:19Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/48",
+      "body": "It looks stupid without them.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:28:18Z",
+          "body": "Done in `1b75cd91`. Your four banners are in as the badge beside each advance in the research list, scaled to twice the slot so they stay crisp as the window grows.\n\n**The categories behind the badges were worth no more than the old swatches**, so they needed fixing first. They were guessed from keywords in the advance's *name*, with a `depth % 2` fallback for anything that missed — which left **68 of 88** in two catch-all buckets and produced *five* categories where Civ II has four. The distribution was 8 / 6 / 6 / 35 / 33.\n\nThe import script now carries an explicit table. Every advance your brief names is placed as it names them — 73 of them. The result is academic 20, applied 30, military 17, social 21. **83 of the 88 changed category.**\n\n**Fifteen advances your brief doesn't name**, which I placed by what it says each kind covers. These are the ones worth checking:\n\n- **Academic** — Medicine, Superconductors\n- **Applied** — Map Making, Navigation, Pottery, Railroad, Refrigeration, Sanitation, Seafaring\n- **Social** — Banking, Currency, Economics, Industrialization, The Corporation, Trade\n\nIndustrialization is the one I'd most expect you to move; it reads as infrastructure as much as economics, and I put it in social because your brief groups economics there.\n\nVerified in game: Alphabet academic, Bronze Working applied, Ceremonial Burial social, Horseback Riding military, Warrior Code military."
+        }
+      ]
+    },
+    {
+      "number": 49,
+      "type": "issue",
+      "title": "New city management screen",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T07:07:16Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/49",
+      "body": "Needs to have the functionality of the old civ 2, but be all original and better looking.",
+      "comments": []
+    },
+    {
+      "number": 50,
+      "type": "issue",
+      "title": "Civilopedia promises the engine does not yet keep",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-04T07:13:09Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/50",
+      "body": "Now that `docs/CIVILOPEDIA-TEXT.md` is written and shipped (#39, #35), the Civilopedia is the player-facing specification: it states in plain words what every unit, building, terrain type and government does. That makes each remaining divergence a promise a player can read rather than an internal inconsistency.\n\nThe 2026-09-04 pass worked through the whole text and fixed everything cheap to fix (see #25 and `8ce5b47c`). This tracks what the text names that the engine still does not do. Full table with file references in `docs/CIV2-PARITY-AUDIT.md`, section \"Civilopedia as the parity contract\".\n\n### Absent\n\n- [ ] **Diplomat and Spy missions** — embassy, investigate, sabotage, steal tech, incite revolt, bribe. Backlog #5, issue #20. Largest single gap.\n- [ ] **Caravan and Freight** — trade routes, deliver commodities, help build wonders. Backlog #6. Three unit entries describe this as their whole purpose.\n- [ ] **Submarine stealth** — invisible to units that cannot spot it. Backlog #13. The flag parses and the movement restrictions work; visibility does not.\n- [ ] **Nuclear strike** — area effect and fallout. Backlog #14.\n- [ ] **Leonardo's Workshop** — upgrades obsolete units. Backlog #4.\n- [ ] **Airlift** between cities with Airports. Backlog #11. Like Paradrop was, the Orders menu entry exists and is bound to no command.\n- [ ] **Revolution and government change** — and Statue of Liberty with it. Backlog #15, #20. The seven government entries describe governments a player currently cannot switch between.\n- [ ] **Marco Polo's Embassy, United Nations, Eiffel Tower** — all need diplomacy. Backlog #19.\n- [ ] **Capitalization** — converts shields to gold. Issue #28.\n\n### Already verified faithful\n\nChecked in the same pass and needing no work: Fanatics' free support under Fundamentalism, the Trireme's must-stay-near-land loss chance, the Despotism/Anarchy penalty on any tile producing 3+, Fundamentalism's unhappiness suppression and half research and ten free units per city, Alpine Troops' road movement, the Howitzer ignoring walls, and AEGIS air defence.\n\n### Note on wording\n\nEvery entry above hedges — each says the behaviour is \"intended\" — so no Civilopedia entry currently claims something the engine contradicts outright. They are promises not yet kept rather than statements that are false. Worth keeping that property: if an entry is rewritten to state a behaviour flatly, the engine needs to do it.",
+      "comments": []
+    },
+    {
+      "number": 51,
+      "type": "issue",
+      "title": "Fix the coastlines",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-04T09:07:45Z",
+      "closed_at": "2026-09-05T07:19:08Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/51",
+      "body": "The need to be a tiny bit of beach close to the shore.  The current beach goes way out to sea.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T07:19:07Z",
+          "body": "Fixed in `e36c809b` — installed locally, not yet in a release.\n\nYou were right about the cause. The coastline tiles are painted from a signed distance to the shoreline, and **two** things in that ramp were wrong:\n\n- The water did not reach deep ocean until **150 world pixels** out — half a tile — so every ocean tile touching land was bright turquoise edge to edge.\n- Everything landward of the shoreline was painted sand, which is what put the beach half a tile out to sea.\n\nThe sea is now at full depth by about **57** pixels, and the sand is trimmed **46** pixels back toward the land. That leaves the thin bright shelf and narrow shore you get looking at a coast from above, which is the Civ IV read you described.\n\nThe marching-squares shoreline itself is untouched — running it through the middle of the tile is what keeps a coast smooth rather than stair-stepped, so that stays.\n\nThe move is applied to the distance just *before* the colour ramp, so every texture term after it — grain, foam, swell, caustics — still lands where it was tuned to. Nothing was repainted from scratch.\n\nOne note for whoever touches this next: `generate_coastline_iso.py` needs Pillow and numpy, which aren't on this machine, so `scripts/tune_coastline.py` performs the same move directly on the painted tiles by inverting the ramp per pixel. **The two carry the same two constants and have to be changed together.**"
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T07:19:08Z",
+          "body": "Closing — reopen if the shelf is still too wide or too bright once you have played with it."
+        }
+      ]
+    },
+    {
+      "number": 52,
+      "type": "issue",
+      "title": "Can't finish production with the buy button in the city window.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-05T05:27:50Z",
+      "closed_at": "2026-09-05T06:59:05Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/52",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T06:59:05Z",
+          "body": "Fixed in `8f3b35e2`, shipped in v0.6.0-beta.1.\n\nThe Buy button had **no click handler at all** — it was created, laid out, and depressed on click, but nothing was ever wired to it.\n\nIt charges Civ II's price now: `2R + R²/20` where R is the shields still owed, doubled for a wonder, and doubled again when nothing has been put toward the item yet. The dialog names the item, the price and the treasury. The purchase re-checks both the price and your gold before committing, since the dialog is not modal to the rest of the turn."
+        }
+      ]
+    },
+    {
+      "number": 53,
+      "type": "issue",
+      "title": "Units display too small in the city window, and they're not quite where they should be in the boxes.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-05T05:28:21Z",
+      "closed_at": "2026-09-05T08:42:02Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/53",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:42:02Z",
+          "body": "Fixed in `45514aa5`, shipped in v0.7.1-beta.1 — two causes, one per half of the report.\n\n**Too small:** the sprite scale was `ZoomScale(0) * 0.82f`, which evaluates to a flat **0.82 regardless of the city window's own scale**. The window defaults to 1.5, so the boxes grew and the units in them did not. The scale is now derived from the cell the unit is given — box size over rows and columns, against the unit rectangle — and multiplied by the window scale.\n\n**Not quite where they should be:** `ListboxControlGroup` added every `UnitDisplay` at `(0, 0)`, so a sprite smaller than its cell sat up and to the left of where the box implied. They are centred in their cells now.\n\nBoth boxes go through the same helper, so Units Supported and Units Present stay consistent."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T14:22:37Z",
+          "body": "Fixed across e8a555b4 and 2ebdb4e3. Two separate faults:\n\n**Placement.** The Units Present box shared its origin with the \"Units Present\" heading, so units drew over the label. The box moved below its heading, and Units Supported went to one row rather than two — the panel is 58 tall, so two rows gave each unit half the height of one in the box beside it.\n\n**Size and sharpness.** The UI deliberately took the small classic sheet sprite while the map took the 1024px art. But `DrawScale`, `DrawOffset` and `LogicalSize` are all derived for the high-resolution art — `DrawScale` is roughly 48/1024 — so applying them to a sprite that was already the logical size drew it at a twentieth of its proper size, and blurry wherever it was scaled up. The UI now uses the same art the map does, so the metadata matches the texture it was measured against. This is also what made units tiny in the production box and the change-production list."
+        }
+      ]
+    },
+    {
+      "number": 54,
+      "type": "issue",
+      "title": "Settler got stuck near a coast line and couldn't move.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:27:04Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/54",
+      "body": "I pressed K to automate and it started automating.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T09:14:30Z",
+          "body": "Fixed in e8a555b4. Three separate faults could each leave a unit unmovable and unselectable:\n\n- **Automated settlers.** If the move an automated settler chose was refused — an enemy zone of control, or a settler with no attack strength meeting the unit standing in its way — the `Automate` order was restored anyway and no movement was spent, so it picked the same blocked square again every turn for the rest of the game. Automated units are not \"awaiting orders\", so it was never offered for selection either. A blocked automated settler now drops its order and comes back to you.\n- **GoTo.** A unit blocked on the next square of its path was handed back to the player with the GoTo order still set, so it was not awaiting orders — and ending the turn came straight back into the same code and offered the same stuck unit again. The order is now cleared when the unit makes no progress.\n- **Activation.** `SetUnitActive` switched the map into unit-moving mode even when the unit was refused (turn already ended), leaving the map pointing at a unit that wasn't there and nothing responding. It now falls back to the view piece.\n\nAlso, blocked moves were completely silent: the engine raised a `MovementBlocked` event and nothing in the UI listened to it, so a refused move was indistinguishable from a stuck unit. The reason is now reported (once per unit, per reason, per turn)."
+        }
+      ]
+    },
+    {
+      "number": 55,
+      "type": "issue",
+      "title": "New Tech Discovery should happen BEFORE selecting next tech.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:27:32Z",
+      "closed_at": "2026-09-05T06:59:07Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/55",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T06:59:07Z",
+          "body": "Fixed in `ada1e6d7`, shipped in v0.6.0-beta.1.\n\nThe engine already called them in the right order, so this was subtler than it looked: the discovery page and the research chooser are both pushed onto the dialog stack, and **the last one pushed is the one you meet first**. Announcing the advance and then asking what to research next put the question in front of the answer it followed from.\n\nThe chooser still has to be built after the advance is granted, so the advance's own unlocks are on the list — only the announcement moved, to the end, where it lands on top."
+        }
+      ]
+    },
+    {
+      "number": 56,
+      "type": "issue",
+      "title": "Game occasionally randomly pops the cursor into black undiscovered territory.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:28:29Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/56",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 57,
+      "type": "issue",
+      "title": "Cursor should be hi resolution at all zooms, and not have square mask issues.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:29:01Z",
+      "closed_at": "2026-09-05T08:42:01Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/57",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:42:00Z",
+          "body": "Fixed in `45514aa5`, shipped in v0.7.1-beta.1. Both halves, and the square mask was the worse of the two.\n\nThe marker came out of a 64×32 slot of the icon sheet, so at the zoom this build reaches it was a **five-times magnification of a stair-stepped outline**.\n\nThe mask: **every pixel of that slot was opaque** — 2048 of 2048. The diamond had been drawn straight onto the sheet's own grey background, so cutting the region out took the background with it, and the corners of the crop painted a grey box over the map around the marker.\n\nIt is a 300×150 sprite now, generated on a transparent scratch tile so the corners stay clear, with a soft dark backing behind the white outline so it reads against pale terrain as well as dark water."
+        }
+      ]
+    },
+    {
+      "number": 58,
+      "type": "issue",
+      "title": "Production Issue... Never produced warrior, Resources invisible in city window map.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:30:37Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/58",
+      "body": "This was on the second city, not the first.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T06:59:26Z",
+          "body": "Partly reproduced, and I don't think it's one bug — leaving open.\n\nI drove your exact setup headlessly (quick start, Deity, two cities, sixty end-turns) and got a city sitting at **+0 shields/turn, not in disorder, permanently stuck** — which matches \"never produced warrior\". Two things are going on and I want to separate them before claiming a fix:\n\n**1. Unit support eats the shields.** Under Despotism free support is the city's *size*. The harness had built six units homed to a size-2 city, so four of them cost a shield each, against a gross of about four. Net zero, forever. That is Civ II-correct behaviour, but it is invisible: the city screen shows `Support: 4` and nothing explains why the shield box never moves.\n\n**2. The cities were founded two tiles apart** and their work radii overlap heavily. The first city takes the good tiles, and `AutoAddDistributionWorkers` will only assign tiles with `WorkedBy == null`, so the second city ends up working little more than its centre. That would give both the low production **and** the \"resources invisible in the city window map\" half of this report — the resource overlays are drawn per worked tile, so a city working only its centre has almost none to draw.\n\nSo the question is whether what you saw was these two effects stacking, or a third thing. What would settle it: when you next hit it, open the second city and tell me what **Support** and **Production** read, and roughly how far apart the two cities are. If Support is large relative to the city size, it's (1). If the resource map shows terrain but no resource icons on the outer tiles, it's (2).\n\nSeparately, note that everything in your report predates the 10x production-cost fix landing in your build, so some of it may simply have been that."
+        }
+      ]
+    },
+    {
+      "number": 59,
+      "type": "issue",
+      "title": "No Diplomacy yet.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:32:20Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/59",
+      "body": "I just failed to kill a settler, with no declaration of war or conversation with the opposing AI",
+      "comments": []
+    },
+    {
+      "number": 60,
+      "type": "issue",
+      "title": "Choose your Research Window needs a link to the civilopedia tech option.",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:34:06Z",
+      "closed_at": "2026-09-05T08:16:59Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/60",
+      "body": "You should be able to select a technology and click an Info button that brings up that techs civilopedia page.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:16:58Z",
+          "body": "Done in `9a4759c1`, shipped in v0.7.0-beta.1.\n\nThe chooser has an Info button that opens the Civilopedia page for whichever advance is highlighted.\n\nOne detail worth knowing, since it bit the tech-discovery ordering in #55 too: dialogs stack, and **the last one pushed is the one you meet first**. So the chooser is re-shown *before* the pedia page is opened, which puts it underneath — the page closes back onto the question instead of dropping you on the map having chosen nothing. The highlighted row carries across, so the advance you just read about is still selected.\n\nFlagging honestly: I could not screenshot this one. The headless harness can pop a dialog by name but cannot populate its list box, so the button is wired and builds but has not been seen working. Worth a click when you next research something."
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T08:28:20Z",
+          "body": "Confirmed working — the earlier note that I could not screenshot it is now moot. The Info button shows in the chooser alongside Ok; the same shot verified #48."
+        }
+      ]
+    },
+    {
+      "number": 61,
+      "type": "issue",
+      "title": "Barbarians seem too strong in deity mode.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:35:38Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/61",
+      "body": "Barbarian horsemen seem to kill the fortified city warrior every time.  That's not how it works in the OG Civ 2.",
+      "comments": []
+    },
+    {
+      "number": 62,
+      "type": "issue",
+      "title": "Cross-Platform Plans",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T06:46:41Z",
+      "closed_at": null,
+      "labels": [
+        "status:planned"
+      ],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/62",
+      "body": "Android, iOS, Windows, MacOS, should just be a few of the targets.",
+      "comments": []
+    },
+    {
+      "number": 63,
+      "type": "issue",
+      "title": "Whales shouldn't be right on the beach...",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T07:17:51Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/63",
+      "body": "They should be at least one tile out to sea.",
+      "comments": []
+    },
+    {
+      "number": 64,
+      "type": "issue",
+      "title": "Citizens in the city window should be justified on the left.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T08:56:45Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/64",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 65,
+      "type": "issue",
+      "title": "Need better Production, Trade, Food, Science and Gold Icons in the City Window",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T08:57:44Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/65",
+      "body": "",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T09:00:57Z",
+          "body": "Also the city window should have some compelling backgrounds for those areas.  Maybe some pretty gradient bars or something?"
+        },
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T14:22:27Z",
+          "body": "Done in 2ebdb4e3. The drawn medallions for food, gold, science, production and trade are cut out of their plates and shipped at 96px in `RaylibUI/FOSSart/Icons/Resources/`, replacing the 14x14 and 10x10 patches of the ICONS sheet the city window used to read. Hunger, corruption, waste and shortage get a red-shifted variant of the same art.\n\nEverywhere that draws one now asks for the footprint it wants rather than taking the file's native size — the food store and shield box fit to the classic 14-pixel logical size, the Civilopedia fits each badge to the label beside it, and the city map's resource overlay is sized against the tile.\n\nOne gap: **luxuries has no drawn art**, and it shares a row with taxes and science, so leaving it as the old sheet sprite would have put one coarse icon between two medallions. It is currently a violet-tinted copy of the gold medallion as a stand-in. A real luxuries badge would finish the set."
+        }
+      ]
+    },
+    {
+      "number": 66,
+      "type": "issue",
+      "title": "Text in the Menus at the top is terrible.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T09:03:00Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/66",
+      "body": "We should improve all of the text in the entire game, honestly.  Better looking fonts, clearer, more legible.",
+      "comments": []
+    },
+    {
+      "number": 67,
+      "type": "issue",
+      "title": "Defork and massive codebase cleanup",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T17:14:40Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/67",
+      "body": "[rhyciv-codebase-review.md](https://github.com/user-attachments/files/31868071/rhyciv-codebase-review.md)\n\nLet's defork and also follow all of the other suggestions. \n\nHonestly we're kind of overdue for this.\n",
+      "comments": []
+    },
+    {
+      "number": 68,
+      "type": "issue",
+      "title": "Update all social media links for all projects",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T19:04:52Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/68",
+      "body": "Include telegram, discord, Instagram",
+      "comments": []
+    },
+    {
+      "number": 69,
+      "type": "issue",
+      "title": "Grass shield is way too big",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T19:45:57Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/69",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 70,
+      "type": "issue",
+      "title": "Unit shield should be much prettier",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T19:47:08Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/70",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 71,
+      "type": "issue",
+      "title": "Multiplayer with audio chat.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T19:47:54Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/71",
+      "body": "And real time whisper translation subtitles.",
+      "comments": []
+    },
+    {
+      "number": 72,
+      "type": "issue",
+      "title": "Beta tester crypto mining",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-05T19:50:03Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/72",
+      "body": "Create a new Civ coin, earnable from beta testing, reporting to GitHub, fixing issues on GitHub.",
+      "comments": [
+        {
+          "author": "crhy",
+          "created_at": "2026-09-05T19:50:35Z",
+          "body": "Maybe also earned from improving artwork?"
+        }
+      ]
+    },
+    {
+      "number": 73,
+      "type": "pull_request",
+      "title": "Defork, cleanup, CI, and painted road/rail + city-window art (#67)",
+      "state": "closed",
+      "author": "crhy",
+      "created_at": "2026-09-06T00:40:58Z",
+      "closed_at": "2026-09-06T03:03:48Z",
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/pull/73",
+      "body": "Works through the [codebase review](https://github.com/crhy/rhYciv/issues/67) attached to #67, in the order that review suggested: identity debt first, then the build contract, then a correctness fix. Every commit leaves `scripts/quality_gate.sh` green (200 tests).\n\n## 1. Defork\n\nThe product is rhYciv, but the solution, several project names, the engine namespace and the on-disk data directory still said Civ2-clone.\n\n| Was | Is |\n|---|---|\n| `Civ2clone.sln` | `rhYciv.sln` |\n| `Civ2/` | `UI.Classic/` |\n| `Civ2Gold/` | `UI.Compact/` |\n| `Civ2TOT/` | `UI.CompatAlternate/` |\n| `Engine/Core.csproj` | `Engine/RhyCiv.Engine.csproj` |\n| `Core.Tests/` | `RhyCiv.Tests/` |\n| `namespace Civ2engine` | `RhyCiv.Engine` |\n| `Engine/src/OriginalSaves` | `Engine/src/LegacySaves` |\n| `Civ2Interface` / `Civ2GoldInterface` / `TestOfTimeInterface` | `ClassicInterface` / `CompactInterface` / `CompatAlternateInterface` |\n| `Civ2WorldGenerator` | `ClassicWorldGenerator` |\n| `Settings.Civ2Path` | `Settings.GameDataPath` |\n\nThree of those are user-visible, so each keeps a back-compatible read path:\n\n- **Save directory** moves from `AxxCiv/` to `rhYciv/`. `Settings.MigrateLegacyDataFolder` copies the old tree across once on first launch and leaves the original in place, so no save is lost and an older build still runs.\n- **`Civ2Path` settings key** is still read when `GameDataPath` is absent.\n- **Ruleset metadata key** written into saves becomes `\"Compact\"`; the loader maps the old `\"Civ2Gold\"` key onto it so existing saves resolve to the right interface instead of falling back to path matching.\n\nAttribution in `LICENSE`, `NOTICE.md` and `ASSET-PROVENANCE.md` is untouched — it has to stay accurate. Comments describing Civilization 2 *mechanics* are also left alone; they document behaviour the engine deliberately reproduces.\n\nAlso removes real dead weight: `EtoFormsUI` left the tree some time ago but its build artifacts and a dangling project GUID in the solution's configuration section outlived it.\n\n## 2. The build contract, in the build\n\n`CONTRIBUTING.md` asked contributors to \"target .NET 9 and preserve nullable annotations\" and nothing enforced it.\n\n- `Directory.Build.props` now owns `TargetFramework`, `LangVersion`, `Nullable`, `ImplicitUsings`, analyzers and deterministic/CI flags; the per-project copies are gone.\n- **`TreatWarningsAsErrors` is on**, with `WarningsNotAsErrors` listing exactly the 18 rules the tree already violated (177 warnings, catalogued with counts in the file). It is a ratchet, not an exemption — no new warning class can appear, and codes come off the list as they are burned down. Verified by probe: `CS0162` (not listed) fails the build; the grandfathered warnings still pass.\n- `Directory.Packages.props` centralises versions. Raylib-CSharp was declared independently in four projects; two Raylib versions in one process is a native crash with no useful stack. This also lifts `Microsoft.Extensions.Configuration` 5.0.0 → 9.0.0.\n- `global.json` pins the SDK band.\n- `.editorconfig` describes the style the tree already uses. `EnforceCodeStyleInBuild` is deliberately **off**, so it guides an IDE and `dotnet format` without failing builds on legacy formatting.\n- `scripts/check_version_consistency.py` (wired into the quality gate) asserts `Directory.Build.props` and the Flatpak AppStream metainfo agree, so a tag can't ship a mismatched version.\n\nTurning on `ImplicitUsings` brought `System.IO` into the engine, colliding with the engine's own `Units.Path`; three call sites now carry an explicit alias.\n\n## 3. Interface discovery fails loudly\n\n`LoadInterfaces` reflected over every DLL beside the executable and silently `continue`d past failures. An empty result surfaced later as an index exception from `interfaces[0]` — on a user's machine, with a stack trace pointing nowhere near the cause. It now reports what it scanned and what it skipped, and `GetInterface` guards its own precondition. The doc comment records that a trimmed or single-file publish would break here first.\n\n\n## 4. Painted road and railroad connections\n\n`docs/TEXTURE-GAP.md` listed the road/railroad rosettes as still generator-drawn vector. They now use the painted art from `~/rhYcivtextures`.\n\nThe renderer composites one sprite per connected neighbour (`Levels[level, neighbour + 1]`, falling back to `Levels[level, 0]` when isolated), so the art has to be **eight half-spokes plus a stub** -- each ending where that neighbour is actually reached: the midpoint of the shared edge for the four neighbours that share one, the diamond corner for the four that only touch at a corner. Two adjacent tiles each draw their half and they meet on the boundary.\n\n`scripts/prepare_road_overlays.py` cuts the spokes from the straight-through source pieces: for each direction it picks the source best aligned with that axis, scales it to span exactly endpoint-to-endpoint on the diamond, and keeps the correct half with a small join overlap. Painted angles are used as-is and never rotated -- the art is already in 2:1 isometric screen space. Both sets resolved all 8 directions from 4 clean axis pieces each.\n\nTwo things needed a second pass: keying on colour distance alone left a pink halo (the painted edges are airbrushed, so a band of pixels is part matte), so the foreground is now eroded past that band and feathered back; and spokes are clipped to the tile diamond, because art outside it lands in the corners of the tile rect and visually overlaps neighbouring squares.\n\n**This also fixes the procedural fallback it replaces.** `draw_connections` drew the full four-way rosette into *all nine* sprite slots, so a tile with one neighbour showed roads running off all four sides. It now draws one spoke per slot in the renderer's neighbour order.\n\n## 5. Source-art audit\n\nEvery file in `~/rhYcivtextures` checked against what ships, recorded in `TEXTURE-GAP.md`. Two stale claims in that doc are corrected -- the cartographer background and the victory painting were both already wired. Still open: panel and city-window backgrounds are flat colour with a stripe every 26px while painted tileable stone sits unused; `main_menu.jpg` is generated and shipped but nothing reads it; `terrain/alts` holds seven unused paintings matching empty special-resource slots.\n\n\n## 6. CI\n\nThe repository had no build or test workflow at all -- only a Flatpak job on tags. Nothing checked a pull request.\n\n`ci.yml` runs `scripts/quality_gate.sh`, the same script the README tells contributors to run, across **ubuntu, windows and macos**. `ARCHITECTURE.md` documents save paths for all three, so all three are supported claims and should be tested claims. Both workflows now pin actions to commit SHAs rather than floating tags, cancel superseded PR runs (never master or tag builds), and declare `contents: read`.\n\nIt found two real bugs on its first runs, neither of which was reachable from a Linux dev box:\n\n- `global.json` said `\"version\": \"9.0.0\"`, which is not valid alongside `rollForward` -- the SDK wants a full version including the feature band. The local dotnet tolerated it; `setup-dotnet` refused it on all three runners.\n- **`ASSET-MANIFEST.tsv` failed to verify on Windows and only on Windows.** `assets()` sorted `Path` objects, and comparing `Path` objects uses the platform's own rules -- which are case-insensitive on Windows. `\"Overlays\"` sorts after `\"ocean.jpg\"` there and before it on Linux. Same files, same hashes, different row order, so the committed manifest read as stale. It now sorts on the POSIX relative path string, which depends on the paths and nothing else; the manifest is unchanged on Linux, which is what shows the fix is purely portability.\n\n`.gitattributes` was added along the way, pinning the working tree to LF and marking binary asset types. That was my first reading of the same failure and it turned out not to be the cause -- but the manifest does hash five text assets (`RULES.txt`, `CITY.txt`, `Game.txt`, `describe.txt`, `pedia.txt`), and a CRLF checkout genuinely would break those hashes, so it stays as a closed hazard rather than a fix.\n\n`quality_gate.sh` also resolves `python` the way it already resolved `dotnet`, which is what lets one script serve the whole matrix.\n\n## 7. The city window\n\nThe window chrome, menu bar and side panels are all cut from the painted slate sheet, but the city window filled each of its own panels with a flat grey (84, 82, 78) that matched nothing else on screen -- the busiest screen in the game was the one that looked unfinished. This is the substance behind issues #64 and #65.\n\nNeutral panels are now tiled with the same inner wallpaper the dialogs use. Food storage and production keep their flat green and blue: those are read as data, and a texture would fight the bars drawn over them. The texture comes from `TextureCache`, which owns the handle and drops it on a ruleset change.\n\nVerified by running the game headless under Xvfb with the existing `RHYCIV_AUTOSTART` / `RHYCIV_TEST_CITY` / `RHYCIV_SHOT_DIR` harness and diffing captures. That is what caught the first attempt: leaving the panels unfilled to let the window background through looked right in principle, but the city window composites a classic backdrop the standalone set does not ship, and removing the fill put what lies underneath on screen. The fill has to stay opaque; only its material changes.\n\n## Not in this PR\n\n- **Detaching the GitHub fork link** needs GitHub Support; it cannot be done from the CLI. Worth filing, since it is the last piece of #67's identity section.\n- **Renderer test coverage.** `RhyCiv.Tests` still only covers the engine. The review's suggestion to extract the pure zoom/tile maths into `RaylibUtils` and test it there remains the highest-value option.\n- **Save schema versioning.** Saves do carry a `version` field (0.1), but there is no migration chain and no round-trip tests.\n- **The remaining flat backgrounds.** `panel.jpg` still backs the seven advisor screens, and `city_land/river/ocean.jpg` still back the city view. Unlike the city window there is no painted source art for those, so they need art before they need code.\n- **`main_menu.jpg`** is generated and shipped but nothing reads it.\n- The **177 grandfathered warnings** are ratcheted, not fixed. Burning down `CS8602` and `CS8618` would cover three quarters of them.\n\n",
+      "comments": []
+    },
+    {
+      "number": 74,
+      "type": "issue",
+      "title": "Troop finishes all moves for turn and doesn't stop blinking.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-06T01:39:45Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/74",
+      "body": "Maybe they're not stuck after all!",
+      "comments": []
+    },
+    {
+      "number": 75,
+      "type": "issue",
+      "title": "Barbarians are a bit too tough still in Deity.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-06T01:40:23Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/75",
+      "body": "One horse went along and killed TWO fortified warriors in cities.  Without stopping to heal first.",
+      "comments": []
+    },
+    {
+      "number": 76,
+      "type": "issue",
+      "title": "City was built and did not consume settler.",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-06T01:41:10Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/76",
+      "body": "I think.  Or maybe I landed on a goody hut?  Double check this logic.",
+      "comments": []
+    },
+    {
+      "number": 77,
+      "type": "issue",
+      "title": "Better goody hut Icon needed.  I had one in rhYcivtextures I think....",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-06T01:41:37Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/77",
+      "body": "",
+      "comments": []
+    },
+    {
+      "number": 78,
+      "type": "issue",
+      "title": "City flags are still blurry and low res",
+      "state": "open",
+      "author": "crhy",
+      "created_at": "2026-09-06T01:43:43Z",
+      "closed_at": null,
+      "labels": [],
+      "milestone": null,
+      "url": "https://github.com/crhy/rhYciv/issues/78",
+      "body": "",
+      "comments": []
+    }
+  ],
+  "attachments_saved": 9
+}
