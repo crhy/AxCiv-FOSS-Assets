@@ -101,12 +101,23 @@ internal static class CityUnitMenu
     private static void DisbandUnit(CityWindow cityWindow, Unit unit)
     {
         var screen = cityWindow.CurrentGameScreen;
-        if (screen.Player.ActiveUnit == unit)
+        var wasActive = screen.Player.ActiveUnit == unit;
+        if (wasActive)
         {
             screen.Player.SetUnitActive(null, false);
         }
 
         CityActions.DisbandUnit(unit, screen.Game);
+
+        if (wasActive)
+        {
+            // Clearing the active unit on its own leaves the map with nothing
+            // selected, and the disbanded unit went on blinking where it had
+            // stood. DisbandOrder, the map-side path, moves to the next unit
+            // here; this one did not.
+            screen.Game.ChooseNextUnit();
+        }
+
         cityWindow.UpdateProduction();
         screen.ForceRedraw();
     }

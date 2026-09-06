@@ -17,6 +17,11 @@ carry a shorter, user-facing summary of each release; this file is the full reco
   a specialist, so the faces never stayed where they were last clicked. (#64)
 - The Supplies and Demands lines in the city window are inset from the panel
   border instead of rendering hard against it. (#83)
+- Disbanding a unit from the city window clears it from the Units Present and
+  Units Supported boxes straight away. Both boxes only rebuilt their contents when
+  the window was rescaled, so a disbanded unit stayed listed until something else
+  resized the window. If the disbanded unit was the active one, the map now moves
+  to the next unit instead of leaving it blinking where it stood. (#94)
 
 ### Changed
 

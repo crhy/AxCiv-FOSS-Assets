@@ -10,19 +10,44 @@ public class UnitSupportBox : Listbox
 {
     private readonly CityWindow _cityWindow;
     private float _oldScale = 0f;
+    private int _unitsSignature = -1;
 
     public UnitSupportBox(CityWindow cityWindow) : base(cityWindow)
     {
         _cityWindow = cityWindow;
+
+        // Disbanding a unit changes this list without resizing the window, so the
+        // box has to be told to lay out again. CityCitizensBox listens to the same
+        // signal for the same reason.
+        _cityWindow.ResourceProductionChanged += (_, _) => OnResize();
         ItemSelected += OpenPopup;
+    }
+
+
+    /// <summary>
+    /// Identity and order of the units this box is showing. The list is rebuilt
+    /// when this changes, not only when the window is rescaled: disbanding a unit
+    /// leaves the scale alone, so the box went on showing a unit that no longer
+    /// existed until something else resized the window.
+    /// </summary>
+    private int UnitsSignature()
+    {
+        var signature = new HashCode();
+        foreach (var unit in _cityWindow.City.SupportedUnits)
+        {
+            signature.Add(unit);
+        }
+        return signature.ToHashCode();
     }
 
     public override void OnResize()
     {
-        if (_oldScale != _cityWindow.Scale)
+        var signature = UnitsSignature();
+        if (_oldScale != _cityWindow.Scale || _unitsSignature != signature)
         {
             Definition = MakeListbox(_cityWindow);
             _oldScale = _cityWindow.Scale;
+            _unitsSignature = signature;
         }
 
         var pos = _cityWindow.CityWindowProps.UnitSupport.Box;
