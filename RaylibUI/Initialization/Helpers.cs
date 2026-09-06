@@ -10,35 +10,82 @@ namespace RaylibUI.Initialization;
 
 public static class Helpers
 {
+    /// <summary>
+    /// Discovers the <see cref="IUserInterface"/> implementations shipped beside the
+    /// executable.
+    /// <para>
+    /// Reflection over the output directory is how third-party interfaces stay
+    /// possible, but it fails at runtime, on a user's machine, with no clue as to
+    /// why. So every DLL that could not be examined is recorded and reported, and
+    /// finding nothing is a named, actionable error rather than an
+    /// <see cref="ArgumentOutOfRangeException"/> from a later index. Note that a
+    /// trimmed or single-file publish removes the assemblies this walks, and would
+    /// break here first.
+    /// </para>
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// No implementation was found, listing what was scanned and what was skipped.
+    /// </exception>
     public static IList<IUserInterface> LoadInterfaces(IMain main)
     {
         var implementors = new List<IUserInterface>();
-        var dir = new DirectoryInfo(Settings.BasePath); 
+        var directory = new DirectoryInfo(Settings.BasePath);
         var userInterfaceType = typeof(IUserInterface);
-            
-        foreach (var file in dir.GetFiles("*.dll")) //loop through all dll files in directory
+
+        var scanned = new List<string>();
+        var skipped = new List<string>();
+
+        foreach (var file in directory.GetFiles("*.dll"))
         {
-            Assembly currentAssembly;
+            scanned.Add(file.Name);
             try
             {
-                var name = AssemblyName.GetAssemblyName(file.FullName);
-                currentAssembly = Assembly.Load(name);
+                var assembly = Assembly.Load(AssemblyName.GetAssemblyName(file.FullName));
+                implementors.AddRange(assembly.GetTypes()
+                    .Where(type => type != userInterfaceType
+                                   && userInterfaceType.IsAssignableFrom(type)
+                                   && !type.IsAbstract)
+                    .Select(type => Activator.CreateInstance(type, main))
+                    .OfType<IUserInterface>());
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                continue;
+                // A native or unmanaged DLL sitting in the output directory is the
+                // ordinary case and is not worth alarming anyone about, but it is
+                // recorded so that it appears if the scan ends up finding nothing.
+                skipped.Add($"{file.Name}: {e.GetType().Name}: {e.Message}");
             }
-
-            implementors.AddRange(currentAssembly.GetTypes()
-                .Where(t => t != userInterfaceType && userInterfaceType.IsAssignableFrom(t) && !t.IsAbstract)
-                .Select(x => Activator.CreateInstance(x, main))
-                .OfType<IUserInterface>());
         }
-        return implementors.ToArray();
+
+        if (implementors.Count != 0)
+        {
+            return implementors.ToArray();
+        }
+
+        throw new InvalidOperationException(
+            $"No {nameof(IUserInterface)} implementation was found in '{Settings.BasePath}', so there " +
+            "is no interface to render the game with. This normally means the interface assemblies " +
+            "were not copied next to the executable, or that a trimmed/single-file publish removed " +
+            $"them.{Environment.NewLine}" +
+            $"Scanned {scanned.Count} assemblies: {string.Join(", ", scanned)}{Environment.NewLine}" +
+            (skipped.Count == 0
+                ? "None were skipped."
+                : $"Skipped {skipped.Count}:{Environment.NewLine}  {string.Join($"{Environment.NewLine}  ", skipped)}"));
     }
 
+    /// <summary>
+    /// Picks the interface that serves <paramref name="path"/>, falling back to the
+    /// first ruleset's interface and then to the first interface discovered.
+    /// </summary>
     public static IUserInterface GetInterface(string path, IList<IUserInterface> interfaces, Ruleset[] ruleSets)
     {
+        if (interfaces.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"GetInterface was called with no interfaces. {nameof(LoadInterfaces)} should have " +
+                "failed before this point.");
+        }
+
         foreach (var ruleSet in ruleSets)
         {
             if (ruleSet.Paths.Contains(path))
