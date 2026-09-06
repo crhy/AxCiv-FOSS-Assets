@@ -26,57 +26,18 @@
     <content_attribute id="violence-cartoon">moderate</content_attribute>
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
+  <!--
+    Only releases from 0.1.0 onward are listed. AppStream orders releases by
+    version, not by document order, so the pre-0.1.0 betas (0.1.0-beta.1 through
+    0.7.2-beta.1) outranked 0.1.0 and software centres reported the newest of
+    them as the current version. Those releases remain on GitHub Releases and in
+    git history; this file describes the 0.1.x line only.
+  -->
   <releases>
     <release version="0.1.0" date="2026-09-05">
       <description>
         <p>The first release built for Linux, Windows and macOS together, and the first that is not a beta.</p>
         <p>Roads and railways are painted art rather than drawn lines, and connect correctly to each of a tile's eight neighbours. The city window is finished in the same stone as the rest of the interface instead of flat grey. The project has been separated from its upstream fork: the solution, the projects, the engine namespace and the save directory all carry the rhYciv name, and saves written by earlier builds are migrated on first launch. Every change is now checked by continuous integration on all three platforms.</p>
-      </description>
-    </release>
-    <release version="0.7.2-beta.1" date="2026-09-05">
-      <description>
-        <p>Units could get stuck where nothing would move them and nothing would select them, from three separate faults: an automated settler whose move was refused kept its order and spent no movement, so it chose the same blocked square every turn forever; a unit blocked on the next square of a GoTo was handed back with the order still set, so ending the turn came straight back and offered it again; and the map switched to unit-moving mode even when the unit had been refused. Blocked moves were also silent, and now say why.</p>
-        <p>The city window has drawn medallions for food, gold, science, production and trade in place of the fourteen-pixel sprites it read out of the icon sheet, and the resource overlay on the city map is sized against the tile rather than a fixed multiple of whichever icon file it happened to load. Unit art in the window was blurry and drawn at a twentieth of its proper size, because the interface took the small classic sprite while applying the high-resolution art's scale to it. The shield box fills across before it fills down, so a ten-shield unit is one row of ten rather than ten rows of one. About shows the build version.</p>
-      </description>
-    </release>
-    <release version="0.7.1-beta.1" date="2026-09-05">
-      <description>
-        <p>Advances are sorted into Civilization II's four kinds - academic, applied, military and social - and each carries its own badge in the research list, replacing the flat coloured swatch that stood in for one. The categories themselves were guessed from keywords in an advance's name, leaving two thirds of them in catch-all buckets; they are an explicit table now, and eighty-three of the eighty-eight changed. The marker under the pointer is drawn at map resolution instead of a magnified 64x32 sprite inside an opaque square, and units in the city window are sized to their boxes and centred in them.</p>
-      </description>
-    </release>
-    <release version="0.7.0-beta.1" date="2026-09-05">
-      <description>
-        <p>Both ends of the game now end: eliminating every rival wins it, and losing your last unit loses it, neither of which the engine noticed before. Four more crashes are fixed, including a city starving during its owner's turn and the citizen row indexing a specialist list that had moved. Hurrying production with gold works, and switching what a city builds charges the ruleset's own penalty once a turn. The coastline is redrawn: a narrow beach that gives way to grass, a thin bright shelf, and deep water immediately beyond, instead of a broad flat band reaching half a tile out to sea. The research chooser can open the Civilopedia for a candidate advance, and About rhYciv opens.</p>
-      </description>
-    </release>
-    <release version="0.6.0-beta.1" date="2026-09-05">
-      <description>
-        <p>A playability pass driven by play-testing. Cities can finish what they build: rules costs are charged as shields rather than ten times that, so a Warrior takes ten turns at one shield a turn instead of a hundred. Civil disorder can be cleared from the city screen by making a citizen an entertainer, which nothing in the interface could do before. Hurrying production with gold works. Four crashes are fixed, among them a null scenario record that threw the first time any city changed hands, and a city starving during its owner's turn. The city screen is reorganised into the panels it is meant to have, its resource map draws the same terrain as the main map, and the food, shield and trade icons are no longer blank grey squares. Every civilisation now wears its Civilization II colour, and unit shields are drawn in it instead of black. A quick start entry drops straight into a Deity game as the Celts. Crashes now write a report naming the line.</p>
-      </description>
-    </release>
-    <release version="0.5.0-beta.1" date="2026-09-03">
-      <description>
-        <p>The Civilopedia is populated and readable in game for the first time: original descriptive copy for 251 entries covering every advance, unit, city improvement, wonder, terrain type and special resource, and government, plus a new Concepts section on terrain development and government strategy. Every figure in the text is cross-checked against the bundled ruleset, and the two data files the game reads are generated from a single source document that the quality gate keeps in step.</p>
-      </description>
-    </release>
-    <release version="0.4.0-beta.1" date="2026-09-03">
-      <description>
-        <p>Seamless high-resolution terrain: the painted terrain diamonds now blend edge to edge with no visible tile borders, soft transitions between terrain types, a procedural shoreline with surf and rocks in place of the legacy coast stipple, high-resolution special-resource art, and crisp map overlays when zoomed in. Event prompts are rewritten in original prose and shown as large, centred, legible panels. Also adds Great Library and Darwin's Voyage advance grants, a stone-panel interface pass, an F10 screenshot hotkey, a fix for a crash when founding a city, and a formula-level Civilization II parity audit.</p>
-      </description>
-    </release>
-    <release version="0.3.0-beta.1" date="2026-09-01">
-      <description>
-        <p>Painted isometric terrain art for every terrain type and most special resources, working city-improvement production bonuses (Factory and the power plants), a disband-unit command, and a ranked Civilization II gameplay-parity backlog.</p>
-      </description>
-    </release>
-    <release version="0.2.0-beta.1" date="2026-08-31">
-      <description>
-        <p>First runtime-standalone beta with bundled rules, cities, interface atlases, and replacement art.</p>
-      </description>
-    </release>
-    <release version="0.1.0-beta.1" date="2026-08-31">
-      <description>
-        <p>First public Flatpak beta for gameplay, interface, and performance testing.</p>
       </description>
     </release>
   </releases>
