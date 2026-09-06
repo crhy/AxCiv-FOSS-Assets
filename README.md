@@ -15,7 +15,9 @@ for downstream forks. rhYciv is an independent project and is not affiliated
 with or endorsed by Take-Two Interactive, 2K, Firaxis, MicroProse, or any other
 publisher of the Civilization series.
 
-![Fusion Power artwork](RaylibUI/FOSSart/Advances/fusionpower.jpg)
+![The map screen: Celtic territory at turn 101, with coastline, resources and wildlife](website/screenshot-map.jpg)
+
+*The map screen. Terrain, resources and wildlife are all replacement art; no commercial game files are used.*
 
 ## Gameplay scope
 
@@ -106,6 +108,10 @@ locally is what CI will say. Flatpak instructions are in
 - Hold `Shift`: preview unit, road, or trade-route paths
 - `Shift` + right click: move eligible units of the active type
 - `Ctrl` + `Alt` + arrows: brightness/saturation; Page Up/Down: gamma; Home: reset
+
+![Fusion Power advance artwork](RaylibUI/FOSSart/Advances/fusionpower.jpg)
+
+*Advance artwork. Every shipped asset has a row in [ASSET-MANIFEST.tsv](ASSET-MANIFEST.tsv) recording its author and licence.*
 
 ## Forking and licensing
 
