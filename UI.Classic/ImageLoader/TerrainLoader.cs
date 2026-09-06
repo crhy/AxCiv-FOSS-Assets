@@ -185,6 +185,11 @@ namespace RhyCiv.UI.Classic.ImageLoader
                 roadGraphics.Levels[1, i] = MapIndexChange((BitmapStorage)active.PicSources["railroad"][i], index, active);
             }
 
+            if (fossTerrainApplied)
+            {
+                ApplyFossConnectionArt(terrain, roadGraphics);
+            }
+
             terrain.ImprovementsMap.Add(ImprovementTypes.Irrigation, new ImprovementGraphic
             {
                 Levels = new[,]
@@ -374,6 +379,91 @@ namespace RhyCiv.UI.Classic.ImageLoader
             }
 
             return variants;
+        }
+
+        /// <summary>
+        /// Connection sprite order for <see cref="ImprovementGraphic.Levels"/>: slot
+        /// 0 is the isolated stub drawn when a tile has no neighbour carrying the
+        /// improvement, and slots 1-8 follow the neighbour order in
+        /// <c>MapNavigationFunctions.Neighbours</c>, which MapImage indexes as
+        /// <c>neighbour + 1</c>.
+        /// </summary>
+        private static readonly string[] FossConnectionNames =
+            ["iso", "ne", "e", "se", "s", "sw", "w", "nw", "n"];
+
+        private static readonly (int Level, string Directory, string Stem)[] FossConnectionSets =
+        [
+            (0, "Roads", "road"),
+            (1, "Railroads", "railroad")
+        ];
+
+        /// <summary>
+        /// Replaces the road and railroad connection sprites with the painted art.
+        /// Both levels are replaced independently: if only one of the two sets is on
+        /// disk, the other keeps the generated rosettes rather than the tile losing
+        /// its roads entirely.
+        /// </summary>
+        private static void ApplyFossConnectionArt(TerrainSet terrain, ImprovementGraphic roadGraphics)
+        {
+            foreach (var (level, directory, stem) in FossConnectionSets)
+            {
+                var sprites = LoadFossConnectionSprites(terrain, directory, stem);
+                if (sprites == null)
+                {
+                    continue;
+                }
+
+                for (var slot = 0; slot < sprites.Length; slot++)
+                {
+                    roadGraphics.Levels[level, slot] = sprites[slot];
+                }
+            }
+        }
+
+        private static IImageSource[]? LoadFossConnectionSprites(TerrainSet terrain, string directory, string stem)
+        {
+            var sprites = new IImageSource[FossConnectionNames.Length];
+            for (var slot = 0; slot < FossConnectionNames.Length; slot++)
+            {
+                var path = FindFossOverlayPath(directory, $"{stem}_{FossConnectionNames[slot]}.png");
+                if (path == null)
+                {
+                    return null;
+                }
+
+                var composed = ComposeConnectionTile(terrain, path);
+                if (composed == null)
+                {
+                    return null;
+                }
+
+                sprites[slot] = new MemoryStorage(composed.Value,
+                    $"FossConnection-{stem}-{FossConnectionNames[slot]}-{terrain.RenderScale}");
+            }
+
+            return sprites;
+        }
+
+        /// <summary>
+        /// Scales connection art to fill the whole tile rectangle.
+        /// <para>
+        /// Unlike <see cref="ComposeOverlayTile"/>, this must not letterbox or
+        /// bottom-align: the art is painted in the tile's own diamond space, where
+        /// every spoke starts at the tile centre and ends on a specific corner or
+        /// edge midpoint. Shifting or insetting it would move those endpoints and
+        /// the halves drawn by two adjacent tiles would no longer meet.
+        /// </para>
+        /// </summary>
+        private static Image? ComposeConnectionTile(TerrainSet terrain, string path)
+        {
+            var art = Images.LoadImageFromFile(path).Image;
+            if (art.Width <= 1 || art.Height <= 1)
+            {
+                return null;
+            }
+
+            art.Resize(terrain.TileWidth * terrain.RenderScale, terrain.TileHeight * terrain.RenderScale);
+            return art;
         }
 
         /// <summary>

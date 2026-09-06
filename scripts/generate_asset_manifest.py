@@ -86,6 +86,10 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
         generator = "none"
         if "/People/" in f"/{relative}":
             generator = "scripts/prepare_people_sheet.py"
+        elif "/Overlays/Roads/" in f"/{relative}" or "/Overlays/Railroads/" in f"/{relative}":
+            # Connection spokes are cut from the straight-through road and rail
+            # pieces by their own script, not the general texture cleaner.
+            generator = "scripts/prepare_road_overlays.py"
         elif "/Units/" in f"/{relative}" or "/Cities/" in f"/{relative}" or "/Flags/" in f"/{relative}" or "/Overlays/" in f"/{relative}":
             generator = "scripts/prepare_custom_textures.py"
         elif "/Terrain/" in f"/{relative}" and relative.endswith(".png"):

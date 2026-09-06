@@ -9,6 +9,24 @@ Provenance rules in [ASSET-PROVENANCE.md](ASSET-PROVENANCE.md) apply to every
 item here: new art is project-original or generated from project-original
 inputs, never traced or sampled from a commercial installation.
 
+## Done: road and railroad connections
+
+Painted spokes now replace the generator-drawn rosettes. The renderer composites
+one sprite per connected neighbour, so the art is eight half-spokes running from
+the tile centre to the point where each neighbour is reached -- the midpoint of
+the shared edge for a neighbour that shares one, the diamond corner for a
+neighbour that only touches at a corner -- plus an isolated stub for a tile with
+no connections. `scripts/prepare_road_overlays.py` cuts them from the
+straight-through pieces in `~/rhYcivtextures/roads` and `~/rhYcivtextures/railroads`
+into `FOSSart/Terrain/Overlays/{Roads,Railroads}`, and `TerrainLoader.ApplyFossConnectionArt`
+composes them at the working tile size, so they keep their detail at high zoom
+instead of being routed through the 64x32 sheet cell.
+
+The procedural fallback in `build_standalone_sheets.draw_connections` was fixed
+at the same time: it had been drawing the full four-way rosette into all nine
+sprite slots, so a tile with a single neighbour showed roads running off every
+side. It now draws one spoke per slot, in the renderer's neighbour order.
+
 ## Done in this pass
 
 Painted isometric base diamonds now feed `Standalone/TERRAIN1.png` for **every
@@ -47,8 +65,8 @@ oasis alt, grassland lawn/conifer variants, oil-slick alt, yak, seal, crab.
 
 ## Missing — overlays and markers (generator-drawn vector, not painted)
 
-- `TERRAIN1`: irrigation, farmland, mine, pollution, grassland shield, goody
-  hut, and the road / railroad connection rosettes.
+- `TERRAIN1`: irrigation, farmland, mine, pollution, grassland shield and goody
+  hut. The road and railroad connection sprites are now painted -- see below.
 - `TERRAIN2`: coast, river-mouth, and ocean-edge transition strokes.
 - `Standalone/ICONS.png`: every map-UI glyph (view toggles, zoom controls,
   progress rings, resource swatches, category chips) is drawn procedurally in
