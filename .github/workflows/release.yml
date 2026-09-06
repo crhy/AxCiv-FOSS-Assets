@@ -204,12 +204,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
+          set -euo pipefail
           tag="${{ github.event.inputs.tag || github.ref_name }}"
-          find artifacts -type f \( -name '*.zip' -o -name '*.tar.gz' -o -name '*.flatpak' \) \
-            -exec mv {} . \;
-          ls -la *.zip *.tar.gz *.flatpak 2>/dev/null || true
+
+          # Collect into an array rather than globbing on the command line: an
+          # unmatched glob would be passed through literally and fail the release
+          # after twenty minutes of platform builds.
+          mapfile -t assets < <(find artifacts -type f \
+            \( -name '*.zip' -o -name '*.tar.gz' -o -name '*.flatpak' \) | sort)
+
+          printf 'asset: %s\n' "${assets[@]}"
+          if [ "${#assets[@]}" -lt 5 ]; then
+            echo "::error::Expected 5 artifacts (4 desktop + flatpak), found ${#assets[@]}"
+            exit 1
+          fi
+
           gh release create "$tag" \
             --title "rhYciv ${{ needs.version.outputs.version }}" \
             --notes-file docs/RELEASE-NOTES.md \
             --verify-tag \
-            *.zip *.tar.gz *.flatpak
+            "${assets[@]}"
