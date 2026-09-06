@@ -1,8 +1,8 @@
 # rhYciv
 
 rhYciv is a standalone, high-resolution turn-based empire strategy game. It
-preserves the map, city, research, production, diplomacy, and tactical-unit
-rhythm of 1990s 4X games while deliberately focusing the endgame on conquest.
+preserves the map, city, research, production, and tactical-unit rhythm of 1990s
+4X games while deliberately focusing the endgame on conquest.
 
 No commercial game installation, CD, DLL, font, rules file, artwork, or save
 file is required. The repository is designed to be a redistribution-ready base
@@ -15,7 +15,8 @@ publisher of the Civilization series.
 ## Gameplay scope
 
 - Explore a procedurally generated world, found cities, improve terrain, trade,
-  research technologies, build wonders, and conduct diplomacy and war.
+  research technologies, build wonders, and wage war.
+- Diplomacy and multiplayer are not implemented yet.
 - New games default to conquest-only victory and permanent elimination.
 - Spaceship victory, the throne room, animated advisors/high council, and wonder
   movies are outside the streamlined product scope.
@@ -27,19 +28,45 @@ publisher of the Civilization series.
 
 See [the gameplay guide](docs/GAMEPLAY.md) for systems, differences, and controls.
 
-## Install the Flatpak beta
+## Download
 
-Download `rhYciv-v0.3.0-beta.1-x86_64.flatpak` from the
-[latest GitHub release](https://github.com/crhy/rhYciv/releases/latest), then:
+**Version 0.1.0 runs on Linux, Windows and macOS.** Get it from the
+[latest release](https://github.com/crhy/rhYciv/releases/latest):
+
+| Platform | Download | Run |
+|---|---|---|
+| Windows x64 | `rhYciv-0.1.0-win-x64.zip` | unzip, run `RaylibUI.exe` |
+| macOS (Apple silicon) | `rhYciv-0.1.0-osx-arm64.zip` | unzip, drag `rhYciv.app` to Applications |
+| macOS (Intel) | `rhYciv-0.1.0-osx-x64.zip` | as above |
+| Linux x64 | `rhYciv-0.1.0-linux-x64.tar.gz` | extract, run `./RaylibUI` |
+| Linux Flatpak | `rhYciv-0.1.0-x86_64.flatpak` | see below |
+
+Nothing else is required. Each download carries its own .NET runtime and the
+complete art set.
 
 ```sh
-flatpak install --user ./rhYciv-v0.3.0-beta.1-x86_64.flatpak
+flatpak install --user ./rhYciv-0.1.0-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
-The current public beta predates the clean-room font and fixture conversion.
-Build the current `master` branch for the fully audited asset set until the next
-release is published.
+### The builds are unsigned
+
+Signing certificates cost money this project does not have yet, so macOS and
+Windows will both try to stop an unsigned download.
+
+On **macOS**, the app will be reported as damaged or from an unidentified
+developer. It is neither; that is the quarantine flag. Clear it with:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/rhYciv.app
+```
+
+On **Windows**, choose *More info* then *Run anyway* at the SmartScreen prompt.
+
+Saves, logs and settings live in `rhYciv/` under the platform data directory:
+`~/.local/share` on Linux, `%LOCALAPPDATA%` on Windows, and
+`~/Library/Application Support` on macOS. Builds before 0.1.0 wrote to `AxxCiv/`;
+that directory is migrated on first launch and left in place.
 
 ## Build and run
 
@@ -58,8 +85,10 @@ Run the complete validation gate before distributing a build:
 ./scripts/quality_gate.sh
 ```
 
-The gate verifies every attributed asset, restores dependencies, builds the
-solution, and runs the test suite. Flatpak instructions are in
+The gate verifies every attributed asset and the Civilopedia text, asserts that
+the build version matches the AppStream metainfo, then restores, builds and
+tests. The same script runs in CI on Linux, Windows and macOS, so what it says
+locally is what CI will say. Flatpak instructions are in
 [packaging/flatpak/README.md](packaging/flatpak/README.md).
 
 ## Essential controls

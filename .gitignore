@@ -25,3 +25,5 @@ test.log
 
 # Generator scratch output (scripts/generate_coastline_iso.py)
 /build/
+
+/website/dist/

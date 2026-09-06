@@ -27,6 +27,12 @@
     <content_attribute id="violence-fantasy">moderate</content_attribute>
   </content_rating>
   <releases>
+    <release version="0.1.0" date="2026-09-05">
+      <description>
+        <p>The first release built for Linux, Windows and macOS together, and the first that is not a beta.</p>
+        <p>Roads and railways are painted art rather than drawn lines, and connect correctly to each of a tile's eight neighbours. The city window is finished in the same stone as the rest of the interface instead of flat grey. The project has been separated from its upstream fork: the solution, the projects, the engine namespace and the save directory all carry the rhYciv name, and saves written by earlier builds are migrated on first launch. Every change is now checked by continuous integration on all three platforms.</p>
+      </description>
+    </release>
     <release version="0.7.2-beta.1" date="2026-09-05">
       <description>
         <p>Units could get stuck where nothing would move them and nothing would select them, from three separate faults: an automated settler whose move was refused kept its order and spent no movement, so it chose the same blocked square every turn forever; a unit blocked on the next square of a GoTo was handed back with the order still set, so ending the turn came straight back and offered it again; and the map switched to unit-moving mode even when the unit had been refused. Blocked moves were also silent, and now say why.</p>
