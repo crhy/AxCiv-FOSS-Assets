@@ -12,6 +12,9 @@ using Model.Core.Mapping;
 using Model.Core.Player;
 using Model.Core.Units;
 
+// `Path` here is the engine's unit movement path, not System.IO.Path, which
+// ImplicitUsings now brings into scope.
+using Path = RhyCiv.Engine.Units.Path;
 namespace RhyCiv.Engine
 {
     public partial class Game

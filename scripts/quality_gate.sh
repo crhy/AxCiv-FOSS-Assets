@@ -21,6 +21,9 @@ python3 scripts/generate_asset_manifest.py --check
 echo "Verifying Civilopedia text..."
 python3 scripts/build_civilopedia_text.py --check
 
+echo "Checking that the build version and the AppStream version agree..."
+python3 scripts/check_version_consistency.py
+
 echo "Restoring dependencies..."
 "$dotnet_cmd" restore rhYciv.sln
 
