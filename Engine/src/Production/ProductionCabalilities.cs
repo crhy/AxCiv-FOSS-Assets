@@ -57,9 +57,25 @@ namespace RhyCiv.Engine.Production
                 .Where(p => p.Improvement.Effects.ContainsKey(effect)).Select(o => o.Improvement).FirstOrDefault();
         }
 
+        /// <summary>
+        /// What this city may build, in a stable order: units first, then
+        /// improvements, each in the order the ruleset declares them.
+        /// <para>
+        /// The underlying list is built once at game start and appended to by
+        /// AddItems as advances are discovered, so without this an item unlocked
+        /// mid-game landed at the bottom of a list of sixty entries rather than in
+        /// its usual place. A player who researched Ceremonial Burial looked where
+        /// the Temple belongs, did not find it, and reasonably concluded it could
+        /// not be built.
+        /// </para>
+        /// </summary>
         public static IList<IProductionOrder> GetAllowedProductionOrders(City thisCity)
         {
-            return _availableProducts[thisCity.OwnerId].Where(i => i.IsValidBuild(thisCity)).ToList();
+            return _availableProducts[thisCity.OwnerId]
+                .Where(i => i.IsValidBuild(thisCity))
+                .OrderBy(i => i.Type)
+                .ThenBy(i => i.ImageIndex)
+                .ToList();
         }
     }
 }

@@ -26,6 +26,11 @@ carry a shorter, user-facing summary of each release; this file is the full reco
   of staying asleep for a player who has stopped thinking about it. A unit that was
   already healthy when told to sleep is unaffected and stays asleep until woken,
   and a fortified unit stays fortified. (#96)
+- The Change Production list keeps a stable order: units first, then improvements,
+  each in the order the ruleset declares them. The list is appended to as advances
+  are discovered, so an item unlocked mid-game used to land at the bottom of sixty
+  entries rather than in its usual place — which is how a buildable Temple went
+  unnoticed after Ceremonial Burial. (#91)
 
 ### Changed
 
