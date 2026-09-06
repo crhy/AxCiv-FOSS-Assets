@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine;
-using Civ2engine.Terrains;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Terrains;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global

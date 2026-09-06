@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Model.Core;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public class PopupBoxReader(Dictionary<string, PopupBox> boxes) : IFileHandler
     {

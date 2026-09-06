@@ -1,7 +1,8 @@
-using Civ2engine;
-using Civ2engine.Production;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Production;
 using Model;
 using Model.Controls;
+using Model.Images;
 using Model.Interface;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Fonts;
@@ -14,7 +15,7 @@ using RaylibUtils;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 using Model.Core.Cities;
 
 namespace RaylibUI.RunGame.GameControls.CityControls;
@@ -242,6 +243,54 @@ public class CityWindow : BaseDialog
         _ => new Color(84, 82, 78, 255)
     };
 
+    /// <summary>
+    /// Tiles the painted stone wallpaper across a panel.
+    /// <para>
+    /// The window chrome, the menu bar and the side panels are all cut from the
+    /// painted slate sheet, but the city window's own panels were flat grey, so
+    /// the busiest screen in the game was the one that looked unfinished. Using
+    /// the same wallpaper the rest of the interface uses keeps them consistent
+    /// without introducing another asset.
+    /// </para>
+    /// Falls back to the flat fill when there is no wallpaper -- a plain Civ II
+    /// install, where the painted sheet is not present.
+    /// </summary>
+    private static void DrawStoneFill(Rectangle rect)
+    {
+        // The panel has to be filled opaquely, not left transparent: the classic
+        // city backdrop this window composites underneath is not part of the
+        // standalone art set, and what shows through where it is missing is not
+        // something to put on screen. So this covers the same area the flat grey
+        // used to -- just with the painted stone the rest of the interface is
+        // made of, instead of a colour that matched nothing.
+        var tiles = ImageUtils.Wallpaper?.Inner;
+        var source = tiles is { Length: > 0 } ? tiles[0] : ImageUtils.InnerWallpaper;
+        if (source.Width <= 0 || source.Height <= 0)
+        {
+            // A plain Civ II install with no painted sheet: keep the flat fill.
+            Graphics.DrawRectangleRec(rect, FillFor(PanelTone.Neutral));
+            return;
+        }
+
+        // TextureCache owns the handle and drops it on a ruleset or interface
+        // change, so this does not add a texture that has to be unloaded here.
+        var stone = TextureCache.GetImage(new MemoryStorage(source, "CityPanelStone"));
+
+        Graphics.BeginScissorMode((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
+        for (var y = rect.Y; y < rect.Y + rect.Height; y += stone.Height)
+        {
+            for (var x = rect.X; x < rect.X + rect.Width; x += stone.Width)
+            {
+                Graphics.DrawTexture(stone, (int)x, (int)y, Color.White);
+            }
+        }
+        Graphics.EndScissorMode();
+
+        // Sink the panel slightly against the window face, which is what the
+        // bevel drawn around it is there to suggest.
+        Graphics.DrawRectangleRec(rect, new Color(0, 0, 0, 30));
+    }
+
     public override void Draw(bool pulse)
     {
         if (BackgroundImage != null)
@@ -270,7 +319,17 @@ public class CityWindow : BaseDialog
                 box.Width * _scale,
                 box.Height * _scale);
 
-            Graphics.DrawRectangleRec(rect, FillFor(tone));
+            if (tone == PanelTone.Neutral)
+            {
+                DrawStoneFill(rect);
+            }
+            else
+            {
+                // Land and Build keep a flat colour: those two panels are read as
+                // data (food store, production progress) and a texture behind them
+                // would fight the bars drawn on top.
+                Graphics.DrawRectangleRec(rect, FillFor(tone));
+            }
 
             // A shallow bevel: dark along the top and left, light along the bottom
             // and right, so the panel reads as sunk into the window.

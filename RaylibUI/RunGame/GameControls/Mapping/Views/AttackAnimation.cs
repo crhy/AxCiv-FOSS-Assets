@@ -1,6 +1,6 @@
 using System.Numerics;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
 using RaylibUI.RunGame.GameControls.Mapping.Views.ViewElements;
 using Model;
 using Model.ImageSets;

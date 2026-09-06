@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model.Constants;
 using Model.Core.Advances;
 using Model.Core.Cities;
@@ -10,7 +10,7 @@ using Model.Core.Mapping;
 using Model.Core.Units;
 using Path = System.IO.Path;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public class RulesParser : IFileHandler
     {

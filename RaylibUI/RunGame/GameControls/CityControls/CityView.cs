@@ -1,5 +1,5 @@
-﻿using Civ2engine;
-using Civ2engine.Enums;
+﻿using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
 using Model;
 using Model.Controls;
 using Model.Images;

@@ -13,21 +13,33 @@ else
     exit 1
 fi
 
+if command -v python3 >/dev/null 2>&1; then
+    python_cmd="$(command -v python3)"
+elif command -v python >/dev/null 2>&1; then
+    python_cmd="$(command -v python)"
+else
+    echo "Error: Python 3 was not found in PATH." >&2
+    exit 1
+fi
+
 cd "$repo_root"
 
 echo "Auditing redistributable assets..."
-python3 scripts/generate_asset_manifest.py --check
+"$python_cmd" scripts/generate_asset_manifest.py --check
 
 echo "Verifying Civilopedia text..."
-python3 scripts/build_civilopedia_text.py --check
+"$python_cmd" scripts/build_civilopedia_text.py --check
+
+echo "Checking that the build version and the AppStream version agree..."
+"$python_cmd" scripts/check_version_consistency.py
 
 echo "Restoring dependencies..."
-"$dotnet_cmd" restore Civ2clone.sln
+"$dotnet_cmd" restore rhYciv.sln
 
 echo "Building solution..."
-"$dotnet_cmd" build Civ2clone.sln --no-restore
+"$dotnet_cmd" build rhYciv.sln --no-restore
 
 echo "Running tests..."
-"$dotnet_cmd" test Civ2clone.sln --no-build
+"$dotnet_cmd" test rhYciv.sln --no-build
 
 echo "Quality gate passed."

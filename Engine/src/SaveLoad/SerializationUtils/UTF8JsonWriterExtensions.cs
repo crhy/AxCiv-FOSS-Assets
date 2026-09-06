@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace Civ2engine.SaveLoad.SerializationUtils;
+namespace RhyCiv.Engine.SaveLoad.SerializationUtils;
 
 public static class Utf8JsonWriterExtensions
 {

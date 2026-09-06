@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Cities;
 using Model.Core.Mapping;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 /// <summary>
 /// The final citizen attitudes produced by Civ II's five happiness passes.

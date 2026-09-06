@@ -1,11 +1,11 @@
-using Civ2engine;
-using Civ2engine.IO;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
 using Model;
 using Model.Core;
 using Model.InterfaceActions;
 using Model.Interface;
 using RaylibUtils;
-using Civ2;
+using RhyCiv.UI.Classic;
 using Model.Controls;
 using Raylib_CSharp.Rendering;
 using Raylib_CSharp.Colors;
@@ -61,7 +61,7 @@ public class MainMenu : BaseScreen
                 
                 var initialDirectory = Directory.Exists(fileAction.FileInfo.InitialDirectory)
                     ? fileAction.FileInfo.InitialDirectory
-                    : Settings.Civ2Path;
+                    : Settings.GameDataPath;
                 ShowDialog(new FileDialog(MainWindow,fileAction.FileInfo.Title, initialDirectory, (fileName) =>
                 {
                     return fileAction.FileInfo.Filters.Any(filter => filter.IsMatch(fileName));
@@ -115,7 +115,7 @@ public class MainMenu : BaseScreen
     private void HandleButtonClick(string button, int selectedIndex, IList<bool>? checkboxStates,
         IDictionary<string, string>? textBoxValues)
     {
-        if (_currentAction.Name == Civ2.Dialogs.MainMenu.Title && button == Labels.Cancel)
+        if (_currentAction.Name == RhyCiv.UI.Classic.Dialogs.MainMenu.Title && button == Labels.Cancel)
         {
             _shutdownApp();
             return;

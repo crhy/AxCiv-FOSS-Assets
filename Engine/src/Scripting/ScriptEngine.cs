@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Civ2engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Scripting.ScriptObjects;
 using Model.Core;
 using Model.Core.Player;
 using Neo.IronLua;
 
-namespace Civ2engine.Scripting
+namespace RhyCiv.Engine.Scripting
 {
     public class ScriptEngine : IDisposable, IScriptEngine
     {

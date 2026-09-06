@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public static class TextFileParser
     {

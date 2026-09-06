@@ -1,11 +1,11 @@
-using Civ2engine.MapObjects;
-using Civ2engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Scripting.ScriptObjects;
 using Model.Core.Mapping;
 using Model.Core.Units;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public abstract class UnitAction(Unit baseUnit, string type, Game game, Tile? tile = null)
 {

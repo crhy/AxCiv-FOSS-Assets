@@ -1,7 +1,7 @@
-using Civ2engine.UnitActions;
+using RhyCiv.Engine.UnitActions;
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public class BuildCityAction(Unit baseUnit, Game game, string? name = null) : FullTurnAction(baseUnit, "BuildCity", game)
 {

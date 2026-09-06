@@ -1,11 +1,11 @@
 using Model.Input;
 using System.Numerics;
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
-using Civ2engine.Terrains;
-using Civ2engine.UnitActions;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Terrains;
+using RhyCiv.Engine.UnitActions;
 using Model.Core;
 using Model.Controls;
 using Model.Core.Mapping;
@@ -15,7 +15,7 @@ using Raylib_CSharp.Transformations;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUI.RunGame.GameControls;
 using RaylibUI.RunGame.GameControls.Mapping.Views;
-using Path = Civ2engine.Units.Path;
+using Path = RhyCiv.Engine.Units.Path;
 
 namespace RaylibUI.RunGame.GameModes;
 

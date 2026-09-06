@@ -1,0 +1,59 @@
+using RhyCiv.UI.Classic.Dialogs.Scenario;
+using RhyCiv.UI.Classic.Rules;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
+using Model.Controls;
+using Model.InterfaceActions;
+
+namespace RhyCiv.UI.Classic.Dialogs.NewGame;
+
+public class SelectGender : BaseDialogHandler
+{
+    public const string Title = "GENDER";
+
+    public SelectGender() : base(Title, 0, -0.03)
+    {
+    }
+
+    public override IInterfaceAction Show(ClassicInterface activeInterface)
+    {
+        var config = Initialization.ConfigObject;
+
+        if (config.IsScenario) 
+            Dialog.Options.SelectedId = config.CivGenders[config.ScenPlayerCivId] == 0 ? 0 : 1;
+
+        return base.Show(activeInterface);
+    }
+
+    public override IInterfaceAction HandleDialogResult(DialogResult result,
+        Dictionary<string, ICivDialogHandler> civDialogHandlers, ClassicInterface civ2Interface)
+    {
+        var config = Initialization.ConfigObject;
+
+        if (result.SelectedButton == Labels.Cancel)
+        {
+            return civDialogHandlers[DifficultyHandler.Title].Show(civ2Interface);
+        }
+
+        config.Gender = result.SelectedIndex;
+
+        if (config.IsScenario)
+        {
+            return civDialogHandlers[EnterName.Title].Show(civ2Interface);
+        }
+        else
+        {
+            if (config.QuickStart)
+            {
+                var randomTribe = config.Random.ChooseFrom(config.Rules.Leaders);
+                config.PlayerCiv = Initialization.MakeCivilization(config, randomTribe, true, randomTribe.Color);
+
+                Initialization.CompleteConfig();
+                return civDialogHandlers[Init.Title].Show(civ2Interface);
+            }
+
+            Initialization.ConfigObject.MapTask = MapGenerator.GenerateMap(Initialization.ConfigObject);
+            return civDialogHandlers[SelectTribe.Title].Show(civ2Interface);
+        }
+    }
+}

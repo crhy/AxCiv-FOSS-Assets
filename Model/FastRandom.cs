@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     /// <summary>
     /// An implementation of a Lahmer random number generator 

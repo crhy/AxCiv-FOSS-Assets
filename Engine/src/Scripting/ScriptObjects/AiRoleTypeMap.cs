@@ -1,4 +1,4 @@
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 public class AiRoleTypeMap
 {

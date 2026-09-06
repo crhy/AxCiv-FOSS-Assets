@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Units;
 using Model.Core;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.Events
+namespace RhyCiv.Engine.Events
 {
     public class UnitInfo : IUnit
     {

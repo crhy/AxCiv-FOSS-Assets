@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model;
 using Model.Constants;
 using Model.Controls;
@@ -10,7 +10,7 @@ using Model.Core.Cities;
 using Model.Core.GameRules;
 using Model.Images;
 
-namespace Civ2engine.Production
+namespace RhyCiv.Engine.Production
 {
     public class UnitProductionOrder(UnitDefinition unitDefinition, int index) : ProductionOrder(unitDefinition.Cost,
         ItemType.Unit,

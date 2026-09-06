@@ -1,7 +1,7 @@
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public class FortifyAction(Unit baseUnit, Game game) : FullTurnAction(baseUnit, "Fortify", game)
 {

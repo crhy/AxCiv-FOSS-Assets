@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 using Model.Core;
 using Model.Core.Player;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting
+namespace RhyCiv.Engine.Scripting
 {
     /// <summary>
     /// This class exposes the popup functionality to LUA script in a TOTPP compatible way

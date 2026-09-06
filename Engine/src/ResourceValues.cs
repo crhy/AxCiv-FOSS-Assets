@@ -1,4 +1,4 @@
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public class ResourceValues
 {

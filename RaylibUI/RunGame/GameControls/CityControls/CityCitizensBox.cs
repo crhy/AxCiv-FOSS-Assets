@@ -1,8 +1,8 @@
-using Civ2engine;
+using RhyCiv.Engine;
 using Model;
 using Model.Controls;
 using Model.Core.Cities;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Raylib_CSharp.Collision;
 using Raylib_CSharp.Interact;
 using RaylibUI.BasicTypes.Controls;

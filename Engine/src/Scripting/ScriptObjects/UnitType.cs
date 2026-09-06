@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.UnitActions;
-using Civ2engine.Units;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core.Advances;
 using Model.Core.Mapping;
@@ -12,7 +12,7 @@ using Model.Core.Units;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 public class UnitType(UnitDefinition unitDefinition, Game game)
 {

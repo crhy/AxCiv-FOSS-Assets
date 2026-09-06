@@ -2,23 +2,23 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.Scripting.ScriptObjects;
-using Civ2engine.Scripting.UI;
-using Civ2engine.UnitActions;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Scripting.UI;
+using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.Units;
 using Model.Core;
 using Model.Core.Mapping;
 using Model.Core.Player;
 using Model.Core.Units;
-using UnitType = Civ2engine.Scripting.ScriptObjects.UnitType;
+using UnitType = RhyCiv.Engine.Scripting.ScriptObjects.UnitType;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting
+namespace RhyCiv.Engine.Scripting
 {
     public class CivScripts
     {

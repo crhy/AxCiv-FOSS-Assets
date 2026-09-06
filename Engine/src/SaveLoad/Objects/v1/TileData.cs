@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Civ2engine.Terrains;
+using RhyCiv.Engine.Terrains;
 using Model.Core.Mapping;
 
-namespace Civ2engine.SaveLoad;
+namespace RhyCiv.Engine.SaveLoad;
 
 public class TileData
 {

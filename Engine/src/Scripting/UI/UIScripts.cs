@@ -6,7 +6,7 @@ using Model.Core.Player;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting.UI
+namespace RhyCiv.Engine.Scripting.UI
 {
     public class UIScripts
     {

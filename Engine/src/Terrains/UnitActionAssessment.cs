@@ -1,4 +1,4 @@
-namespace Civ2engine.Terrains
+namespace RhyCiv.Engine.Terrains
 {
     public class UnitActionAssessment
     {

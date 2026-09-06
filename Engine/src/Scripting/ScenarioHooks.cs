@@ -1,14 +1,14 @@
 using System;
-using Civ2engine.Events;
-using Civ2engine.Scripting.ScriptObjects;
-using Civ2engine.Units;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Units;
 using Model.Core.Units;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting
+namespace RhyCiv.Engine.Scripting
 {
     public class ScenarioHooks(Game game)
     {

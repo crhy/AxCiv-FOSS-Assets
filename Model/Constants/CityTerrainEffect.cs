@@ -1,4 +1,4 @@
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class CityTerrainEffect

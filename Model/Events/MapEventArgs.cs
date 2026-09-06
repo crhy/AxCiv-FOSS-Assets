@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model.Core.Mapping;
 
-namespace Civ2engine.Events
+namespace RhyCiv.Engine.Events
 {
     public class MapEventArgs : EventArgs
     {

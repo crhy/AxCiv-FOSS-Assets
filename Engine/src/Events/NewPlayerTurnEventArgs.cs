@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Civ2engine.Events
+namespace RhyCiv.Engine.Events
 {
     public class NewPlayerTurnEventArgs : EventArgs
     {

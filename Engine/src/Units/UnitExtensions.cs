@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.Units;
+namespace RhyCiv.Engine.Units;
 
 public static class UnitExtensions
 {

@@ -26,7 +26,7 @@ incomplete row.
 - Freeciv-derived `RULES.txt` and `CITY.txt`: GPL-2.0-or-later, pinned to commit
   `94beba8bc7d6512e485ae35103bdb8fb55babb4f`.
 - Liberation Sans/Serif: unmodified OFL-1.1 fonts with the complete license in
-  `Civ2/Fonts/OFL-1.1.txt`.
+  `UI.Classic/Fonts/OFL-1.1.txt`.
 - Two small upstream AxxCiv UI atlases: GPL-3.0-only, with introduction commits
   and author attribution recorded per file.
 

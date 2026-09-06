@@ -146,16 +146,65 @@ def build_cities() -> None:
     sheet.save(OUT / "CITIES.png", optimize=True)
 
 
-def draw_connections(draw: ImageDraw.ImageDraw, origin: tuple[int, int], railroad: bool = False) -> None:
+# Where each connection sprite ends on the 64x32 diamond, in slot order: slot 0
+# is the isolated stub and slots 1-8 follow the neighbour order in
+# MapNavigationFunctions.Neighbours (NE, E, SE, S, SW, W, NW, N). A neighbour
+# that shares an edge is reached at that edge's midpoint; one that only touches a
+# corner is reached at the corner.
+_N, _E, _S, _W = (32, 0), (63, 16), (32, 31), (0, 16)
+_MID = lambda a, b: ((a[0] + b[0]) // 2, (a[1] + b[1]) // 2)
+CONNECTION_ENDS = [
+    None,                # slot 0: isolated, drawn as a stub rather than a spoke
+    _MID(_N, _E),        # NE
+    _E,                  # E
+    _MID(_E, _S),        # SE
+    _S,                  # S
+    _MID(_S, _W),        # SW
+    _W,                  # W
+    _MID(_W, _N),        # NW
+    _N,                  # N
+]
+
+
+def draw_connections(draw: ImageDraw.ImageDraw, origin: tuple[int, int], slot: int,
+                     railroad: bool = False) -> None:
+    """Draw one connection sprite: a single spoke from the tile centre outwards.
+
+    The renderer composites one of these per connected neighbour, so each slot
+    must carry only its own spoke. Drawing the full rosette into every slot -- as
+    this did before -- meant a tile with one neighbour showed roads running off
+    all four sides, and a tile with four neighbours drew the same rosette four
+    times over.
+
+    This is the fallback for when the painted spokes in
+    FOSSart/Terrain/Overlays/{Roads,Railroads} are not on disk; TerrainLoader
+    replaces these whenever that art is present.
+    """
     x, y = origin
     color = (212, 212, 205, 255) if railroad else (123, 81, 45, 255)
     width = 3 if railroad else 2
     center = (x + 32, y + 16)
-    for edge in ((x, y + 16), (x + 32, y), (x + 63, y + 16), (x + 32, y + 31)):
-        draw.line((center, edge), fill=color, width=width)
+
+    end = CONNECTION_ENDS[slot]
+    if end is None:
+        # Isolated: a short stub through the centre, not a spoke to an edge.
+        draw.line((x + 26, y + 16, x + 38, y + 16), fill=color, width=width)
+        return
+
+    finish = (x + end[0], y + end[1])
+    draw.line((center, finish), fill=color, width=width)
     if railroad:
-        for offset in range(-24, 25, 8):
-            draw.line((x + 32 + offset, y + 11, x + 32 + offset, y + 21), fill=(55, 55, 52, 255), width=1)
+        # Sleepers laid across the spoke, perpendicular to its run.
+        span_x, span_y = finish[0] - center[0], finish[1] - center[1]
+        length = max(abs(span_x), abs(span_y), 1)
+        across = (-span_y / length, span_x / length)
+        steps = max(int(length / 5), 1)
+        for step in range(1, steps + 1):
+            px = center[0] + span_x * step / steps
+            py = center[1] + span_y * step / steps
+            draw.line((px - across[0] * 3, py - across[1] * 3,
+                       px + across[0] * 3, py + across[1] * 3),
+                      fill=(55, 55, 52, 255), width=1)
 
 
 # --- Tile overlays -----------------------------------------------------------
@@ -264,9 +313,9 @@ def build_terrain1() -> None:
                               outline=(40, 40, 40, 255), width=1)
             sheet.alpha_composite(resource, (x, 1 + 33 * row))
 
-    for column in range(9):
-        draw_connections(draw, (1 + 65 * column, 363), False)
-        draw_connections(draw, (1 + 65 * column, 397), True)
+    for slot in range(9):
+        draw_connections(draw, (1 + 65 * slot, 363), slot, False)
+        draw_connections(draw, (1 + 65 * slot, 397), slot, True)
 
     # The six 64x32 slots in this column are read by the renderer as irrigation,
     # farmland, mine, pollution, the grassland shield and a goody hut. They each

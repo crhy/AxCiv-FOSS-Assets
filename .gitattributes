@@ -1,0 +1,32 @@
+# Line endings must be identical on every platform.
+#
+# ASSET-MANIFEST.tsv records a SHA-256 and a byte count for every shipped asset,
+# and scripts/quality_gate.sh verifies them. Several of those assets are text
+# (RULES.txt, CITY.txt, Game.txt, describe.txt, pedia.txt). If a Windows
+# checkout rewrote them to CRLF, every one of those hashes would be wrong and
+# the gate would fail on Windows and only on Windows -- which is exactly what
+# happened the first time CI ran on the matrix.
+#
+# So the working tree gets LF everywhere. Nothing here is a Windows-only file
+# that needs CRLF.
+* text=auto eol=lf
+
+# Never touched: git must not apply any line-ending or diff transformation to
+# binary assets.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.ttf   binary
+*.otf   binary
+*.wav   binary
+*.ogg   binary
+*.mp3   binary
+*.zip   binary
+*.flatpak binary
+*.xcf   binary
+
+# ASSET-MANIFEST.tsv is deliberately left diffable. It is generated and long,
+# but it is also the provenance record for every shipped asset, and a reviewer
+# needs to see exactly which rows a change adds or alters.

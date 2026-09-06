@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
-using Civ2engine.Production;
-using Civ2engine.Scripting;
-using Civ2engine.Scripting.ScriptObjects;
-using Civ2engine.Scripting.UnitActions;
-using Civ2engine.UnitActions;
-using Civ2engine.Units;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Production;
+using RhyCiv.Engine.Scripting;
+using RhyCiv.Engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Scripting.UnitActions;
+using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Advances;
@@ -22,7 +22,7 @@ using Model.Core.Production;
 using Model.Core.Units;
 using Neo.IronLua;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public class AiPlayer(int difficultyLevel, Civilization civilization, Tile tile0, Game game, AiInterface ai)
         : IPlayer

@@ -1,4 +1,4 @@
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 
 namespace Model.Core.Mapping
 {

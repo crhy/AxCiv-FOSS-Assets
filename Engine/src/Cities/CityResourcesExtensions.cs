@@ -3,9 +3,9 @@ using System.Linq;
 using System.Security.AccessControl;
 using Model.Constants;
 using Model.Core.Cities;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public static class CityResourcesExtensions
 {

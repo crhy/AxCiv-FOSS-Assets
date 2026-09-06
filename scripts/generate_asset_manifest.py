@@ -17,7 +17,7 @@ FREECIV_URL = f"https://github.com/freeciv/freeciv/tree/{FREECIV_COMMIT}/data/ci
 
 def attribution(relative: str) -> tuple[str, str, str, str, str]:
     """Return kind, author, SPDX license, source, and generator for a path."""
-    if relative.startswith("Civ2/Fonts/"):
+    if relative.startswith("UI.Classic/Fonts/"):
         return (
             "third-party-font",
             "Google Corporation and Red Hat, Inc.; Liberation Fonts contributors",
@@ -25,7 +25,7 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             "https://github.com/liberationfonts/liberation-fonts",
             "unmodified upstream font",
         )
-    if relative == "Civ2/buttons.png":
+    if relative == "UI.Classic/buttons.png":
         return (
             "upstream-project-original",
             "Reuben Evans",
@@ -33,7 +33,7 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             "https://github.com/axx0/Civ2-clone/commit/652bb54eb2a8f984ff6d0ec208e67dd4f17bd7db",
             "none",
         )
-    if relative == "Civ2/explorer_icons.png":
+    if relative == "UI.Classic/explorer_icons.png":
         return (
             "upstream-project-original",
             "axx0/Civ2-clone contributors",
@@ -86,6 +86,10 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
         generator = "none"
         if "/People/" in f"/{relative}":
             generator = "scripts/prepare_people_sheet.py"
+        elif "/Overlays/Roads/" in f"/{relative}" or "/Overlays/Railroads/" in f"/{relative}":
+            # Connection spokes are cut from the straight-through road and rail
+            # pieces by their own script, not the general texture cleaner.
+            generator = "scripts/prepare_road_overlays.py"
         elif "/Units/" in f"/{relative}" or "/Cities/" in f"/{relative}" or "/Flags/" in f"/{relative}" or "/Overlays/" in f"/{relative}":
             generator = "scripts/prepare_custom_textures.py"
         elif "/Terrain/" in f"/{relative}" and relative.endswith(".png"):
@@ -107,15 +111,20 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
 
 def assets() -> list[Path]:
     files = [
-        REPOSITORY / "Civ2" / "buttons.png",
-        REPOSITORY / "Civ2" / "explorer_icons.png",
-        *sorted((REPOSITORY / "Civ2" / "Fonts").glob("*.ttf")),
+        REPOSITORY / "UI.Classic" / "buttons.png",
+        REPOSITORY / "UI.Classic" / "explorer_icons.png",
+        *sorted((REPOSITORY / "UI.Classic" / "Fonts").glob("*.ttf")),
     ]
     files.extend(
-        path for path in sorted(FOSS_ART.rglob("*"))
+        path for path in FOSS_ART.rglob("*")
         if path.is_file() and path.name not in {"SOURCES.md", "ASSET-MANIFEST.tsv"}
     )
-    return sorted(files)
+    # Sort on the POSIX relative path, not on the Path objects. Comparing Path
+    # objects uses the platform's own rules, and on Windows those are
+    # case-insensitive: "Overlays" sorts after "ocean.jpg" there and before it on
+    # Linux. That reorders the manifest rows, so the committed file looked stale
+    # on Windows and only on Windows.
+    return sorted(files, key=lambda path: path.relative_to(REPOSITORY).as_posix())
 
 
 def render() -> str:
@@ -143,12 +152,12 @@ def audit(content: str) -> list[str]:
     for number, row in enumerate(rows, 2):
         if len(row) != 8 or any(not value for value in row):
             errors.append(f"manifest line {number} is incomplete")
-    if any((REPOSITORY / "Core.Tests" / "TestFiles").glob("*.sav")):
-        errors.append("legacy save fixtures are present in Core.Tests/TestFiles")
+    if any((REPOSITORY / "RhyCiv.Tests" / "TestFiles").glob("*.sav")):
+        errors.append("legacy save fixtures are present in RhyCiv.Tests/TestFiles")
     forbidden_fonts = ("ARIAL.TTF", "times-new-roman.ttf", "times-new-roman-bold.ttf")
     for name in forbidden_fonts:
-        if (REPOSITORY / "Civ2" / name).exists():
-            errors.append(f"commercial font remains: Civ2/{name}")
+        if (REPOSITORY / "UI.Classic" / name).exists():
+            errors.append(f"commercial font remains: UI.Classic/{name}")
     return errors
 
 

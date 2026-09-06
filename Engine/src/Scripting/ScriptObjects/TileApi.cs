@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.MapObjects;
-using Civ2engine.Scripting.ScriptObjects;
-using Civ2engine.Units;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Units;
 using Model.Core.Cities;
 using Model.Core.Mapping;
 using Model.Core.Units;
@@ -13,7 +13,7 @@ using Neo.IronLua;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting;
+namespace RhyCiv.Engine.Scripting;
 
 public class TileApi(Tile tile, Game game)
 {

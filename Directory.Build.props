@@ -2,10 +2,70 @@
   <!--
     One place to set the version. The About dialog reads it back at runtime from
     the assembly's informational version, so a release only has to be bumped here
-    and in packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml.
+    and in packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml. scripts/quality_gate.sh
+    asserts that those two agree.
   -->
   <PropertyGroup>
     <VersionPrefix>0.7.2</VersionPrefix>
     <VersionSuffix>beta.1</VersionSuffix>
+  </PropertyGroup>
+
+  <!--
+    The language and compiler contract for every project. CONTRIBUTING.md used to
+    ask contributors to "target .NET 9 and preserve nullable annotations"; setting
+    it here is what actually enforces that, and it stops a new project being added
+    on an older framework or with nullable quietly switched off.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!--
+    Reproducible output: identical sources produce identical assemblies, and paths
+    embedded in CI builds are normalised rather than leaking the runner's layout.
+  -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!--
+    Warnings are errors, so no new warning class can be introduced unnoticed.
+
+    WarningsNotAsErrors below is the burn-down list: every rule the tree was
+    already violating when this gate was switched on. It is a ratchet, not a
+    permanent exemption - delete a code from the list once its last occurrence is
+    fixed, and it can never come back. Do not add to it.
+
+    Baseline when the gate landed (177 warnings, deforking commit 6072553c):
+      CS8602 70   dereference of a possibly null reference
+      CS8618 43   non-nullable field/property uninitialised on exit from constructor
+      CS8604 12   possible null reference argument
+      CS8601  9   possible null reference assignment
+      SYSLIB0050 8  legacy binary serialisation API is obsolete
+      CS9107  8   parameter captured into state as well as passed to the base type
+      CS8603  8   possible null reference return
+      CS8625  3   cannot convert null literal to non-nullable reference
+      CS8605  3   unboxing a possibly null value
+      CS8622  2   nullability of reference types in a delegate signature
+      CS0219  2   variable assigned but never used
+      CS9124  1   parameter captured into state as well as passed to the base type
+      CS8629  1   nullable value type may be null
+      CS8620  1   argument cannot be used due to reference type nullability
+      CS8619  1   nullability of reference types in value does not match
+      CS8524  1   switch expression does not handle some inputs
+      CS0169  1   field is never used
+      CS0067  1   event is never used
+  -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>
+      CS8602;CS8618;CS8604;CS8601;SYSLIB0050;CS9107;CS8603;CS8625;CS8605;CS8622;CS0219;CS9124;CS8629;CS8620;CS8619;CS8524;CS0169;CS0067
+    </WarningsNotAsErrors>
   </PropertyGroup>
 </Project>

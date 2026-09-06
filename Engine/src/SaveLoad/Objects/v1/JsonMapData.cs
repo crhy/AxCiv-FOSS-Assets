@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.MapObjects;
-using Civ2engine.SaveLoad.SerializationUtils;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.SaveLoad.SerializationUtils;
 using Model.Core;
 using Model.Core.Mapping;
 
-namespace Civ2engine.SaveLoad;
+namespace RhyCiv.Engine.SaveLoad;
 
 public class JsonMapData
 {

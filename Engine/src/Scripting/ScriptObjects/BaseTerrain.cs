@@ -1,6 +1,6 @@
 using Model.Core.Mapping;
 
-namespace Civ2engine.Scripting;
+namespace RhyCiv.Engine.Scripting;
 
 public class BaseTerrain(Terrain terrain, int map)
 {

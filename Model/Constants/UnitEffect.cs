@@ -1,4 +1,4 @@
-namespace Civ2engine.Units;
+namespace RhyCiv.Engine.Units;
 
 public enum UnitEffect
 {

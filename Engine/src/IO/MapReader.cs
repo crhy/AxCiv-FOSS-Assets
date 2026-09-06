@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public static class MapReader
     {

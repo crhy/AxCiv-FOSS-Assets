@@ -1,0 +1,56 @@
+name: CI
+
+# Runs scripts/quality_gate.sh -- the same script README.md tells contributors to
+# run -- rather than a duplicated list of steps here. If CI and the local gate
+# were separate they would drift, and "it works locally" would become real.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a PR makes the previous run's answer irrelevant, so cancel it.
+# Never cancel on master: those runs are the record of what each commit did.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality-gate:
+    name: Quality gate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # One platform failing is a fact worth having about the others, so let the
+      # rest of the matrix finish.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # Actions are pinned to commit SHAs, not floating tags: a tag can be moved
+      # to point at different code. This project is careful about the provenance
+      # of its art; its CI supply chain deserves the same.
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      # bash is present on all three runners, so the one gate script serves the
+      # whole matrix. It verifies the asset manifest and Civilopedia text, checks
+      # the build version against the AppStream metainfo, then restores, builds
+      # and tests.
+      - name: Run the quality gate
+        shell: bash
+        run: scripts/quality_gate.sh

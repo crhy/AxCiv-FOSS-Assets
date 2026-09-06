@@ -13,7 +13,7 @@ is neither required nor bundled.
 - Commercial Arial and Times New Roman files were deleted. Unmodified Liberation
   Sans/Serif and the full OFL-1.1 license are bundled instead.
 - Legacy-derived `RULES.TXT`, `Labels.txt`, classic `.sav`, and converted JSON
-  fixture were deleted from `Core.Tests`.
+  fixture were deleted from `RhyCiv.Tests`.
 - Tests create a seeded game from standalone data and serialize it in memory.
 - Every shipped media/data asset has a path, hash, author, SPDX license, source,
   and generation field in `ASSET-MANIFEST.tsv`.
@@ -28,7 +28,7 @@ Readers and adapters for user-supplied classic saves/rules may remain. Some
 compile-disabled DLL extraction tables and legacy model fields also remain for
 format compatibility. They contain code/data structure knowledge, not bundled
 commercial binaries or art. A downstream fork that does not want import support
-can remove `Engine/src/OriginalSaves`, `Civ2TOT`, and the dormant model fields in
+can remove `Engine/src/LegacySaves`, `UI.CompatAlternate`, and the dormant model fields in
 a versioned save-format migration.
 
 ## Release rule

@@ -1,19 +1,19 @@
-﻿using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
-using Civ2engine.Terrains;
-using Civ2engine.Units;
+﻿using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Terrains;
+using RhyCiv.Engine.Units;
 using Model.Core;
 using Model.Core.Units;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Advances;
+using RhyCiv.Engine.Advances;
 using Model.Constants;
 using Model.Core.GameRules;
 using Model.Core.Mapping;
 
-namespace Civ2engine.UnitActions
+namespace RhyCiv.Engine.UnitActions
 {
     public static class MovementFunctions
     {

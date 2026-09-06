@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.Production;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Production;
 using Model.Core.Cities;
 using Model.Core.Player;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public static class GameTurn
     {

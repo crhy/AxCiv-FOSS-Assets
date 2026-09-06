@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Terrains;
+using RhyCiv.Engine.Terrains;
 using Model.Core.Mapping;
 
-namespace Civ2engine.MapObjects;
+namespace RhyCiv.Engine.MapObjects;
 
 public static class PlayerTileExtensions
 {

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model.Core;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.MapObjects
+namespace RhyCiv.Engine.MapObjects
 {
     public static class TileExtensions
     {

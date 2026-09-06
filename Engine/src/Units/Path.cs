@@ -1,6 +1,6 @@
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.UnitActions;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.UnitActions;
 using Model.Core;
 using Model.Core.Units;
 using System;
@@ -9,7 +9,7 @@ using System.Linq;
 using Model.Core.GameRules;
 using Model.Core.Mapping;
 
-namespace Civ2engine.Units;
+namespace RhyCiv.Engine.Units;
 
 public class Path
 {

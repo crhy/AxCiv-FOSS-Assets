@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Model.Core.Mapping;
 
-namespace Civ2engine.MapObjects;
+namespace RhyCiv.Engine.MapObjects;
 
 public static class MapNavigationFunctions
 {

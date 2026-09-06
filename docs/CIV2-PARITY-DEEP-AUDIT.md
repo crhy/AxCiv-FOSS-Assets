@@ -39,7 +39,7 @@ case · **missing** Civ II mechanic absent · **faithful** matches Civ II.
 ### Fixed since this audit was written
 
 C1 through C4 were all corrected in the 2026-09-04 Civilopedia-parity pass, and
-each carries a regression test in `Core.Tests/Units/UnitExtensionsTests.cs`. That
+each carries a regression test in `RhyCiv.Tests/Units/UnitExtensionsTests.cs`. That
 pass also found one divergence this audit missed: **City Walls added their effect
 value rather than multiplying by it**, so the shipped 200 gave a garrison a flat
 +2 defence instead of ×3. It is fixed in the same place as C3. The summary table

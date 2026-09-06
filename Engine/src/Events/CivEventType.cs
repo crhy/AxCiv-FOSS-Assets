@@ -1,4 +1,4 @@
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     internal enum CivEventType
     {

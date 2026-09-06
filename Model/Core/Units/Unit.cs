@@ -1,6 +1,6 @@
-﻿using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Units;
+﻿using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core.Cities;
 using Model.Core.Mapping;

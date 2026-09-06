@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
 using Model.Constants;
 using Model.Core;
-using Civ2engine.Production;
+using RhyCiv.Engine.Production;
 using Model.Core.Cities;
 using Model.Core.Production;
 using Model.Core.GameRules;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public static class CityExtensions
     {

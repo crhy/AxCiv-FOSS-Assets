@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
-using Civ2engine;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
 using Model;
 using Model.Core.Mapping;
 using Model.Interface;
@@ -272,7 +272,7 @@ namespace RaylibUI
                     return sets;
                 })
                 .ToArray();
-            ActiveInterface = Helpers.GetInterface(Settings.Civ2Path, Interfaces, AllRuleSets);
+            ActiveInterface = Helpers.GetInterface(Settings.GameDataPath, Interfaces, AllRuleSets);
             return new MainMenu(this,() => _shouldClose= true, StartGame, Soundman);
         }
 

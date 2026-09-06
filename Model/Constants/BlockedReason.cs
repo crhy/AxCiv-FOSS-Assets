@@ -1,4 +1,4 @@
-namespace Civ2engine.Enums
+namespace RhyCiv.Engine.Enums
 {
     public enum BlockedReason
     {
