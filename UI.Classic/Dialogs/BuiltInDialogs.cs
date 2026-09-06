@@ -39,6 +39,8 @@ internal static class BuiltInDialogs
         Add(dialogs, "USESEED", "Map resources", ["Randomize resources", "Keep map resources"], ["OK", "Cancel"]);
         Add(dialogs, "USESTARTLOC", "Starting locations", ["Randomize starts", "Keep map starts"], ["OK", "Cancel"]);
         Add(dialogs, "FAILEDTOLOAD", "Could not load map", [], ["OK"]);
+        AddMessage(dialogs, "FAILEDTOLOADGAME", "Could not load game",
+            ["%STRING0 could not be loaded.", "", "%STRING1"]);
         Add(dialogs, "LOADOK", "Game loaded", [], ["Continue"]);
         Add(dialogs, "SCENCHOSECIV", "Choose a civilization", [], ["OK", "Cancel"]);
         Add(dialogs, "SCENINTRO", "Scenario", [], ["Continue"]);
@@ -55,6 +57,26 @@ internal static class BuiltInDialogs
         Text = [],
         Options = []
     };
+
+    /// <summary>
+    /// A plain message box: body text and an OK button, with no options to choose
+    /// between. The Add overload above always leaves Text empty, because the
+    /// dialogs it builds get their wording from GAME.TXT.
+    /// </summary>
+    private static void AddMessage(Dictionary<string, PopupBox> dialogs, string name, string title,
+        IList<string> text)
+    {
+        if (dialogs.ContainsKey(name)) return;
+        dialogs[name] = new PopupBox
+        {
+            Name = name,
+            Width = 440,
+            Title = title,
+            Button = [Labels.Ok],
+            Options = [],
+            Text = text
+        };
+    }
 
     private static void AddRandom(Dictionary<string, PopupBox> dialogs, string name, string title, IList<string> options) =>
         Add(dialogs, name, title, options, ["Random", "OK", "Cancel"]);

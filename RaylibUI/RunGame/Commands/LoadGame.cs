@@ -25,8 +25,23 @@ public class LoadGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
             return false;
         }
         
-        RhyCiv.Engine.SaveLoad.LoadGame.LoadFrom(arg, GameScreen.Main);
-        
+        try
+        {
+            RhyCiv.Engine.SaveLoad.LoadGame.LoadFrom(arg, GameScreen.Main);
+        }
+        catch (Exception e)
+        {
+            // A save can be unreadable for reasons that are not the player's fault
+            // and are not worth ending the session over -- a file truncated by an
+            // interrupted write, or one from an older format. Nothing caught this,
+            // so picking a bad save in the load dialog took the whole game down.
+            Console.Error.WriteLine($"Could not load '{arg}': {e}");
+            GameScreen.CloseDialog(_loadDialog);
+            GameScreen.ShowPopup("FAILEDTOLOADGAME",
+                replaceStrings: [Path.GetFileName(arg), e.Message]);
+            return true;
+        }
+
         GameScreen.CloseDialog(_loadDialog);
         return true;
     }

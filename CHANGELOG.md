@@ -9,6 +9,14 @@ carry a shorter, user-facing summary of each release; this file is the full reco
 
 ### Fixed
 
+- **A failed save no longer destroys the save it was replacing.** Saving opened the
+  destination file with `FileMode.Truncate`, emptying an existing save before
+  writing a byte of the new one, so anything that threw part way through
+  serialisation left a fragment where a finished game had been. Saves are now built
+  beside the target and moved into place only once complete.
+- **Loading an unreadable save reports an error instead of crashing.** Nothing
+  caught a failure on the load path, so choosing a corrupt or truncated save in the
+  load dialog took the whole game down.
 - **Crash on saving.** Once the barbarians had founded or taken a city, every save
   threw an IndexOutOfRangeException and the game was lost. The saved per-tribe city
   counter is a fixed-width array indexed by TribeId; the barbarians carry TribeId
