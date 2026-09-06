@@ -6,9 +6,9 @@ using Model.Core.Cities;
 using Model.Core.GameRules;
 using Model.Core.Production;
 using Model.Images;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 
-namespace Civ2engine.Production
+namespace RhyCiv.Engine.Production
 {
     public abstract class ProductionOrder : IProductionOrder
     {

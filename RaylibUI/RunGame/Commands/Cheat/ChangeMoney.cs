@@ -1,7 +1,7 @@
 using Model.Input;
 using System.Diagnostics;
-using Civ2engine;
-using Civ2engine.IO;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
 using Microsoft.VisualBasic.CompilerServices;
 using Model.Core;
 using Model.Interface;

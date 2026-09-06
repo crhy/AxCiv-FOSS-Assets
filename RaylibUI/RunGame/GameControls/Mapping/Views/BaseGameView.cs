@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Xml.Serialization;
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
 using Model;
 using Model.ImageSets;
 using Model.Interface;

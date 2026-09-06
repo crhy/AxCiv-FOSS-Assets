@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Model.Core;
 
-namespace Civ2engine.Statistics
+namespace RhyCiv.Engine.Statistics
 {
     public static class Power
     {

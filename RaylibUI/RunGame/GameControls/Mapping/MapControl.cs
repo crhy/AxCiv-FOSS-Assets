@@ -1,9 +1,9 @@
 using System.Numerics;
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
 using Raylib_CSharp.Transformations;
 using Raylib_CSharp.Textures;
 using RaylibUI.BasicTypes.Controls;
@@ -18,7 +18,7 @@ using Raylib_CSharp.Fonts;
 using Raylib_CSharp.Interact;
 using RaylibUI.Controls;
 using Raylib_CSharp.Collision;
-using Path = Civ2engine.Units.Path;
+using Path = RhyCiv.Engine.Units.Path;
 
 namespace RaylibUI.RunGame.GameControls.Mapping;
 

@@ -1,9 +1,9 @@
-using Civ2engine;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
 using Model.Controls;
 using Model.Controls.Civilopedia;
 using Model.Core;

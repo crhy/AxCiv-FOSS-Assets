@@ -1,8 +1,8 @@
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.MapObjects;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public abstract class TileAction(Unit baseUnit, Tile tile, string type, Game game) : UnitAction(baseUnit, type, game, tile)
 {

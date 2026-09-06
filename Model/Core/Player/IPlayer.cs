@@ -1,6 +1,6 @@
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Events;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
 using Model.Core.Advances;
 using Model.Core.Cities;
 using Model.Core.GoodyHuts.Outcomes;

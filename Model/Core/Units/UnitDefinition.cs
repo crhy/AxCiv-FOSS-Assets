@@ -1,5 +1,5 @@
-using Civ2engine.Enums;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 
 namespace Model.Core.Units

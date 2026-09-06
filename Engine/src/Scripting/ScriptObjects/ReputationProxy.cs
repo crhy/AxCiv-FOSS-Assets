@@ -1,7 +1,7 @@
 using System;
 using Model.Core;
 
-namespace Civ2engine.Scripting;
+namespace RhyCiv.Engine.Scripting;
 
 public class ReputationProxy(Civilization civ)
 {

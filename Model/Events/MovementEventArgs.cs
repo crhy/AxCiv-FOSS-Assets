@@ -1,9 +1,9 @@
-using Civ2engine.Enums;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Units;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.Events
+namespace RhyCiv.Engine.Events
 {
     public class MovementEventArgs : UnitEventArgs
     {

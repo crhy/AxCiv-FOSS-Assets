@@ -1,4 +1,4 @@
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using JetBrains.Annotations;
 using Model;
 using Model.Constants;

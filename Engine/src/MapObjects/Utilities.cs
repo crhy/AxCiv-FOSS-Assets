@@ -1,7 +1,7 @@
 using System;
 using Model.Core.Mapping;
 
-namespace Civ2engine.MapObjects
+namespace RhyCiv.Engine.MapObjects
 {
     public static class Utilities
     {

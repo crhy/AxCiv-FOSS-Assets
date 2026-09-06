@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Scripting;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Scripting;
 using Model.Core.Units;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 public class UnitApi
 {

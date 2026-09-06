@@ -1,0 +1,62 @@
+using RhyCiv.UI.Classic.Rules;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
+using Model.Controls;
+using Model.Core;
+using Model.Interface;
+using Model.InterfaceActions;
+using RaylibUtils;
+
+namespace RhyCiv.UI.Classic.Dialogs.NewGame;
+
+public class SelectCityStyle : BaseDialogHandler
+{
+    public const string Title = "CUSTOMCITY";
+
+    public SelectCityStyle() : base(Title, -0.085, -0.03)
+    {
+    }
+
+    public override ICivDialogHandler UpdatePopupData(Dictionary<string, PopupBox> popups)
+    {
+        var res = base.UpdatePopupData(popups);
+
+        if (!res.Dialog.Button.Contains(Labels.Cancel))
+        {
+            res.Dialog.Button.Add(Labels.Cancel);
+        }
+        return res;
+    }
+
+    public override IInterfaceAction Show(ClassicInterface activeInterface)
+    {
+        Dialog.Options = new()
+        {
+            Icons = activeInterface.CityImages.Sets.Take(4).Select(i => i.Skip(6).First().Image).ToArray(),
+            SelectedId = Initialization.ConfigObject.PlayerCiv.CityStyle
+        };
+        Dialog.Options.Texts ??= Labels.Items[247..251];
+        return base.Show(activeInterface);
+    }
+
+    public override IInterfaceAction HandleDialogResult(DialogResult result,
+        Dictionary<string, ICivDialogHandler> civDialogHandlers, ClassicInterface civ2Interface)
+    {
+        if (result.SelectedButton == Labels.Cancel)
+        {
+            return civDialogHandlers[SelectGender.Title].Show(civ2Interface);
+        }
+        
+        Initialization.ConfigObject.PlayerCiv.CityStyle = result.SelectedIndex;
+
+        Initialization.CompleteConfig();
+
+        if (Initialization.ConfigObject.SelectComputerOpponents && Initialization.ConfigObject.Civilizations.Count <
+            Initialization.ConfigObject.NumberOfCivs)
+        {
+            return civDialogHandlers[SelectOpponent.Title].Show(civ2Interface);
+        }
+
+        return civDialogHandlers[Init.Title].Show(civ2Interface);
+    }
+}

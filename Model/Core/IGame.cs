@@ -1,5 +1,5 @@
-using Civ2engine;
-using Civ2engine.Enums;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
 using Model.Core.Cities;
 using Model.Core.GameRules;
 using Model.Core.Mapping;

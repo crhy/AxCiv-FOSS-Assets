@@ -1,6 +1,6 @@
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public class NothingAction(Unit baseUnit, Game game) : FullTurnAction(baseUnit, "Nothing", game)
 {

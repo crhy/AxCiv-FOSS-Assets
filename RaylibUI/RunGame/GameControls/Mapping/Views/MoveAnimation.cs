@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
 
 namespace RaylibUI.RunGame.GameControls.Mapping.Views;
 

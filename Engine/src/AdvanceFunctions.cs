@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.Production;
-using Civ2engine.Terrains;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Production;
+using RhyCiv.Engine.Terrains;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Advances;
 
-namespace Civ2engine.Advances
+namespace RhyCiv.Engine.Advances
 {
     public static class AdvanceFunctions
     {

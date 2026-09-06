@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public class LabelLoader : IFileHandler
     {

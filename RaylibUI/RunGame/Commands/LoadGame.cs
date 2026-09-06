@@ -1,6 +1,6 @@
 using Model.Input;
-using Civ2engine;
-using Civ2engine.IO;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
 using Model.Controls;
 using Raylib_CSharp.Interact;
 
@@ -25,7 +25,7 @@ public class LoadGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
             return false;
         }
         
-        Civ2engine.SaveLoad.LoadGame.LoadFrom(arg, GameScreen.Main);
+        RhyCiv.Engine.SaveLoad.LoadGame.LoadFrom(arg, GameScreen.Main);
         
         GameScreen.CloseDialog(_loadDialog);
         return true;

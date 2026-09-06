@@ -1,4 +1,4 @@
-using Civ2engine;
+using RhyCiv.Engine;
 using Model;
 using Model.Controls;
 using Model.Core;
@@ -9,7 +9,7 @@ using Raylib_CSharp.Transformations;
 using RaylibUI.BasicTypes.Controls;
 using RaylibUtils;
 using System.Numerics;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 using Model.Core.Cities;
 using Model.Core.Mapping;
 

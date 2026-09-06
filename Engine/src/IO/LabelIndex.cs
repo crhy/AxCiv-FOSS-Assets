@@ -1,6 +1,6 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public enum LabelIndex
     {

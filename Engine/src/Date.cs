@@ -1,9 +1,9 @@
 ﻿using System;
-using Civ2engine.Enums;
-using Civ2engine.IO;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.IO;
 using Model.Core;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public class Date : IGameDate
 {

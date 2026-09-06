@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Engine\Core.csproj" />
+      <ProjectReference Include="..\Engine\RhyCiv.Engine.csproj" />
 		<ProjectReference Include="..\Model\Model.csproj" />
     </ItemGroup>
 

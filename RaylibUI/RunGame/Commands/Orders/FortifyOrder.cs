@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using Civ2engine.Enums;
-using Civ2engine.UnitActions;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.UnitActions;
 using JetBrains.Annotations;
 using Model;
 using Model.Constants;

@@ -39,7 +39,7 @@ flatpak run io.github.crhy.rhYciv
 The application stores saves under its private XDG data directory and requests
 no broad host-filesystem permission. The final package must contain `LICENSE`,
 `NOTICE.md`, `ASSET-MANIFEST.tsv`, `RaylibUI/FOSSart/Standalone/SOURCES.md`, and
-`Civ2/Fonts/OFL-1.1.txt`; inspect the exported file list before release.
+`UI.Classic/Fonts/OFL-1.1.txt`; inspect the exported file list before release.
 
 ## Updating NuGet sources
 

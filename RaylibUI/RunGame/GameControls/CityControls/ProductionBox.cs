@@ -1,6 +1,6 @@
-using Civ2engine;
-using Civ2engine.IO;
-using Civ2engine.Production;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.Production;
 using Model;
 using Model.Controls;
 using Model.Core.Cities;
@@ -145,7 +145,7 @@ public class ProductionBox : BaseControl
         var slotHeight = Math.Max(1, (int)Math.Round(ProductionIconSlotHeight * scale));
         FitIconInSlot(activeOrder.GetIcon(_active), slotWidth, slotHeight);
 
-        // IconLocation is already relative to the production box in Civ2Interface.
+        // IconLocation is already relative to the production box in ClassicInterface.
         _icon.Location = new(
             _properties.IconLocation.X * scale - _icon.Width / 2f,
             Math.Max(0, _properties.IconLocation.Y * scale - _icon.Height / 2f));

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using Civ2engine.Advances;
+using RhyCiv.Engine.Advances;
 using Model.Constants;
 using Model.Core.Advances;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting.ScriptObjects
+namespace RhyCiv.Engine.Scripting.ScriptObjects
 {
     public class Tech
     {

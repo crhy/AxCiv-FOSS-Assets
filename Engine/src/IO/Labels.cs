@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Model.Core.GameRules;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public static class Labels
     {

@@ -1,9 +1,9 @@
-using Civ2engine.MapObjects;
-using Civ2engine.Units;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Units;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 internal class GotoAction(Unit baseUnit, Tile tile, Game game) : TileAction(baseUnit, tile, "Goto", game)
 {

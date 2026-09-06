@@ -1,7 +1,7 @@
-using Civ2engine.Enums;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
-using Civ2engine.Terrains;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Terrains;
 using JetBrains.Annotations;
 using Model;
 using Model.Core;

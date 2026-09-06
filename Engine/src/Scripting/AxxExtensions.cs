@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Civ2engine.Enums;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core;
 using Model.Core.GameRules;
@@ -11,7 +11,7 @@ using Neo.IronLua;
 
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting
+namespace RhyCiv.Engine.Scripting
 {
     public class AxxExtensions
     {

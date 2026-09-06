@@ -1,12 +1,12 @@
 
-using Civ2engine;
+using RhyCiv.Engine;
 using Raylib_CSharp.Colors;
 using Raylib_CSharp.Images;
 
 namespace RaylibUI;
 
 /// <summary>
-/// This screen should be shown when there is no Civ2Path set to show a file dialog so the user cna set it
+/// This screen should be shown when there is no GameDataPath set to show a file dialog so the user cna set it
 /// </summary>
 public class GameFileLocatorScreen : BaseScreen
 {

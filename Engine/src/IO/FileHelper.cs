@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public static class FileHelper
     {

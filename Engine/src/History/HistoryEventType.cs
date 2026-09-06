@@ -1,4 +1,4 @@
-namespace Civ2engine.Advances
+namespace RhyCiv.Engine.Advances
 {
     public enum HistoryEventType
     {

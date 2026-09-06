@@ -1,8 +1,8 @@
 using System;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 using Model.Core;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public class Barbarians
 {

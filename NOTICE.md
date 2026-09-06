@@ -20,8 +20,8 @@ copyright notices, and this attribution information.
   `94beba8bc7d6512e485ae35103bdb8fb55babb4f`, licensed GPL-2.0-or-later.
 - Liberation Sans and Liberation Serif are unmodified Liberation Fonts releases
   licensed under SIL Open Font License 1.1. Copyright and license text are in
-  `Civ2/Fonts/OFL-1.1.txt`.
-- `Civ2/buttons.png` and `Civ2/explorer_icons.png` originated in the GPL-3.0
+  `UI.Classic/Fonts/OFL-1.1.txt`.
+- `UI.Classic/buttons.png` and `UI.Classic/explorer_icons.png` originated in the GPL-3.0
   AxxCiv/Civ2-clone codebase. Exact introduction commits and authors are pinned
   in the asset manifest.
 

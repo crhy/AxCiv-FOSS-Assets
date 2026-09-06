@@ -1,8 +1,8 @@
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.MapObjects;
 using Model.Core;
 using Model.Core.Mapping;
 
-namespace Civ2engine.Scripting;
+namespace RhyCiv.Engine.Scripting;
 
 public class TerrainApi(Tile tile)
 {

@@ -1,0 +1,65 @@
+using RhyCiv.UI.Classic.Dialogs.FileDialogs;
+using RhyCiv.UI.Classic.Dialogs.NewGame;
+using RhyCiv.UI.Classic.Rules;
+using RhyCiv.Engine;
+using RhyCiv.Engine.IO;
+using Model;
+using Model.Controls;
+using Model.Core;
+using Model.InterfaceActions;
+
+namespace RhyCiv.UI.Classic.Dialogs.Scenario;
+
+public class ScenChoseCiv : ICivDialogHandler
+{
+    public const string Title = "SCENCHOSECIV";
+
+    public string Name { get; } = Title;
+    public ICivDialogHandler UpdatePopupData(Dictionary<string, PopupBox> popups)
+    {
+        Dialog = new DialogElements(popups[Name])
+        {
+            Button = new List<string> { Labels.Ok, Labels.Cancel },
+            Title = " ",
+            Name = Title,
+            DialogPos = new Point(0, 0),
+        };
+        return this;
+    }
+
+    public DialogElements Dialog { get; private set; }
+
+    public IInterfaceAction HandleDialogResult(DialogResult result,
+        Dictionary<string, ICivDialogHandler> civDialogHandlers, ClassicInterface civ2Interface)
+    {
+        if (result.SelectedButton == Labels.Cancel)
+        {
+            return civDialogHandlers[LoadScenario.DialogTitle].Show(civ2Interface);
+        }
+
+        var boolPos = new int[Initialization.ConfigObject.CivsInPlay.Count(c => c)];
+        int count = 0;
+        for (int i = 0; i < Initialization.ConfigObject.CivsInPlay.Length; i++)
+        {
+            if (Initialization.ConfigObject.CivsInPlay[i])
+            {
+                boolPos[count] = i;
+                count++;
+            }
+        }
+        Initialization.ConfigObject.ScenPlayerCivId = boolPos[result.SelectedIndex + 1];
+
+        return civDialogHandlers["DIFFICULTY"].Show(civ2Interface);
+    }
+
+    public IInterfaceAction Show(ClassicInterface activeInterface)
+    {
+        //activeInterface.ScenTitleImage = 
+
+        Dialog.Options = new()
+        {
+            Texts = Enumerable.Range(0, 7).Where(i => Initialization.ConfigObject.CivsInPlay[i + 1]).Select(i => $"{Initialization.ConfigObject.CivNames[i + 1]} ({Initialization.ConfigObject.LeaderNames[i + 1]})").ToList()
+        };
+        return new MenuAction(Dialog);
+    }
+}

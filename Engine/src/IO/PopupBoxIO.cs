@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Model.Core;
 
-namespace Civ2engine.IO;
+namespace RhyCiv.Engine.IO;
 
 public static class PopupBoxIO
 {

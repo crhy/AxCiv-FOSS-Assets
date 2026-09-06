@@ -1,6 +1,6 @@
-﻿using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
+﻿using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
 using Model;
 using Model.Controls;
 using Model.Images;
@@ -13,7 +13,7 @@ using RaylibUI.Controls;
 using RaylibUtils;
 using System.IO;
 using System.Numerics;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 
 namespace RaylibUI;
 

@@ -22,12 +22,12 @@ echo "Verifying Civilopedia text..."
 python3 scripts/build_civilopedia_text.py --check
 
 echo "Restoring dependencies..."
-"$dotnet_cmd" restore Civ2clone.sln
+"$dotnet_cmd" restore rhYciv.sln
 
 echo "Building solution..."
-"$dotnet_cmd" build Civ2clone.sln --no-restore
+"$dotnet_cmd" build rhYciv.sln --no-restore
 
 echo "Running tests..."
-"$dotnet_cmd" test Civ2clone.sln --no-build
+"$dotnet_cmd" test rhYciv.sln --no-build
 
 echo "Quality gate passed."

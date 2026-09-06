@@ -5,18 +5,17 @@
 | Project | Responsibility |
 |---|---|
 | `Model` | Interfaces, definitions, controls, events, and shared game objects |
-| `Engine/Core` | Game state, turns, AI, map generation, production, scripting, saves, and rules parsing |
-| `Civ2` | Shared classic-layout interface adapters, dialogs, menus, and atlas loading |
-| `Civ2Gold` | Primary compact desktop interface implementation used by standalone rhYciv |
-| `Civ2TOT` | Optional compatibility adapter for alternate external rules/content layouts |
+| `Engine` (`RhyCiv.Engine`) | Game state, turns, AI, map generation, production, scripting, saves, and rules parsing |
+| `UI.Classic` | Shared classic-layout interface adapters, dialogs, menus, and atlas loading |
+| `UI.Compact` | Primary compact desktop interface implementation used by standalone rhYciv |
+| `UI.CompatAlternate` | Optional compatibility adapter for alternate external rules/content layouts |
 | `RaylibUtils` | Raylib drawing and resource helpers |
 | `RaylibUI` | Executable, initialization, rendering, input, dialogs, sound, shaders, and bundled assets |
-| `Core.Tests` | Engine/unit tests and deterministic clean-room save-fixture generation |
+| `RhyCiv.Tests` | Engine/unit tests and deterministic clean-room save-fixture generation |
 
 `RaylibUI` discovers `IUserInterface` implementations from built assemblies.
 `Game.txt` identifies the bundled `rhYciv Standalone` ruleset, which is routed to
-the Gold-layout adapter without requiring a commercial product title in its own
-metadata.
+`UI.Compact` without requiring a commercial product title in its own metadata.
 
 ## Runtime data flow
 
@@ -43,9 +42,14 @@ the omitted gameplay or introduce an asset dependency.
 ## Saves and writable data
 
 Saves are JSON `.sav` files. On Linux they live under
-`$XDG_DATA_HOME/AxxCiv/Saves` (normally `~/.local/share/AxxCiv/Saves`); the
+`$XDG_DATA_HOME/rhYciv/Saves` (normally `~/.local/share/rhYciv/Saves`); the
 Flatpak redirects XDG storage into its private app data directory. Windows uses
 Local Application Data and macOS uses Application Support.
+
+Builds before the defork wrote the same tree under `AxxCiv/`. `Settings.MigrateLegacyDataFolder`
+copies it across once, on first launch, and leaves the original in place so an
+older build still runs. The `Civ2Path` settings key is likewise still read under
+its old name when the current `GameDataPath` key is absent.
 
 ## Generators and validation
 

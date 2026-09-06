@@ -17,7 +17,7 @@ FREECIV_URL = f"https://github.com/freeciv/freeciv/tree/{FREECIV_COMMIT}/data/ci
 
 def attribution(relative: str) -> tuple[str, str, str, str, str]:
     """Return kind, author, SPDX license, source, and generator for a path."""
-    if relative.startswith("Civ2/Fonts/"):
+    if relative.startswith("UI.Classic/Fonts/"):
         return (
             "third-party-font",
             "Google Corporation and Red Hat, Inc.; Liberation Fonts contributors",
@@ -25,7 +25,7 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             "https://github.com/liberationfonts/liberation-fonts",
             "unmodified upstream font",
         )
-    if relative == "Civ2/buttons.png":
+    if relative == "UI.Classic/buttons.png":
         return (
             "upstream-project-original",
             "Reuben Evans",
@@ -33,7 +33,7 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
             "https://github.com/axx0/Civ2-clone/commit/652bb54eb2a8f984ff6d0ec208e67dd4f17bd7db",
             "none",
         )
-    if relative == "Civ2/explorer_icons.png":
+    if relative == "UI.Classic/explorer_icons.png":
         return (
             "upstream-project-original",
             "axx0/Civ2-clone contributors",
@@ -107,9 +107,9 @@ def attribution(relative: str) -> tuple[str, str, str, str, str]:
 
 def assets() -> list[Path]:
     files = [
-        REPOSITORY / "Civ2" / "buttons.png",
-        REPOSITORY / "Civ2" / "explorer_icons.png",
-        *sorted((REPOSITORY / "Civ2" / "Fonts").glob("*.ttf")),
+        REPOSITORY / "UI.Classic" / "buttons.png",
+        REPOSITORY / "UI.Classic" / "explorer_icons.png",
+        *sorted((REPOSITORY / "UI.Classic" / "Fonts").glob("*.ttf")),
     ]
     files.extend(
         path for path in sorted(FOSS_ART.rglob("*"))
@@ -143,12 +143,12 @@ def audit(content: str) -> list[str]:
     for number, row in enumerate(rows, 2):
         if len(row) != 8 or any(not value for value in row):
             errors.append(f"manifest line {number} is incomplete")
-    if any((REPOSITORY / "Core.Tests" / "TestFiles").glob("*.sav")):
-        errors.append("legacy save fixtures are present in Core.Tests/TestFiles")
+    if any((REPOSITORY / "RhyCiv.Tests" / "TestFiles").glob("*.sav")):
+        errors.append("legacy save fixtures are present in RhyCiv.Tests/TestFiles")
     forbidden_fonts = ("ARIAL.TTF", "times-new-roman.ttf", "times-new-roman-bold.ttf")
     for name in forbidden_fonts:
-        if (REPOSITORY / "Civ2" / name).exists():
-            errors.append(f"commercial font remains: Civ2/{name}")
+        if (REPOSITORY / "UI.Classic" / name).exists():
+            errors.append(f"commercial font remains: UI.Classic/{name}")
     return errors
 
 

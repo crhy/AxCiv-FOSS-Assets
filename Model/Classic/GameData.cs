@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Model.Core;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public class GameData : IGameData
     {

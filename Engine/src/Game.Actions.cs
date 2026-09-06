@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
-using Civ2engine.Scripting.ScriptObjects;
-using Civ2engine.Statistics;
-using Civ2engine.UnitActions;
-using Civ2engine.Units;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Statistics;
+using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Events;
@@ -17,7 +17,7 @@ using Model.Core.Player;
 using Model.Core.Units;
 using Neo.IronLua;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public partial class Game
     {

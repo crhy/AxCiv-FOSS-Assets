@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Text.Json;
-using Civ2engine.IO;
-using Civ2engine.OriginalSaves;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.LegacySaves;
 using Model.Core;
 using Model.Core.GameRules;
 
-namespace Civ2engine.SaveLoad.SavFile;
+namespace RhyCiv.Engine.SaveLoad.SavFile;
 
 public interface ISavFile
 {

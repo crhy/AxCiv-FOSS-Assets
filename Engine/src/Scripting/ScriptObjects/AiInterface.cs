@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.Scripting.UnitActions;
-using Civ2engine.UnitActions;
-using Civ2engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Scripting.UnitActions;
+using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Cities;
@@ -16,7 +16,7 @@ using Neo.IronLua;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
 
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 /// <summary>
 /// Provides the AI interface exposed to Lua scripts for controlling AI players.

@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Civ2engine.Advances;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
-using Civ2engine.Production;
-using Civ2engine.SaveLoad.SerializationUtils;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Production;
+using RhyCiv.Engine.SaveLoad.SerializationUtils;
 using Model.Core;
 using Model.Core.Advances;
 using Model.Core.Cities;
@@ -15,7 +15,7 @@ using Model.Core.Mapping;
 using Model.Core.Production;
 using Model.Core.Units;
 
-namespace Civ2engine.SaveLoad;
+namespace RhyCiv.Engine.SaveLoad;
 
 public class GameSerializer
 {

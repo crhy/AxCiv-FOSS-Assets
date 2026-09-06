@@ -1,9 +1,9 @@
-using Civ2engine.SaveLoad.SerializationUtils;
+using RhyCiv.Engine.SaveLoad.SerializationUtils;
 using Model.Core;
 using Model.Core.GameRules;
 using System.Linq;
 
-namespace Civ2engine.SaveLoad;
+namespace RhyCiv.Engine.SaveLoad;
 
 public class JsonCivData
 {

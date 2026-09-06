@@ -1,7 +1,7 @@
 ﻿
-using Civ2engine.IO;
-using Civ2engine;
-using Civ2engine.Units;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Units;
 using Model;
 using Model.Core;
 using Model.Core.GameRules;
@@ -31,14 +31,29 @@ namespace RaylibUI
             }
         }
 
+        /// <summary>
+        /// Ruleset metadata keys that saves written before the defork still carry,
+        /// mapped to the key the matching interface advertises today. Without this
+        /// an old save falls back to path matching and can pick the wrong interface.
+        /// </summary>
+        private static readonly Dictionary<string, string> LegacyRulesetMetadataKeys = new()
+        {
+            [RhyCiv.UI.Compact.CompactInterface.LegacyRulesetMetadataKey] =
+                RhyCiv.UI.Compact.CompactInterface.RulesetMetadataKey
+        };
+
         public IUserInterface SetActiveRulesetFromFile(string root, string subDirectory,
             Dictionary<string, string> extendedMetadata)
         {
+            var metadata = extendedMetadata.ToDictionary(
+                pair => LegacyRulesetMetadataKeys.GetValueOrDefault(pair.Key, pair.Key),
+                pair => pair.Value);
+
             var maxScore = -1;
             Ruleset selected = AllRuleSets.First();
             foreach (var set in AllRuleSets)
             {
-                var score = extendedMetadata
+                var score = metadata
                     .Where(thing => set.Metadata.ContainsKey(thing.Key) && set.Metadata[thing.Key] == thing.Value)
                     .Sum(thing => 1000);
 

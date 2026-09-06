@@ -1,5 +1,5 @@
-using Civ2engine;
-using Civ2engine.Production;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Production;
 using Model;
 using Model.Controls;
 using Model.Interface;
@@ -14,7 +14,7 @@ using RaylibUtils;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Civ2engine.IO;
+using RhyCiv.Engine.IO;
 using Model.Core.Cities;
 
 namespace RaylibUI.RunGame.GameControls.CityControls;

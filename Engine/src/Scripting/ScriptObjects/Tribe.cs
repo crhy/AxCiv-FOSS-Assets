@@ -1,12 +1,12 @@
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Scripting.ScriptObjects;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Scripting.ScriptObjects;
 using Model.Core;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting;
+namespace RhyCiv.Engine.Scripting;
 
 public class Tribe(Civilization civ, Game game)
 {

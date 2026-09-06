@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public interface IFileHandler
 {

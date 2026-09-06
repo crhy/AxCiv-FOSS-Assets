@@ -5,7 +5,7 @@ using Neo.IronLua;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 public class CityImprovement
 {

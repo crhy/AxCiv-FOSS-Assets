@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
 using Model.Core;
 using Model.Core.Mapping;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public class MapGenerator
     {
@@ -99,7 +99,7 @@ namespace Civ2engine
                 Tile = new Tile[width, height]
             };
             var terrains = config.Rules.Terrains;
-            var world = Civ2WorldGenerator.Generate(config, width, height);
+            var world = ClassicWorldGenerator.Generate(config, width, height);
             for (var y = 0; y < height; y++)
             {
                 var odd = y % 2;

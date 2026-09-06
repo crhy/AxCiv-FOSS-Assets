@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Civ2engine.IO
+namespace RhyCiv.Engine.IO
 {
     public class NameLoader : IFileHandler
     {

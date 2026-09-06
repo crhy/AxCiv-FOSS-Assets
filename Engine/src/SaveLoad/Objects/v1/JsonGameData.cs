@@ -1,6 +1,6 @@
 using Model.Core;
 
-namespace Civ2engine.SaveLoad;
+namespace RhyCiv.Engine.SaveLoad;
 
 /// <summary>
 /// Encapsulate and map the fields of the game object that need to be serialized

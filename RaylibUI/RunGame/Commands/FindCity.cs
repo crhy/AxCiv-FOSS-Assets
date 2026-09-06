@@ -1,7 +1,7 @@
-using Civ2engine;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.IO;
+using RhyCiv.Engine;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.IO;
 using Model.Controls;
 using Model.Input;
 using RaylibUI.BasicTypes;

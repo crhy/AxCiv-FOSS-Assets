@@ -2,7 +2,7 @@
 
 using Model.Core;
 
-namespace Civ2engine.Scripting.ScriptObjects;
+namespace RhyCiv.Engine.Scripting.ScriptObjects;
 
 public class Leader(Civilization civ)
 {

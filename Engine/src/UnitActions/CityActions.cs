@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.MapObjects;
-using Civ2engine.Production;
-using Civ2engine.Units;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Production;
+using RhyCiv.Engine.Units;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Advances;
@@ -14,7 +14,7 @@ using Model.Core.GameRules;
 using Model.Core.Mapping;
 using Model.Core.Units;
 
-namespace Civ2engine.UnitActions
+namespace RhyCiv.Engine.UnitActions
 {
     public static class CityActions 
     {

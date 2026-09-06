@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Advances;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.IO;
-using Civ2engine.MapObjects;
-using Civ2engine.SaveLoad;
-using Civ2engine.Scripting;
-using Civ2engine.Units;
+using RhyCiv.Engine.Advances;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.IO;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.SaveLoad;
+using RhyCiv.Engine.Scripting;
+using RhyCiv.Engine.Units;
 using Model;
 using Model.Core;
 using Model.Core.Cities;
@@ -17,7 +17,7 @@ using Model.Core.Mapping;
 using Model.Core.Player;
 using Model.Core.Units;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public partial class Game : IGame
     {

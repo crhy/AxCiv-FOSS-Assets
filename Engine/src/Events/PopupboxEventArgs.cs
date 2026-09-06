@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Civ2engine.Events
+namespace RhyCiv.Engine.Events
 {
     public class PopupboxEventArgs : EventArgs
     {

@@ -1,8 +1,8 @@
-using Civ2engine.UnitActions;
+using RhyCiv.Engine.UnitActions;
 using Model.Core.Cities;
 using Model.Core.Units;
 
-namespace Civ2engine.Scripting.UnitActions;
+namespace RhyCiv.Engine.Scripting.UnitActions;
 
 public class CaptureAction(Unit baseUnit, City city, Game game) : TileAction(baseUnit, city.Location, "Capture", game)
 {

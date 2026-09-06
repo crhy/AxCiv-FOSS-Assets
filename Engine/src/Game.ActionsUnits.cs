@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Units;
-using Civ2engine.Enums;
-using Civ2engine.Events;
-using Civ2engine.MapObjects;
-using Civ2engine.Terrains;
-using Civ2engine.UnitActions;
+using RhyCiv.Engine.Units;
+using RhyCiv.Engine.Enums;
+using RhyCiv.Engine.Events;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.Engine.Terrains;
+using RhyCiv.Engine.UnitActions;
 using Model.Constants;
 using Model.Core.Mapping;
 using Model.Core.Player;
 using Model.Core.Units;
 
-namespace Civ2engine
+namespace RhyCiv.Engine
 {
     public partial class Game
     {

@@ -1,4 +1,4 @@
-﻿using Civ2engine.IO;
+﻿using RhyCiv.Engine.IO;
 using Model.Controls;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using Model.Controls.Civilopedia;
 using Model.Core.GameRules;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 public class CivilopediaLoader
 {

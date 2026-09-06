@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.Enums;
+using RhyCiv.Engine.Enums;
 using Model.Constants;
 using Model.Core;
 using Model.Core.Cities;
 
-namespace Civ2engine;
+namespace RhyCiv.Engine;
 
 /// <summary>
 /// Shared wonder lookups for the systems that apply wonder effects.

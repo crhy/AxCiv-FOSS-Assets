@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Civ2engine.MapObjects;
-using Civ2;
-using Civ2engine;
-using Civ2engine.NewGame;
-using CivInit = Civ2.Rules.Initialization;
+using RhyCiv.Engine.MapObjects;
+using RhyCiv.UI.Classic;
+using RhyCiv.Engine;
+using RhyCiv.Engine.NewGame;
+using CivInit = RhyCiv.UI.Classic.Rules.Initialization;
 
 namespace RaylibUI
 {
@@ -26,7 +26,7 @@ namespace RaylibUI
                 return false;
             }
 
-            if (ActiveInterface is not Civ2Interface civ2)
+            if (ActiveInterface is not ClassicInterface civ2)
             {
                 Console.WriteLine("autostart: active interface is not the Civ2 interface; skipping");
                 return false;
@@ -193,10 +193,10 @@ namespace RaylibUI
                     break;
                 }
 
-                var name = Civ2engine.UnitActions.CityActions.GetCityName(civ, game);
+                var name = RhyCiv.Engine.UnitActions.CityActions.GetCityName(civ, game);
                 Console.WriteLine($"test-city: founding city {founded + 1} '{name}' at " +
                                   $"{settler.CurrentLocation.X},{settler.CurrentLocation.Y}");
-                last = Civ2engine.UnitActions.CityActions.BuildCity(settler, game, name);
+                last = RhyCiv.Engine.UnitActions.CityActions.BuildCity(settler, game, name);
                 Console.WriteLine($"test-city: founded '{last.Name}' size {last.Size}, production " +
                                   (last.ItemInProduction == null ? "<null>" : last.ItemInProduction.ToString()));
 
