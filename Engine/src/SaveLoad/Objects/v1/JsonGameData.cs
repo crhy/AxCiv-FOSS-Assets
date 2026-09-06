@@ -8,6 +8,13 @@ namespace RhyCiv.Engine.SaveLoad;
 public class JsonGameData : IGameData
 {
     /// <summary>
+    /// Slots in the saved per-tribe city counter. Fixed by the save format, and
+    /// Game.LoadGame reads the array's own length back, so it is only ever the
+    /// width written here.
+    /// </summary>
+    private const int TribeSlots = 21;
+
+    /// <summary>
     /// This constructor is to deserialize data
     /// </summary>
     public JsonGameData()
@@ -30,12 +37,24 @@ public class JsonGameData : IGameData
         GlobalTempRiseOccured = game.GlobalTempRiseOccured;
         NoOfTurnsOfPeace = game.NoOfTurnsOfPeace;
 
-        CitiesBuiltSoFar = new int[21];
+        // Indexed by TribeId, which is how Game.LoadGame reads it back. The
+        // barbarians carry TribeId -1 and the load side already skips them
+        // explicitly, but nothing skipped them here: CityActions.BuildCity records a
+        // count for whichever civilisation founded a city, barbarians included, so
+        // the first barbarian city made this index the array with -1 and every save
+        // from then on threw IndexOutOfRangeException. Anything outside the array is
+        // dropped rather than trusted, which also covers a ruleset with more tribes
+        // than the format has slots.
+        CitiesBuiltSoFar = new int[TribeSlots];
         foreach (var civAndCityCount in game.CitiesBuiltSoFar)
         {
             int tribeId = civAndCityCount.Key.TribeId;
-            int cityCount = civAndCityCount.Value;
-            CitiesBuiltSoFar[tribeId] = cityCount;
+            if (tribeId < 0 || tribeId >= CitiesBuiltSoFar.Length)
+            {
+                continue;
+            }
+
+            CitiesBuiltSoFar[tribeId] = civAndCityCount.Value;
         }
     }
     public int DifficultyLevel { set; get; }

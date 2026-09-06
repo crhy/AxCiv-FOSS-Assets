@@ -9,6 +9,13 @@ carry a shorter, user-facing summary of each release; this file is the full reco
 
 ### Fixed
 
+- **Crash on saving.** Once the barbarians had founded or taken a city, every save
+  threw an IndexOutOfRangeException and the game was lost. The saved per-tribe city
+  counter is a fixed-width array indexed by TribeId; the barbarians carry TribeId
+  -1, and while the loading code already skipped them, the saving code did not.
+  Tribes with no slot in the format are now dropped on write, as they already were
+  on read.
+
 - The Alt key no longer moves focus into the menu bar. It opened the menus and
   had no way to close them again, so the key was a one-way trip that had to be
   undone with the mouse. The menus are still reachable by clicking them. (#103)
