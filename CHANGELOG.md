@@ -40,6 +40,13 @@ carry a shorter, user-facing summary of each release; this file is the full reco
   art used to be; it is now 300 square, so units rendered at about fourteen pixels
   and improvement icons at roughly one. Icons are now fitted to the row, so the
   same thing cannot happen again when art is redrawn at a new size. (#81)
+- A unit that has finished its turn stops blinking. When no unit was left awaiting
+  orders the game never cleared the selection, and because the active-unit setter
+  refuses a unit whose turn has ended without clearing the previous one, whichever
+  unit spent the last move point stayed selected and blinked for the rest of the
+  turn. Finishing a turn by taking an order that occupies the unit — fortifying, or
+  starting a road, mine or irrigation — now also moves on, where before only
+  running the movement points to zero did. (#74)
 
 ### Changed
 
