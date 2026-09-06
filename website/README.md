@@ -1,13 +1,16 @@
 # rhYciv website
 
-Static Cloudflare Pages site for `rhyciv.org` and `rhyciv.com`.
+Static site for `rhyciv.org` and `rhyciv.com`, deployed as a Cloudflare Worker
+with static assets (config in `wrangler.jsonc` at the repo root).
 
-Cloudflare Pages settings:
+Cloudflare Workers Builds (git integration) settings:
 - Production branch: `master`
-- Framework preset: None
+- Root directory: `/`
 - Build command: `bash website/build.sh`
-- Build output directory: `website/dist`
+- Deploy command: `npx wrangler deploy`
 
-The build copies current art from `RaylibUI/FOSSart`, so future art replacements remain easy.
+`wrangler.jsonc` points the `assets` binding at `website/dist`, so the deploy
+command needs no extra flags. The build copies current art from
+`RaylibUI/FOSSart`, so future art replacements remain easy.
 
 Recommended canonical host: `https://rhyciv.org`. Redirect `www.rhyciv.org`, `rhyciv.com`, and `www.rhyciv.com` to the canonical host while preserving paths and query strings.
