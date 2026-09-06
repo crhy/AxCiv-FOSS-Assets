@@ -30,6 +30,9 @@ echo "Auditing redistributable assets..."
 echo "Verifying Civilopedia text..."
 "$python_cmd" scripts/build_civilopedia_text.py --check
 
+echo "Checking the Flatpak offline NuGet mirror..."
+"$python_cmd" scripts/check_flatpak_sources.py
+
 echo "Checking that the build version and the AppStream version agree..."
 "$python_cmd" scripts/check_version_consistency.py
 

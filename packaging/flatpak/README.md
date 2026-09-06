@@ -51,3 +51,16 @@ python3 flatpak-dotnet-generator.py \
   packaging/flatpak/nuget-sources.json RaylibUI/RaylibUI.csproj \
   --dotnet 9 --freedesktop 25.08 --runtime linux-x64
 ```
+
+The mirror deliberately carries more than one version of the ASP.NET and .NET
+runtime packs. Which one a build asks for is decided by the SDK doing the
+restore, and the SDK inside the Flatpak extension is not always on the same
+patch level as the machine that generated the file. Keeping the older entries
+alongside the newly resolved ones means the offline restore succeeds either way,
+rather than failing on a patch-level difference that has nothing to do with this
+project. Do not prune them.
+
+`scripts/check_flatpak_sources.py`, which the quality gate runs, fails if a
+package declared in `Directory.Packages.props` is absent from the mirror. It sees
+direct references only — transitive ones are resolved by NuGet and are not
+declared anywhere — so regenerating after a dependency change remains the rule.
