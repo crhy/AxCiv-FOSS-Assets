@@ -231,7 +231,11 @@ public class MinimapPanel : BaseControl
                 {
                     double yf = _map.YDim / (2 * radius);
                     double xf = (double)(_map.XDim / (xright - xleft));
-                    var xcoord = x * xf + _game.ActivePlayer.ActiveTile.X - 2 * _rotationShift - _map.XDim / 2;
+                    // The human's tile, not Game.ActivePlayer's: while another
+                    // civilisation is being processed ActivePlayer is that
+                    // civilisation, and the globe would swing to wherever its last
+                    // unit moved rather than staying where the player is looking.
+                    var xcoord = x * xf + _gameScreen.Player.ActiveTile.X - 2 * _rotationShift - _map.XDim / 2;
                     var ycoord = y * yf;
 
                     Color color = _map.TileC2((int)xcoord, (int)ycoord).Terrain.Type == TerrainType.Ocean ? Color.Blue : Color.DarkGreen;

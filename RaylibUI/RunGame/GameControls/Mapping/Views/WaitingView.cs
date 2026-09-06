@@ -8,8 +8,14 @@ namespace RaylibUI.RunGame.GameControls.Mapping.Views;
 
 public class WaitingView : BaseGameView
 {
+    // gameScreen.Player, not Game.ActivePlayer. ActivePlayer is whichever
+    // civilisation the engine is currently processing, which during another
+    // civilisation's turn is not the human at all -- and its active tile is
+    // wherever its last unit moved, frequently somewhere the player has never
+    // seen. Anchoring the view there is what threw the map into unexplored black
+    // on pressing Turn.
     public WaitingView(GameScreen gameScreen, IGameView? currentView, int viewHeight,
-        int viewWidth, bool forceRedraw) : base(gameScreen, gameScreen.Game.ActivePlayer.ActiveTile,
+        int viewWidth, bool forceRedraw) : base(gameScreen, gameScreen.Player.ActiveTile,
         currentView, viewHeight, viewWidth, true, 200, Array.Empty<Tile>(), forceRedraw)
     {
         var activeInterface = gameScreen.Main.ActiveInterface;
@@ -24,7 +30,7 @@ public class WaitingView : BaseGameView
         SetAnimation(new[]
         {
             new TextureElement(texture: marker,
-                location: ActivePos, gameScreen.Game.ActivePlayer.ActiveTile,
+                location: ActivePos, gameScreen.Player.ActiveTile,
                 renderScale: renderScale, maxDrawSize: logicalSize)
         });
 
