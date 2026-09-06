@@ -34,6 +34,12 @@
     git history; this file describes the 0.1.x line only.
   -->
   <releases>
+    <release version="0.1.1" date="2026-09-06">
+      <description>
+        <p>Fixes two crashes and a round of interface problems reported against 0.1.0.</p>
+        <p>Saving failed permanently once the barbarians had taken a city, and researching an advance that enabled a terrain improvement took the game down. Units and improvements in the Change Production list are drawn at a readable size instead of a few pixels, and the list keeps a stable order so something unlocked by a new advance appears where you would look for it rather than at the bottom. A unit that has finished its turn stops blinking, a unit that slept to heal wakes when it is whole, and disbanding a unit clears it from the city window at once. The city window is finished in the same painted stone as the rest of the interface.</p>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-09-05">
       <description>
         <p>The first release built for Linux, Windows and macOS together, and the first that is not a beta.</p>

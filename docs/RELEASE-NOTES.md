@@ -1,14 +1,16 @@
-**The first release for Linux, Windows and macOS together — and the first that is not a beta.**
+**Fixes two crashes and a round of interface problems reported against 0.1.0.**
+
+If you are running 0.1.0, update — one of the crashes made saving fail permanently.
 
 ## Install
 
 | Platform | Download |
 |---|---|
-| **Windows** (x64) | `rhYciv-0.1.0-win-x64.zip` — unzip, run `RaylibUI.exe` |
-| **macOS** (Apple silicon) | `rhYciv-0.1.0-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
-| **macOS** (Intel) | `rhYciv-0.1.0-osx-x64.zip` — same |
-| **Linux** (x64) | `rhYciv-0.1.0-linux-x64.tar.gz` — extract, run `./RaylibUI` |
-| **Linux** (Flatpak) | `rhYciv-0.1.0-x86_64.flatpak` |
+| **Windows** (x64) | `rhYciv-0.1.1-win-x64.zip` — unzip, run `RaylibUI.exe` |
+| **macOS** (Apple silicon) | `rhYciv-0.1.1-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
+| **macOS** (Intel) | `rhYciv-0.1.1-osx-x64.zip` — same |
+| **Linux** (x64) | `rhYciv-0.1.1-linux-x64.tar.gz` — extract, run `./RaylibUI` |
+| **Linux** (Flatpak) | `rhYciv-0.1.1-x86_64.flatpak` |
 
 Nothing else is needed. No commercial Civilization II installation, no runtime to install — each download carries its own .NET runtime and the complete art set.
 
@@ -27,23 +29,38 @@ xattr -dr com.apple.quarantine /Applications/rhYciv.app
 **Linux Flatpak**:
 
 ```
-flatpak install --user ./rhYciv-0.1.0-x86_64.flatpak
+flatpak install --user ./rhYciv-0.1.1-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
-## What's in this release
+## Crashes fixed
 
-**Roads and railways are painted.** They were drawn as vector lines before, and every one of the nine connection sprites was the same four-way rosette — so a tile with a single neighbour showed roads running off all four sides. They are now painted art, cut into eight half-spokes that meet the neighbouring tile correctly on the shared edge.
+**Saving stopped working once the barbarians took a city.** The saved per-tribe city counter is indexed by tribe, and the barbarians have no slot in it. From the moment they founded or captured their first city, every save attempt failed and the game could not be written to disk. If you lost a game to this in 0.1.0, that is what happened.
 
-**The city window is finished.** It filled its own panels with a flat grey that matched nothing else on screen, while the rest of the interface was painted stone. It now uses the same material.
+**Researching certain advances took the game down.** Anything that enabled a terrain improvement — fortresses among them — tried to announce itself through an interface that was never implemented, and crashed instead.
 
-**Separated from the upstream fork.** rhYciv began as a fork of Civ2-clone and had kept its names. The solution, the project names, the engine namespace, the interface classes and the save directory all now carry the rhYciv name. **Your existing saves are migrated automatically on first launch** — the old `AxxCiv` directory is copied across and left in place, so an older build still works.
+## The city screen
 
-**Checked on every platform, every change.** There was no build or test CI at all before this; there is now a quality gate running on Linux, Windows and macOS, which caught two platform-specific bugs during this release alone.
+Units and improvements in the **Change Production** list are drawn at a readable size. They were being scaled against the size the art used to be, so units rendered at about fourteen pixels and improvement icons at roughly one (#81).
+
+That list also **keeps a stable order** now — units first, then improvements, each in ruleset order. It used to have newly unlocked items appended to the end, so something you had just researched appeared at the bottom of sixty entries instead of where you would look for it. That is why a buildable Temple could seem to be missing after Ceremonial Burial (#91).
+
+The window itself is finished in the **same painted stone as the rest of the interface** instead of flat grey, citizens are justified left so they stop moving as the city grows (#64), and the Supplies and Demands lines no longer render hard against the panel border (#83).
+
+## Units
+
+- A unit that has finished its turn **stops blinking**. Nothing cleared the selection when no unit was left to move, so whichever unit spent the last move point stayed lit for the rest of the turn (#74).
+- A unit put to sleep to recover **wakes when it is back to full health**. One that was already healthy when told to sleep stays asleep until you wake it (#96).
+- **Disbanding a unit** clears it from the city window at once, instead of leaving it listed until something else resized the window (#94).
+
+## Elsewhere
+
+- The **Alt** key no longer opens the menus. It had no way to close them again, so it was a one-way trip that had to be undone with the mouse (#103).
+- The Civilopedia's city-improvement pages drop the **Description** button, which navigated to text already on the page (#104).
 
 ## Known limitations
 
-Diplomacy, multiplayer and several advisor screens are not implemented yet. Some interface art is still placeholder. The Windows and macOS builds are new with this release and have had far less real-world use than the Linux one — please report anything that looks wrong.
+Diplomacy, multiplayer and several advisor screens are not implemented yet. Some interface art is still placeholder. Scripted Lua dialogs do not work at all — see #110.
 
 Each download is about 190 MB because it is fully self-contained. It cannot be trimmed: the game discovers its interface implementations by reflection at startup, and trimming removes exactly those assemblies.
 
@@ -51,6 +68,8 @@ Each download is about 190 MB because it is fully self-contained. It cannot be t
 
 Please open an issue at https://github.com/crhy/rhYciv/issues. Say which platform and which download, and attach the log from:
 
-- **Linux** `~/.local/share/rhYciv/Logs`
+- **Linux** `~/.local/share/rhYciv/Logs` (Flatpak: `~/.var/app/io.github.crhy.rhYciv/data/rhYciv/Logs`)
 - **Windows** `%LOCALAPPDATA%\rhYciv\Logs`
 - **macOS** `~/Library/Application Support/rhYciv/Logs`
+
+The crash log is what made both of the fixes above possible — it names the exact line. Please attach it.

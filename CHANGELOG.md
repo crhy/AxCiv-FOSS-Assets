@@ -5,7 +5,7 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
-## [Unreleased] — 0.1.1
+## [0.1.1] — 2026-09-06
 
 ### Fixed
 
@@ -59,6 +59,17 @@ carry a shorter, user-facing summary of each release; this file is the full reco
 
 - The Civilopedia's city-improvement pages no longer offer a Description button.
   The description is already on the page it navigated away from. (#104)
+- The AppStream metainfo lists only 0.1.0 onward. AppStream orders releases by
+  version rather than document order, so the pre-0.1.0 betas outranked 0.1.0 and
+  software centres reported the wrong version. Those releases remain on GitHub
+  Releases and in git history.
+
+### Added
+
+- `RHYCIV_TEST_PRODUCTION` and `RHYCIV_TEST_ADVANCES` in the review harness, which
+  open the Change Production list over the city window with a chosen number of
+  advances already granted. The dialog is the hardest part of the city screen to
+  reach by hand; opening it this way is what exposed the improvement-advance crash.
 
 ## [0.1.0] — 2026-09-05
 
