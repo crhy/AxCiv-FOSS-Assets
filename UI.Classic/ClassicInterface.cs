@@ -384,8 +384,10 @@ public abstract class ClassicInterface(IMain main) : IUserInterface
         _cityWindowLayout.Labels.Add("UnitsPresent", new(Labels.For(LabelIndex.UnitsPresent), new(0, 0, 232, 12), headingColour, headingShadow));
         _cityWindowLayout.Labels.Add("UnitsSupported", new(Labels.For(LabelIndex.UnitsSupported), new(3, 215, 189, 12), headingColour, headingShadow));
         _cityWindowLayout.Labels.Add("ItemInProduction", new("", new(0, 4, 195, 12), new Color(63, 79, 167, 255), Color.Black));
-        _cityWindowLayout.Labels.Add("Supplies", new(Labels.For(LabelIndex.Supplies), new(0, 130, 232, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
-        _cityWindowLayout.Labels.Add("Demands", new(Labels.For(LabelIndex.Demands), new(0, 143, 232, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
+        // Inset by 5 on both sides: these two sit at the bottom of the Units
+        // Present panel, and at x=0 the text rendered hard against its border.
+        _cityWindowLayout.Labels.Add("Supplies", new(Labels.For(LabelIndex.Supplies), new(5, 130, 222, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
+        _cityWindowLayout.Labels.Add("Demands", new(Labels.For(LabelIndex.Demands), new(5, 143, 222, 12), new Color(227, 83, 15, 255), new Color(67, 67, 67, 255)));
         _cityWindowLayout.Labels.Add("ResourceMap", new(Labels.For(LabelIndex.ResourceMap), new(0, 125, 189, 12), headingColour, headingShadow));
         _cityWindowLayout.Labels.Add("Citizens", new(Labels.For(LabelIndex.Citizens), new(0, 46, 189, 12), headingColour, headingShadow));
 
@@ -880,8 +882,12 @@ public abstract class ClassicInterface(IMain main) : IUserInterface
                     => ["Info", "Close"],
                 var c when c.WindowType == CivilopediaWindowType.Info && c.InfoType == CivilopediaInfoType.Advances
                     => ["Go Back", "Tree", "Close"],
-                var c when c.WindowType == CivilopediaWindowType.Info && 
+                var c when c.WindowType == CivilopediaWindowType.Info &&
                     (c.InfoType == CivilopediaInfoType.Governments || c.InfoType == CivilopediaInfoType.Concepts)
+                    => ["Go Back", "Close"],
+                // A city improvement's info page already shows its description, so
+                // the Description button only navigated to what was on screen.
+                var c when c.WindowType == CivilopediaWindowType.Info && c.InfoType == CivilopediaInfoType.Improvements
                     => ["Go Back", "Close"],
                 _ => ["Go Back", "Description", "Close"],
             }

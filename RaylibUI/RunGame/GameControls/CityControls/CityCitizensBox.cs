@@ -84,11 +84,12 @@ public class CityCitizensBox : BaseControl
             spacing = iconWidth + 1;
         }
 
-        // Centre the row in its panel. The citizens used to start hard against the
-        // left edge whatever the city's size, so a small city sat in the corner of a
-        // wide empty strip.
-        var rowWidth = iconWidth + spacing * Math.Max(0, _icons.Length - 1);
-        var leading = Math.Max(2f, (_props.CitizensBox.Width - rowWidth) / 2f);
+        // Left-justify the row. It was centred for a while so a small city did not
+        // sit in the corner of a wide strip, but a row that shifts every time the
+        // city grows or a citizen becomes a specialist is harder to read than an
+        // empty strip: the faces never stay where you last clicked them. Anchored
+        // left, a citizen keeps its position for the life of the city.
+        const float leading = 4f;
 
         // The icon array was sized when the window opened; the city can grow or
         // starve while it is still up, so only lay out the citizens that exist and

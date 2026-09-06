@@ -274,11 +274,10 @@ public class GameScreen : BaseScreen
 
     public override void OnKeyPress(KeyboardKey key)
     {
-        if (key is KeyboardKey.LeftAlt or KeyboardKey.RightAlt)
-        {
-            Focused = MenuBar.Controls!.First();
-            return;
-        }
+        // Alt used to move focus into the menu bar, but it only ever opened the
+        // menus and never closed them again, so the key was a one-way trip that
+        // had to be undone with the mouse. The menus are reachable by clicking
+        // them, which is how they are used in practice.
         var command = new Shortcut(key.ToModelKey(), Input.IsKeyDown(KeyboardKey.RightShift) ||
                                         Input.IsKeyDown(KeyboardKey.LeftShift)
             , Input.IsKeyDown(KeyboardKey.LeftControl) ||
