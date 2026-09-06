@@ -577,6 +577,12 @@ public class GameScreen : BaseScreen
 
     private void ClosePopup(string arg1, int arg2, IList<bool>? arg3, IDictionary<string, string>? arg4)
     {
+        // The answer, not just the question. A record that ends at "popup RESEARCH"
+        // cannot say whether the player pressed OK or Info, and those run entirely
+        // different code -- which is the difference between a reproducible report
+        // and a guess.
+        SessionLog.Record($"popup answered: {arg1} (selection {arg2})");
+
         var closedPopup = _currentPopupDialog;
         var popupClicked = _popupClicked;
 

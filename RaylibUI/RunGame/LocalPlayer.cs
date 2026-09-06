@@ -302,6 +302,18 @@ public class LocalPlayer : IPlayer
             return;
         }
 
+        // No unit to move. The view piece is the only sensible mode here, and the
+        // only safe one: MovingPieces.Activate asks the game for the next unit
+        // whenever there is no active one, and this is reached from ChooseNextUnit
+        // when nothing is awaiting orders. Entering Moving mode from here therefore
+        // called back into ChooseNextUnit and recursed until the stack overflowed,
+        // which .NET cannot catch -- the process died with no crash report at all.
+        if (_activeUnit == null)
+        {
+            _gameScreen.ActiveMode = _gameScreen.ViewPiece;
+            return;
+        }
+
         _gameScreen.ActiveMode = _gameScreen.Moving;
     }
 

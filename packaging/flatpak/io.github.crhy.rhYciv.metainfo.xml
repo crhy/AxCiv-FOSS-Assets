@@ -34,6 +34,12 @@
     git history; this file describes the 0.1.x line only.
   -->
   <releases>
+    <release version="0.1.2" date="2026-09-06">
+      <description>
+        <p>Fixes a crash introduced in 0.1.1.</p>
+        <p>Founding a city could leave the game with no unit to move, and asking for the next one then recursed until the process died. It left no crash report, because the failure was a stack overflow, which cannot be caught. Anyone on 0.1.1 should update.</p>
+      </description>
+    </release>
     <release version="0.1.1" date="2026-09-06">
       <description>
         <p>Fixes two crashes and a round of interface problems reported against 0.1.0.</p>

@@ -28,7 +28,34 @@ namespace RhyCiv.Engine
         private readonly int[] _doNothingOrders = { (int)OrderType.Fortified, (int)OrderType.Sleep };
 
         // Choose next unit for orders. If all units ended turn, update cities.
+        private bool _choosingNextUnit;
+
         public void ChooseNextUnit()
+        {
+            // Defence in depth against re-entry. Choosing a unit tells the player,
+            // the player changes the interface mode, and a mode is entitled to ask
+            // for the next unit when it has none -- a cycle that recurses until the
+            // stack overflows and kills the process outright, with no exception any
+            // handler can catch. One such cycle has already shipped. Whatever the
+            // interface does in response, asking again while an answer is already in
+            // progress is never what was meant.
+            if (_choosingNextUnit)
+            {
+                return;
+            }
+
+            _choosingNextUnit = true;
+            try
+            {
+                ChooseNextUnitCore();
+            }
+            finally
+            {
+                _choosingNextUnit = false;
+            }
+        }
+
+        private void ChooseNextUnitCore()
         {
             var units = _activeCiv.Units.Where(u => !u.Dead).ToList();
 

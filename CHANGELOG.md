@@ -5,6 +5,18 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
+## [0.1.2] — 2026-09-06
+
+### Fixed
+
+- **Crash after founding a city.** Asking for the next unit when none was left
+  awaiting orders cleared the selection, which put the map into unit-moving mode,
+  which asked for the next unit again — recursing until the stack overflowed and
+  the process died. A StackOverflowException cannot be caught, so this left no
+  crash report at all. Introduced in 0.1.1 by the fix for #74; with no unit to
+  move the map now falls back to the view piece, and the engine refuses to be
+  asked for a unit while it is already answering.
+
 ## [0.1.1] — 2026-09-06
 
 ### Fixed

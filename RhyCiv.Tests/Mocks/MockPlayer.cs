@@ -102,7 +102,7 @@ public class MockPlayer : IPlayer
     {
     }
 
-    public void SetUnitActive(Unit? unit, bool move)
+    public virtual void SetUnitActive(Unit? unit, bool move)
     {
         ActiveUnit = unit;
     }

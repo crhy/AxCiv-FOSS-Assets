@@ -1,16 +1,21 @@
-**Fixes two crashes and a round of interface problems reported against 0.1.0.**
+**Fixes a crash introduced in 0.1.1.**
 
-If you are running 0.1.0, update — one of the crashes made saving fail permanently.
+If you are running 0.1.1, update. Founding a city could leave the game with no
+unit to move, and asking for the next one then recursed until the process died.
+It produced no crash report, because a stack overflow cannot be caught.
+
+0.1.1 also fixed two crashes and a round of interface problems reported against
+0.1.0; all of that is included here.
 
 ## Install
 
 | Platform | Download |
 |---|---|
-| **Windows** (x64) | `rhYciv-0.1.1-win-x64.zip` — unzip, run `RaylibUI.exe` |
-| **macOS** (Apple silicon) | `rhYciv-0.1.1-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
-| **macOS** (Intel) | `rhYciv-0.1.1-osx-x64.zip` — same |
-| **Linux** (x64) | `rhYciv-0.1.1-linux-x64.tar.gz` — extract, run `./RaylibUI` |
-| **Linux** (Flatpak) | `rhYciv-0.1.1-x86_64.flatpak` |
+| **Windows** (x64) | `rhYciv-0.1.2-win-x64.zip` — unzip, run `RaylibUI.exe` |
+| **macOS** (Apple silicon) | `rhYciv-0.1.2-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
+| **macOS** (Intel) | `rhYciv-0.1.2-osx-x64.zip` — same |
+| **Linux** (x64) | `rhYciv-0.1.2-linux-x64.tar.gz` — extract, run `./RaylibUI` |
+| **Linux** (Flatpak) | `rhYciv-0.1.2-x86_64.flatpak` |
 
 Nothing else is needed. No commercial Civilization II installation, no runtime to install — each download carries its own .NET runtime and the complete art set.
 
@@ -29,7 +34,7 @@ xattr -dr com.apple.quarantine /Applications/rhYciv.app
 **Linux Flatpak**:
 
 ```
-flatpak install --user ./rhYciv-0.1.1-x86_64.flatpak
+flatpak install --user ./rhYciv-0.1.2-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 

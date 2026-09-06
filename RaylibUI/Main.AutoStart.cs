@@ -235,6 +235,21 @@ namespace RaylibUI
                 Console.WriteLine($"test-city: supported {last.SupportedUnits.Count} " +
                                   $"[{string.Join(", ", last.SupportedUnits.Select(u => $"{u.Name} dead={u.Dead}"))}]");
 
+                // RHYCIV_TEST_NO_UNITS=1 ends every unit's turn and asks for the
+                // next one. That is the state reached after founding a city with
+                // the last settler, and it is where ChooseNextUnit has nothing to
+                // hand on to.
+                if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RHYCIV_TEST_NO_UNITS")))
+                {
+                    foreach (var unit in civ.Units)
+                    {
+                        unit.MovePointsLost = unit.MaxMovePoints;
+                    }
+                    Console.WriteLine("test-city: all units spent; asking for the next unit");
+                    game.ChooseNextUnit();
+                    Console.WriteLine("test-city: ChooseNextUnit returned");
+                }
+
                 var openedWindow = screen.ShowCityWindow(last);
                 Console.WriteLine("test-city: city window opened");
 
