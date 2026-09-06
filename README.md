@@ -1,4 +1,9 @@
-# rhYciv
+<p align="center">
+  <img src="RaylibUI/FOSSart/rhyciv-app-icon.png" alt="rhYciv" width="240">
+</p>
+
+<h1 align="center">rhYciv</h1>
+
 
 rhYciv is a standalone, high-resolution turn-based empire strategy game. It
 preserves the map, city, research, production, and tactical-unit rhythm of 1990s

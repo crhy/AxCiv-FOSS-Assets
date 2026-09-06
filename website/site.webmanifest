@@ -6,6 +6,6 @@
   "background_color": "#050a11",
   "theme_color": "#07111c",
   "icons": [
-    {"src": "/assets/rhyciv-app-icon.png", "sizes": "512x512", "type": "image/png"}
+    {"src": "/assets/rhyciv-app-icon.png", "sizes": "1024x1024", "type": "image/png"}
   ]
 }
