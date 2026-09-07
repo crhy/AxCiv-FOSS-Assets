@@ -1,86 +1,105 @@
 #!/usr/bin/env python3
-"""Cut the medallion resource icons out of their black plates.
+"""Cut the resource icons out of their matte.
 
-The food, gold, science, production and trade art arrives as 1254x1254 RGB
-plates: a round medallion centred on a near-black square. The game needs them
-with an alpha channel so they can sit on the city window's panels.
+These are the food, production, trade, gold, luxury and science icons the city
+window draws in its resource rows, and the Civilopedia reuses.
 
-The cut is a circular mask, not a colour key. The medallions have no hard edge
-against their plate - the stone rim is itself nearly black and fades into the
-background - so both a luminance threshold and a flood from the border eat
-straight through the rim and into the badge. What the art does have is a
-reliable shape: a disc centred in the plate with four compass points reaching
-exactly as far as the disc. So the medallion extent is measured, and a circle
-inscribed in it keeps the badge whole and drops the corners.
+The art used to be round medallions on a near-black plate, and was cut with a
+circular mask because the stone rim faded into the plate with no edge to key
+against. The current art is the bare icon on a flat rose matte, which keys
+cleanly: the matte is a single colour with almost no variance, and there is a
+wide gap between it and anything in the artwork. A circular mask would now cut
+the corners off icons that are not round.
+
+Luxuries used to be the gold badge tinted violet, a stand-in noted as wanting
+real art. There is real art now, so the tint is gone.
 
 Each icon is also written in a "loss" colour, which the city window uses for
 hunger, corruption, waste and shortage.
+
+Usage:
+    python3 scripts/import_resource_icons.py [--source ~/rhYcivtextures/resources]
 """
 
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
-SOURCE = Path.home() / "Pictures"
-OUT = Path(__file__).resolve().parent.parent / "RaylibUI" / "FOSSart" / "Icons" / "Resources"
+REPOSITORY = Path(__file__).resolve().parents[1]
+OUT = REPOSITORY / "RaylibUI" / "FOSSart" / "Icons" / "Resources"
+DEFAULT_SOURCE = Path.home() / "rhYcivtextures" / "resources"
 
 # Big enough to stay sharp in the city window's resource rows at full scale and
-# in the Civilopedia, small enough that five of them cost little to load.
+# in the Civilopedia, small enough that a row of them costs little to load.
 SIZE = 96
 
-ICONS = ["food", "gold", "science", "production", "trade"]
+# Source name -> shipped name. The city window has always called luxuries "lux".
+ICONS = {
+    "food": "food",
+    "production": "production",
+    "trade": "trade",
+    "gold": "gold",
+    "luxury": "lux",
+    "science": "science",
+}
 
-# A pixel this dark is bare plate. Used only to measure how far the medallion
-# reaches, never to decide a pixel's own transparency.
-PLATE = 12
+# Which icons the city window also needs in the loss colour.
+LOSS_ICONS = ("food", "production", "trade")
 
-# Feather on the cut edge, as a fraction of the radius: enough to avoid a hard
-# jagged rim, small enough not to eat the frame.
-FEATHER = 0.012
+# Distance from the matte colour at which a pixel is fully matte, and at which it
+# is fully artwork. The matte is flat to within about two levels, and the nearest
+# artwork sits far outside this band, so the ramp is narrow on purpose.
+MATTE_NEAR = 30.0
+MATTE_FAR = 80.0
 
-
-def medallion_box(rgb: np.ndarray) -> tuple[int, int, int, int]:
-    """The bounds of everything that is not bare plate, as (l, t, r, b)."""
-    lit = rgb.mean(axis=2) > PLATE
-    rows = np.flatnonzero(lit.any(axis=1))
-    cols = np.flatnonzero(lit.any(axis=0))
-    if rows.size == 0 or cols.size == 0:
-        return 0, 0, rgb.shape[1], rgb.shape[0]
-    return int(cols[0]), int(rows[0]), int(cols[-1]) + 1, int(rows[-1]) + 1
-
-
-def circular_alpha(shape: tuple[int, int], box: tuple[int, int, int, int]) -> np.ndarray:
-    left, top, right, bottom = box
-    cx, cy = (left + right - 1) / 2, (top + bottom - 1) / 2
-    radius = min(right - left, bottom - top) / 2
-
-    ys, xs = np.ogrid[: shape[0], : shape[1]]
-    distance = np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2)
-    edge = max(1.0, radius * FEATHER)
-    return np.clip((radius - distance) / edge + 0.5, 0, 1) * 255
+# Fraction of the canvas left clear around the icon.
+MARGIN = 0.04
 
 
-def cut(name: str) -> Image.Image:
-    plate = Image.open(SOURCE / f"{name}.png").convert("RGB")
-    rgb = np.asarray(plate).astype(np.uint8)
+def matte_colour(rgb: np.ndarray) -> np.ndarray:
+    """The matte, taken from the border rather than assumed."""
+    border = np.concatenate([
+        rgb[:3].reshape(-1, 3), rgb[-3:].reshape(-1, 3),
+        rgb[:, :3].reshape(-1, 3), rgb[:, -3:].reshape(-1, 3),
+    ])
+    values, counts = np.unique(border, axis=0, return_counts=True)
+    return values[counts.argmax()].astype(np.float64)
 
-    box = medallion_box(rgb)
-    alpha = circular_alpha(rgb.shape[:2], box).astype(np.uint8)
-    cutout = Image.fromarray(np.dstack([rgb, alpha]), "RGBA")
 
-    # Crop to the disc, so every icon is the same square footprint and rows of
-    # them line up without any dead margin.
-    left, top, right, bottom = box
-    cx, cy = (left + right - 1) / 2, (top + bottom - 1) / 2
-    radius = min(right - left, bottom - top) / 2
-    cutout = cutout.crop((round(cx - radius), round(cy - radius),
-                          round(cx + radius), round(cy + radius)))
+def cut(path: Path) -> Image.Image:
+    rgb = np.asarray(Image.open(path).convert("RGB")).astype(np.float64)
+    matte = matte_colour(rgb)
 
-    return cutout.resize((SIZE, SIZE), Image.LANCZOS)
+    distance = np.linalg.norm(rgb - matte, axis=-1)
+    alpha = np.clip((distance - MATTE_NEAR) / (MATTE_FAR - MATTE_NEAR), 0.0, 1.0)
+
+    # Take the matte back out of the edge rather than eroding it away. These icons
+    # are full of thin detail -- the ring's band, the sparkles, the wheat ears --
+    # and an erosion wide enough to remove the pink rim eats those too. Every
+    # part-transparent pixel is a blend of artwork and matte in known proportion,
+    # so the matte's share can simply be subtracted.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        unmixed = (rgb - (1.0 - alpha)[..., None] * matte) / np.maximum(alpha, 1e-6)[..., None]
+    cleaned = np.where(alpha[..., None] > 0.0, np.clip(unmixed, 0, 255), 0.0)
+
+    icon = Image.fromarray(cleaned.astype(np.uint8), "RGB")
+    icon.putalpha(Image.fromarray((alpha * 255).astype(np.uint8), "L"))
+
+    bounds = icon.getbbox()
+    if bounds is None:
+        raise SystemExit(f"{path.name}: nothing left after keying the matte")
+    icon = icon.crop(bounds)
+
+    inner = round(SIZE * (1 - 2 * MARGIN))
+    icon.thumbnail((inner, inner), Image.LANCZOS)
+    canvas = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    canvas.alpha_composite(icon, ((SIZE - icon.width) // 2, (SIZE - icon.height) // 2))
+    return canvas
 
 
 def to_loss(icon: Image.Image) -> Image.Image:
@@ -96,45 +115,29 @@ def to_loss(icon: Image.Image) -> Image.Image:
     return Image.fromarray(np.dstack([tinted, alpha]).astype(np.uint8), "RGBA")
 
 
-def to_lux(gold: Image.Image) -> Image.Image:
-    """A stand-in luxuries medallion, until there is drawn art for it.
-
-    Luxuries sit in the same row as taxes and science in the city window, so
-    leaving it as the old 14-pixel sheet sprite would have put one coarse icon
-    between two medallions. This tints the gold badge violet, which reads as
-    luxury and keeps the row consistent, and should be replaced by real art.
-    """
-    pixels = np.asarray(gold).astype(np.float32)
-    rgb, alpha = pixels[..., :3], pixels[..., 3:]
-    grey = rgb @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
-    tinted = np.dstack([
-        np.clip(grey * 0.92 + 28, 0, 255),
-        np.clip(grey * 0.44, 0, 255),
-        np.clip(grey * 1.02 + 34, 0, 255),
-    ])
-    return Image.fromarray(np.dstack([tinted, alpha]).astype(np.uint8), "RGBA")
-
-
 def main() -> int:
-    missing = [n for n in ICONS if not (SOURCE / f"{n}.png").exists()]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    args = parser.parse_args()
+
+    missing = [n for n in ICONS if not (args.source / f"{n}.png").exists()]
     if missing:
-        print(f"missing source art: {', '.join(missing)}", file=sys.stderr)
+        print(f"missing source art in {args.source}: {', '.join(missing)}", file=sys.stderr)
         return 1
 
     OUT.mkdir(parents=True, exist_ok=True)
-    for name in ICONS:
-        icon = cut(name)
-        icon.save(OUT / f"{name}.png")
-        print(f"{OUT.name}/{name}.png {icon.size}")
+    for source_name, shipped_name in ICONS.items():
+        icon = cut(args.source / f"{source_name}.png")
+        icon.save(OUT / f"{shipped_name}.png", optimize=True)
+        opaque = np.asarray(icon)[..., 3] > 8
+        print(f"  {shipped_name}.png  {icon.size[0]}x{icon.size[1]}  "
+              f"{100 * opaque.mean():.0f}% covered")
 
-    for name in ("food", "production", "trade"):
+    for name in LOSS_ICONS:
         loss = to_loss(Image.open(OUT / f"{name}.png"))
-        loss.save(OUT / f"{name}_loss.png")
-        print(f"{OUT.name}/{name}_loss.png {loss.size}")
+        loss.save(OUT / f"{name}_loss.png", optimize=True)
+        print(f"  {name}_loss.png  {loss.size[0]}x{loss.size[1]}")
 
-    lux = to_lux(Image.open(OUT / "gold.png"))
-    lux.save(OUT / "lux.png")
-    print(f"{OUT.name}/lux.png {lux.size} (placeholder)")
     return 0
 
 
