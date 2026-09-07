@@ -71,6 +71,16 @@ Everything below was reported in the 0.1.2 beta test (#111).
   defines including disabled ones costing nothing, so a new city routinely opened
   building an item that was not buildable and sat at zero shields.
 
+### Fixed — elsewhere
+
+- **The crash report for a session that died without a handler is produced on
+  Windows too.** The record is held open for the length of a session, and Windows
+  will not let an open file be renamed or removed unless it was opened to allow
+  it, so promoting a leftover record into a crash report threw instead. It only
+  bit when a session record was still open in the same process — a real previous
+  session is a dead process, which holds no handle — but the file is now opened
+  to allow the next launch to take it over regardless.
+
 ### Fixed — reading the screen
 
 - **Small text is legible.** The font atlases are rasterised at 96 to 112 pixels

@@ -56,10 +56,23 @@ public static class SessionLog
         {
             try
             {
+                // Release any record this process is already holding. Beginning a
+                // session while one is open is not something the game does -- a
+                // real previous session is a dead process, and a dead process holds
+                // no handle -- but on Windows a file open without FileShare.Delete
+                // cannot be renamed or removed, so promoting it would throw rather
+                // than produce the crash report. Closing first makes the two cases
+                // behave alike.
+                _writer?.Dispose();
+                _writer = null;
+
                 previous = PromotePreviousSession();
 
+                // FileShare.Delete so the next launch can always take this file over,
+                // whatever state this process is left in.
                 _writer = new StreamWriter(
-                    new FileStream(ActivePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    new FileStream(ActivePath, FileMode.Create, FileAccess.Write,
+                        FileShare.Read | FileShare.Delete))
                 {
                     AutoFlush = true,
                 };
