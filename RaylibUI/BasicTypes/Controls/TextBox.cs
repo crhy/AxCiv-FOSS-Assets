@@ -178,7 +178,11 @@ public class TextBox : BaseControl
 
     private void SetEditPosition(int newEditPosition)
     {
-        _editPosition = newEditPosition;
+        // Clamped rather than trusted. Every caller here keeps it in range today,
+        // but the caret is driven by keys arriving from anywhere and a text box is
+        // not worth taking a session down over; Substring below throws the moment
+        // it is out by one.
+        _editPosition = Math.Clamp(newEditPosition, 0, _text.Length);
         _editWidth = (int)TextRendering.Measure(_active?.Look.DefaultFont ?? Fonts.Tnr, _text.Substring(0, _editPosition), TextRendering.LegibleUiFontSize(Styles.BaseFontSize), 1).X;
     }
 }

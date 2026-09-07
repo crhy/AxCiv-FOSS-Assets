@@ -1,16 +1,16 @@
-**The map, from a full beta test.**
+**Saving, and a turn that ends when you press Enter.**
 
-Everything here was reported against 0.1.2 in issue #111.
+Everything here was reported against 0.1.3 in issue #113, or found while fixing it.
 
 ## Install
 
 | Platform | Download |
 |---|---|
-| **Windows** (x64) | `rhYciv-0.1.3-win-x64.zip` — unzip, run `RaylibUI.exe` |
-| **macOS** (Apple silicon) | `rhYciv-0.1.3-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
-| **macOS** (Intel) | `rhYciv-0.1.3-osx-x64.zip` — same |
-| **Linux** (x64) | `rhYciv-0.1.3-linux-x64.tar.gz` — extract, run `./RaylibUI` |
-| **Linux** (Flatpak) | `rhYciv-0.1.3-x86_64.flatpak` |
+| **Windows** (x64) | `rhYciv-0.1.4-win-x64.zip` — unzip, run `RaylibUI.exe` |
+| **macOS** (Apple silicon) | `rhYciv-0.1.4-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
+| **macOS** (Intel) | `rhYciv-0.1.4-osx-x64.zip` — same |
+| **Linux** (x64) | `rhYciv-0.1.4-linux-x64.tar.gz` — extract, run `./RaylibUI` |
+| **Linux** (Flatpak) | `rhYciv-0.1.4-x86_64.flatpak` |
 
 Nothing else is needed. No commercial Civilization II installation, no runtime to install — each download carries its own .NET runtime and the complete art set.
 
@@ -29,42 +29,51 @@ xattr -dr com.apple.quarantine /Applications/rhYciv.app
 **Linux Flatpak**:
 
 ```
-flatpak install --user ./rhYciv-0.1.3-x86_64.flatpak
+flatpak install --user ./rhYciv-0.1.4-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
+## Saving
+
+**Save Game and Load Game work from the menu.** Both entries carried no command id, so they were drawn and did nothing when clicked. The commands behind them existed and were bound to Ctrl+S and Ctrl+L, so saving worked — but only if you already knew the shortcut, which is not where anyone looks for it.
+
+**Autosave each turn actually saves.** It has been a checkbox in Game Options for as long as the dialog has existed, and nothing ever read it. It writes at the start of your turn, before anything has moved, so the newest autosave is always a position that can be picked up cleanly. Three slots rotate, and a failure part way through cannot destroy the one it is writing over.
+
+**Opening the Save dialog could take the game down.** The name it offers is built from the leader's initials, taken with `Substring(0, 2)` — which throws on a one-letter leader, or a custom civilisation saved with the name left blank. It crashed before the dialog drew, so nothing on screen said why.
+
+## The turn
+
+**Enter ends the turn on the first press.** Ending a turn walks every unit giving it its end-of-turn processing, and it returned the moment it met one that needed a decision from you — a GoTo whose route no longer exists, a settler freed by finishing what it was building — abandoning the rest of the list. So each press got only as far as the next such unit.
+
+It was not only slow. The units behind the one that stopped the walk were **never processed at all**, so a unit told to fortify did not become fortified, and did not get its defensive bonus, until whatever preceded it in the list had been dealt with.
+
+## Diplomats
+
+A Diplomat has no attack strength, so walking one into an enemy unit or city was refused outright: the unit could be researched, built and marched across the map, and then did nothing whatever.
+
+Moving one onto somebody else's unit or city now offers to buy it. A lone unit in the open can be bribed; a stack cannot, which is the point of standing a second unit beside a valuable one, and nor can a garrison inside a city — that is bought by inciting the city, which brings its defenders over with it. A capital cannot be bought at any price. Both prices rise with the treasury the owner is sitting on and fall away with distance from the seat of their government.
+
+## Rules
+
+**Huts use the original game's measured odds.** There are five outcomes, equally likely — tribes, gold, mercenaries, scrolls, barbarians — and an empty village is **not one of them**. It exists only as a consolation when one of the five cannot be delivered. It was a sixth outcome here, drawn as often as the rest. Tribes and barbarians are also withheld in favour of mercenaries near a city, or before you have founded one.
+
+**Switching production says what it will cost.** Changing between a unit, a building and a wonder forfeits a share of the work already done. The engine has always charged it; nothing said so, and the shields simply disappeared.
+
 ## The map
 
-**Roads and railways connect.** A road is not one picture per square: the renderer composites one half-spoke per connected neighbour, and each has to run from the centre of the square to the exact point on the boundary where that neighbour is reached, so the two halves meet. They were being cut from the painted sources by measuring where the ink happened to lie — free-hand art, so it began and ended wherever the brush did. The geometry is constructed now and the painted surface swept along it.
+**The coastline.** It ran through saturated turquoise from 48 pixels out with a wide cream beach behind it, which drew a lit outline round every island. Measured against a photograph of a real fjord coast instead: the sea is nearly black up to the rock, the lightening at the shore is slight, and the beach is a thread. The shoreline also wanders further, so a coast is lobed rather than a chain of straight facets, and the water inside an enclosed square is lopsided instead of the perfect circle it was.
 
-**Rivers run as rivers, and reach the sea.** A river *is* one picture per square, chosen by which of the four neighbouring squares also carry water — sixteen distinct pictures. The art set held eight free-hand meanders, handed out by index modulo eight, so what was drawn had nothing to do with where the river ran and no two squares lined up. All sixteen are now composed from halves that meet on the boundary. River mouths had never been replaced at all: that coarse blue arc where a river met the coast was the compatibility sheet showing through.
+**The generation matte is gone.** The art is drawn on magenta and cut out, and cutting sets the alpha without touching the colour underneath — so citizens in the city window were outlined and veiled in pink, and several city sprites had magenta specks on the roofs.
 
-**An ocean square is drawn as water.** The coastline art is chosen by how many of a square's four corners are land, and with three or four of them the shoreline never crossed the square at all, so it came out as solid grass. A one-square bay was a meadow, and the whales in it appeared to be breaching out of a field.
+**The marker for a unit killed in combat appears.** It worked out who had died from the per-round hitpoint series, which records each unit's health at the *start* of a round, before that round's damage. The loser's last entry is therefore its health just before the fatal blow — always above zero — so it never once decided anybody had died, and the pause and the marker never happened at all.
 
-**Irrigation and farmland are ploughed fields.** They were still the compatibility sheet's 64×32 cell scaled up, which over photographic terrain reads as a blue lattice thrown across the square. Irrigation is hand-cut ditches; farmland is the same field cross-ploughed, with the channels meeting at the junctions.
+**Production shields are an even block**, every row the same length and as near square as the cost allows, rather than filling to the panel's width and stranding a single shield on the last row. **The flag over a city is three times the size**, and **special resources sit high in their square**, so a whale breaches out of water rather than sand.
 
-**The flag over a city is sharp**, and the goody hut is the painted art. Both were drawing the classic sprite — a dozen pixels across — enlarged to match a map composed several times larger.
+## Elsewhere
 
-**The map no longer scrolls off into the fog.** Movement was being announced to every player who had ever *explored* the square it happened on rather than to those who could see it now, so every enemy step through territory you had once walked was animated on your map, and the view went after it.
+- **Left and right step between cities** from inside the city window.
+- The caret in a text box is clamped rather than trusted, so a key arriving with it out of range cannot end a session.
 
-## Playing a turn
-
-**A road is worth a third of a movement point to every unit.** There was a rule that a unit whose whole allowance was a single movement point spent all of it on any move costing less than a full point — which is every move along a road. Settlers, Warriors, Phalanx and Musketeers were all walking their own roads at one square a turn.
-
-**Enter ends the turn**, and the side panel says so, flashing *End of Turn (Press ENTER)* once every unit has moved.
-
-**A kill can be seen.** Combat ended on the last frame of the explosion and handed straight back, so a unit killed during someone else's turn was gone before you could see it die. The map holds on the square for about a second now and marks it with a fallen-soldier icon; another civilisation's move is held at its destination for the same reason.
-
-**Huts usually hold something.** The six outcomes were drawn evenly, and several of the others degrade into a consolation of their own, so a good third of huts came up empty. Mercenaries also arrive as soldiers now, rather than as a copy of whatever unit walked into the village — which had been handing a free Settlers to any settler that found a hut.
-
-**A new city builds something it can build.** The opening item was the cheapest thing in the entire ruleset, drawn from tables that carry every slot the file format defines, including disabled ones costing nothing.
-
-## Reading the screen
-
-- **Small text is legible.** The font atlases are rasterised at 96–112 pixels and most text is drawn between 14 and 20. With only bilinear filtering, shrinking a glyph five times samples a twentieth of the pixels it covers and drops most of the stroke. They are mipmapped now.
-- **City names in the Go To dialog** are set at a readable size; the listbox text size was fixed at 12 when the interface was laid out against a much smaller window.
-- **The Civilopedia's technology description** is inset from its panel border instead of starting hard against the rule.
-- **Production shields are justified** across the width of the box, so the row reads as a gauge.
 
 ## Known limitations
 

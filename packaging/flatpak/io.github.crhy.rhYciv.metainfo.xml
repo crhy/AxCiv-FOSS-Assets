@@ -34,6 +34,15 @@
     git history; this file describes the 0.1.x line only.
   -->
   <releases>
+    <release version="0.1.4" date="2026-09-07">
+      <description>
+        <p>Saving, and a turn that ends when you press Enter.</p>
+        <p>Save Game and Load Game are in the Game menu and work when clicked; before this they were drawn but carried no action, and saving was only reachable by a keyboard shortcut. "Autosave each turn" has been a checkbox for a long time and now actually writes, three rotating slots taken at the start of each turn. Opening the Save dialog could take the game down before it drew, if the leader's name was shorter than two characters.</p>
+        <p>Ending a turn no longer takes several presses of Enter. It stopped at the first unit that needed a decision and abandoned the rest of the army, so the units behind it were never processed at all -- a unit told to fortify did not become fortified until whatever preceded it had been dealt with.</p>
+        <p>Diplomats can buy units and cities. A lone unit in the open can be bribed, a garrison comes with the city it defends, and a capital cannot be bought at any price.</p>
+        <p>Huts use the original game's measured odds: five outcomes at one chance in five each, with no empty village among them. The coastline is dark water meeting a thread of beach instead of a lit turquoise outline, the generation matte is gone from the citizens and the city roofs, production shields are drawn as an even block, and the marker for a unit killed in combat appears -- it never once did.</p>
+      </description>
+    </release>
     <release version="0.1.3" date="2026-09-06">
       <description>
         <p>The map, from a full beta test.</p>

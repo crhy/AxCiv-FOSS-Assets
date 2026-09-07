@@ -5,6 +5,85 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
+## [0.1.4] — 2026-09-07
+
+Saving, and the fixes from the 0.1.3 beta test (#113).
+
+### Saving and loading
+
+- **Save Game and Load Game work from the menu.** Both entries carried no command
+  id, so they were drawn and did nothing when clicked. The commands behind them
+  existed and were bound to Ctrl+S and Ctrl+L, so saving worked — but only if you
+  already knew the shortcut.
+- **Autosave each turn actually saves.** It has been a checkbox in Game Options for
+  as long as the dialog has existed and nothing ever read it. It writes at the
+  start of the player's turn, before anything has moved, so the newest autosave is
+  always a position that can be picked up cleanly. Three slots rotate, written so
+  that a failure part way through cannot destroy the one it is replacing.
+- **Opening the Save dialog no longer crashes on a short leader name.** The
+  suggested file name took the leader's first two characters with `Substring`,
+  which throws on a one-letter leader or a blank name — before the dialog drew, so
+  nothing on screen said why.
+
+### The turn
+
+- **Enter ends the turn on the first press.** Ending a turn walks every unit giving
+  it its end-of-turn processing, and it returned the moment it met one that needed
+  a decision, abandoning the rest of the list. So each press got only as far as the
+  next such unit. It was not only slow: the units behind it were never processed at
+  all, so a unit told to fortify did not become fortified — and did not get its
+  defensive bonus — until whatever preceded it had been resolved.
+
+### Diplomats
+
+- **A Diplomat can buy units and cities.** It has no attack strength, so walking
+  one into an enemy was refused outright and the unit was good for nothing. A lone
+  unit in the open can be bribed; a stack cannot, and nor can a garrison inside a
+  city — that is bought by inciting the city, which brings its defenders across. A
+  capital cannot be incited at any price. Prices rise with the owner's treasury and
+  fall with distance from the seat of their government.
+
+### Rules
+
+- **Huts use the original game's measured odds.** There are five outcomes, equally
+  likely — tribes, gold, mercenaries, scrolls, barbarians — and an empty village is
+  not one of them; it exists only as a consolation when one of the five cannot be
+  delivered. It was a sixth outcome drawn as often as the rest. Tribes and
+  barbarians are withheld in favour of mercenaries near a city, or before the
+  finder has founded one.
+- **Switching production says what it will cost.** The penalty for changing between
+  a unit, a building and a wonder has always been charged; nothing said so, and the
+  shields simply disappeared.
+
+### The map
+
+- **The coastline is dark water meeting a thread of beach.** It ran through
+  saturated turquoise from 48 pixels out with a wide cream beach behind it, which
+  drew a lit outline round every island. The shoreline wanders further off the line
+  between its corners, so a coast is lobed rather than a chain of facets, and the
+  water held open inside an enclosed square is lopsided instead of a perfect circle.
+- **The generation matte is gone from the art.** Citizens in the city window were
+  outlined and veiled in magenta and several city sprites had pink specks on the
+  roofs. Edge pixels have the matte's share subtracted back out; opaque patches are
+  removed where they reach outside the picture and painted in where they are sealed
+  within it.
+- **The marker for a unit killed in combat appears.** It decided who had died from
+  the per-round hitpoint series, which records health at the *start* of a round —
+  so the loser's last entry is its health just before the fatal blow, always above
+  zero, and the pause and marker never once happened.
+- **Production shields are an even block.** Rows all hold the same number and the
+  block is as near square as the cost allows, instead of filling to the panel width
+  and leaving a single shield stranded on the last row.
+- **The flag over a city is three times the size**, and special resources sit high
+  in their square so a whale breaches out of water rather than sand.
+
+### Elsewhere
+
+- **Left and right step between cities** from inside the city window.
+- The caret in a text box is clamped rather than trusted, so a key arriving with it
+  out of range cannot end a session.
+- A hung CI runner no longer blocks every later run on master.
+
 ## [0.1.3] — 2026-09-06
 
 Everything below was reported in the 0.1.2 beta test (#111).
