@@ -56,6 +56,13 @@ jobs:
       # whole matrix. It verifies the asset manifest and Civilopedia text, checks
       # the build version against the AppStream metainfo, then restores, builds
       # and tests.
+      # The art checks read PNGs; everything else in the gate is standard library.
+      # Without these the matte check stands aside, so install them here to make
+      # sure it actually runs.
+      - name: Set up Python image libraries
+        shell: bash
+        run: python3 -m pip install --quiet --disable-pip-version-check numpy pillow
+
       - name: Run the quality gate
         shell: bash
         run: scripts/quality_gate.sh

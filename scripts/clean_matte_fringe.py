@@ -30,8 +30,12 @@ import argparse
 import sys
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    from PIL import Image
+except ImportError:  # pragma: no cover - depends on the machine, not the code
+    np = None
+    Image = None
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 DEFAULT_ROOT = REPOSITORY / "RaylibUI" / "FOSSart"
@@ -201,6 +205,14 @@ def main() -> int:
     parser.add_argument("--check", action="store_true",
                         help="report what is still matte-coloured without changing it")
     args = parser.parse_args()
+
+    # The gate runs everywhere, including on a machine set up only to build and
+    # test. Reading images needs numpy and Pillow, which the rest of the gate does
+    # not, so the check says so and stands aside rather than failing a build over a
+    # missing tool. CI installs both, so the check is still enforced there.
+    if np is None or Image is None:
+        print("  matte: skipped (needs numpy and Pillow)")
+        return 0
 
     if args.check:
         hits = survey(args.root)
