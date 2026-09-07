@@ -301,32 +301,24 @@ public class ProductionBox : BaseControl
         var scale = _cityWindow.Scale;
         var shieldTop = ShieldBoxTop * scale;
         var shieldBottom = Height - Padding * scale;
-        var lines = (int)((shieldBottom - shieldTop) / _shieldHeight);
-        if (lines <= 0)
+        var roomForRows = (int)((shieldBottom - shieldTop) / _shieldHeight);
+        if (roomForRows <= 0)
         {
             return;
         }
 
         var posX = Bounds.X + Padding * scale;
-        var posY = Bounds.Y + shieldTop;
         var drawWidth = Width - 2 * Padding * scale;
+        var inset = 3 * scale;
 
-        // Civ II fills the box across before it fills it down: a ten-shield Warriors
-        // is one row of ten, not ten rows of one. Deriving the row count from
-        // RowsShieldBox did the opposite and drew a single vertical column for
-        // anything cheap. Fill each row to the width instead, and only pack more
-        // shields per row when the cost will not fit in the rows available.
-        var maxRows = Math.Max(1, Math.Min(lines, _shieldBoxRows));
-        var shieldsPerRow = Math.Max(1, (int)(drawWidth / Math.Max(1f, _shieldWidth)));
-        if (_totalCost > shieldsPerRow * maxRows)
-        {
-            shieldsPerRow = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)maxRows));
-        }
-        shieldsPerRow = Math.Min(shieldsPerRow, Math.Max(1, _totalCost));
-        lines = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)shieldsPerRow));
+        var maxPerRow = Math.Max(1, (int)((drawWidth - 2 * inset) / Math.Max(1f, _shieldWidth)));
+        var maxRows = Math.Max(1, Math.Min(roomForRows, _shieldBoxRows));
+        var (rows, perRow) = ShieldBoxLayout.Choose(_totalCost, maxRows, maxPerRow,
+            _shieldWidth, _shieldHeight);
 
+        var posY = Bounds.Y + shieldTop;
         Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX + drawWidth, posY), 1f, _pen1);
-        var lineHeight = 6 * scale + lines * _shieldHeight;
+        var lineHeight = 6 * scale + rows * _shieldHeight;
         posY = Bounds.Y + shieldTop + lineHeight;
         Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX + drawWidth, posY), 1f, _pen2);
 
@@ -334,34 +326,19 @@ public class ProductionBox : BaseControl
         Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX, posY + lineHeight), 1f, _pen1);
         Graphics.DrawLineEx(new Vector2(posX + drawWidth, posY), new Vector2(posX + drawWidth, posY + lineHeight), 1f, _pen2);
 
-        // Justify the row across the box rather than packing the shields together
-        // and leaving the rest of the row empty. Civ II spreads a row of shields to
-        // the full width of the box, so the last one for the turn's cost sits at the
-        // right-hand edge and the row reads as a gauge. Packing them left meant a
-        // ten-shield item filled a third of the box and stopped.
-        var inset = 3 * scale;
-        var track = drawWidth - 2 * inset - _shieldWidth;
-        var step = shieldsPerRow > 1 ? track / (shieldsPerRow - 1) : 0f;
-        var firstX = posX + inset;
-        if (shieldsPerRow == 1)
-        {
-            firstX = posX + (drawWidth - _shieldWidth) / 2f;
-        }
-        else if (step > _shieldWidth)
-        {
-            // Never spread them so far apart that they stop reading as a row; fall
-            // back to touching shields, centred, once the gaps exceed a shield.
-            step = _shieldWidth;
-            firstX = posX + (drawWidth - (shieldsPerRow - 1) * step - _shieldWidth) / 2f;
-        }
+        // The block of shields is centred in the box at its natural size. It is a
+        // count, and a count reads best as a block; stretching it to the panel's
+        // width made ten shields into a sparse line.
+        var blockWidth = perRow * _shieldWidth;
+        var firstX = posX + (drawWidth - blockWidth) / 2f;
 
         var count = 0;
-        for (var row = 0; row < lines && count < progressShields; row++)
+        for (var row = 0; row < rows && count < progressShields; row++)
         {
-            for (var col = 0; col < shieldsPerRow && count < progressShields; col++)
+            for (var col = 0; col < perRow && count < progressShields; col++)
             {
                 Graphics.DrawTextureEx(_shieldIcon,
-                    new Vector2((int)(firstX + step * col),
+                    new Vector2((int)(firstX + _shieldWidth * col),
                         (int)(Bounds.Y + shieldTop + inset + _shieldHeight * row)),
                     0f, _shieldScale, Color.White);
                 count++;
