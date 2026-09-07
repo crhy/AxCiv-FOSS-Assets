@@ -58,7 +58,18 @@ namespace Model.Core.Cities
         public readonly SortedList<int, Improvement> OrderedImprovements = new();
         public IReadOnlyList<Improvement> Improvements => OrderedImprovements.Values.ToArray();
         public List<Unit> UnitsInCity => Location.UnitsHere;
-        public List<Unit> SupportedUnits => Owner.Units.Where(unit => unit.HomeCity == this).ToList();
+        /// <summary>
+        /// The units this city pays for.
+        /// <para>
+        /// A unit killed in combat is marked dead and taken off the map, but it is
+        /// left in its owner's unit list -- only disbanding removes it. Without the
+        /// check for that, a city went on listing its dead in the support box and,
+        /// worse, went on paying their shield and food upkeep and counting them
+        /// towards the unhappiness of troops in the field.
+        /// </para>
+        /// </summary>
+        public List<Unit> SupportedUnits =>
+            Owner.Units.Where(unit => !unit.Dead && unit.HomeCity == this).ToList();
         public bool AnyUnitsPresent() => Location.UnitsHere.Count > 0;
 
         public int FoodProduction { get; set; }

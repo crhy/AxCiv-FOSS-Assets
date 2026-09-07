@@ -70,7 +70,7 @@ public class MockPlayer : IPlayer
     {
     }
 
-    public void WaitingAtEndOfTurn()
+    public virtual void WaitingAtEndOfTurn()
     {
     }
 
@@ -98,7 +98,7 @@ public class MockPlayer : IPlayer
     {
     }
 
-    public void TurnStart(int turnNumber)
+    public virtual void TurnStart(int turnNumber)
     {
     }
 

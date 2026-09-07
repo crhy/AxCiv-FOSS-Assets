@@ -58,6 +58,58 @@ public class SaveRoundTripTests : IDisposable
     }
 
     [Fact]
+    public void ScriptDataOnAUnit_SurvivesTheRoundTrip()
+    {
+        // Extended data is a dictionary, and the save writer treated every
+        // dictionary as a plain sequence -- so it came out as an array of
+        // {Key, Value} objects while the reader expected an object, and the save
+        // could not be read back at all. Scripts put this on units routinely: the
+        // barbarians carry a horde flag, so in practice a game became unloadable as
+        // soon as barbarians appeared.
+        var (game, ruleset, _) = CleanRoomGameFactory.CreateGame();
+        game.ConnectPlayer(new MockPlayer(game.GetPlayerCiv));
+
+        var unit = game.GetPlayerCiv.Units.First(u => !u.Dead);
+        unit.ExtendedData["horde"] = "1";
+        unit.ExtendedData["errand"] = "scout the coast";
+
+        var reloaded = SaveAndLoad(game, ruleset);
+        var reloadedUnit = reloaded.AllCivilizations
+            .First(civ => civ.Id == game.GetPlayerCiv.Id)
+            .Units.First(u => !u.Dead && u.ExtendedData.Count > 0);
+
+        Assert.Equal("1", reloadedUnit.ExtendedData["horde"]);
+        Assert.Equal("scout the coast", reloadedUnit.ExtendedData["errand"]);
+    }
+
+    [Fact]
+    public void ASaveFromBeforeTheDictionaryFix_StillLoads()
+    {
+        // Older builds wrote extended data as an array of key/value objects. A game
+        // saved then must still open.
+        var (game, ruleset, _) = CleanRoomGameFactory.CreateGame();
+        game.ConnectPlayer(new MockPlayer(game.GetPlayerCiv));
+        game.GetPlayerCiv.Units.First(u => !u.Dead).ExtendedData["horde"] = "1";
+
+        var path = Path.Combine(_directory, "legacy.sav");
+        Write(game, ruleset, path);
+
+        var legacy = File.ReadAllText(path).Replace(
+            "\"ExtendedData\": {\n          \"horde\": \"1\"\n        }",
+            "\"ExtendedData\": [{ \"Key\": \"horde\", \"Value\": \"1\" }]");
+        File.WriteAllText(path, legacy);
+        Assert.DoesNotContain("\"ExtendedData\": {", File.ReadAllText(path));
+
+        var reloaded = new JsonSavFile().LoadGame(File.ReadAllBytes(path), ruleset,
+            RulesParser.ParseRules(ruleset));
+        var reloadedUnit = reloaded.AllCivilizations
+            .First(civ => civ.Id == game.GetPlayerCiv.Id)
+            .Units.First(u => !u.Dead && u.ExtendedData.Count > 0);
+
+        Assert.Equal("1", reloadedUnit.ExtendedData["horde"]);
+    }
+
+    [Fact]
     public void TheMap_ComesBackUnchanged()
     {
         var (game, ruleset, _) = CleanRoomGameFactory.CreateGame();

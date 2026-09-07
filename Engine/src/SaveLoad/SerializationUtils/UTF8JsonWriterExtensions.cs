@@ -64,6 +64,34 @@ public static class Utf8JsonWriterExtensions
             case TypeCode.Empty:
                 break;
             case TypeCode.Object:
+                // A dictionary is an IEnumerable of key/value pairs, and falling
+                // into the branch below wrote it as an array of {Key, Value}
+                // objects -- which the reader, which deserialises it as a
+                // Dictionary, cannot parse. Any save holding a unit with script
+                // data on it, such as a barbarian's horde flag, could not be
+                // loaded at all. Written as a JSON object it round-trips.
+                if (value is IDictionary dictionary)
+                {
+                    if (dictionary.Count == 0)
+                    {
+                        return;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(name))
+                    {
+                        writer.WritePropertyName(name);
+                    }
+
+                    writer.WriteStartObject();
+                    foreach (DictionaryEntry entry in dictionary)
+                    {
+                        writer.WritePropertyName(Convert.ToString(entry.Key) ?? string.Empty);
+                        writer.WriteStringValue(Convert.ToString(entry.Value) ?? string.Empty);
+                    }
+                    writer.WriteEndObject();
+                    break;
+                }
+
                 if (value is IEnumerable enumerable)
                 {
                     var enumerator = enumerable.GetEnumerator();

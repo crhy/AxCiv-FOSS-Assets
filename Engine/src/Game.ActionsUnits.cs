@@ -56,15 +56,43 @@ namespace RhyCiv.Engine
             }
         }
 
+        /// <summary>
+        /// Most times round the selection loop below before giving up. One pass per
+        /// unit that turns out to be unusable is plenty; the bound is only here so a
+        /// selector that kept answering with the same unit could not hang the game.
+        /// </summary>
+        private const int SelectionAttempts = 64;
+
         private void ChooseNextUnitCore()
         {
+            var player = Players[_activeCiv.Id];
             var units = _activeCiv.Units.Where(u => !u.Dead).ToList();
 
-            var player = Players[_activeCiv.Id];
-            
-            //Look for units on this square or neighbours of this square
-            
-            var nextUnit = NextUnit(player, units);
+            // Look for units on this square or neighbours of this square.
+            //
+            // This is a loop rather than a recursive call. It used to ask again by
+            // calling ChooseNextUnit, which the re-entrancy guard turns into a no-op
+            // while a selection is already in progress -- so when the chosen unit
+            // turned out to be unusable, nothing further happened at all. The
+            // interface was left with no active unit *and* without being told the
+            // turn was waiting to be ended, which is the state where a unit appears
+            // to blink without responding and Enter seems to do nothing.
+            Unit? nextUnit = null;
+            for (var attempt = 0; attempt < SelectionAttempts; attempt++)
+            {
+                nextUnit = NextUnit(player, units);
+                if (nextUnit == null || nextUnit.AwaitingOrders)
+                {
+                    break;
+                }
+
+                // It cannot be given orders, so it must not be offered: the
+                // interface refuses a unit whose turn has ended and would be left
+                // pointing at nothing. Take it out of the running and look again.
+                player.WaitingList.Remove(nextUnit);
+                units.Remove(nextUnit);
+                nextUnit = null;
+            }
             
             // End turn if no units awaiting orders
             if (nextUnit == null)
@@ -94,11 +122,6 @@ namespace RhyCiv.Engine
                 //TODO: determine the true values of these extra props
                 OnUnitEvent?.Invoke(this, new ActivationEventArgs(unit: nextUnit, userInitiated: true, reactivation: false));
                 player.SetUnitActive(nextUnit, true);
-                // If the player immediately moved the unit it might be already dead or moved so choose again
-                if (nextUnit.Dead || nextUnit.MovePointsLost == nextUnit.MaxMovePoints)
-                {
-                    ChooseNextUnit();
-                }
             }
         }
 
@@ -128,11 +151,21 @@ namespace RhyCiv.Engine
 
         }
 
-        private Unit ResetWaiting(IPlayer player)
+        /// <summary>
+        /// Everything the player told to wait has come round again. The list is
+        /// emptied and the first of them that can still be given orders is offered.
+        /// <para>
+        /// This used to return the head of the list whatever state it was in. A unit
+        /// told to wait and then fortified, or spent, or killed, was handed to the
+        /// interface, which refuses a unit whose turn has ended -- leaving nothing
+        /// selected and the turn not marked as waiting either.
+        /// </para>
+        /// </summary>
+        private Unit? ResetWaiting(IPlayer player)
         {
-            var unit = player.WaitingList[0];
+            var waiting = player.WaitingList.ToList();
             player.WaitingList.Clear();
-            return unit;
+            return waiting.FirstOrDefault(unit => unit.AwaitingOrders);
         }
 
         /// <summary>

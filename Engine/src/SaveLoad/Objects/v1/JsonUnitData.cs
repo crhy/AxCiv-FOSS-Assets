@@ -44,6 +44,7 @@ public class JsonUnitData
         }
     }
 
+    [System.Text.Json.Serialization.JsonConverter(typeof(SerializationUtils.ForgivingDictionaryConverter))]
     public Dictionary<string, string>? ExtendedData { get; set; }
 
     public int X { get; set; }

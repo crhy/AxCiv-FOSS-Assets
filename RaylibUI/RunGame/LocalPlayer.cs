@@ -366,8 +366,15 @@ public class LocalPlayer : IPlayer
         // view piece instead, which the player can always move.
         if (unit != null && !ReferenceEquals(_activeUnit, unit))
         {
+            // The engine offered a unit that cannot be given orders. It should not
+            // any more, but if it ever does again the game must not be left with
+            // nothing selected and no idea that it is waiting: that is the state
+            // where a unit appears to blink without responding to anything and
+            // Enter looks like it has done nothing. Treat it as having nothing left
+            // to move, which is what it amounts to.
             _activeUnit = null;
             if (unit.CurrentLocation != null) ActiveTile = unit.CurrentLocation;
+            IsWaitingAtEndOfTurn = true;
             _gameScreen.ActiveMode = _gameScreen.ViewPiece;
             return;
         }

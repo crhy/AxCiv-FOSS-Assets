@@ -58,6 +58,11 @@ public abstract class BaseGameView : IGameView
     /// </summary>
     private const float FlagScale = 3f;
 
+    /// <summary>
+    /// How far left of its anchor the flag is drawn, as a share of its own width.
+    /// </summary>
+    private const float FlagLeftShift = 0.6f;
+
     public bool IsDefault { get; }
     public int Interval { get; }
     public IList<Tile> ActionTiles => _actionTiles;
@@ -341,7 +346,13 @@ public abstract class BaseGameView : IGameView
                     ? colours.LogicalSize * FlagScale
                     : new Vector2(flagTexture.Width, flagTexture.Height);
                 var flagRenderScale = GetContainedRenderScale(flagTexture, flagLogicalSize);
-                var flagOffset = cityImage.FlagLoc - new Vector2(0, flagLogicalSize.Y - 5)
+                // The anchor marks where the classic flag's pole stood, and the cloth
+                // hangs to the right of it. Drawing the art three times that size
+                // therefore pushed three times as much cloth across the buildings,
+                // so the flag is carried back to the left by most of the extra
+                // width it gained.
+                var flagShift = flagLogicalSize.X * FlagLeftShift;
+                var flagOffset = cityImage.FlagLoc - new Vector2(flagShift, flagLogicalSize.Y - 5)
                                  + GetContainedDrawOffset(flagTexture, flagLogicalSize, flagRenderScale);
                 elements.Add(new TextureElement(texture: flagTexture,
                     tile: tile, location: cityPos, offset: flagOffset,
