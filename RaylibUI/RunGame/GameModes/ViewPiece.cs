@@ -31,28 +31,9 @@ public class ViewPiece : IGameMode
 
         Actions = new Dictionary<Key, Func<bool>>
         {
-            {
-                Key.Enter, () =>
-                {
-                    var playerActiveTile = _gameScreen.Game.ActivePlayer.ActiveTile;
-                    if (playerActiveTile.CityHere != null)
-                    {
-                        _gameScreen.ShowCityWindow(playerActiveTile.CityHere);
-                        return true;
-                    }
-
-                    if (playerActiveTile.UnitsHere.Any(u => u.MovePoints > 0))
-                    {
-                        _gameScreen.ActivateUnits(playerActiveTile);
-                        return true;
-                    }
-
-                    // Nothing left to move: Enter ends the turn, as it does in
-                    // Civ II. Without this the only way on was the button in the
-                    // corner of the side panel.
-                    return _gameScreen.Player.EndTurnIfWaiting();
-                }
-            },
+            // Enter is not handled here. GameScreen routes it straight to the
+            // EndTurn command before any mode sees it, which is what ends a turn.
+            // A binding placed here would simply never run.
 
             { Key.D7, () => SetActive(-1, -1) }, { Key.D8, () => SetActive(0, -2) },
             { Key.D9, () => SetActive(1, -1) },

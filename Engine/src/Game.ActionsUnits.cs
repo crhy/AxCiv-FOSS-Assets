@@ -135,9 +135,35 @@ namespace RhyCiv.Engine
             return unit;
         }
 
+        /// <summary>
+        /// Runs every unit's end-of-turn processing, and reports whether the turn
+        /// can now end.
+        /// <para>
+        /// A unit may turn out to need a decision the player has to make — a GoTo
+        /// whose route no longer exists, one that arrived with movement to spare,
+        /// or a settler freed by finishing what it was building. This used to
+        /// return the moment it found one, abandoning the rest of the list. Two
+        /// things followed. Every unit after it in the order went unprocessed, so a
+        /// unit told to fortify did not become fortified and construction did not
+        /// complete, until whatever came before it had been dealt with. And because
+        /// each press of End Turn processed only as far as the next such unit, a
+        /// player with several of them had to press Enter over and over, appearing
+        /// to do nothing each time.
+        /// </para>
+        /// <para>
+        /// Every unit is now processed, and the first that wants a decision is
+        /// offered once at the end. So a turn with nothing outstanding ends on the
+        /// first press, and a turn with something outstanding asks about it once.
+        /// </para>
+        /// </summary>
         public bool ProcessEndOfTurn()
         {
             var player = Players[_activeCiv.Id];
+
+            // The first unit that needs the player to decide something. Held rather
+            // than acted on, so the rest of the army still gets its turn processed.
+            Unit? awaitingOrders = null;
+
             // Snapshot: following a GoTo can pop a goody hut that hands the player new
             // units, and combat can kill them, both of which modify Units mid-loop.
             foreach (var unit in _activeCiv.Units.ToList())
@@ -173,8 +199,8 @@ namespace RhyCiv.Engine
                             if (path == null)
                             {
                                 ClearGotoOrder(unit);
-                                player.SetUnitActive(unit, true);
-                                return false;
+                                awaitingOrders ??= unit;
+                                break;
                             }
 
                             var startedAt = unit.CurrentLocation;
@@ -200,14 +226,13 @@ namespace RhyCiv.Engine
                                 // came back here and offered the same stuck unit again.
                                 // Drop the order so it is genuinely awaiting orders.
                                 ClearGotoOrder(unit);
-                                player.SetUnitActive(unit, true);
-                                return false;
+                                awaitingOrders ??= unit;
+                                break;
                             }
 
                             if (unit.MovePoints > 0)
                             {
-                                player.SetUnitActive(unit, true);
-                                return false;
+                                awaitingOrders ??= unit;
                             }
 
                             break;
@@ -231,8 +256,7 @@ namespace RhyCiv.Engine
                                 var activeUnit = completedUnits.FirstOrDefault(u => u.MovePoints > 0 && !u.WaitOrder);
                                 if (activeUnit != null)
                                 {
-                                    player.SetUnitActive(activeUnit, true);
-                                    return false;
+                                    awaitingOrders ??= activeUnit;
                                 }
                             }
 
@@ -240,6 +264,12 @@ namespace RhyCiv.Engine
                         }
                     }
                 }
+            }
+
+            if (awaitingOrders is { Dead: false })
+            {
+                player.SetUnitActive(awaitingOrders, true);
+                return false;
             }
 
             return true;

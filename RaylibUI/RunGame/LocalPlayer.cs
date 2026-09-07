@@ -240,25 +240,6 @@ public class LocalPlayer : IPlayer
         _gameScreen.ActiveMode = _gameScreen.ViewPiece;
     }
 
-    /// <summary>
-    /// Ends the turn if the engine is waiting for it. Returns whether it did.
-    /// </summary>
-    public bool EndTurnIfWaiting()
-    {
-        if (!IsWaitingAtEndOfTurn)
-        {
-            return false;
-        }
-
-        IsWaitingAtEndOfTurn = false;
-        if (_gameScreen.Game.ProcessEndOfTurn())
-        {
-            _gameScreen.Game.ChoseNextCiv();
-        }
-
-        return true;
-    }
-
     public void NotifyAdvanceResearched(int advance)
     {
         var rules = _gameScreen.Game.Rules;
