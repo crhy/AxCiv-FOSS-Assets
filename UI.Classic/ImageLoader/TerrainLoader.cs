@@ -654,7 +654,7 @@ namespace RhyCiv.UI.Classic.ImageLoader
                         continue;
                     }
 
-                    var composed = ComposeSpecialTile(terrain, path, 0.62f, 0.94f);
+                    var composed = ComposeSpecialTile(terrain, path, 0.56f, 0.72f);
                     if (composed == null)
                     {
                         continue;
@@ -891,6 +891,12 @@ namespace RhyCiv.UI.Classic.ImageLoader
         /// ground. <paramref name="widthFrac"/> and <paramref name="heightFrac"/>
         /// bound its footprint as fractions of the tile.
         /// </summary>
+        /// <summary>
+        /// How far above centre a special-resource cutout sits, as a fraction of
+        /// the tile's height.
+        /// </summary>
+        private const float SpecialLift = 0.20f;
+
         private static Image? ComposeSpecialTile(TerrainSet terrain, string path, float widthFrac, float heightFrac)
         {
             var art = Images.LoadImageFromFile(path).Image;
@@ -909,7 +915,13 @@ namespace RhyCiv.UI.Classic.ImageLoader
 
             var canvas = Image.GenColor(targetWidth, targetHeight, Color.Blank);
             var offsetX = (targetWidth - drawWidth) / 2f;
-            var offsetY = (targetHeight - drawHeight) / 2f - targetHeight * 0.06f;
+            // Sit the cutout high in the diamond. A tile's lower half is the part
+            // nearest the viewer, which for an ocean square is where its shore is
+            // drawn; a whale centred in the tile came up out of the sand. Lifting
+            // it puts it over open water. The tile image cannot overhang its
+            // neighbours, so the art is composed a little smaller to make room
+            // rather than being clipped at the top.
+            var offsetY = (targetHeight - drawHeight) / 2f - targetHeight * SpecialLift;
             canvas.Draw(art,
                 new Rectangle(0, 0, drawWidth, drawHeight),
                 new Rectangle(offsetX, offsetY, drawWidth, drawHeight),

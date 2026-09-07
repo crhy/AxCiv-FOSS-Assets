@@ -27,6 +27,9 @@ cd "$repo_root"
 echo "Auditing redistributable assets..."
 "$python_cmd" scripts/generate_asset_manifest.py --check
 
+echo "Checking for leftover generation matte in the art..."
+"$python_cmd" scripts/clean_matte_fringe.py --check
+
 echo "Verifying Civilopedia text..."
 "$python_cmd" scripts/build_civilopedia_text.py --check
 

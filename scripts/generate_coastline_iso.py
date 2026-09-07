@@ -81,14 +81,21 @@ G_shell  = grid(150)
 # narrow strip that gives way to whatever grows behind it, so the land end now
 # runs sand, then dune growth, then the grassland tile's own colour, and the
 # coast tile carries on into its neighbour instead of stopping at a hard edge.
+# Measured against a satellite photograph of a fjord coast rather than against
+# what looks dramatic on its own. In that photograph the sea is nearly black
+# right up to the rock, the lightening near the shore is slight and short, and
+# the beach is a thread rather than a band. The ramp used to run through
+# saturated turquoise from 48 pixels out and put a wide cream beach behind it,
+# which drew a glowing outline around every island -- the single loudest thing
+# on the map, and nothing like a coast.
 STOPS = [
-    (-420, (  5,  28,  60)), (-150, (  5,  28,  60)), (-130, (  7,  44,  82)),
-    (-108, ( 10,  66, 110)), ( -84, ( 14,  94, 138)), ( -64, ( 19, 126, 164)),
-    ( -48, ( 26, 160, 184)), ( -36, ( 42, 192, 196)), ( -26, ( 66, 214, 206)),
-    ( -18, (100, 228, 214)), ( -11, (140, 236, 220)), (  -5, (176, 226, 205)),
-    (  -1, (150, 132, 104)), (   3, (176, 156, 124)), (  10, (214, 196, 160)),
-    (  22, (222, 206, 170)), (  34, (196, 186, 132)), (  48, (140, 150,  74)),
-    (  70, ( 96, 112,  34)), ( 150, ( 81,  99,  19)), ( 420, ( 81,  99,  19)),
+    (-420, (  6,  24,  50)), (-150, (  7,  27,  55)), (-110, (  8,  32,  62)),
+    ( -80, ( 10,  38,  71)), ( -56, ( 13,  47,  83)), ( -38, ( 18,  60,  98)),
+    ( -24, ( 22,  68, 102)), ( -14, ( 27,  78, 110)), (  -8, ( 33,  88, 118)),
+    (  -3, ( 42,  98, 124)),
+    (  -1, (116, 112,  90)), (   3, (146, 136, 108)), (   9, (174, 162, 128)),
+    (  16, (166, 160, 116)), (  26, (136, 142,  80)), (  42, (106, 122,  48)),
+    (  66, ( 88, 104,  28)), ( 150, ( 81,  99,  19)), ( 420, ( 81,  99,  19)),
 ]
 _ds = np.array([s[0] for s in STOPS], float)
 _cs = np.array([s[1] for s in STOPS], float)
@@ -119,7 +126,12 @@ inside = ((U_raw > -EPS) & (U_raw < 1 + EPS) &
 U = np.clip(U_raw, 0, 1)         # clamped for colour: extends art past the edge
 V = np.clip(V_raw, 0, 1)         # so downsampling can't pull in a halo
 
-AMP = 0.115
+# How far the shoreline wanders off the straight line between two corners. A
+# real coast is lobed and fractal; at 0.115 this one read as a chain of straight
+# facets, which is the "needs to be rounded a bit more, more rustic" of it. The
+# noise is periodic, so however far it wanders two tiles still agree on the edge
+# they share.
+AMP = 0.175
 
 # How the painted coast is pulled in towards the land. The sea reaches full depth
 # at 150 / SHELF_REACH world pixels, so a smaller number is a narrower shelf.
@@ -145,6 +157,15 @@ LAND_REACH = 1.0
 CENTRE_WATER = 0.75
 CENTRE_SPREAD = 0.42
 
+# How lopsided the held-open water is. Without this the enclosed masks came out
+# as a perfect circle -- a bright ring with a dark middle, sitting in a field --
+# which read as a cartoon pond rather than as a tarn. The wobble is taken from a
+# periodic noise field, so two tiles still agree along the edge they share.
+CENTRE_IRREGULARITY = 0.55
+
+# Most surf the shoreline may ever be covered by.
+FOAM_CEILING = 0.34
+
 def build(N, E, Sc, Wc):
     """Corners in world order TL,TR,BR,BL == screen N,E,S,W."""
     TL, TR, BR, BL = N, E, Sc, Wc
@@ -157,8 +178,9 @@ def build(N, E, Sc, Wc):
     # corrected too, because gmag is what converts the field into a distance in
     # world pixels, and every band painted below -- shelf, surf, wet sand -- is
     # placed by that distance.
-    bump = CENTRE_WATER * np.exp(-(((U - 0.5) ** 2 + (V - 0.5) ** 2)
-                                   / CENTRE_SPREAD ** 2))
+    lopsided = 1.0 + CENTRE_IRREGULARITY * (F_blotch(U, V) - 0.5) * 2.0
+    bump = CENTRE_WATER * lopsided * np.exp(-(((U - 0.5) ** 2 + (V - 0.5) ** 2)
+                                              / CENTRE_SPREAD ** 2))
     f = f - bump
     dfu = dfu + bump * (2 * (U - 0.5) / CENTRE_SPREAD ** 2)
     dfv = dfv + bump * (2 * (V - 0.5) / CENTRE_SPREAD ** 2)
@@ -208,7 +230,7 @@ def build(N, E, Sc, Wc):
     img -= (wrack * 18)[..., None] * np.array([1.0, 1.05, 1.15])
     wet = (1 - smoothstep(4, 20, d)) * smoothstep(-2, 2, d)
     img -= (wet * 26)[..., None] * np.array([1.0, 1.02, 0.86])
-    img += (wet * 14)[..., None] * np.array([0.35, 0.75, 1.0])
+    img += (wet * 6)[..., None] * np.array([0.35, 0.75, 1.0])
     img -= ((1 - smoothstep(16, 34, d)) * smoothstep(2, 12, d) * 9)[..., None]
 
     # ---- water body ---------------------------------------------------------
@@ -236,19 +258,22 @@ def build(N, E, Sc, Wc):
 
     sw_ = (smoothstep(0.48, 0.82, n_foam)
            * (1 - smoothstep(-58, -44, d)) * smoothstep(-76, -62, d))
-    img += (sw_ * 34)[..., None]
+    img += (sw_ * 9)[..., None]
 
     # ---- surf ---------------------------------------------------------------
-    band = smoothstep(-14, -8, d) * (1 - smoothstep(-1, 4, d))
-    lace = smoothstep(0.40, 0.74, n_foam * 0.55 + n_foam2 * 0.45)
-    foam = band * (0.20 + 0.60 * lace)
-    lip = smoothstep(-5.0, -2.6, d) * (1 - smoothstep(-1.8, 1.6, d))
-    foam = np.clip(foam + lip * 0.72, 0, 1)
-    foam = np.clip(foam + smoothstep(3, 6, d) * (1 - smoothstep(8, 15, d))
-                   * smoothstep(0.62, 0.90, n_foam2) * 0.42, 0, 1) * 0.92
-    foam = np.clip(foam + smoothstep(0.90, 0.99, n_spray)
-                   * smoothstep(-22, -12, d) * (1 - smoothstep(6, 12, d)) * 0.5, 0, 1)
-    img = img * (1 - foam[..., None]) + np.array([250.0, 253.0, 252.0]) * foam[..., None]
+    # Surf is a broken thread along the waterline, and it is off-white rather than
+    # white. It used to be a wide band at nearly full strength, which is what put a
+    # lit outline round every coast; capped here so it can accent the shore without
+    # becoming the shore.
+    band = smoothstep(-7, -3.5, d) * (1 - smoothstep(-0.5, 2.5, d))
+    lace = smoothstep(0.46, 0.80, n_foam * 0.55 + n_foam2 * 0.45)
+    foam = band * (0.10 + 0.45 * lace)
+    lip = smoothstep(-2.6, -1.2, d) * (1 - smoothstep(-0.6, 1.2, d))
+    foam = np.clip(foam + lip * 0.30, 0, FOAM_CEILING)
+    foam = np.clip(foam + smoothstep(0.94, 0.995, n_spray)
+                   * smoothstep(-10, -5, d) * (1 - smoothstep(2, 6, d)) * 0.18,
+                   0, FOAM_CEILING)
+    img = img * (1 - foam[..., None]) + np.array([232.0, 240.0, 240.0]) * foam[..., None]
 
     gl = smoothstep(0.80, 0.97, F_glint(U, V)) * smoothstep(-150, -60, d_col) * sea
     img += (gl * 22)[..., None]

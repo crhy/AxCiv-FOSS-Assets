@@ -70,8 +70,14 @@ internal class AttackAnimation : BaseGameView
     private void ShowTheFallen(GameScreen gameScreen, CombatEventArgs args,
         IUserInterface active, IGame game)
     {
-        var defenderLost = args.Defender.Hitpoints.Count > 0 && args.Defender.Hitpoints[^1] <= 0;
-        var attackerLost = args.Attacker.Hitpoints.Count > 0 && args.Attacker.Hitpoints[^1] <= 0;
+        // Use the hitpoints captured when the exchange finished, not the per-round
+        // series. That series records each unit's hitpoints at the *start* of a
+        // round, before the round's damage, so the loser's last entry is its health
+        // just before the fatal blow -- always above zero. Reading it meant this
+        // never once decided anybody had died, and the pause and the marker never
+        // appeared at all.
+        var defenderLost = args.Defender.RemainingHitpoints <= 0;
+        var attackerLost = args.Attacker.RemainingHitpoints <= 0;
         if (!defenderLost && !attackerLost)
         {
             return;

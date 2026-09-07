@@ -47,6 +47,17 @@ public abstract class BaseGameView : IGameView
     private int _xShift;
     public int Xshift => _xShift;
 
+    /// <summary>
+    /// How much larger than the classic sprite the flag over a city is drawn.
+    /// <para>
+    /// The classic flag is about a dozen pixels tall, which was the right size
+    /// against a 64x32 tile on a 640x480 screen. On a map composed several times
+    /// that size, beside city art drawn from 300px sources, it disappeared: 0.1.3
+    /// made it sharp but left it that size, so it was a sharp speck.
+    /// </para>
+    /// </summary>
+    private const float FlagScale = 3f;
+
     public bool IsDefault { get; }
     public int Interval { get; }
     public IList<Tile> ActionTiles => _actionTiles;
@@ -327,7 +338,7 @@ public abstract class BaseGameView : IGameView
                 var colours = activeInterface.PlayerColours[cityHere.OwnerId];
                 var flagTexture = TextureCache.GetImage(colours.MapImage ?? colours.Image);
                 var flagLogicalSize = colours.MapImage != null && colours.LogicalSize.Y > 0
-                    ? colours.LogicalSize
+                    ? colours.LogicalSize * FlagScale
                     : new Vector2(flagTexture.Width, flagTexture.Height);
                 var flagRenderScale = GetContainedRenderScale(flagTexture, flagLogicalSize);
                 var flagOffset = cityImage.FlagLoc - new Vector2(0, flagLogicalSize.Y - 5)
