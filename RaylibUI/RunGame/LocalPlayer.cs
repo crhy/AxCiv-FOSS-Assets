@@ -1,4 +1,5 @@
 using RhyCiv.Engine;
+using RhyCiv.Engine.UnitActions;
 using RhyCiv.Engine.Advances;
 using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.Enums;
@@ -509,6 +510,120 @@ public class LocalPlayer : IPlayer
     public void CityLost(City city)
     {
         //TODO: Show info ? is game over?
+    }
+
+    /// <summary>
+    /// A Diplomat has reached somebody else's unit or city. Offer what can be done
+    /// with it, and how much it costs.
+    /// <para>
+    /// A Diplomat has no attack strength, so before this the engine simply refused
+    /// the move and said so. The unit could be built and walked across the map and
+    /// then did nothing at all.
+    /// </para>
+    /// </summary>
+    public void DiplomatArrived(Unit diplomat, Tile target)
+    {
+        var game = _gameScreen.Game;
+        var city = DiplomatActions.EnemyCityAt(diplomat, target);
+        var unit = DiplomatActions.BribableUnitAt(diplomat, target);
+
+        SessionLog.Record($"diplomat at {target.X},{target.Y} " +
+                          $"(city={city?.Name ?? "none"}, unit={unit?.Name ?? "none"})");
+
+        if (city != null && unit != null)
+        {
+            // Both are possible, so let the player say which.
+            _gameScreen.ShowPopup("DIPLOMATACTION", handleButtonClick: (button, selection, _, _) =>
+            {
+                if (button != Labels.Ok)
+                {
+                    return;
+                }
+
+                if (selection == 0)
+                {
+                    OfferToIncite(diplomat, city);
+                }
+                else
+                {
+                    OfferToBribe(diplomat, unit);
+                }
+            });
+            return;
+        }
+
+        if (city != null)
+        {
+            OfferToIncite(diplomat, city);
+            return;
+        }
+
+        if (unit != null)
+        {
+            OfferToBribe(diplomat, unit);
+            return;
+        }
+
+        // Something is here, but not something that can be bought: a stack keeping
+        // an eye on each other, or a garrison that has to be taken with the city.
+        _gameScreen.ShowPopup("CANNOTBRIBE");
+    }
+
+    private void OfferToBribe(Unit diplomat, Unit target)
+    {
+        var cost = DiplomatActions.BribeCost(_gameScreen.Game, target);
+        var treasury = diplomat.Owner.Money;
+        if (cost > treasury)
+        {
+            _gameScreen.ShowPopup("NODIPLOMATGOLD", replaceNumbers: [cost, treasury]);
+            return;
+        }
+
+        _gameScreen.ShowPopup("BRIBEUNIT", handleButtonClick: (button, _, _, _) =>
+        {
+            if (button != Labels.Ok || diplomat.Dead || target.Dead)
+            {
+                return;
+            }
+
+            if (DiplomatActions.BribeUnit(_gameScreen.Game, diplomat, target))
+            {
+                _gameScreen.ForceRedraw();
+                _gameScreen.Game.ChooseNextUnit();
+            }
+        }, replaceNumbers: [cost, treasury], replaceStrings: [target.Name]);
+    }
+
+    private void OfferToIncite(Unit diplomat, City city)
+    {
+        if (!DiplomatActions.CanIncite(city))
+        {
+            _gameScreen.ShowPopup("CANNOTINCITE", replaceStrings: [city.Name]);
+            return;
+        }
+
+        var cost = DiplomatActions.InciteCost(_gameScreen.Game, city);
+        var treasury = diplomat.Owner.Money;
+        if (cost > treasury)
+        {
+            _gameScreen.ShowPopup("NODIPLOMATGOLD", replaceNumbers: [cost, treasury]);
+            return;
+        }
+
+        _gameScreen.ShowPopup("INCITEREVOLT", handleButtonClick: (button, _, _, _) =>
+        {
+            if (button != Labels.Ok || diplomat.Dead)
+            {
+                return;
+            }
+
+            if (DiplomatActions.InciteRevolt(_gameScreen.Game, diplomat, city))
+            {
+                _gameScreen.ForceRedraw();
+                _gameScreen.Game.ChooseNextUnit();
+            }
+        }, replaceNumbers: [cost, treasury],
+           replaceStrings: [city.Name, city.Owner.TribeName]);
     }
 
     public void CityCaptured(City city)

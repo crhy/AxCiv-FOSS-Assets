@@ -46,6 +46,27 @@ internal static class BuiltInDialogs
         Add(dialogs, "SCENINTRO", "Scenario", [], ["Continue"]);
         Add(dialogs, "SCENCUSTOMINTRO", "Scenario", [], ["OK", "Cancel"]);
         Add(dialogs, "SCENARIOLOADED", "Scenario loaded", [], ["Continue"]);
+
+        // Diplomats. GAME.TXT has no wording for these because the original game
+        // asked them through its own dialog resources, so the fallbacks carry the
+        // whole text.
+        Add(dialogs, "DIPLOMATACTION", "Diplomatic mission",
+            ["Incite a revolt in the city", "Bribe the unit"], ["OK", "Cancel"]);
+        AddMessage(dialogs, "BRIBEUNIT", "Bribe unit",
+            ["The %STRING0 commander will change sides for %NUMBER0 gold.",
+             "You have %NUMBER1 gold.", "", "Pay?"], ["OK", "Cancel"]);
+        AddMessage(dialogs, "INCITEREVOLT", "Incite revolt",
+            ["The citizens of %STRING0 will rise against %STRING1 for %NUMBER0 gold,",
+             "and the city and its garrison will be yours.",
+             "You have %NUMBER1 gold.", "", "Pay?"], ["OK", "Cancel"]);
+        AddMessage(dialogs, "NODIPLOMATGOLD", "Not enough gold",
+            ["This will cost %NUMBER0 gold and your treasury holds %NUMBER1."]);
+        AddMessage(dialogs, "CANNOTINCITE", "The capital will not be bought",
+            ["%STRING0 is the seat of government. No amount of gold will turn it;",
+             "it has to be taken."]);
+        AddMessage(dialogs, "CANNOTBRIBE", "Nothing to buy here",
+            ["A single unit in the open can be bought. A garrison watching each",
+             "other, or one inside a city, cannot."]);
     }
 
     public static PopupBox Generic(string name) => new()
@@ -64,7 +85,7 @@ internal static class BuiltInDialogs
     /// dialogs it builds get their wording from GAME.TXT.
     /// </summary>
     private static void AddMessage(Dictionary<string, PopupBox> dialogs, string name, string title,
-        IList<string> text)
+        IList<string> text, IList<string>? buttons = null)
     {
         if (dialogs.ContainsKey(name)) return;
         dialogs[name] = new PopupBox
@@ -72,7 +93,7 @@ internal static class BuiltInDialogs
             Name = name,
             Width = 440,
             Title = title,
-            Button = [Labels.Ok],
+            Button = buttons ?? [Labels.Ok],
             Options = [],
             Text = text
         };

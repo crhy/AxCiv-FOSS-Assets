@@ -620,6 +620,14 @@ namespace RhyCiv.Engine
             Ai.Call(AiEvent.CityCaptured, new LuaTable { { "city", new CityApi(city, game) } });
         }
 
+        /// <summary>
+        /// The AI does not yet buy units or cities. It declines rather than spending
+        /// its treasury on a decision nothing has been written to make well.
+        /// </summary>
+        public void DiplomatArrived(Unit diplomat, Tile target)
+        {
+        }
+
         private UnitAction? TileToAction(Tile tile, Unit unit)
         {
             if (tile == unit.CurrentLocation)

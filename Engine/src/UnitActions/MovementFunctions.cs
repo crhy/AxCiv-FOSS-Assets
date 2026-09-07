@@ -281,6 +281,16 @@ namespace RhyCiv.Engine.UnitActions
 
         internal static bool AttackAtTile(Unit unit, IGame game, Tile tileTo)
         {
+            // A Diplomat reaching somebody else's unit or city is not a failed
+            // attack, it is the whole reason the unit exists. Offer the player what
+            // can be done here before refusing the move for having no attack
+            // strength, which is all that used to happen.
+            if (DiplomatActions.HasTarget(unit, tileTo))
+            {
+                game.Players[unit.Owner.Id].DiplomatArrived(unit, tileTo);
+                return false;
+            }
+
             if (unit.AttackBase == 0)
             {
                 game.Players[unit.Owner.Id].MoveBlocked(unit, BlockedReason.ZeroAttackStrength);

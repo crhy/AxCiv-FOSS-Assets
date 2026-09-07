@@ -115,6 +115,15 @@ namespace Model.Core.Player
         /// </summary>
         /// <param name="city">The city that has been captured.</param>
         void CityCaptured(City city);
+
+        /// <summary>
+        /// A Diplomat has reached somebody else's unit or city and could act on it.
+        /// The engine cannot decide what to do -- buying costs gold the player may
+        /// want to keep -- so it hands the decision over.
+        /// </summary>
+        /// <param name="diplomat">The diplomat, still standing where it was.</param>
+        /// <param name="target">The square it tried to move onto.</param>
+        void DiplomatArrived(Unit diplomat, Tile target);
     }
 
     public interface IInterfaceCommands

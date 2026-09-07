@@ -144,4 +144,12 @@ public class MockPlayer : IPlayer
     public void CityCaptured(City city)
     {
     }
+
+    public virtual void DiplomatArrived(Unit diplomat, Tile target)
+    {
+        DiplomatTargets.Add((diplomat, target));
+    }
+
+    /// <summary>Every square a diplomat was offered an action on.</summary>
+    public List<(Unit Diplomat, Tile Target)> DiplomatTargets { get; } = new();
 }
