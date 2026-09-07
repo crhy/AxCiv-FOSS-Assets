@@ -128,9 +128,10 @@ namespace Model.Core.Mapping
             }
         }
         
-        public GoodyHutOutcomeResult ConsumeGoodyHut(Unit unit, IReadOnlyList<int>? eligibleAdvanceIndices = null)
+        public GoodyHutOutcomeResult ConsumeGoodyHut(Unit unit,
+            IReadOnlyList<int>? eligibleAdvanceIndices = null, bool nearSettlement = false)
         {
-            var outcome = _goodyHut?.Trigger(unit, eligibleAdvanceIndices);
+            var outcome = _goodyHut?.Trigger(unit, eligibleAdvanceIndices, nearSettlement);
             _goodyHut = null; // Consume / remove the goody hut from the game.
             return outcome!;
         }

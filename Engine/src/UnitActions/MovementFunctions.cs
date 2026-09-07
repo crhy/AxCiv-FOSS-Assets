@@ -5,6 +5,7 @@ using RhyCiv.Engine.Terrains;
 using RhyCiv.Engine.Units;
 using Model.Core;
 using Model.Core.Units;
+using Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -784,7 +785,8 @@ namespace RhyCiv.Engine.UnitActions
                     var eligibleAdvances = AdvanceFunctions.CalculateAvailableResearch(game, unit.Owner)
                         .Select(advance => advance.Index)
                         .ToArray();
-                    var outcome = tileTo.ConsumeGoodyHut(unit, eligibleAdvances);
+                    var outcome = tileTo.ConsumeGoodyHut(unit, eligibleAdvances,
+                        NearSettlement(game, unit, tileTo));
                     if (outcome.AdvanceIndex is { } advanceIndex)
                     {
                         game.GiveAdvance(advanceIndex, unit.Owner);
@@ -816,6 +818,37 @@ namespace RhyCiv.Engine.UnitActions
                     game.UpdateTiles(mapUpdates);
                 }
             }
+        }
+
+        /// <summary>
+        /// How near a hut counts as being within somebody's reach, in squares.
+        /// </summary>
+        private const double NearCityDistance = 4.0;
+
+        /// <summary>
+        /// The turn after which a civilisation with no cities is no longer given
+        /// the beginner's protection.
+        /// </summary>
+        private const int NoCitiesRuleLastTurn = 50;
+
+        /// <summary>
+        /// Whether a hut should withhold a wandering tribe and a barbarian horde.
+        /// <para>
+        /// Civ II suppresses both when the finder has founded nothing yet and it is
+        /// still early -- there is nowhere for a tribe to join and no chance against
+        /// a horde -- and when the hut is within four squares of a city, where a
+        /// tribe would have nowhere to settle. Their share goes to mercenaries.
+        /// </para>
+        /// </summary>
+        private static bool NearSettlement(IGame game, Unit unit, Tile hut)
+        {
+            if (unit.Owner.Cities.Count == 0 && game.TurnNumber < NoCitiesRuleLastTurn)
+            {
+                return true;
+            }
+
+            return game.AllCities.Any(city => city.Location != null &&
+                                              Utilities.DistanceTo(city.Location, hut) < NearCityDistance);
         }
 
         private static void ApplyAdvancedTribeOutcome(IGame game, Unit unit, Tile tile,
