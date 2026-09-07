@@ -686,9 +686,12 @@ public class CompactInterface(IMain main) : ClassicInterface(main)
             var lightColour = DominantColour(PicSources["flags"][col], textColour);
             var darkColour = DominantColour(PicSources["flags"][9 + col], Darken(lightColour));
 
+            var classicFlag = Images.ExtractBitmap(PicSources["flags"][col], this);
             playerColours[col] = new PlayerColour
             {
                 Image = PicSources["flags"][col],
+                MapImage = GetFossArtFlagImage(textColour),
+                LogicalSize = new Vector2(classicFlag.Width, classicFlag.Height),
                 TextColour = textColour,
                 LightColour = lightColour,
                 DarkColour = darkColour

@@ -47,11 +47,10 @@ public class ViewPiece : IGameMode
                         return true;
                     }
 
-                    /*else if (_gameScreen.StatusPanel.WaitingAtEndOfTurn)
-                    {
-                        main.StatusPanel.End_WaitAtEndOfTurn();
-                    }*/
-                    return false;
+                    // Nothing left to move: Enter ends the turn, as it does in
+                    // Civ II. Without this the only way on was the button in the
+                    // corner of the side panel.
+                    return _gameScreen.Player.EndTurnIfWaiting();
                 }
             },
 
@@ -154,6 +153,32 @@ public class ViewPiece : IGameMode
         {
             _gameScreen.Game.ChooseNextUnit();
         }
+    }
+
+    /// <summary>
+    /// The flashing "End of Turn (Press ENTER)" line Civ II shows once every unit
+    /// has moved. It is built on demand because it is only ever wanted at the foot
+    /// of the panel, and only while the game is actually waiting.
+    /// </summary>
+    private LabelControl BuildEndOfTurnBanner(Rectangle bounds, int fontSize)
+    {
+        var look = _gameScreen.MainWindow.ActiveInterface.Look;
+        return new LabelControl(_gameScreen,
+            $"{Labels.For(LabelIndex.EndOfTurn)} ({Labels.For(LabelIndex.PressEnter)})",
+            eventTransparent: true,
+            horizontalAlignment: HorizontalAlignment.Center,
+            font: look.StatusPanelLabelFont,
+            fontSize: fontSize,
+            spacing: 0,
+            colorFront: look.MovingUnitsViewingPiecesLabelColor,
+            colorShadow: look.MovingUnitsViewingPiecesLabelColorShadow,
+            shadowOffset: new Vector2(1, 0),
+            switchColors:
+            [
+                look.MovingUnitsViewingPiecesLabelColor,
+                look.MovingUnitsViewingPiecesLabelColorShadow
+            ],
+            switchTime: 500);
     }
 
     public IList<IControl> GetSidePanelContents(Rectangle bounds)
@@ -382,6 +407,18 @@ public class ViewPiece : IGameMode
                     break;
                 }
             }
+        }
+
+        // The banner sits at the foot of the panel, clear of the unit list, and
+        // above the button in the corner rather than under it.
+        if (_gameScreen.Player.IsWaitingAtEndOfTurn)
+        {
+            var banner = BuildEndOfTurnBanner(bounds, fontSize);
+            banner.Width = (int)bounds.Width;
+            banner.Height = (int)labelHeight;
+            banner.Location = new(bounds.X,
+                bounds.Y + bounds.Height - labelHeight - (_gameScreen.ToTPanelLayout ? 4 : 40));
+            controls.Add(banner);
         }
 
         controls.ForEach(c => c.OnResize());

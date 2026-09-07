@@ -22,21 +22,36 @@ public static class Fonts
 
     public const int FontSize = 20;
 
+    /// <summary>
+    /// Prepares a loaded face for drawing at any size.
+    /// <para>
+    /// The atlases are rasterised at 96 to 112 pixels so headings stay sharp, but
+    /// most text is drawn between 14 and 20. Bilinear filtering takes only a 2x2
+    /// sample, so shrinking a glyph by five times sampled a twentieth of the pixels
+    /// it was covering and dropped most of the stroke: body text came out with
+    /// broken serifs and stems that flickered as the window moved. Mipmaps give the
+    /// small sizes something properly downsampled to read from.
+    /// </para>
+    /// </summary>
+    private static Font Prepare(Font font)
+    {
+        font.Texture.GenMipmaps();
+        font.Texture.SetFilter(TextureFilter.Trilinear);
+        return font;
+    }
+
     public static void SetTnr(Font font)
     {
-        Tnr = font;
-        Tnr.Texture.SetFilter(TextureFilter.Bilinear);
+        Tnr = Prepare(font);
     }
 
     public static void SetArial(Font font)
     {
-        Arial = font;
-        Arial.Texture.SetFilter(TextureFilter.Bilinear);
+        Arial = Prepare(font);
     }
 
     public static void SetBold(Font font)
     {
-        TnRbold = font;
-        TnRbold.Texture.SetFilter(TextureFilter.Bilinear);
+        TnRbold = Prepare(font);
     }
 }

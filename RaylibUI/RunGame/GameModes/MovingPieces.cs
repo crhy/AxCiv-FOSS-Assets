@@ -40,12 +40,11 @@ public class MovingPieces : IGameMode
 
         Actions = new Dictionary<Shortcut, Action<IGame>>
         {
-            /*{
-                Keys.Enter, () =>
-                {
-                    if (main.StatusPanel.WaitingAtEndOfTurn) main.StatusPanel.End_WaitAtEndOfTurn();
-                }
-            },*/
+            // Enter ends the turn from here too. Unit-moving mode is where a turn
+            // is normally spent, and it can still be the active mode when the last
+            // unit finishes, so requiring the player to be in viewing-pieces mode
+            // to press Enter would make the key work only some of the time.
+            {new Shortcut(Key.Enter), _ => _gameScreen.Player.EndTurnIfWaiting()},
 
             {new Shortcut(Key.D7), MovementFunctions.TryMoveNorthWest}, {new Shortcut(Key.D8), MovementFunctions.TryMoveNorth},
             {new Shortcut(Key.D9), MovementFunctions.TryMoveNorthEast},

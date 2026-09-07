@@ -322,10 +322,19 @@ public abstract class BaseGameView : IGameView
                 renderScale: cityRenderScale));
             if (tile.UnitsHere.Count > 0)
             {
-                var flagTexture = TextureCache.GetImage(activeInterface.PlayerColours[cityHere.OwnerId].Image);
-                var flagOffset = cityImage.FlagLoc - new Vector2(0, flagTexture.Height - 5);
+                // Prefer the high-resolution flag, fitted into the classic sprite's
+                // footprint so the pole still lands on the city's flag anchor.
+                var colours = activeInterface.PlayerColours[cityHere.OwnerId];
+                var flagTexture = TextureCache.GetImage(colours.MapImage ?? colours.Image);
+                var flagLogicalSize = colours.MapImage != null && colours.LogicalSize.Y > 0
+                    ? colours.LogicalSize
+                    : new Vector2(flagTexture.Width, flagTexture.Height);
+                var flagRenderScale = GetContainedRenderScale(flagTexture, flagLogicalSize);
+                var flagOffset = cityImage.FlagLoc - new Vector2(0, flagLogicalSize.Y - 5)
+                                 + GetContainedDrawOffset(flagTexture, flagLogicalSize, flagRenderScale);
                 elements.Add(new TextureElement(texture: flagTexture,
-                    tile: tile, location: cityPos, offset: flagOffset)
+                    tile: tile, location: cityPos, offset: flagOffset,
+                    renderScale: flagRenderScale, maxDrawSize: flagLogicalSize)
                 );
             }
         }

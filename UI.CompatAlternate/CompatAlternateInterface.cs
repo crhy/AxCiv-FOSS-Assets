@@ -1,3 +1,4 @@
+using System.Numerics;
 ﻿using RhyCiv.UI.Classic;
 using RhyCiv.UI.Classic.Dialogs;
 using RhyCiv.Engine.IO;
@@ -560,7 +561,7 @@ public class CompatAlternateInterface(IMain main) : ClassicInterface(main)
             ListboxType.Default => new ListboxLooks
             {
                 Font = Fonts.Tnr,
-                FontSize = 12,
+                FontSize = 18,
                 TextColorFront = Color.Black,
                 BoxBackgroundColor = new Color(67, 67, 67, 255)
             },
@@ -584,9 +585,12 @@ public class CompatAlternateInterface(IMain main) : ClassicInterface(main)
             var lightColour = new Color((byte)(shieldColour.R / 2), (byte)(shieldColour.G / 2), (byte)(shieldColour.B / 2), 255);
             var darkColour = new Color((byte)(shieldColour.R / 4), (byte)(shieldColour.G / 4), (byte)(shieldColour.B / 4), 255);
 
+            var classicFlag = Images.ExtractBitmap(PicSources["flags"][col], this);
             playerColours[col] = new PlayerColour
             {
                 Image = PicSources["flags"][col],
+                MapImage = GetFossArtFlagImage(textColour),
+                LogicalSize = new Vector2(classicFlag.Width, classicFlag.Height),
                 TextColour = textColour,
                 LightColour = lightColour,
                 DarkColour = darkColour

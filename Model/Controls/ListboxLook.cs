@@ -11,7 +11,14 @@ public class ListboxLooks
     public Color BoxLineColor { get; set; } = Color.Blank;
 
     public Font Font { get; set; } = Fonts.Tnr;
-    public int FontSize { get; set; } = 12;
+
+    /// <summary>
+    /// Row text size. This was 12, set when the interface was laid out against a
+    /// much smaller window, and it is what made the city names in the Go To dialog
+    /// unreadable. Rows size themselves from their label's preferred height, so
+    /// raising it grows the row rather than clipping the text.
+    /// </summary>
+    public int FontSize { get; set; } = 18;
     public Color TextColorFront { get; set; } = Color.Black;
     public Color TextColorShadow { get; set; } = Color.Blank;
     public Vector2 TextShadowOffset { get; set; } = Vector2.Zero;

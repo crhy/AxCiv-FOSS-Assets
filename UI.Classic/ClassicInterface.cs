@@ -1,3 +1,4 @@
+using RaylibUtils;
 using RhyCiv.UI.Classic.Dialogs;
 using RhyCiv.UI.Classic.Dialogs.NewGame;
 using RhyCiv.UI.Classic.Menu;
@@ -768,6 +769,104 @@ public abstract class ClassicInterface(IMain main) : IUserInterface
         [UnitType.Freight] = ["freight"],
         [UnitType.Explorer] = ["explorer"],
     };
+
+    /// <summary>
+    /// The bundled high-resolution flags, and the colour of the cloth in each.
+    /// Built once; the sheet is nine colours in two shades.
+    /// </summary>
+    private static List<(IImageSource Source, Vector3 Colour)>? _fossArtFlags;
+
+    /// <summary>
+    /// The bundled flag whose cloth is closest to a civilisation's colour.
+    /// <para>
+    /// The art is matched by colour rather than by position, because nothing ties
+    /// the order the flags were cut in to the order the ruleset lists its
+    /// civilisations. Matching on the colour the game already uses for a
+    /// civilisation cannot put the wrong flag over a city, whatever order the
+    /// files happen to be in.
+    /// </para>
+    /// </summary>
+    protected static IImageSource? GetFossArtFlagImage(Color civilisationColour)
+    {
+        _fossArtFlags ??= LoadFossArtFlags();
+        if (_fossArtFlags.Count == 0)
+        {
+            return null;
+        }
+
+        var wanted = new Vector3(civilisationColour.R, civilisationColour.G, civilisationColour.B);
+        return _fossArtFlags
+            .MinBy(flag => Vector3.DistanceSquared(flag.Colour, wanted))
+            .Source;
+    }
+
+    private static List<(IImageSource Source, Vector3 Colour)> LoadFossArtFlags()
+    {
+        var flags = new List<(IImageSource, Vector3)>();
+        foreach (var categoryPath in GetFossArtCategoryPaths("Flags"))
+        {
+            foreach (var file in GetFossArtFileIndex(categoryPath).Values.OrderBy(f => f, StringComparer.Ordinal))
+            {
+                var source = new BitmapStorage(file);
+                if (MeasureFlagColour(source) is { } colour)
+                {
+                    flags.Add((source, colour));
+                }
+            }
+
+            if (flags.Count > 0)
+            {
+                break;
+            }
+        }
+
+        return flags;
+    }
+
+    /// <summary>
+    /// The average colour of a flag's cloth. The pole and the near-white highlights
+    /// on the folds are left out, so a white flag is not mistaken for a grey one and
+    /// a dark flag is not dragged towards its own shadows.
+    /// </summary>
+    private static Vector3? MeasureFlagColour(IImageSource source)
+    {
+        var image = Images.ExtractBitmap(source);
+        if (image.Width <= 1 || image.Height <= 1)
+        {
+            return null;
+        }
+
+        var pixels = image.LoadColors();
+        try
+        {
+            var total = Vector3.Zero;
+            var counted = 0;
+            foreach (var pixel in pixels)
+            {
+                if (pixel.A < 200)
+                {
+                    continue;
+                }
+
+                var maximum = Math.Max(pixel.R, Math.Max(pixel.G, pixel.B));
+                var minimum = Math.Min(pixel.R, Math.Min(pixel.G, pixel.B));
+                // Skip the pole and the specular streaks: near-neutral and bright.
+                if (maximum - minimum < 24 && maximum > 150)
+                {
+                    continue;
+                }
+
+                total += new Vector3(pixel.R, pixel.G, pixel.B);
+                counted++;
+            }
+
+            return counted == 0 ? null : total / counted;
+        }
+        finally
+        {
+            Image.UnloadColors(pixels);
+        }
+    }
 
     private static IImageSource? GetFossArtImage(string category, string title)
     {

@@ -324,8 +324,6 @@ public class ProductionBox : BaseControl
         }
         shieldsPerRow = Math.Min(shieldsPerRow, Math.Max(1, _totalCost));
         lines = Math.Max(1, (int)Math.Ceiling(_totalCost / (decimal)shieldsPerRow));
-        var spacing = (int)_shieldWidth;
-        var requiredWidth = shieldsPerRow * spacing;
 
         Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX + drawWidth, posY), 1f, _pen1);
         var lineHeight = 6 * scale + lines * _shieldHeight;
@@ -336,23 +334,35 @@ public class ProductionBox : BaseControl
         Graphics.DrawLineEx(new Vector2(posX, posY), new Vector2(posX, posY + lineHeight), 1f, _pen1);
         Graphics.DrawLineEx(new Vector2(posX + drawWidth, posY), new Vector2(posX + drawWidth, posY + lineHeight), 1f, _pen2);
 
-        if (requiredWidth < drawWidth)
+        // Justify the row across the box rather than packing the shields together
+        // and leaving the rest of the row empty. Civ II spreads a row of shields to
+        // the full width of the box, so the last one for the turn's cost sits at the
+        // right-hand edge and the row reads as a gauge. Packing them left meant a
+        // ten-shield item filled a third of the box and stopped.
+        var inset = 3 * scale;
+        var track = drawWidth - 2 * inset - _shieldWidth;
+        var step = shieldsPerRow > 1 ? track / (shieldsPerRow - 1) : 0f;
+        var firstX = posX + inset;
+        if (shieldsPerRow == 1)
         {
-            posX += (drawWidth - requiredWidth) / 2f;
+            firstX = posX + (drawWidth - _shieldWidth) / 2f;
         }
-        else
+        else if (step > _shieldWidth)
         {
-            spacing = (int)(drawWidth - _shieldWidth) / shieldsPerRow;
+            // Never spread them so far apart that they stop reading as a row; fall
+            // back to touching shields, centred, once the gaps exceed a shield.
+            step = _shieldWidth;
+            firstX = posX + (drawWidth - (shieldsPerRow - 1) * step - _shieldWidth) / 2f;
         }
 
         var count = 0;
-        posX += 3 * scale;
         for (var row = 0; row < lines && count < progressShields; row++)
         {
             for (var col = 0; col < shieldsPerRow && count < progressShields; col++)
             {
                 Graphics.DrawTextureEx(_shieldIcon,
-                    new Vector2((int)posX + spacing * col, (int)(Bounds.Y + shieldTop + 3 * scale + _shieldHeight * row)),
+                    new Vector2((int)(firstX + step * col),
+                        (int)(Bounds.Y + shieldTop + inset + _shieldHeight * row)),
                     0f, _shieldScale, Color.White);
                 count++;
             }

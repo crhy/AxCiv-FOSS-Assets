@@ -223,9 +223,40 @@ public class LocalPlayer : IPlayer
         _gameScreen.ForceRedraw();
     }
 
+    /// <summary>
+    /// Every unit has moved and the engine is waiting for the turn to be ended.
+    /// <para>
+    /// Civ II says so, in the side panel, and takes Enter for it. Nothing said so
+    /// here: the interface simply dropped into viewing-pieces mode, which looks the
+    /// same as choosing to look around mid-turn, so there was no way to tell that
+    /// the game was waiting rather than that a unit had been missed.
+    /// </para>
+    /// </summary>
+    public bool IsWaitingAtEndOfTurn { get; private set; }
+
     public void WaitingAtEndOfTurn()
     {
+        IsWaitingAtEndOfTurn = true;
         _gameScreen.ActiveMode = _gameScreen.ViewPiece;
+    }
+
+    /// <summary>
+    /// Ends the turn if the engine is waiting for it. Returns whether it did.
+    /// </summary>
+    public bool EndTurnIfWaiting()
+    {
+        if (!IsWaitingAtEndOfTurn)
+        {
+            return false;
+        }
+
+        IsWaitingAtEndOfTurn = false;
+        if (_gameScreen.Game.ProcessEndOfTurn())
+        {
+            _gameScreen.Game.ChoseNextCiv();
+        }
+
+        return true;
     }
 
     public void NotifyAdvanceResearched(int advance)
@@ -277,12 +308,18 @@ public class LocalPlayer : IPlayer
 
     public void TurnStart(int turnNumber)
     {
+        IsWaitingAtEndOfTurn = false;
         _lastBlocked = (null, BlockedReason.NotBlocked);
         _gameScreen.TurnStarting(turnNumber);
     }
 
     public void SetUnitActive(Unit? unit, bool move)
     {
+        if (unit != null)
+        {
+            IsWaitingAtEndOfTurn = false;
+        }
+
         ActiveUnit = unit;
 
         if (_gameScreen.Game.GetActiveCiv != Civilization)

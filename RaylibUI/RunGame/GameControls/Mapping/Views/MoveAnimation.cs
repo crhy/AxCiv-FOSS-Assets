@@ -3,6 +3,9 @@ using System.Linq;
 using System.Numerics;
 using RhyCiv.Engine.Events;
 using RhyCiv.Engine.MapObjects;
+using Model.Core.Units;
+using RaylibUI.RunGame.GameControls.Mapping.Views.ViewElements;
+using ExtensionMethods;
 
 namespace RaylibUI.RunGame.GameControls.Mapping.Views;
 
@@ -67,6 +70,51 @@ internal class MoveAnimation : BaseGameView
         if (totalFrames != noFramesForOneMove)
         {
             SetAnimation([]);
+        }
+
+        HoldOnSomeoneElsesMove(gameScreen, activeUnit,
+            viewElementsPrevTileUnits.Concat(viewElementsNextTileUnits).ToList());
+    }
+
+    /// <summary>
+    /// Frames the last position of another civilisation's unit is held for. This
+    /// view runs at a 12ms interval, so a move takes about fifty milliseconds --
+    /// fine when you are the one moving and watching the square you chose, far too
+    /// quick to follow when something steps out of the trees during someone else's
+    /// turn.
+    /// </summary>
+    private const int ForeignMoveHoldFrames = 26;
+
+    /// <summary>
+    /// Lets the player see a move that was not theirs.
+    /// <para>
+    /// Movement the player can watch is now only movement they can actually see, so
+    /// when an enemy unit does appear it is worth stopping for. Without this the
+    /// barbarians crossed open ground and were back to the player's own turn before
+    /// the eye could follow what had happened.
+    /// </para>
+    /// </summary>
+    private void HoldOnSomeoneElsesMove(GameScreen gameScreen, Unit movingUnit,
+        List<IViewElement> bystanders)
+    {
+        if (movingUnit.Owner.Id == gameScreen.Player.Civilization.Id)
+        {
+            return;
+        }
+
+        var settled = new List<IViewElement>(bystanders);
+        var activeInterface = gameScreen.Main.ActiveInterface;
+        var restingPos = GetPosForTile(movingUnit.CurrentLocation);
+        ImageUtils.GetUnitTextures(movingUnit, activeInterface, gameScreen.Game, settled,
+            restingPos with
+            {
+                Y = restingPos.Y + Dimensions.TileHeight -
+                    activeInterface.UnitImages.UnitRectangle.Height.ZoomScale(gameScreen.Zoom)
+            }, useMapArt: true);
+
+        for (var frame = 0; frame < ForeignMoveHoldFrames; frame++)
+        {
+            SetAnimation(settled.Select(element => element.CloneForLocation(element.Location)).ToList());
         }
     }
 }

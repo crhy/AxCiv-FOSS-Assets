@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cut painted road and railroad connection spokes from the generated source art.
+"""Paint the road and railroad connection spokes from the generated source art.
 
 Background
 ----------
@@ -12,38 +12,28 @@ to produce is eight *half-spokes*, each running from the tile centre out to the
 point where that neighbour is reached, plus one isolated stub. Two adjacent
 tiles each draw their own half, and the halves meet on the shared boundary.
 
-Where each spoke ends, on the 64x32 diamond with corners N(32,0) E(63,16)
-S(32,31) W(0,16):
+This script used to cut those halves out of the painted sources by measuring
+where their ink lay and keeping the part running in the wanted direction. That
+does not work, and is why roads appeared as scattered dashes rather than a
+network: the sources are free-hand, so their ink begins and ends wherever the
+brush did, and a half cut from them started somewhere near the tile centre and
+stopped somewhere near the edge. Neither end landed on the point that the
+neighbouring tile's spoke would meet.
 
-    sprite  neighbour  map offset   ends at
-    1       NE         ( 0,-1)      midpoint of the N-E edge
-    2       E          ( 1, 0)      the E corner
-    3       SE         ( 0, 1)      midpoint of the E-S edge
-    4       S          ( 0, 2)      the S corner
-    5       SW         (-1, 1)      midpoint of the S-W edge
-    6       W          (-1, 0)      the W corner
-    7       NW         (-1,-1)      midpoint of the W-N edge
-    8       N          ( 0,-2)      the N corner
-
-A neighbour that shares an edge with this tile is reached at that edge's
-midpoint; one that only touches a corner is reached at the corner. That is why
-the four "diagonal" spokes are shorter than the four axial ones.
+Now the geometry is constructed exactly -- centre to boundary point, every time
+-- and the painted material is swept along it, so a spoke cannot be misplaced.
+Roads sweep a median cross-section of their source, because gravel track has no
+structure along its length to lose. Railways resample the source picture along
+the spoke instead, because their sleepers and rails do.
 
 Input
 -----
-The generated art lives outside the repository, in ~/rhYcivtextures/roads and
-~/rhYcivtextures/railroads. Each folder holds straight-through pieces painted on
-a magenta generation matte: one image per axis (E-W, N-S, NE-SW, NW-SE), plus
-junctions this script does not need. The pieces are already drawn in 2:1
-isometric screen space, so their painted angles are used as-is and never
-rotated -- rotating a piece with baked lighting and perspective is what makes
-tile art look wrong.
-
-For each direction the script picks, out of the candidate sources, the piece
-whose ink is most strongly aligned with that axis; scales it so the whole
-through-piece spans exactly the distance between its two endpoints on the
-diamond; centres it; and keeps the half running in the wanted direction, with a
-small overlap past the centre so opposite spokes join without a seam.
+~/rhYcivtextures/roads and ~/rhYcivtextures/railroads, each holding painted
+straight-through pieces on a magenta generation matte. For every spoke the
+source whose painted axis best matches that spoke's direction is used, so the
+baked lighting and isometric perspective stay consistent with the direction
+drawn. Nothing is ever rotated: rotating art with baked lighting is what makes
+tile overlays look wrong.
 
 Output
 ------
@@ -65,256 +55,155 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+
+import isotile
+from isotile import CANVAS, CENTRE, EIGHT, ENDPOINTS, StraightSource
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 OVERLAYS = REPOSITORY / "RaylibUI" / "FOSSart" / "Terrain" / "Overlays"
 DEFAULT_SOURCE = Path.home() / "rhYcivtextures"
 
-# Output canvas. The tile is 2:1, and the art is authored at that aspect so the
-# isometric angles survive the compose step without being stretched.
-CANVAS = (512, 256)
+# Painted width of each surface, in canvas pixels (the tile is 512 wide here).
+# A Civ II road is a few pixels on a 64-wide tile; these are the same share.
+ROAD_WIDTH = 26.0
+RAIL_WIDTH = 34.0
 
-# The diamond, in output canvas pixels (the 64x32 tile scaled by 8).
-SCALE = CANVAS[0] / 64.0
-CORNER_N = (32.0 * SCALE, 0.0)
-CORNER_E = (63.0 * SCALE, 16.0 * SCALE)
-CORNER_S = (32.0 * SCALE, 31.0 * SCALE)
-CORNER_W = (0.0, 16.0 * SCALE)
-CENTRE = (32.0 * SCALE, 16.0 * SCALE)
-
-
-def _midpoint(a: tuple[float, float], b: tuple[float, float]) -> tuple[float, float]:
-    return ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
-
-
-# Sprite index -> (name, endpoint on the diamond). Order matches the neighbour
-# order in Engine/src/MapObjects/MapNavigationFunctions.Neighbours.
-ENDPOINTS: dict[str, tuple[float, float]] = {
-    "ne": _midpoint(CORNER_N, CORNER_E),
-    "e": CORNER_E,
-    "se": _midpoint(CORNER_E, CORNER_S),
-    "s": CORNER_S,
-    "sw": _midpoint(CORNER_S, CORNER_W),
-    "w": CORNER_W,
-    "nw": _midpoint(CORNER_W, CORNER_N),
-    "n": CORNER_N,
-}
-
-SPRITE_ORDER = ["ne", "e", "se", "s", "sw", "w", "nw", "n"]
-
-# Opposite directions share a straight-through source image.
-AXES = {"ne": "sw", "sw": "ne", "e": "w", "w": "e",
-        "se": "nw", "nw": "se", "n": "s", "s": "n"}
-
-# How far past the tile centre a spoke is kept, as a fraction of the tile width.
-# Without it two opposite spokes meet on an exact pixel boundary and show a hairline.
-OVERLAP = 0.06
+# The longest spoke, centre to the E or W corner. Railway sleepers are pitched
+# against this so the short diagonal spokes do not show squashed track.
+REFERENCE_LENGTH = math.hypot(ENDPOINTS["e"][0] - CENTRE[0], ENDPOINTS["e"][1] - CENTRE[1])
 
 # Radius of the isolated stub, as a fraction of the tile width.
-ISOLATED_RADIUS = 0.16
+ISOLATED_RADIUS = 0.15
 
 
-def diamond_mask() -> np.ndarray:
-    """The tile's diamond, as a boolean mask over the output canvas.
+def source_axis(path: Path) -> tuple[float, float]:
+    """The painted segment's own direction, as a unit vector."""
+    _, alpha = isotile.key_matte(path)
+    ys, xs = np.nonzero(alpha > 0.25)
+    points = np.stack([xs, ys], axis=1).astype(np.float64)
+    centred = points - points.mean(axis=0)
+    _, _, vectors = np.linalg.svd(centred, full_matrices=False)
+    return float(vectors[0][0]), float(vectors[0][1])
 
-    Every spoke is clipped to it. Art that spilled outside the diamond would be
-    drawn into the corners of the tile's bounding rectangle, which overlap the
-    neighbouring tiles on screen -- a road would appear to run across squares
-    that have none.
+
+def straightness(path: Path) -> float:
+    """How linear a painted segment is: across-spread over along-spread."""
+    _, alpha = isotile.key_matte(path)
+    ys, xs = np.nonzero(alpha > 0.25)
+    points = np.stack([xs, ys], axis=1).astype(np.float64)
+    centred = points - points.mean(axis=0)
+    values = np.linalg.svd(centred, compute_uv=False)
+    return float(values[1] / max(values[0], 1e-6))
+
+
+def best_source(sources: list[Path], axes: dict[Path, tuple[float, float]],
+                direction: str) -> Path:
+    """The source painted most nearly along a given spoke's direction.
+
+    The tile is 2:1, so a spoke's screen direction is not its map direction; the
+    match is made in screen space, which is the space the art was painted in.
     """
-    mask = Image.new("L", CANVAS, 0)
-    ImageDraw.Draw(mask).polygon(
-        [CORNER_N, CORNER_E, CORNER_S, CORNER_W], fill=255)
-    return np.asarray(mask) > 0
-
-
-def unit_vector(direction: str) -> tuple[float, float]:
-    ex, ey = ENDPOINTS[direction]
-    dx, dy = ex - CENTRE[0], ey - CENTRE[1]
+    end = ENDPOINTS[direction]
+    dx, dy = end[0] - CENTRE[0], end[1] - CENTRE[1]
     length = math.hypot(dx, dy)
-    return dx / length, dy / length
+    wanted = (dx / length, dy / length)
+
+    def alignment(path: Path) -> float:
+        axis = axes[path]
+        return abs(wanted[0] * axis[0] + wanted[1] * axis[1])
+
+    return max(sources, key=alignment)
 
 
-def through_length(direction: str) -> float:
-    """Distance between a direction's endpoint and its opposite."""
-    a, b = ENDPOINTS[direction], ENDPOINTS[AXES[direction]]
-    return math.hypot(a[0] - b[0], a[1] - b[1])
+def isolated_stub(profile, seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """The short mark drawn on a tile whose road reaches no neighbour.
 
-
-def key_matte(path: Path) -> tuple[np.ndarray, np.ndarray]:
-    """Return RGB and alpha with the magenta generation matte removed.
-
-    The matte test is the same one the rest of the art pipeline uses
-    (`prepare_custom_textures.is_matte_background`), applied to every pixel
-    rather than only to the edge-connected region -- road and rail art contains
-    no legitimate magenta, and the gaps between railway sleepers are interior
-    matte pockets that an edge flood fill reaches only by luck.
-
-    The painted edges are airbrushed, so a band of pixels around each piece is a
-    blend of paint and matte. Keying those on colour alone leaves a pink halo
-    that is glaring against grassland, so the foreground is eroded past the
-    contaminated band and then feathered back to a soft edge.
+    Civ II draws a stub rather than nothing, so a newly built road is visible
+    before it is connected to anything.
     """
-    rgb = np.asarray(Image.open(path).convert("RGB")).astype(np.int16)
-    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
-    lowest = np.minimum(r, b)
-    magenta = (r > 90) & (b > 105) & (g < lowest * 0.70)
-    green = (g > 60) & (g > r * 1.18) & (g > b * 1.10)
-
-    solid = Image.fromarray(np.where(magenta | green, 0, 255).astype(np.uint8), "L")
-    # MinFilter is an erosion: a 7px window pulls the edge in by 3px, which is
-    # wider than the blend band the generator leaves.
-    eroded = solid.filter(ImageFilter.MinFilter(7))
-    alpha = np.asarray(eroded.filter(ImageFilter.GaussianBlur(1.2))).astype(np.float64) / 255.0
-
-    colour = rgb.astype(np.float64)
-    return colour, alpha
-
-
-def axis_alignment(alpha: np.ndarray, direction: str) -> float:
-    """Fraction of a source's ink that lies along `direction`'s axis."""
-    ys, xs = np.nonzero(alpha > 0.35)
-    if len(xs) < 64:
-        return 0.0
-    cx, cy = xs.mean(), ys.mean()
-    radius = np.hypot(xs - cx, ys - cy)
-    outer = radius > 0.18 * alpha.shape[1]
-    if outer.sum() < 32:
-        return 0.0
-
-    ux, uy = unit_vector(direction)
-    target = math.degrees(math.atan2(uy, ux))
-    angle = np.degrees(np.arctan2(ys[outer] - cy, xs[outer] - cx))
-    delta = np.abs((angle - target + 180.0) % 360.0 - 180.0)
-    # count both ends of the axis: a through-piece serves either direction
-    opposite = np.abs((angle - (target + 180.0) + 180.0) % 360.0 - 180.0)
-    return float(((delta < 16.0) | (opposite < 16.0)).sum()) / float(outer.sum())
-
-
-def build_spoke(colour: np.ndarray, alpha: np.ndarray, direction: str) -> Image.Image:
-    """Place a through-piece on the tile and keep the half running `direction`."""
-    ux, uy = unit_vector(direction)
-    px, py = -uy, ux
-
-    ys, xs = np.nonzero(alpha > 0.35)
-    proj = xs * ux + ys * uy
-    perp = xs * px + ys * py
-
-    # Scale so the painted piece spans exactly endpoint-to-endpoint on the tile.
-    span = proj.max() - proj.min()
-    scale = through_length(direction) / span
-    # Centre on the middle of the piece's axis, and on the bulk of its width.
-    axis_mid = (proj.max() + proj.min()) / 2.0
-    perp_mid = float(np.median(perp))
-    source_centre = (axis_mid * ux + perp_mid * px, axis_mid * uy + perp_mid * py)
-
-    height, width = alpha.shape
-    art = np.dstack([colour, alpha[..., None] * 255.0]).astype(np.uint8)
-    scaled = Image.fromarray(art, "RGBA").resize(
-        (max(1, round(width * scale)), max(1, round(height * scale))), Image.LANCZOS)
-
-    canvas = Image.new("RGBA", CANVAS, (0, 0, 0, 0))
-    canvas.paste(scaled,
-                 (round(CENTRE[0] - source_centre[0] * scale),
-                  round(CENTRE[1] - source_centre[1] * scale)))
-
-    # Keep only the half-plane running in `direction`, plus the join overlap.
-    grid_y, grid_x = np.mgrid[0:CANVAS[1], 0:CANVAS[0]]
-    ahead = ((grid_x - CENTRE[0]) * ux + (grid_y - CENTRE[1]) * uy) >= -(OVERLAP * CANVAS[0])
-
-    out = np.asarray(canvas).copy()
-    out[..., 3] = np.where(ahead & diamond_mask(), out[..., 3], 0)
-    return Image.fromarray(out, "RGBA")
-
-
-def build_isolated(colour: np.ndarray, alpha: np.ndarray, direction: str) -> Image.Image:
-    """A short centre stub for a tile whose improvement has no neighbours."""
-    spoke = build_spoke(colour, alpha, direction)
-    grid_y, grid_x = np.mgrid[0:CANVAS[1], 0:CANVAS[0]]
-    # An ellipse, so the stub reads as a patch lying on the ground rather than a
-    # circle painted on a 2:1 tile.
     radius = ISOLATED_RADIUS * CANVAS[0]
-    inside = (((grid_x - CENTRE[0]) / radius) ** 2
-              + ((grid_y - CENTRE[1]) / (radius / 2.0)) ** 2) <= 1.0
-
-    out = np.asarray(spoke).copy()
-    out[..., 3] = np.where(inside, out[..., 3], 0)
-    return Image.fromarray(out, "RGBA")
+    start = (CENTRE[0] - radius / 2.0, CENTRE[1] - radius / 4.0)
+    end = (CENTRE[0] + radius / 2.0, CENTRE[1] + radius / 4.0)
+    return isotile.sweep(profile, start, end, ROAD_WIDTH, seed, wobble=0.08)
 
 
-def prepare(source_dir: Path, out_dir: Path, stem: str, check: bool) -> list[str]:
-    sources = sorted(source_dir.glob("*.png"))
+def build(source_directory: Path, out_directory: Path, stem: str,
+          use_warp: bool, width: float, check: bool) -> int:
+    sources = sorted(p for p in source_directory.glob("*.png"))
     if not sources:
-        raise SystemExit(f"Error: no source art in {source_dir}")
+        print(f"no source art in {source_directory}", file=sys.stderr)
+        return 1
 
-    keyed = {path: key_matte(path) for path in sources}
-    problems: list[str] = []
-    out_dir.mkdir(parents=True, exist_ok=True)
+    axes = {path: source_axis(path) for path in sources}
 
-    chosen: dict[str, Path] = {}
-    for direction in SPRITE_ORDER:
-        best = max(sources, key=lambda p: axis_alignment(keyed[p][1], direction))
-        score = axis_alignment(keyed[best][1], direction)
-        if score < 0.30:
-            problems.append(
-                f"{stem}: no source is aligned with {direction.upper()} "
-                f"(best {best.name} at {score:.2f})")
-            continue
-        chosen[direction] = best
+    # A junction piece is not a segment: its ink spreads in several directions at
+    # once, so it has no usable axis and would blur a swept profile. Keep the
+    # pieces that read as a single stroke.
+    segments = [path for path in sources if straightness(path) < 0.30]
+    if not segments:
+        segments = sources
 
-    for direction, path in chosen.items():
-        colour, alpha = keyed[path]
-        image = build_spoke(colour, alpha, direction)
-        problems += _emit(image, out_dir / f"{stem}_{direction}.png", check)
+    out_directory.mkdir(parents=True, exist_ok=True)
+    written = []
 
-    # The isolated stub is cut from the E-W piece, whose paint is the least
-    # foreshortened of the four axes.
-    if "e" in chosen:
-        colour, alpha = keyed[chosen["e"]]
-        problems += _emit(build_isolated(colour, alpha, "e"),
-                          out_dir / f"{stem}_iso.png", check)
+    profile = None
+    if not use_warp:
+        # One material for every spoke: the straightest segment available.
+        material = min(segments, key=straightness)
+        profile = isotile.cross_section(material)
 
-    print(f"{stem}: {len(chosen)}/8 spokes from "
-          f"{len({p.name for p in chosen.values()})} source images"
-          + ("" if "e" not in chosen else " + isolated stub"))
-    for direction in SPRITE_ORDER:
-        if direction in chosen:
-            print(f"    {direction.upper():>2} <- {chosen[direction].name}")
-    return problems
+    for index, direction in enumerate(EIGHT):
+        start, end = isotile.spoke_path(direction)
+        if use_warp:
+            chosen = best_source(segments, axes, direction)
+            rgb, alpha = isotile.warp(StraightSource(chosen), start, end, width,
+                                      seed=1000 + index,
+                                      reference_length=REFERENCE_LENGTH)
+        else:
+            rgb, alpha = isotile.sweep(profile, start, end, width, seed=1000 + index)
 
+        rgb, alpha = isotile.fill_holes(rgb, alpha)
+        image = isotile.to_image(rgb, alpha)
+        target = out_directory / f"{stem}_{direction}.png"
+        if not check:
+            image.save(target, optimize=True)
+        written.append(target)
 
-def _emit(image: Image.Image, target: Path, check: bool) -> list[str]:
-    buffer = target.with_suffix(".tmp.png")
-    image.save(buffer, optimize=True)
-    produced = buffer.read_bytes()
-    buffer.unlink()
+    stub_profile = profile if profile is not None else isotile.cross_section(
+        min(segments, key=straightness))
+    rgb, alpha = isolated_stub(stub_profile, seed=999)
+    rgb, alpha = isotile.fill_holes(rgb, alpha)
+    target = out_directory / f"{stem}_iso.png"
+    if not check:
+        isotile.to_image(rgb, alpha).save(target, optimize=True)
+    written.append(target)
+
+    missing = [path for path in written if not path.exists()]
     if check:
-        if not target.exists():
-            return [f"missing: {target.relative_to(REPOSITORY)}"]
-        if target.read_bytes() != produced:
-            return [f"stale: {target.relative_to(REPOSITORY)}"]
-        return []
-    target.write_bytes(produced)
-    return []
+        if missing:
+            print(f"missing {stem} overlays: {', '.join(p.name for p in missing)}",
+                  file=sys.stderr)
+            return 1
+        print(f"  {stem}: {len(written)} sprites present")
+        return 0
+
+    print(f"  {stem}: wrote {len(written)} sprites to {out_directory}")
+    return 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE,
-                        help="folder holding roads/ and railroads/ (default ~/rhYcivtextures)")
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--check", action="store_true",
-                        help="verify the committed art matches the source, without rewriting")
+                        help="verify the overlays exist without rebuilding them")
     args = parser.parse_args()
 
-    problems: list[str] = []
-    for folder, stem, out in (("roads", "road", "Roads"),
-                              ("railroads", "railroad", "Railroads")):
-        problems += prepare(args.source / folder, OVERLAYS / out, stem, args.check)
-
-    for problem in problems:
-        print(f"ERROR: {problem}", file=sys.stderr)
-    return 1 if problems else 0
+    status = 0
+    status |= build(args.source / "roads", OVERLAYS / "Roads", "road",
+                    use_warp=False, width=ROAD_WIDTH, check=args.check)
+    status |= build(args.source / "railroads", OVERLAYS / "Railroads", "railroad",
+                    use_warp=True, width=RAIL_WIDTH, check=args.check)
+    return status
 
 
 if __name__ == "__main__":

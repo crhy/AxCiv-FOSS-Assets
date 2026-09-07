@@ -157,6 +157,7 @@ namespace RhyCiv.UI.Classic.ImageLoader
             if (fossTerrainApplied)
             {
                 ApplyFossOverlayArt(terrain);
+                ApplyFossRiverArt(terrain);
                 ApplyFossSpecialArt(terrain);
             }
 
@@ -190,14 +191,20 @@ namespace RhyCiv.UI.Classic.ImageLoader
                 ApplyFossConnectionArt(terrain, roadGraphics);
             }
 
-            terrain.ImprovementsMap.Add(ImprovementTypes.Irrigation, new ImprovementGraphic
+            var fieldGraphics = new ImprovementGraphic
             {
                 Levels = new[,]
                 {
                     { MapIndexChange((BitmapStorage)active.PicSources["irrigation"][0], index, active) },
                     { MapIndexChange((BitmapStorage)active.PicSources["farmland"][0], index, active) }
                 }
-            });
+            };
+            terrain.ImprovementsMap.Add(ImprovementTypes.Irrigation, fieldGraphics);
+
+            if (fossTerrainApplied)
+            {
+                ApplyFossFieldArt(terrain, fieldGraphics);
+            }
 
             terrain.ImprovementsMap[ImprovementTypes.Mining] = new ImprovementGraphic
                 { Levels = new[,] { { MapIndexChange((BitmapStorage)active.PicSources["mine"][0], index, active) } } };
@@ -224,6 +231,22 @@ namespace RhyCiv.UI.Classic.ImageLoader
             }
 
             terrain.Huts = MapIndexChange((BitmapStorage)active.PicSources["hut"][0], index, active);
+            if (fossTerrainApplied)
+            {
+                var hutPath = FindFossTerrainPath("goodyhut");
+                if (hutPath != null)
+                {
+                    // A hut is a thing standing on the square, not a covering for
+                    // it, so it is composed at well under tile width and sits a
+                    // little above centre the way the special-resource cutouts do.
+                    var composedHut = ComposeSpecialTile(terrain, hutPath, 0.44f, 0.86f);
+                    if (composedHut != null)
+                    {
+                        terrain.Huts = new MemoryStorage(composedHut.Value,
+                            $"FossHut-{terrain.RenderScale}");
+                    }
+                }
+            }
 
             if (fossTerrainApplied)
             {
@@ -312,7 +335,6 @@ namespace RhyCiv.UI.Classic.ImageLoader
         /// </summary>
         private static readonly (string Directory, string Stem)[] FossOverlaySets =
         [
-            ("Rivers", "river"),
             ("Forest", "forest"),
             ("Mountains", "mountain"),
             ("Hills", "hill")
@@ -338,7 +360,6 @@ namespace RhyCiv.UI.Classic.ImageLoader
 
                 var target = stem switch
                 {
-                    "river" => terrain.River,
                     "forest" => terrain.Forest,
                     "mountain" => terrain.Mountains,
                     "hill" => terrain.Hills,
@@ -379,6 +400,94 @@ namespace RhyCiv.UI.Classic.ImageLoader
             }
 
             return variants;
+        }
+
+        /// <summary>
+        /// Installs the worked-ground overlays. Irrigation and farmland stayed on
+        /// the compatibility sheet's 64x32 cells, which the tile compositor
+        /// point-scales up: over photographic terrain that read as a coarse blue
+        /// lattice thrown across the square rather than as a ploughed field.
+        /// </summary>
+        private static void ApplyFossFieldArt(TerrainSet terrain, ImprovementGraphic fieldGraphics)
+        {
+            var names = new[] { "irrigation.png", "farmland.png" };
+            for (var level = 0; level < names.Length && level < fieldGraphics.Levels.GetLength(0); level++)
+            {
+                var path = FindFossOverlayPath("Improvements", names[level]);
+                if (path == null)
+                {
+                    continue;
+                }
+
+                var composed = ComposeConnectionTile(terrain, path);
+                if (composed != null)
+                {
+                    fieldGraphics.Levels[level, 0] = new MemoryStorage(composed.Value,
+                        $"FossField-{level}-{terrain.RenderScale}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// The four edge-sharing neighbours, in the order
+        /// <c>MapNavigationFunctions.DirectNeighbours</c> yields them. MapImage
+        /// builds the river sprite index as a bitmask over this order, bit 0
+        /// first, and indexes <see cref="TerrainSet.RiverMouth"/> by position.
+        /// </summary>
+        private static readonly string[] FossRiverDirections = ["ne", "se", "sw", "nw"];
+
+        /// <summary>
+        /// Installs the river tiles and river mouths.
+        /// <para>
+        /// A river is one picture per tile, chosen by which of the four
+        /// edge-sharing neighbours also carry a river -- sixteen distinct
+        /// pictures. The bundled art was eight free-hand meanders, and the
+        /// general overlay path assigned them as <c>index % 8</c>, so the picture
+        /// drawn bore no relation to where the river actually ran and no two
+        /// adjacent tiles lined up. The art is now composed per mask from
+        /// half-spokes that meet on the tile boundary, so a river is continuous.
+        /// </para>
+        /// <para>
+        /// River mouths were never replaced at all and stayed on the legacy sheet,
+        /// which is why a river reaching the coast simply stopped.
+        /// </para>
+        /// </summary>
+        private static void ApplyFossRiverArt(TerrainSet terrain)
+        {
+            for (var mask = 0; mask < terrain.River.Length && mask < 16; mask++)
+            {
+                var path = FindFossOverlayPath("Rivers", $"river_mask_{mask:00}.png");
+                if (path == null)
+                {
+                    continue;
+                }
+
+                var composed = ComposeConnectionTile(terrain, path);
+                if (composed != null)
+                {
+                    terrain.River[mask] = new MemoryStorage(composed.Value,
+                        $"FossRiver-{mask}-{terrain.RenderScale}");
+                }
+            }
+
+            for (var index = 0;
+                 index < terrain.RiverMouth.Length && index < FossRiverDirections.Length;
+                 index++)
+            {
+                var path = FindFossOverlayPath("Rivers",
+                    $"river_mouth_{FossRiverDirections[index]}.png");
+                if (path == null)
+                {
+                    continue;
+                }
+
+                var composed = ComposeConnectionTile(terrain, path);
+                if (composed != null)
+                {
+                    terrain.RiverMouth[index] = new MemoryStorage(composed.Value,
+                        $"FossRiverMouth-{index}-{terrain.RenderScale}");
+                }
+            }
         }
 
         /// <summary>
@@ -645,10 +754,10 @@ namespace RhyCiv.UI.Classic.ImageLoader
         [
             "coast_00_ocean.png", "coast_01_corner_land_W.png", "coast_02_corner_land_S.png",
             "coast_03_edge_land_SW.png", "coast_04_corner_land_E.png", "coast_05_diagonal_E_W.png",
-            "coast_06_edge_land_SE.png", "coast_07_inner_water_N.png", "coast_08_corner_land_N.png",
-            "coast_09_edge_land_NW.png", "coast_10_diagonal_N_S.png", "coast_11_inner_water_E.png",
-            "coast_12_edge_land_NE.png", "coast_13_inner_water_S.png", "coast_14_inner_water_W.png",
-            "coast_15_land.png",
+            "coast_06_edge_land_SE.png", "coast_07_cove_N.png", "coast_08_corner_land_N.png",
+            "coast_09_edge_land_NW.png", "coast_10_diagonal_N_S.png", "coast_11_cove_E.png",
+            "coast_12_edge_land_NE.png", "coast_13_cove_S.png", "coast_14_cove_W.png",
+            "coast_15_enclosed.png",
         ];
 
         /// <summary>

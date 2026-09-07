@@ -34,6 +34,13 @@
     git history; this file describes the 0.1.x line only.
   -->
   <releases>
+    <release version="0.1.3" date="2026-09-06">
+      <description>
+        <p>The map, from a full beta test.</p>
+        <p>Roads and railways now meet at the edges of a square instead of scattering as dashes across it, and rivers run as rivers: the sixteen river tiles are drawn to match which neighbours the water actually reaches, and a river arriving at the coast opens into a mouth instead of stopping. An ocean square is drawn as water whatever surrounds it, so a one-square bay is no longer a meadow with whales breaching out of it. Irrigation and farmland are ploughed fields rather than a blue lattice, and the goody hut, the flag over a city and the resource icons are all drawn from the high-resolution art set.</p>
+        <p>A road is worth a third of a movement point to every unit again, not only to those with more than one point to spend — settlers, warriors and musketeers were walking their own roads at one square a turn. Pressing Enter ends a turn, and the side panel says when the game is waiting for it. When a unit is killed the map holds on the square long enough to see it happen, and marks it. Huts hold something worth finding far more often than they hold nothing, a new city starts building something it can actually build, and the map no longer scrolls off to watch movement the player is not entitled to see.</p>
+      </description>
+    </release>
     <release version="0.1.2" date="2026-09-06">
       <description>
         <p>Fixes a crash introduced in 0.1.1.</p>

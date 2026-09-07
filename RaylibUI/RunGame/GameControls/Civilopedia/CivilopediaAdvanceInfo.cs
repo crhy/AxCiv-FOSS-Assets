@@ -37,6 +37,13 @@ public sealed class CivilopediaAdvanceInfo : BaseControl
     private const int HeadingWidth = 145;
     private const int LinkGap = 14;
 
+    /// <summary>
+    /// Space between the description panel's border and its text. It used to be 8
+    /// pixels against a 516-pixel panel, so the prose started hard against the rule
+    /// and read as pushed into the left edge of the box.
+    /// </summary>
+    private const int DescriptionInset = 22;
+
     private readonly CivilopediaWindow _window;
     private readonly GameScreen _gameScreen;
     private readonly List<Advance> _advances;
@@ -80,7 +87,7 @@ public sealed class CivilopediaAdvanceInfo : BaseControl
         var advanceId = Array.FindIndex(rules.Advances, row => row == _advance);
 
         var rightX = Margin + ArtWidth + 22;
-        AddSectionLabel("Civilopedia", rightX, Margin - 4, DescriptionWidth);
+        AddSectionLabel("Civilopedia", rightX + DescriptionInset, Margin - 4, DescriptionWidth);
         AddDescriptionBox(_advance, advanceId, rightX, Margin + 26);
 
         var y = Margin + ArtHeight + 38;
@@ -98,7 +105,9 @@ public sealed class CivilopediaAdvanceInfo : BaseControl
             description = advance.Name;
         }
 
-        var textWidth = DescriptionWidth - 18;
+        // The panel is drawn from x, so the measure has to lose an inset at both
+        // ends or the text sits centred in a box it overhangs on the right.
+        var textWidth = DescriptionWidth + 16 - 2 * DescriptionInset;
         var wrappedTexts = DialogUtils.GetWrappedTexts(description, textWidth,
             _active.Look.LabelFont, BodyFontSize);
 
@@ -106,7 +115,8 @@ public sealed class CivilopediaAdvanceInfo : BaseControl
         var maxLines = Math.Max(1, (DescriptionHeight - 16) / LineHeight);
         foreach (var text in wrappedTexts.Take(maxLines))
         {
-            AddBodyLabel(string.IsNullOrWhiteSpace(text) ? " " : text, x + 8, lineY, textWidth, LineHeight);
+            AddBodyLabel(string.IsNullOrWhiteSpace(text) ? " " : text, x + DescriptionInset, lineY,
+                textWidth, LineHeight);
             lineY += LineHeight;
         }
     }

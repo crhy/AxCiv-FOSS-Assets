@@ -580,19 +580,7 @@ namespace RhyCiv.Engine.UnitActions
                         break;
                     }
                     
-                    moveCost *= tileTo.MoveCost;
-                    moveCost = MoveCost(tileTo, tileFrom, moveCost, cosmicRules);
-                    if (unit.MaxMovePoints <= cosmicRules.MovementMultiplier && moveCost < cosmicRules.MovementMultiplier)
-                    {
-                        moveCost = unit.MovePoints;
-                    }
-
-                    // If alpine movement could be less use that
-                    if (cosmicRules.AlpineMovement < moveCost && unit.Alpine)
-                    {
-                        moveCost = cosmicRules.AlpineMovement;
-                    }
-
+                    moveCost = GroundMoveCost(unit, tileTo, tileFrom, cosmicRules);
                     unitMoved = true;
                     break;
                 }
@@ -686,7 +674,11 @@ namespace RhyCiv.Engine.UnitActions
             // If unit moved, update its X-Y coords
             if (unitMoved)
             {
-                unit.MovePointsLost += moveCost;
+                // A unit may always complete a move it has any movement left for,
+                // even onto ground that costs more than it has; it simply ends its
+                // turn there. Capping the loss keeps the remaining points from
+                // going negative, which the interface reads as points still owed.
+                unit.MovePointsLost = Math.Min(unit.MaxMovePoints, unit.MovePointsLost + moveCost);
                 // Set previous coords
                 unit.PrevXy = [unit.X, unit.Y];
 
@@ -724,9 +716,18 @@ namespace RhyCiv.Engine.UnitActions
                     unit.Order = (int)OrderType.NoOrders;
                 }
                 
+                // Only tell a player about a move they can actually watch. The test
+                // used to be Visibility alone, which records that a civilisation has
+                // *explored* a square, not that it can see it now. So every enemy
+                // step through territory you had once walked was animated on your
+                // map: the view scrolled away to a dark corner of the world to
+                // follow a unit you were not entitled to see, which is what made the
+                // map jump into the fog on ending a turn.
                 for (var civId = 0; civId < unit.CurrentLocation.Visibility.Length; civId++)
                 {
-                    if (unit.CurrentLocation.Visibility[civId])
+                    if (unit.CurrentLocation.Visibility[civId] &&
+                        (tileTo.Map.IsCurrentlyVisible(tileTo, civId) ||
+                         tileFrom.Map.IsCurrentlyVisible(tileFrom, civId)))
                     {
                         game.Players[civId].UnitMoved(unit, tileTo, tileFrom);
                     }
@@ -789,6 +790,10 @@ namespace RhyCiv.Engine.UnitActions
                     else if (outcome.OutcomeType == "Barbarians")
                     {
                         ApplyBarbarianOutcome(game, unit, tileTo, outcome, mapUpdates);
+                    }
+                    else if (outcome.OutcomeType == "Mercenaries")
+                    {
+                        ApplyMercenariesOutcome(game, outcome);
                     }
 
                     game.Players[unit.Owner.Id].GoodyHutTriggered(unit, outcome);
@@ -947,6 +952,43 @@ namespace RhyCiv.Engine.UnitActions
             unit.CurrentLocation = tile;
             return unit;
         }
+        /// <summary>
+        /// Gives the mercenaries a soldier's uniform.
+        /// <para>
+        /// The outcome itself has no access to the ruleset, so it can only copy the
+        /// type of whatever unit walked into the village. That made the "skilled
+        /// mercenaries" a second copy of the explorer that found them, or -- worse
+        /// -- a free Settlers unit for any settler that stumbled on a hut. They
+        /// should be soldiers, so the best fighter the finder's civilisation could
+        /// field is substituted here, where the rules are in reach.
+        /// </para>
+        /// </summary>
+        private static void ApplyMercenariesOutcome(IGame game,
+            Model.Core.GoodyHuts.Outcomes.GoodyHutOutcomeResult outcome)
+        {
+            if (outcome.CreatedUnit == null)
+            {
+                return;
+            }
+
+            var owner = outcome.CreatedUnit.Owner;
+            var soldier = game.Rules.UnitTypes
+                .Where(definition => definition.Domain == UnitGas.Ground)
+                .Where(definition => definition.Attack > 0 && !definition.IsSettler)
+                .Where(definition => AdvanceFunctions.HasTech(owner, definition.Prereq))
+                .MaxBy(definition => definition.Attack * 2 + definition.Defense);
+
+            if (soldier == null)
+            {
+                return;
+            }
+
+            outcome.CreatedUnit.TypeDefinition = soldier;
+            outcome.CreatedUnit.MovePointsLost = 0;
+            outcome.Message =
+                $"You have discovered a friendly tribe of skilled mercenaries. They join you as {soldier.Name}.";
+        }
+
         private static void ApplyNomadsOutcome(IGame game, Model.Core.GoodyHuts.Outcomes.GoodyHutOutcomeResult outcome)
         {
             if (outcome.CreatedUnit == null)
@@ -967,6 +1009,31 @@ namespace RhyCiv.Engine.UnitActions
             outcome.CreatedUnit.TypeDefinition = settlerDefinition;
             outcome.CreatedUnit.MovePointsLost = 0;
             outcome.Message = "You discover a band of wandering nomads. They agree to join your tribe as Settlers.";
+        }
+
+        /// <summary>
+        /// What one step of ground movement costs, in movement fragments.
+        /// <para>
+        /// There used to be a rule here that a unit whose whole allowance was a
+        /// single movement point spent all of it on any move costing less than a
+        /// full point. A road costs a third of a point, so that meant a road was
+        /// worth nothing at all to a Settlers, Warriors, Phalanx or Musketeers:
+        /// every one-move unit in the game walked its own roads at one square a
+        /// turn. Roads are for everybody.
+        /// </para>
+        /// </summary>
+        internal static int GroundMoveCost(Unit unit, Tile tileTo, Tile tileFrom, CosmicRules cosmicRules)
+        {
+            var moveCost = cosmicRules.MovementMultiplier * tileTo.MoveCost;
+            moveCost = MoveCost(tileTo, tileFrom, moveCost, cosmicRules);
+
+            // Alpine movement, where it is cheaper than the ground being crossed.
+            if (cosmicRules.AlpineMovement < moveCost && unit.Alpine)
+            {
+                moveCost = cosmicRules.AlpineMovement;
+            }
+
+            return moveCost;
         }
 
         internal static int MoveCost(Tile tileTo, Tile tileFrom, int moveCost, CosmicRules cosmicRules)

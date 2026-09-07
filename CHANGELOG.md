@@ -5,6 +5,85 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
+## [0.1.3] — 2026-09-06
+
+Everything below was reported in the 0.1.2 beta test (#111).
+
+### Fixed — the map
+
+- **Roads and railways connect.** Each of the nine connection sprites is a
+  half-spoke that has to run from the tile centre to the exact point on the
+  boundary where the neighbour is reached, so the two halves meet. They were cut
+  from the painted sources by measuring where the ink happened to lie, so they
+  started somewhere near the middle and stopped somewhere near the edge and
+  neither end landed where it had to. The geometry is now constructed and the
+  painted material swept along it, so a spoke cannot be misplaced.
+- **Rivers run as rivers, and reach the sea.** A river is one picture per tile,
+  chosen by which of the four edge-sharing neighbours also carry water — sixteen
+  distinct pictures. The bundled art was eight free-hand meanders handed out as
+  `index % 8`, so the picture drawn bore no relation to where the river actually
+  ran. All sixteen are now composed from half-spokes that meet on the boundary.
+  River mouths had never been replaced at all and still came from the
+  compatibility sheet, which is the coarse blue arc that appeared where a river
+  met the coast; they are painted deltas now.
+- **An ocean square is drawn as water.** The coastline set is chosen by how many
+  of a square's four corners are land, and with three or four of them the
+  shoreline never crossed the square, so the tile came out as solid grass — a
+  one-square bay was a meadow, and the whales in it appeared to be breaching out
+  of a field. Every one of the sixteen now keeps open water at its centre.
+- **Irrigation and farmland are ploughed fields**, drawn at map resolution,
+  rather than the compatibility sheet's 64x32 cell scaled up into a coarse blue
+  lattice. Irrigation is hand-cut ditches; farmland is the same field
+  cross-ploughed, and the channels intersect rather than one crossing over the
+  other.
+- **The flag over a city is sharp.** The high-resolution flags were in the art
+  set but nothing loaded them, so the map drew the classic sprite — a dozen
+  pixels across — enlarged to match a tile composed several times larger.
+- **The goody hut is the painted art** rather than the generated sheet icon.
+- **The map no longer scrolls off into the fog.** Movement was announced to every
+  player who had ever *explored* the square it happened on, rather than to those
+  who could see it now, so every enemy step through territory you had once walked
+  was animated on your map and the view followed it into the dark.
+
+### Fixed — playing a turn
+
+- **A road is worth a third of a movement point to every unit.** Ground movement
+  carried a rule that a unit whose whole allowance was one point spent all of it
+  on any move costing less than a full point — which is every move along a road.
+  So settlers, warriors, phalanxes and musketeers walked their own roads at one
+  square a turn.
+- **Enter ends the turn**, and the side panel says so, flashing "End of Turn
+  (Press ENTER)" once every unit has moved. Nothing distinguished waiting for the
+  turn to be ended from choosing to look around mid-turn.
+- **A kill can be seen.** Combat ended on the last frame of the explosion and
+  handed straight back, so a unit killed during someone else's turn was gone
+  before it could be seen to die. The map now holds on the square for about a
+  second and marks it with the fallen-soldier icon. Another civilisation's move
+  is held at its destination for the same reason.
+- **Huts usually hold something.** The six outcomes were drawn evenly, and since
+  several of the others degrade into a consolation of their own, a good third of
+  huts came up empty. The empty village is now the exception it is meant to be,
+  and mercenaries arrive as soldiers instead of as a copy of whatever unit walked
+  into the village — which had been handing a free Settlers to any settler that
+  found a hut.
+- **A new city builds something it can build.** The opening item was the cheapest
+  thing in the whole ruleset, taken from tables that carry every slot the format
+  defines including disabled ones costing nothing, so a new city routinely opened
+  building an item that was not buildable and sat at zero shields.
+
+### Fixed — reading the screen
+
+- **Small text is legible.** The font atlases are rasterised at 96 to 112 pixels
+  and most text is drawn between 14 and 20; with only bilinear filtering, shrinking
+  a glyph five times sampled a twentieth of the pixels it covered and dropped most
+  of the stroke. They are mipmapped now.
+- **City names in the Go To dialog** are set at a readable size. The listbox text
+  size was 12, fixed when the interface was laid out against a much smaller window.
+- **The Civilopedia's technology description** is inset from the edge of its panel
+  rather than starting hard against the rule.
+- **Production shields are justified** across the width of the box, so a row reads
+  as a gauge, instead of being packed to the left and stopping.
+
 ## [0.1.2] — 2026-09-06
 
 ### Fixed

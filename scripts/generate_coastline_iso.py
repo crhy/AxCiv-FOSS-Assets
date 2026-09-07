@@ -130,6 +130,21 @@ SHELF_REACH = 0.32
 BEACH_TRIM = 16.0
 LAND_REACH = 1.0
 
+# Every one of these sixteen diamonds is drawn on an *ocean* tile: MapImage only
+# reaches for the marching set when the tile's own type is Ocean. So however many
+# of its four vertices are land, the tile is still water, and must still read as
+# water. Left to the bilinear field alone it does not: with three or four land
+# vertices the shoreline never crosses the diamond and the tile comes out as
+# solid grass. A bay one tile wide was drawn as a meadow, and the whales living
+# in it appeared to be breaching out of a field.
+#
+# This keeps a pool of open water at the tile centre by pushing the field down
+# there, so the enclosed masks read as a cove or a tarn ringed by shore rather
+# than as land. It is a smooth bump centred on the tile, so the corners are
+# untouched and the open-sea and single-shoreline tiles are unchanged.
+CENTRE_WATER = 0.75
+CENTRE_SPREAD = 0.42
+
 def build(N, E, Sc, Wc):
     """Corners in world order TL,TR,BR,BL == screen N,E,S,W."""
     TL, TR, BR, BL = N, E, Sc, Wc
@@ -137,6 +152,17 @@ def build(N, E, Sc, Wc):
          U * V * BR + (1 - U) * V * BL)
     dfu = (1 - V) * (TR - TL) + V * (BR - BL)
     dfv = (1 - U) * (BL - TL) + U * (BR - TR)
+
+    # Hold open water at the tile centre (see CENTRE_WATER). The gradient is
+    # corrected too, because gmag is what converts the field into a distance in
+    # world pixels, and every band painted below -- shelf, surf, wet sand -- is
+    # placed by that distance.
+    bump = CENTRE_WATER * np.exp(-(((U - 0.5) ** 2 + (V - 0.5) ** 2)
+                                   / CENTRE_SPREAD ** 2))
+    f = f - bump
+    dfu = dfu + bump * (2 * (U - 0.5) / CENTRE_SPREAD ** 2)
+    dfv = dfv + bump * (2 * (V - 0.5) / CENTRE_SPREAD ** 2)
+
     gmag = np.maximum(np.sqrt(dfu ** 2 + dfv ** 2) / S, 0.42 / S)
 
     warp = AMP * (0.84 * (F_coast(U, V) - 0.5) +
@@ -236,10 +262,10 @@ def build(N, E, Sc, Wc):
 NAMES = {
     0: "ocean",          1: "corner_land_W",   2: "corner_land_S",
     3: "edge_land_SW",   4: "corner_land_E",   5: "diagonal_E_W",
-    6: "edge_land_SE",   7: "inner_water_N",   8: "corner_land_N",
-    9: "edge_land_NW",  10: "diagonal_N_S",   11: "inner_water_E",
-    12: "edge_land_NE", 13: "inner_water_S",  14: "inner_water_W",
-    15: "land",
+    6: "edge_land_SE",   7: "cove_N",          8: "corner_land_N",
+    9: "edge_land_NW",  10: "diagonal_N_S",   11: "cove_E",
+    12: "edge_land_NE", 13: "cove_S",         14: "cove_W",
+    15: "enclosed",
 }
 tiles = {}
 for mask in range(16):
@@ -261,26 +287,55 @@ for mask in range(16):
 sheet.convert("RGB").save(f"{OUT}/_contact_sheet.png")
 
 # ---------------- assembled isometric demo -----------------------------------
-GW, GH = 10, 10
-cw_, ch_ = GW + 1, GH + 1
-cy, cx = np.mgrid[0:ch_, 0:cw_]
-ncx, ncy = cx / (cw_ - 1) - .5, cy / (ch_ - 1) - .5
+# This mirrors how MapImage actually uses the set, which is not how a textbook
+# marching-squares field is drawn. The map is a grid of *typed tiles*, and the
+# coast diamonds are reached for only when a tile's own type is Ocean; a land
+# tile draws its terrain texture and never appears here. Each water tile's mask
+# comes from its four vertices, and a vertex counts as land when any of the three
+# tiles meeting it there is land -- exactly the rule in MapImage.MakeTileGraphic.
+GW, GH = 11, 11
+cy, cx = np.mgrid[0:GH, 0:GW]
+ncx, ncy = cx / (GW - 1) - .5, cy / (GH - 1) - .5
 r = np.sqrt((ncx * 1.3) ** 2 + (ncy * 1.3) ** 2)
 lobe = 0.30 + 0.08 * np.sin(np.arctan2(ncy, ncx) * 3.0 + 1.1)
-lg = (r < lobe).astype(int)
-lg[2, 8] = 1; lg[8, 2] = 1
+land_tile = (r < lobe)
+land_tile[2, 8] = True
+land_tile[8, 2] = True
+# A one-tile bay inside the island: the case that used to be drawn as a meadow.
+land_tile[5, 5] = False
+
+def is_land(ty, tx):
+    return bool(land_tile[ty, tx]) if 0 <= ty < GH and 0 <= tx < GW else False
 
 TW, TH = 120, 60
 ox, oy = GH * TW // 2, 20
 demo = Image.new("RGBA", (TW * (GW + GH) // 2 + 40, TH * (GW + GH) // 2 + 80),
                  (16, 22, 40, 255))
 small = {m: tiles[m].resize((TW, TH), Image.LANCZOS) for m in tiles}
+grass = Image.new("RGBA", (TW, TH), (0, 0, 0, 0))
+_gy, _gx = np.mgrid[0:TH, 0:TW]
+_diamond = (np.abs(_gx + .5 - TW / 2) / (TW / 2)
+            + np.abs(_gy + .5 - TH / 2) / (TH / 2)) <= 1
+_g = np.zeros((TH, TW, 4), np.uint8)
+_g[..., :3] = np.array([104, 124, 62], np.uint8)
+_g[..., 3] = np.where(_diamond, 255, 0)
+grass = Image.fromarray(_g, "RGBA")
+
 for ty in range(GH):
     for tx in range(GW):
-        m = ((lg[ty, tx] << 3) | (lg[ty, tx + 1] << 2) |
-             (lg[ty + 1, tx + 1] << 1) | lg[ty + 1, tx])
         X = ox + (tx - ty) * TW // 2
         Y = oy + (tx + ty) * TH // 2
+        if is_land(ty, tx):
+            demo.alpha_composite(grass, (X, Y))
+            continue
+        # Screen N is (ty-1, tx-1)'s side of the grid; the three tiles meeting
+        # each vertex are the two edge neighbours either side of it and the
+        # diagonal one between them.
+        n = is_land(ty - 1, tx) or is_land(ty - 1, tx - 1) or is_land(ty, tx - 1)
+        e = is_land(ty - 1, tx) or is_land(ty - 1, tx + 1) or is_land(ty, tx + 1)
+        s = is_land(ty, tx + 1) or is_land(ty + 1, tx + 1) or is_land(ty + 1, tx)
+        w = is_land(ty + 1, tx) or is_land(ty + 1, tx - 1) or is_land(ty, tx - 1)
+        m = (n << 3) | (e << 2) | (s << 1) | w
         demo.alpha_composite(small[m], (X, Y))
 demo.convert("RGB").save(f"{OUT}/_demo_island.png")
 print("done")

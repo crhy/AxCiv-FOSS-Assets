@@ -12,6 +12,7 @@ using Model.Core.Advances;
 using Model.Core.Cities;
 using Model.Core.GameRules;
 using Model.Core.Mapping;
+using Model.Core.Production;
 using Model.Core.Units;
 
 namespace RhyCiv.Engine.UnitActions
@@ -104,9 +105,46 @@ namespace RhyCiv.Engine.UnitActions
             city.CommodityDemanded = demanded.Select(i => commodities[i]).ToArray();
         }
 
+        /// <summary>
+        /// What a newly founded city starts building.
+        /// <para>
+        /// This used to be the cheapest thing in the whole ruleset, taken straight
+        /// from the unit and improvement tables. Those tables carry every slot the
+        /// format defines, including disabled ones costing nothing, so a new city
+        /// routinely opened building an item that was not buildable and made no
+        /// progress -- the city sat at zero shields and the player had to notice and
+        /// change it by hand.
+        /// </para>
+        /// <para>
+        /// Civ II opens on Warriors. The nearest general rule is the cheapest
+        /// defender this city is actually allowed to build, falling back to the
+        /// cheapest allowed item of any kind.
+        /// </para>
+        /// </summary>
+        private static IProductionOrder? ChooseOpeningProduction(City city, IGame game)
+        {
+            var allowed = ProductionPossibilities.GetAllowedProductionOrders(city)
+                .Where(order => order.Cost > 0)
+                .ToList();
+            if (allowed.Count == 0)
+            {
+                return null;
+            }
+
+            var defender = allowed.OfType<UnitProductionOrder>()
+                .Where(order => order.UnitDefinition.Domain == UnitGas.Ground)
+                .Where(order => order.UnitDefinition.Defense > 0 && !order.UnitDefinition.IsSettler)
+                .MinBy(order => order.Cost);
+
+            return defender ?? allowed.MinBy(order => order.Cost);
+        }
+
         public static City BuildCity(Unit unit, IGame game, string name)
         {
             var tile = unit.CurrentLocation;
+            // Something has to be set before the city is registered; the real choice
+            // is made below, once the city is on the map and can be asked what it is
+            // allowed to build.
             var initialProduction = ProductionOrder.GetAll(game.Rules).MinBy(i => i.Cost);
             var city = new City
             {
@@ -130,6 +168,9 @@ namespace RhyCiv.Engine.UnitActions
             unit.Owner.Cities.Add(tile.CityHere);
 
             game.SetImprovementsForCity(city);
+
+            city.ItemInProduction = ChooseOpeningProduction(city, game) ?? city.ItemInProduction;
+
             
             if (unit.Owner.Cities.Count == 1)
             {
