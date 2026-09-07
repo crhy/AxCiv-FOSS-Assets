@@ -347,8 +347,14 @@ public class CompatAlternateInterface(IMain main) : ClassicInterface(main)
                 new("&Game Profile", Shortcut.None, Key.G),
                 new("-", Shortcut.None, Key.None),
                 new("Pick &Music", Shortcut.None, Key.M),
-                new("&Save Game|Ctrl+S", new Shortcut(Key.S, ctrl: true), Key.S),
-                new("&Load Game|Ctrl+L", new Shortcut(Key.L, ctrl: true), Key.L),
+                // These carried no command id, so the two menu entries were drawn
+                // and did nothing when clicked. Saving and loading were only ever
+                // reachable by their keyboard shortcuts, which is not where anyone
+                // looks for them.
+                new("&Save Game|Ctrl+S", new Shortcut(Key.S, ctrl: true), Key.S,
+                    commandId: SaveGame),
+                new("&Load Game|Ctrl+L", new Shortcut(Key.L, ctrl: true), Key.L,
+                    commandId: LoadGame),
                 new("&Join Game|Ctrl+J", new Shortcut(Key.J, ctrl: true), Key.J),
                 new("-", Shortcut.None, Key.None),
                 new("Set Pass&word|Ctrl+W", new Shortcut(Key.W, ctrl: true), Key.W),

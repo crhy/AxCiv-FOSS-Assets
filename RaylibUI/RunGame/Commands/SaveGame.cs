@@ -5,6 +5,7 @@ using RhyCiv.Engine.IO;
 using RhyCiv.Engine.SaveLoad;
 using Model.Controls;
 using JetBrains.Annotations;
+using Model.Core;
 
 namespace RaylibUI.RunGame.Commands;
 
@@ -16,9 +17,7 @@ public class SaveGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
 
     public override void Action()
     {
-        var suggestedFileName =
-            $"{GameScreen.Game.ActivePlayer.Civilization.LeaderName.Substring(0, 2)}_{GameScreen.Game.Date.GameYearString(GameScreen.Game.TurnNumber, "").Replace(".", "")}.sav"
-                .ToLowerInvariant();
+        var suggestedFileName = SaveFileNames.Suggest(GameScreen.Game);
         _saveDialog = new FileDialog(GameScreen.Main, Labels.For(LabelIndex.SaveFiles),
             Settings.SaveGameFolder, IsValidSelectionCallback, OnSelectionCallback, suggestedFileName,
             false);
@@ -51,7 +50,11 @@ public class SaveGame(GameScreen gameScreen) : AlwaysOnCommand(gameScreen, Comma
 
     private void CloseConfirm(string arg1, int arg2, IList<bool>? arg3, IDictionary<string, string>? arg4)
     {
-        GameScreen.CloseDialog(_saveDialog);
+        if (_saveDialog != null)
+        {
+            GameScreen.CloseDialog(_saveDialog);
+            _saveDialog = null;
+        }
     }
 
     private bool IsValidSelectionCallback(string path)

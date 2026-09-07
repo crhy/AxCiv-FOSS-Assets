@@ -1,5 +1,6 @@
 using RhyCiv.Engine;
 using RhyCiv.Engine.UnitActions;
+using RhyCiv.Engine.SaveLoad;
 using RhyCiv.Engine.Advances;
 using RhyCiv.Engine.Diagnostics;
 using RhyCiv.Engine.Enums;
@@ -288,11 +289,60 @@ public class LocalPlayer : IPlayer
         _gameScreen.ShowCityDialog("DECREASE", city);
     }
 
+    /// <summary>
+    /// How many autosaves are kept before the oldest is written over. Enough to
+    /// step back past a turn that went wrong, few enough not to fill a disk.
+    /// </summary>
+    private const int AutosaveSlots = 3;
+
     public void TurnStart(int turnNumber)
     {
         IsWaitingAtEndOfTurn = false;
         _lastBlocked = (null, BlockedReason.NotBlocked);
+        Autosave(turnNumber);
         _gameScreen.TurnStarting(turnNumber);
+    }
+
+    /// <summary>
+    /// Writes the game at the start of the player's turn, if they have asked for it.
+    /// <para>
+    /// "Autosave each turn" has been a checkbox in Game Options for as long as the
+    /// options dialog has existed, and nothing has ever read it. Given that a
+    /// session can still end in a fault no handler can catch, an autosave that does
+    /// not happen is the worst of the settings to have got wrong.
+    /// </para>
+    /// <para>
+    /// The turn is saved as it begins, before the player has moved anything, so the
+    /// newest autosave is always a position that can be picked up cleanly. Failing
+    /// to write one must never end a session, so everything here is best-effort:
+    /// the player gets a line in the record and carries on playing.
+    /// </para>
+    /// </summary>
+    private void Autosave(int turnNumber)
+    {
+        var game = _gameScreen.Game;
+        if (!game.Options.AutosaveEachTurn || _gameScreen.Main.ActiveRuleSet is not { } ruleset)
+        {
+            return;
+        }
+
+        try
+        {
+            var slot = Math.Abs(turnNumber) % AutosaveSlots + 1;
+            var path = Path.Combine(Settings.SaveGameFolder, $"autosave{slot}.sav");
+            var viewData = new Dictionary<string, string> { { "Zoom", _gameScreen.Zoom.ToString() } };
+
+            // AtomicFile so a failure part way through cannot destroy the autosave
+            // from three turns ago that it is writing over.
+            AtomicFile.Write(path,
+                stream => new GameSerializer().Write(stream, game, ruleset, viewData));
+            SessionLog.Record($"autosaved turn {turnNumber} to {Path.GetFileName(path)}");
+        }
+        catch (Exception error)
+        {
+            SessionLog.Record($"autosave failed: {error.Message}");
+            Console.Error.WriteLine($"rhYciv: could not autosave: {error.Message}");
+        }
     }
 
     public void SetUnitActive(Unit? unit, bool move)
