@@ -23,6 +23,11 @@ jobs:
   quality-gate:
     name: Quality gate (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    # The gate takes about two minutes. A hosted runner that hangs instead holds
+    # the master concurrency group open, and because master runs are never
+    # cancelled, every later run queues behind it indefinitely -- one stuck macOS
+    # job left three commits' worth of CI unreported. Fail rather than block.
+    timeout-minutes: 20
     strategy:
       # One platform failing is a fact worth having about the others, so let the
       # rest of the matrix finish.
