@@ -350,8 +350,42 @@ public class CityWindow : BaseDialog
         if (key is KeyboardKey.Escape or KeyboardKey.Enter or KeyboardKey.KpEnter)
         {
             CurrentGameScreen.CloseDialog(this);
+            return;
         }
+
+        // Left and right step through the player's cities without going back to the
+        // map, which is how Civ II's city window works and how a turn's worth of
+        // production is set in a few seconds rather than a few dozen clicks.
+        if (key is KeyboardKey.Left or KeyboardKey.Right)
+        {
+            StepToAnotherCity(key == KeyboardKey.Right ? 1 : -1);
+            return;
+        }
+
         base.OnKeyPress(key);
+    }
+
+    /// <summary>
+    /// Closes this window and opens the next city along, in the order the player's
+    /// cities were founded. Does nothing when they only hold one.
+    /// </summary>
+    private void StepToAnotherCity(int step)
+    {
+        var cities = CurrentGameScreen.Player.Civilization.Cities;
+        if (cities.Count < 2)
+        {
+            return;
+        }
+
+        var index = cities.IndexOf(City);
+        if (index < 0)
+        {
+            return;
+        }
+
+        var next = cities[((index + step) % cities.Count + cities.Count) % cities.Count];
+        CurrentGameScreen.CloseDialog(this);
+        CurrentGameScreen.ShowCityWindow(next);
     }
 
     /// <summary>Opens this city's Change Production list. Used by the review harness.</summary>

@@ -224,8 +224,36 @@ public class ProductionBox : BaseControl
         selectedIndex = Math.Clamp(selectedIndex, 0, _canProduce.Count - 1);
         var selectedOrder = _canProduce[selectedIndex];
         var previousOrder = _city.ItemInProduction;
-        if (previousOrder != selectedOrder)
+        if (previousOrder == selectedOrder)
         {
+            return;
+        }
+
+        // Switching between a unit, a building and a wonder forfeits a share of the
+        // work already done. The engine has always charged it; nothing said so, and
+        // the shields simply vanished.
+        var rules = _cityWindow.CurrentGameScreen.Game.Rules;
+        var penalty = _city.ProductionChangePenalty(selectedOrder, rules);
+        if (penalty > 0)
+        {
+            _cityWindow.CurrentGameScreen.ShowPopup("CHANGEPRODUCTION",
+                handleButtonClick: (confirm, _, _, _) =>
+                {
+                    if (confirm == Labels.Ok)
+                    {
+                        ApplyProductionChange(selectedOrder);
+                    }
+                },
+                replaceNumbers: [penalty, Math.Max(0, _city.ShieldsProgress)],
+                replaceStrings: [previousOrder?.Title ?? string.Empty, selectedOrder.Title]);
+            return;
+        }
+
+        ApplyProductionChange(selectedOrder);
+    }
+
+    private void ApplyProductionChange(IProductionOrder selectedOrder)
+    {
             // The engine charges the change: it knows the ruleset's penalty rate,
             // counts wonders as their own category, and only charges once a turn.
             // Halving here on ItemType alone made a switch to a wonder free and
@@ -238,7 +266,6 @@ public class ProductionBox : BaseControl
             SynchronizeQueueProgress(selectedOrder, retainedShields);
 
             ChangeProductionDisplay();
-        }
     }
 
     private void SynchronizeQueueProgress(IProductionOrder selectedOrder, int retainedShields)

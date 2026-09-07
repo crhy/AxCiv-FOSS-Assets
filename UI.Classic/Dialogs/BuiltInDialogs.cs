@@ -64,6 +64,11 @@ internal static class BuiltInDialogs
         AddMessage(dialogs, "CANNOTINCITE", "The capital will not be bought",
             ["%STRING0 is the seat of government. No amount of gold will turn it;",
              "it has to be taken."]);
+        AddMessage(dialogs, "CHANGEPRODUCTION", "Change production",
+            ["Switching from %STRING0 to %STRING1 is a change of trade, and the",
+             "work already done does not carry over in full.",
+             "%NUMBER0 of the %NUMBER1 shields gathered will be lost.", "", "Change anyway?"],
+            ["OK", "Cancel"]);
         AddMessage(dialogs, "CANNOTBRIBE", "Nothing to buy here",
             ["A single unit in the open can be bought. A garrison watching each",
              "other, or one inside a city, cannot."]);

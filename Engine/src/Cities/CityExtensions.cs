@@ -429,6 +429,26 @@ namespace RhyCiv.Engine
         /// changes. The rate comes from the ruleset's own ShieldPenaltyTypeChange,
         /// which was parsed and then never read.
         /// </summary>
+        /// <summary>
+        /// Shields that switching to <paramref name="next"/> would cost, without
+        /// charging them. Civ II takes a share of the accumulated shields when the
+        /// change crosses between units, buildings and wonders, and only once a
+        /// turn -- so the player should be told before it happens, not after.
+        /// </summary>
+        public static int ProductionChangePenalty(this City city, IProductionOrder? next, Rules rules)
+        {
+            var current = city.ItemInProduction;
+            if (next == null || current == null || ReferenceEquals(next, current) ||
+                city.ProductionChanged ||
+                ProductionCategory(current) == ProductionCategory(next))
+            {
+                return 0;
+            }
+
+            var penalty = Math.Clamp(rules.Cosmic.ShieldPenaltyTypeChange, 0, 100);
+            return Math.Max(0, city.ShieldsProgress) * penalty / 100;
+        }
+
         public static void ChangeProduction(this City city, IProductionOrder next, Rules rules)
         {
             var current = city.ItemInProduction;
