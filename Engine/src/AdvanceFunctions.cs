@@ -109,6 +109,13 @@ namespace RhyCiv.Engine.Advances
                 civilization.ReseachingAdvance = AdvancesConstants.No;
             }
 
+            // Arriving at the goal retires it. Leaving it set would have the
+            // research chooser go on offering a route to somewhere already reached.
+            if (civilization.ResearchGoal == advanceIndex)
+            {
+                civilization.ResearchGoal = -1;
+            }
+
             foreach (var effect in game.Rules.Advances[advanceIndex].Effects)
             {
                 if (effect.Key == Effects.EpochTech)
@@ -231,6 +238,80 @@ namespace RhyCiv.Engine.Advances
             return allAvailable.ToList();
         }
         
+        /// <summary>
+        /// Every advance this civilisation still has to learn before
+        /// <paramref name="goal"/> is within reach, the goal itself included.
+        /// <para>
+        /// Walks the prerequisite tree from the goal downwards, stopping wherever
+        /// the civilisation already knows an advance. An advance it is barred from
+        /// by its advance group is still reported, because the caller needs to be
+        /// able to tell the player that the goal cannot be reached at all rather
+        /// than silently returning a shorter answer.
+        /// </para>
+        /// </summary>
+        public static HashSet<int> AdvancesNeededFor(IGame game, Civilization civ, int goal)
+        {
+            var needed = new HashSet<int>();
+            var advances = game.Rules.Advances;
+            if (goal < 0 || goal >= advances.Length || HasTech(civ, goal))
+            {
+                return needed;
+            }
+
+            var pending = new Stack<int>();
+            pending.Push(goal);
+
+            while (pending.Count > 0)
+            {
+                var index = pending.Pop();
+                if (index < 0 || index >= advances.Length || HasTech(civ, index) || !needed.Add(index))
+                {
+                    continue;
+                }
+
+                // Nil marks "no prerequisite", and the visited set above is what
+                // keeps a ruleset with a circular prerequisite from spinning here.
+                pending.Push(advances[index].Prereq1);
+                pending.Push(advances[index].Prereq2);
+            }
+
+            return needed;
+        }
+
+        /// <summary>
+        /// The advances out of <paramref name="options"/> that lead towards
+        /// <paramref name="goal"/> -- its outstanding prerequisites, and the goal
+        /// itself once everything it needs is known.
+        /// <para>
+        /// An empty answer means nothing that can be started now brings the goal
+        /// any nearer, which the caller is expected to say out loud rather than
+        /// present as an empty list.
+        /// </para>
+        /// </summary>
+        public static List<Advance> StepsToward(IGame game, Civilization civ, int goal,
+            IEnumerable<Advance> options)
+        {
+            var needed = AdvancesNeededFor(game, civ, goal);
+            return needed.Count == 0
+                ? new List<Advance>()
+                : options.Where(a => needed.Contains(a.Index)).ToList();
+        }
+
+        /// <summary>
+        /// Everything this civilisation could sensibly aim at: advances it does not
+        /// have and is not barred from. Unlike the research list this is not limited
+        /// to what can be started now, because the point of a goal is that it is
+        /// several advances away.
+        /// </summary>
+        public static List<Advance> PossibleResearchGoals(IGame game, Civilization civ)
+        {
+            return game.Rules.Advances
+                .Where(a => GetAdvanceGroupAccess(civ, a) == AdvanceGroupAccess.CanResearch &&
+                            !HasTech(civ, a.Index))
+                .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+        }
+
         /// <summary>
         /// Get a list of advances that can be taken by the active civilization from another civilization.
         ///

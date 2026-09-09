@@ -42,6 +42,18 @@ public class DialogElements
     /// </summary>
     public IList<string>? Button { get; set; }
 
+    /// <summary>
+    /// Asks for the dialog to be laid out at the width it requested rather than at
+    /// the wide default a text-only message otherwise gets.
+    /// <para>
+    /// The wide default suits a proclamation of several sentences, which is what
+    /// most text-only dialogs in this game are. A short remark reads badly stretched
+    /// across two thirds of the screen on one line, so a dialog that is a sentence
+    /// or two can ask to keep its own width and wrap sooner instead.
+    /// </para>
+    /// </summary>
+    public bool Compact { get; set; }
+
     public List<Decoration> Decorations { get; } = new();
 
     /// <summary>

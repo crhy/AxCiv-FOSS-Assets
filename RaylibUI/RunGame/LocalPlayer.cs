@@ -88,23 +88,63 @@ public class LocalPlayer : IPlayer
             [cityImprovement.Cost]);
     }
 
+    /// <summary>
+    /// Whether the research chooser is on screen and still waiting for an answer.
+    /// <para>
+    /// The chooser is a dialog: showing it returns at once and the answer arrives
+    /// later. The engine asks whenever the civilisation has nothing being
+    /// researched, which is still true until the player replies -- so asking again
+    /// before then would stack a second identical chooser behind the first, and the
+    /// player would have to pick the same technology twice.
+    /// </para>
+    /// <para>
+    /// It is set only when a chooser actually went up, and cleared only when an
+    /// advance has been chosen. It deliberately survives the start of a turn: the
+    /// engine asks for research from <c>TurnBeginning</c>, which runs *before* the
+    /// player is told the turn has started, so clearing this on turn start -- which
+    /// it used to do, as a backstop against a question that never got answered --
+    /// cancelled the guard on the same turn it was set, every turn, and left it
+    /// doing nothing at all.
+    /// </para>
+    /// </summary>
+    private bool _awaitingResearchChoice;
+
     public void SelectNewAdvance(List<Advance> researchPossibilities)
     {
-        ShowResearchChoice(researchPossibilities, 0);
+        if (_awaitingResearchChoice)
+        {
+            return;
+        }
+
+        // Only wait for an answer if there is going to be one. A ruleset whose text
+        // has no RESEARCH dialog shows nothing, and setting the flag then would lock
+        // the question out for the rest of the game.
+        _awaitingResearchChoice = ShowResearchChoice(researchPossibilities, 0);
     }
 
     /// <summary>
-    /// The research chooser, with an Info button that opens the Civilopedia page
-    /// for whichever advance is highlighted. Reading about a choice puts the
-    /// chooser back underneath, so the pedia closes onto the question again.
+    /// The name of the button that narrows the research list to the advances
+    /// leading towards the civilisation's technology goal. It is added to the
+    /// dialog here rather than in the game's text so that it is present whatever
+    /// text the ruleset supplies.
     /// </summary>
-    private void ShowResearchChoice(List<Advance> researchPossibilities, int preselected)
+    private const string GoalButton = "Goal";
+
+    /// <summary>
+    /// The research chooser. Info opens the Civilopedia page for whichever advance
+    /// is highlighted, and puts the chooser back underneath, so the pedia closes
+    /// onto the question again. Goal leads to the technology goal, and to the
+    /// shorter list of advances that lead towards it.
+    /// </summary>
+    /// <returns>Whether the chooser was put up.</returns>
+    private bool ShowResearchChoice(List<Advance> researchPossibilities, int preselected)
     {
         var activeInterface = _gameScreen.Main.ActiveInterface;
-        _gameScreen.ShowPopup("RESEARCH", (s, i, arg3, arg4) =>
+        return _gameScreen.ShowPopup("RESEARCH", (s, i, arg3, arg4) =>
             {
                 if (researchPossibilities.Count == 0)
                 {
+                    _awaitingResearchChoice = false;
                     return;
                 }
 
@@ -112,44 +152,300 @@ public class LocalPlayer : IPlayer
 
                 if (s == "Info")
                 {
-                    // Pushed first so it sits under the pedia page pushed next.
+                    // Pushed first so it sits under the pedia page pushed next. The
+                    // question is still outstanding, so the flag stays set.
                     ShowResearchChoice(researchPossibilities, selectedIndex);
                     NotifyAdvanceResearched(researchPossibilities[selectedIndex].Index);
                     return;
                 }
 
-                Civilization.ReseachingAdvance = researchPossibilities[selectedIndex].Index;
-                if (Civilization.ScienceRate <= 0)
+                if (s == GoalButton)
                 {
-                    Civilization.ScienceRate = 60;
-                    Civilization.TaxRate = Math.Min(Civilization.TaxRate, 40);
+                    // Still the same outstanding question, asked a different way.
+                    ShowGoalRoute(researchPossibilities);
+                    return;
                 }
+
+                _awaitingResearchChoice = false;
+                StartResearching(researchPossibilities[selectedIndex]);
             }, replaceStrings: [activeInterface.GetScientistName(Civilization.Epoch)],
-            listBox: new ListboxDefinition
+            listBox: ResearchListbox(researchPossibilities, preselected),
+            extraButtons: [GoalButton]);
+    }
+
+    /// <summary>
+    /// Commits the civilisation to an advance, and makes sure it is actually being
+    /// paid for: a civilisation that has had its science rate at nothing would
+    /// otherwise agree to research something and never make any progress on it.
+    /// </summary>
+    private void StartResearching(Advance advance)
+    {
+        Civilization.ReseachingAdvance = advance.Index;
+        if (Civilization.ScienceRate <= 0)
+        {
+            Civilization.ScienceRate = 60;
+            Civilization.TaxRate = Math.Min(Civilization.TaxRate, 40);
+        }
+    }
+
+    private ListboxDefinition ResearchListbox(IList<Advance> advances, int preselected)
+    {
+        var activeInterface = _gameScreen.Main.ActiveInterface;
+        return new ListboxDefinition
+        {
+            VerticalScrollbar = advances.Count > 10,
+            ImageShift = false,
+            Rows = Math.Min(10, Math.Max(1, advances.Count)),
+            Looks = new ListboxLooks
             {
-                VerticalScrollbar = false,
+                Font = activeInterface.Look.DefaultFont,
+                FontSize = 20,
+                TextColorFront = Raylib_CSharp.Colors.Color.Black,
+                TextColorShadow = Raylib_CSharp.Colors.Color.Blank,
+                TextShadowOffset = System.Numerics.Vector2.Zero,
+                SelectedTextFont = activeInterface.Look.DefaultFont,
+                SelectedTextBackgroundColor = new Raylib_CSharp.Colors.Color(107, 107, 107, 255),
+                SelectedTextColorFront = Raylib_CSharp.Colors.Color.White,
+                SelectedTextColorShadow = Raylib_CSharp.Colors.Color.Black
+            },
+            Groups = advances.Select(a => new ListboxGroup
+            {
+                Elements = [new() { Icon = GetClassicAdvanceIcon(a), Width = 2 * 36 + 2 },
+                            new() { Text = a.Name, VerticalAlignment = VerticalAlignment.Center } ],
+                Height = 36
+            }).ToList(),
+            SelectedId = Math.Clamp(preselected, 0, Math.Max(0, advances.Count - 1))
+        };
+    }
+
+    /// <summary>
+    /// The Goal button. Shows the advances on the list that lead towards the
+    /// civilisation's technology goal, so a player working towards something
+    /// several advances away does not have to hold the tech tree in their head
+    /// every time the scientists ask.
+    /// <para>
+    /// Without a goal there is nothing to narrow the list by, so the goal is asked
+    /// for first.
+    /// </para>
+    /// </summary>
+    private void ShowGoalRoute(List<Advance> researchPossibilities)
+    {
+        if (Civilization.ResearchGoal < 0)
+        {
+            ShowGoalChooser(researchPossibilities);
+            return;
+        }
+
+        var goal = GoalAdvance();
+        if (goal == null)
+        {
+            // The goal names an advance these rules do not have, or one that has
+            // since been learned. Either way there is nothing to steer by.
+            Civilization.ResearchGoal = -1;
+            ShowGoalChooser(researchPossibilities);
+            return;
+        }
+
+        var steps = AdvanceFunctions.StepsToward(_gameScreen.Game, Civilization, goal.Index,
+            researchPossibilities);
+
+        if (steps.Count == 0)
+        {
+            ShowNothingLeadsToGoal(researchPossibilities, goal);
+            return;
+        }
+
+        var elements = new DialogElements
+        {
+            Name = "RESEARCHGOALROUTE_DYNAMIC",
+            Title = $"Towards {goal.Name}",
+            Width = 400,
+            Button = [Labels.Ok, GoalButton, Labels.Cancel],
+            Text = [steps.Count == 1
+                ? $"One advance you can begin now leads towards {goal.Name}."
+                : $"These advances lead towards {goal.Name}."],
+            LineStyles = [TextStyles.Left],
+            Listbox = ResearchListbox(steps, 0)
+        };
+
+        CivDialog? dialog = null;
+        dialog = new CivDialog(_gameScreen.Main, elements, (button, selected, _, _) =>
+        {
+            _gameScreen.CloseDialog(dialog);
+
+            if (button == GoalButton)
+            {
+                ShowGoalChooser(researchPossibilities);
+                return;
+            }
+
+            if (button != Labels.Ok)
+            {
+                // Back to the full list; the question has still not been answered.
+                ShowResearchChoice(researchPossibilities, 0);
+                return;
+            }
+
+            var chosen = steps[Math.Clamp(selected, 0, steps.Count - 1)];
+            _awaitingResearchChoice = false;
+            StartResearching(chosen);
+        });
+        _gameScreen.ShowDialog(dialog, stack: true);
+    }
+
+    /// <summary>
+    /// Says so, plainly, when the goal is real but out of reach for now -- every
+    /// advance that leads to it needs something the civilisation has not learned.
+    /// Silently showing an empty list would read as a broken dialog.
+    /// </summary>
+    private void ShowNothingLeadsToGoal(List<Advance> researchPossibilities, Advance goal)
+    {
+        var elements = new DialogElements
+        {
+            Name = "RESEARCHGOALBLOCKED_DYNAMIC",
+            Title = "Research Goal",
+            // A remark, not a proclamation: kept to its own width so it wraps into
+            // a few short lines rather than being stretched across the screen.
+            Compact = true,
+            Width = 260,
+            Button = [Labels.Ok, GoalButton],
+            Text =
+            [
+                $"There is nothing that can be researched towards {goal.Name} at this time.",
+                "Choose from the full list, or set a different goal."
+            ],
+            LineStyles = [TextStyles.Left, TextStyles.Left]
+        };
+
+        CivDialog? dialog = null;
+        dialog = new CivDialog(_gameScreen.Main, elements, (button, _, _, _) =>
+        {
+            _gameScreen.CloseDialog(dialog);
+            if (button == GoalButton)
+            {
+                ShowGoalChooser(researchPossibilities);
+            }
+            else
+            {
+                ShowResearchChoice(researchPossibilities, 0);
+            }
+        });
+        _gameScreen.ShowDialog(dialog, stack: true);
+    }
+
+    /// <summary>
+    /// Picks the advance to work towards. Everything the civilisation does not have
+    /// and is not barred from is offered, however far off, because that is the point
+    /// of a goal; the first entry gives it up again.
+    /// </summary>
+    private void ShowGoalChooser(List<Advance> researchPossibilities)
+    {
+        var goals = AdvanceFunctions.PossibleResearchGoals(_gameScreen.Game, Civilization);
+        if (goals.Count == 0)
+        {
+            ShowResearchChoice(researchPossibilities, 0);
+            return;
+        }
+
+        var current = goals.FindIndex(a => a.Index == Civilization.ResearchGoal);
+        var elements = new DialogElements
+        {
+            Name = "RESEARCHGOAL_DYNAMIC",
+            Title = "Set Research Goal",
+            Width = 400,
+            Button = [Labels.Ok, Labels.Cancel],
+            Text = ["What shall we work towards?"],
+            LineStyles = [TextStyles.Left],
+            Listbox = new ListboxDefinition
+            {
+                VerticalScrollbar = true,
                 ImageShift = false,
-                Rows = Math.Min(10, researchPossibilities.Count),
-                Looks = new ListboxLooks
-                {
-                    Font = activeInterface.Look.DefaultFont,
-                    FontSize = 20,
-                    TextColorFront = Raylib_CSharp.Colors.Color.Black,
-                    TextColorShadow = Raylib_CSharp.Colors.Color.Blank,
-                    TextShadowOffset = System.Numerics.Vector2.Zero,
-                    SelectedTextFont = activeInterface.Look.DefaultFont,
-                    SelectedTextBackgroundColor = new Raylib_CSharp.Colors.Color(107, 107, 107, 255),
-                    SelectedTextColorFront = Raylib_CSharp.Colors.Color.White,
-                    SelectedTextColorShadow = Raylib_CSharp.Colors.Color.Black
-                },
-                Groups = researchPossibilities.Select(a => new ListboxGroup
-                {
-                    Elements = [new() { Icon = GetClassicAdvanceIcon(a), Width = 2 * 36 + 2 },
-                                new() { Text = a.Name, VerticalAlignment = VerticalAlignment.Center } ],
-                    Height = 36
-                }).ToList(),
-                SelectedId = Math.Clamp(preselected, 0, Math.Max(0, researchPossibilities.Count - 1))
-            });
+                Rows = 10,
+                Looks = GoalListLooks(),
+                Groups = GoalEntries(goals),
+                SelectedId = current >= 0 ? current + 1 : 0
+            }
+        };
+
+        CivDialog? dialog = null;
+        dialog = new CivDialog(_gameScreen.Main, elements, (button, selected, _, _) =>
+        {
+            _gameScreen.CloseDialog(dialog);
+
+            if (button != Labels.Ok)
+            {
+                ShowResearchChoice(researchPossibilities, 0);
+                return;
+            }
+
+            // Entry zero is "no goal"; everything after it is an advance.
+            Civilization.ResearchGoal = selected <= 0 || selected > goals.Count
+                ? -1
+                : goals[selected - 1].Index;
+
+            if (Civilization.ResearchGoal < 0)
+            {
+                ShowResearchChoice(researchPossibilities, 0);
+            }
+            else
+            {
+                ShowGoalRoute(researchPossibilities);
+            }
+        });
+        _gameScreen.ShowDialog(dialog, stack: true);
+    }
+
+    private List<ListboxGroup> GoalEntries(IList<Advance> goals)
+    {
+        var entries = new List<ListboxGroup>
+        {
+            new()
+            {
+                Elements = [new() { Text = "(no goal)", VerticalAlignment = VerticalAlignment.Center }],
+                Height = 36
+            }
+        };
+
+        entries.AddRange(goals.Select(a => new ListboxGroup
+        {
+            Elements =
+            [
+                new() { Icon = GetClassicAdvanceIcon(a), Width = 2 * 36 + 2 },
+                new() { Text = a.Name, VerticalAlignment = VerticalAlignment.Center }
+            ],
+            Height = 36
+        }));
+
+        return entries;
+    }
+
+    private ListboxLooks GoalListLooks()
+    {
+        var activeInterface = _gameScreen.Main.ActiveInterface;
+        return new ListboxLooks
+        {
+            Font = activeInterface.Look.DefaultFont,
+            FontSize = 20,
+            TextColorFront = Raylib_CSharp.Colors.Color.Black,
+            TextColorShadow = Raylib_CSharp.Colors.Color.Blank,
+            TextShadowOffset = System.Numerics.Vector2.Zero,
+            SelectedTextFont = activeInterface.Look.DefaultFont,
+            SelectedTextBackgroundColor = new Raylib_CSharp.Colors.Color(107, 107, 107, 255),
+            SelectedTextColorFront = Raylib_CSharp.Colors.Color.White,
+            SelectedTextColorShadow = Raylib_CSharp.Colors.Color.Black
+        };
+    }
+
+    private Advance? GoalAdvance()
+    {
+        var advances = _gameScreen.Game.Rules.Advances;
+        var goal = Civilization.ResearchGoal;
+        if (goal < 0 || goal >= advances.Length || AdvanceFunctions.HasTech(Civilization, goal))
+        {
+            return null;
+        }
+
+        return advances[goal];
     }
 
     /// <summary>

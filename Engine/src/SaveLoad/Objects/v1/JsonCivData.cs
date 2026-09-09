@@ -21,6 +21,7 @@ public class JsonCivData
         Money = civilization.Money;
         Science = civilization.Science;
         ResearchingAdvance = civilization.ReseachingAdvance;
+        ResearchGoal = civilization.ResearchGoal >= 0 ? civilization.ResearchGoal : null;
         Advances = civilization.Advances.Clamp();
         SciRate = civilization.ScienceRate;
         TaxRate = civilization.TaxRate;
@@ -72,6 +73,13 @@ public class JsonCivData
     public int Money { get; set; }
     public int Science { get; set; }
     public int ResearchingAdvance { get; set; }
+
+    /// <summary>
+    /// The advance this civilisation is working towards, absent when it has no
+    /// goal. Nullable so that a save written before goals existed loads as having
+    /// none rather than as aiming at whichever advance happens to be index zero.
+    /// </summary>
+    public int? ResearchGoal { get; set; }
     public bool[]? Advances { get; set; }
     public int SciRate { get; set; }
     public int FutureTechCount { get; set; }

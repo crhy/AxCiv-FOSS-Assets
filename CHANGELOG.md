@@ -61,6 +61,22 @@ Responsiveness: the turn comes back to the player, and the map keeps up.
   built and then played a dozen of them. Past a limit the move is drawn rather
   than animated.
 
+### Research
+
+- **A technology goal, and a Goal button that shows the way to it.** Name an
+  advance to work towards and the research chooser will list only the advances
+  that lead there — its outstanding prerequisites, and the goal itself once
+  everything it needs is known. When nothing that can be started now brings the
+  goal any nearer it says so rather than showing an empty list. The goal is kept
+  in saved games and retires itself when it is reached.
+- **The chooser no longer asks the same question twice.** The guard against a
+  second chooser stacking behind the first was cancelled every turn by the
+  backstop meant to protect it: the engine asks for research from the start of
+  the turn's bookkeeping, which runs before the player is told the turn has
+  begun, so the flag was cleared on the same turn it was set. It now lasts until
+  the question is actually answered, and is only set when a chooser really went
+  up.
+
 ### Diagnostics
 
 - `RHYCIV_FRAME_LOG=<seconds>` reports how many frames the game is drawing and how

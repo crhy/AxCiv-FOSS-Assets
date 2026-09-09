@@ -22,6 +22,16 @@ namespace Model.Core
         
         public int Science { get; set; }
         public int ReseachingAdvance { get; set; } = -1;
+
+        /// <summary>
+        /// The advance this civilisation is working towards, or -1 for none.
+        /// <para>
+        /// A goal is a long-term intention rather than an order: it does not choose
+        /// research by itself, it lets the research chooser show only the advances
+        /// that lead towards it. It is cleared when the goal is reached.
+        /// </para>
+        /// </summary>
+        public int ResearchGoal { get; set; } = -1;
         public bool[] Advances { get; set; } = [];
         public int ScienceRate { get; set; }
         public int TaxRate { get; set; }

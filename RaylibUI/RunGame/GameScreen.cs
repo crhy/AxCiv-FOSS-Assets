@@ -514,7 +514,14 @@ public class GameScreen : BaseScreen
         _queuedPopups.Enqueue(action);
     }
 
-    public void ShowPopup(string dialogName,
+    /// <summary>
+    /// Puts a dialog from the game's text up on screen, and reports whether it
+    /// went up -- or was queued behind one that is already there, which comes to
+    /// the same thing for a caller waiting on an answer. False means the dialog is
+    /// not in the game's text at all and no answer is ever coming, which a caller
+    /// that has set itself to wait for one needs to know.
+    /// </summary>
+    public bool ShowPopup(string dialogName,
         Action<string, int, IList<bool>?, IDictionary<string, string>?>? handleButtonClick = null,
         IList<int>? replaceNumbers = null,
         IList<string>? replaceStrings = null,
@@ -522,21 +529,29 @@ public class GameScreen : BaseScreen
         List<string>? options = null,
         List<TextBoxDefinition>? textBoxes = null,
         DialogImageElements? dialogImage = null,
-        ListboxDefinition? listBox = null)
+        ListboxDefinition? listBox = null,
+        IList<string>? extraButtons = null)
     {
         SessionLog.Record($"popup {dialogName}");
 
         if (_currentPopupDialog != null)
         {
             _queuedPopups.Enqueue(() => ShowPopup(dialogName, handleButtonClick, replaceNumbers, replaceStrings,
-                checkboxStates, options, textBoxes, dialogImage, listBox));
-            return;
+                checkboxStates, options, textBoxes, dialogImage, listBox, extraButtons));
+            return true;
         }
 
         var popupBox = MainWindow.ActiveInterface.GetDialog(dialogName);
         if (popupBox != null)
         {
             var dialog = new DialogElements(popupBox);
+            if (extraButtons is { Count: > 0 })
+            {
+                // A fresh list: DialogElements takes the one held by the cached
+                // dialog definition, so appending in place would grow the game's own
+                // copy by another button every time the dialog was opened.
+                dialog.Button = (dialog.Button ?? []).Concat(extraButtons).ToList();
+            }
             if (options != null)
             {
                 dialog.Options = new()
@@ -572,7 +587,10 @@ public class GameScreen : BaseScreen
             _popupClicked = handleButtonClick;
             _currentPopupDialog = new CivDialog(MainWindow, dialog, ClosePopup);
             ShowDialog(_currentPopupDialog, stack: true);
+            return true;
         }
+
+        return false;
     }
 
     private void ClosePopup(string arg1, int arg2, IList<bool>? arg3, IDictionary<string, string>? arg4)

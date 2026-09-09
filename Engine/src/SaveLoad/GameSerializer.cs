@@ -293,6 +293,15 @@ public class GameSerializer
             researchingAdvance = AdvancesConstants.Nil;
         }
 
+        // A goal that no longer names an advance in these rules -- a save carried
+        // across a ruleset change -- is dropped rather than kept as a number the
+        // research chooser cannot make sense of.
+        var researchGoal = jsonCivData.ResearchGoal ?? -1;
+        if (researchGoal < 0 || researchGoal >= rules.Advances.Length)
+        {
+            researchGoal = -1;
+        }
+
         return new Civilization
         {
             TribeId = jsonCivData.TribeId,
@@ -307,6 +316,7 @@ public class GameSerializer
             Money = jsonCivData.Money,
             Science = jsonCivData.Science,
             ReseachingAdvance = researchingAdvance,
+            ResearchGoal = researchGoal,
             Advances = jsonCivData.Advances ?? [],
             ScienceRate = jsonCivData.SciRate,
             PlayerType = jsonCivData.PlayerType,

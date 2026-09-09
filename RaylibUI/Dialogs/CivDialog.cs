@@ -34,7 +34,8 @@ public class CivDialog : DynamicSizingDialog
     /// panel rather than a small strip.
     /// </summary>
     private static bool IsMessageLayout(DialogElements d) =>
-        d.Text is { Count: > 0 }
+        !d.Compact
+        && d.Text is { Count: > 0 }
         && (d.TextBoxes is null || d.TextBoxes.Count == 0)
         && d.Listbox is null
         && (d.Image is null || d.Image.Image.Any(n => n is null));
