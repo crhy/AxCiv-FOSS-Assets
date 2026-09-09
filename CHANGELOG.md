@@ -5,7 +5,7 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
-## [Unreleased]
+## [0.1.5] — 2026-09-09
 
 Responsiveness: the turn comes back to the player, and the map keeps up.
 

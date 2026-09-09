@@ -34,6 +34,14 @@
     git history; this file describes the 0.1.x line only.
   -->
   <releases>
+    <release version="0.1.5" date="2026-09-09">
+      <description>
+        <p>The game answers the keyboard and the mouse again.</p>
+        <p>One press of End Turn now plays a whole turn. Starting a civilisation's turn handed control back and waited, which is right for you and wrong for everybody else — a computer civilisation has nothing that comes back later to ask it to carry on, so each rival moved a single unit and then held the turn. With eight rivals on the board that meant pressing Enter eight times, into a game that appeared to be ignoring you, before you could move again. Rival civilisations also move their whole armies now, and their fortify and settler orders actually resolve.</p>
+        <p>Keypresses are no longer lost. Keys were read by asking about every key on the keyboard once a frame, so a key pressed and released during a frame that ran long had already come back up before it was asked about, and the press simply never happened. Redrawing the map is about ten times faster, a redraw happens when it is asked for instead of waiting up to two seconds on the animation clock, and the side panel keeps answering the mouse after it rebuilds itself.</p>
+        <p>The research chooser has a Goal button: name an advance to work towards and it lists only the research that leads there, or says plainly when nothing you can begin now brings it any nearer. The goal is remembered in saved games and retires itself when it is reached.</p>
+      </description>
+    </release>
     <release version="0.1.4" date="2026-09-07">
       <description>
         <p>Saving, and a turn that ends when you press Enter.</p>
