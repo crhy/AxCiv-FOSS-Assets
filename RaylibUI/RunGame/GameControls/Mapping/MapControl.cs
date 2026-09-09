@@ -90,6 +90,20 @@ public class MapControl : BaseControl
         _gameScreen.ActiveMode.MouseDown(tile);
     }
 
+    /// <summary>
+    /// How many moves may be waiting to be watched at once.
+    /// <para>
+    /// Every move the player can see is composed into a small film the moment the
+    /// engine reports it, and every rival civilisation now plays its whole turn on
+    /// one press of End Turn. Without a limit, a turn in which a dozen visible
+    /// units marched past would build a dozen films before the frame ended, and
+    /// then hold the player watching them for several seconds. Past this many the
+    /// move is simply not animated: the map is redrawn instead, so the units are
+    /// still where they should be.
+    /// </para>
+    /// </summary>
+    private const int MaxQueuedAnimations = 12;
+
     private void UnitEventTriggered(object sender, UnitEventArgs e)
     {
         switch (e.EventType)
@@ -99,6 +113,12 @@ public class MapControl : BaseControl
             {
                 if (e is MovementEventArgs mo)
                 {
+                    if (_animationQueue.Count >= MaxQueuedAnimations)
+                    {
+                        _gameScreen.ForceRedraw();
+                        break;
+                    }
+
                     _animationQueue.Enqueue(new MoveAnimation(_gameScreen, mo, _animationQueue.LastOrDefault(_currentView), _viewHeight, _viewWidth, ForceRedraw));
                 }
 
@@ -108,6 +128,12 @@ public class MapControl : BaseControl
             {
                 if (e is CombatEventArgs combatEventArgs)
                 {
+                    if (_animationQueue.Count >= MaxQueuedAnimations)
+                    {
+                        _gameScreen.ForceRedraw();
+                        break;
+                    }
+
                     _animationQueue.Enqueue(new AttackAnimation(_gameScreen, combatEventArgs, _animationQueue.LastOrDefault(_currentView), _viewHeight, _viewWidth, ForceRedraw));
                 }
                 break;
@@ -352,9 +378,18 @@ public class MapControl : BaseControl
             _gameScreen.ActiveMode.MouseClear();
         }
 
-        if (_animationStart.AddMilliseconds(_currentView.Interval) < DateTime.Now)
+        // A redraw that has been asked for is done at once rather than on the
+        // animation clock. The static view of the map ticks once every two seconds,
+        // so anything that changed it other than the player's own move -- ground
+        // coming into view, a city founded, a unit lost, the grid switched on --
+        // could sit unseen for that long. Waiting to be shown what you have just
+        // done is most of what a laggy game feels like. A move being played out is
+        // left alone: it is short, and cutting it off mid-step looks worse than the
+        // wait it saves.
+        var redrawNow = _forceRedraw && _currentView.IsDefault;
+        if (redrawNow || _animationStart.AddMilliseconds(_currentView.Interval) < DateTime.Now)
         {
-            if (_currentView.Finished())
+            if (redrawNow || _currentView.Finished())
             {
                 NextView();
             }

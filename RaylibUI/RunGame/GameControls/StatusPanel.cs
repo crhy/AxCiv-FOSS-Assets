@@ -90,6 +90,28 @@ public class StatusPanel : BaseControl
         var researchIcon = new TextureDisplay(_gameScreen, TextureCache.GetImage(_active.PicSources["researchProgress"][iconNo]), researchIconLoc, scale: iconScale);
 
         _endTurnButton.Visible = _game.GetPlayerCiv == _game.GetActiveCiv;
+
+        // Almost everything in this panel is built again from scratch here, so
+        // whatever the screen was holding on to is about to stop being part of it.
+        // The screen only looks for what the mouse is over when it has nothing, and
+        // a control that has been replaced still reports plausible bounds, so
+        // without letting go the panel would go on delivering the mouse to a
+        // control that is no longer drawn -- clicks on the side panel would simply
+        // do nothing until the pointer was moved away and back.
+        var replaced = Controls;
+        if (replaced.Count > 0)
+        {
+            if (Contains(replaced, _gameScreen.Hovered))
+            {
+                _gameScreen.Hovered = null;
+            }
+
+            if (Contains(replaced, _gameScreen.Focused))
+            {
+                _gameScreen.Focused = null;
+            }
+        }
+
         Controls = [_headerLabel, populLabel, yearLabel, goldLabel, turnsLabel, researchIcon, _endTurnButton];
 
         // Global warming is outside this game's scope, so the status panel has no
@@ -102,6 +124,25 @@ public class StatusPanel : BaseControl
                 Controls.Add(c);
             }
         }
+    }
+
+    private static bool Contains(IEnumerable<IControl> controls, IControl? candidate)
+    {
+        if (candidate == null)
+        {
+            return false;
+        }
+
+        foreach (var control in controls)
+        {
+            if (ReferenceEquals(control, candidate) ||
+                (control.Controls is { Count: > 0 } children && Contains(children, candidate)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void OnClick(object? sender, MouseEventArgs e)

@@ -289,12 +289,19 @@ namespace RaylibUI
             for (var i = 0; i < turns; i++)
             {
                 Console.WriteLine($"test-city: ending turn {game.TurnNumber}");
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 if (game.ProcessEndOfTurn())
                 {
                     game.ChoseNextCiv();
                 }
+                sw.Stop();
 
-                Console.WriteLine($"test-city: turn is now {game.TurnNumber}");
+                // The turn number and whose turn it now is, because a turn that does
+                // not come back round to the player is the failure this harness
+                // exists to catch, and it is invisible from the turn number alone.
+                Console.WriteLine($"test-city: turn is now {game.TurnNumber} in {sw.ElapsedMilliseconds} ms, " +
+                                  $"active {game.GetActiveCiv.TribeName}" +
+                                  (game.GetActiveCiv == game.GetPlayerCiv ? " (the player)" : " (NOT the player)"));
                 foreach (var c in civ.Cities)
                 {
                     Console.WriteLine($"test-city:   {c.Name} size {c.Size} shields {c.ShieldsProgress}" +

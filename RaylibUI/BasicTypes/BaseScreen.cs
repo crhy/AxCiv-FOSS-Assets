@@ -58,10 +58,16 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     {
     }
 
+    /// <summary>
+    /// Most keys and characters taken from the window in one frame. raylib's own
+    /// queues hold sixteen of each, so this empties them.
+    /// </summary>
+    private const int InputQueueLength = 16;
+
     private void ControlEvents(IControlLayout layoutController)
     {
         // Handle up to 16 characters per frame
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < InputQueueLength; i++)
         {
             var charPressed = Convert.ToChar(Input.GetCharPressed());
             if (charPressed > char.MinValue)
@@ -69,9 +75,24 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
                 layoutController.Focused?.OnCharPressed(charPressed);
             }
         }
-        foreach (var key in _keys)
+
+        // Keys are taken from the window's queue of what was actually pressed since
+        // the last frame, rather than by asking about every key on the keyboard in
+        // turn. Asking was both slower and, more importantly, lossy: a key pressed
+        // and let go inside a single frame is already back up by the time it is
+        // asked about, so on any frame that ran long the press simply never
+        // happened. That is precisely what a game feels like when Enter has to be
+        // pressed several times before anything moves. The queue remembers presses
+        // however briefly they were held and however long the frame took.
+        for (int i = 0; i < InputQueueLength; i++)
         {
-            if (!Input.IsKeyPressed(key)) continue;
+            var pressed = Input.GetKeyPressed();
+            if (pressed == 0)
+            {
+                break;
+            }
+
+            var key = (KeyboardKey)pressed;
             if (layoutController.Focused == null || !layoutController.Focused.OnKeyPressed(key))
             {
                 layoutController.OnKeyPress(key);
@@ -155,10 +176,8 @@ public abstract class BaseScreen : BaseLayoutController, IScreen
     
     private int _renderedWidth;
     private int _renderedHeight;
-    private readonly KeyboardKey[] _keys;
 
     protected BaseScreen(Main main) : base(main, Padding.None)
     {
-        _keys = (KeyboardKey[])Enum.GetValues(typeof(KeyboardKey));
     }
 }

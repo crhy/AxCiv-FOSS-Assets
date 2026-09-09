@@ -1,3 +1,4 @@
+using Raylib_CSharp.Images;
 using RhyCiv.Engine.IO;
 using RhyCiv.Engine.MapObjects;
 using Model.Core.Mapping;
@@ -13,7 +14,7 @@ public class TileTextureCache
     private readonly List<TileDetails?[,]> _mapTileTextures = new();
 
     /// <summary>
-    /// Composed tiles in least-recently-used order, newest first. Tiles are built
+    /// Composed tiles in the order they were built, newest first. Tiles are built
     /// at the terrain set's render scale, so at high zoom each one is large; the
     /// cache is bounded by total pixels rather than by tile count.
     /// </summary>
@@ -57,31 +58,26 @@ public class TileTextureCache
             mapIndex = SetupMap(tile.Map);
         }
 
-        var key = new CacheKey(mapIndex, tile.XIndex, tile.Y);
         var cache = _mapTileTextures[mapIndex];
         var details = cache[tile.XIndex, tile.Y];
         if (details != null)
         {
+            // Deliberately not reordering the eviction list. Composing a view asks
+            // for every tile on the screen, so doing that work per tile per redraw
+            // cost more than composing the tiles did, and it bought nothing: a tile
+            // this view has drawn from is already protected by its generation, and
+            // eviction only ever considers tiles that no live view is using.
             details.Generation = _generation;
-            Touch(key);
             return details;
         }
 
+        var key = new CacheKey(mapIndex, tile.XIndex, tile.Y);
         details = MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
         details.Generation = _generation;
         cache[tile.XIndex, tile.Y] = details;
         Track(key, details);
         TrimToBudget();
         return details;
-    }
-
-    private void Touch(CacheKey key)
-    {
-        if (_recentNodes.TryGetValue(key, out var node))
-        {
-            _recent.Remove(node);
-            _recent.AddFirst(node);
-        }
     }
 
     private void Track(CacheKey key, TileDetails details)
@@ -110,8 +106,55 @@ public class TileTextureCache
         }
     }
 
-    private static long ByteSize(TileDetails details) =>
-        Math.Max(0L, (long)details.Image.Width * details.Image.Height * 4);
+    private static long ByteSize(TileDetails details)
+    {
+        var bytes = Math.Max(0L, (long)details.Image.Width * details.Image.Height * 4);
+        if (details.Scaled is { } scaled)
+        {
+            bytes += Math.Max(0L, (long)scaled.Width * scaled.Height * 4);
+        }
+
+        return bytes;
+    }
+
+    /// <summary>
+    /// The tile as it should be drawn at the current zoom: the composed tile when
+    /// it is already the right size, otherwise a resampled copy kept beside it.
+    /// <para>
+    /// Resampling is what a redraw used to spend nearly all its time on, because
+    /// raylib resamples inside every draw call and throws the result away. Holding
+    /// the answer turns a redraw of a screenful of map from a hundred milliseconds
+    /// into a few.
+    /// </para>
+    /// </summary>
+    public Image DrawableImage(TileDetails details, int width, int height)
+    {
+        if (width <= 0 || height <= 0 ||
+            (details.Image.Width == width && details.Image.Height == height))
+        {
+            return details.Image;
+        }
+
+        if (details.Scaled is { } existing && details.ScaledWidth == width && details.ScaledHeight == height)
+        {
+            return existing;
+        }
+
+        if (details.Scaled is { } stale)
+        {
+            _cachedBytes -= Math.Max(0L, (long)stale.Width * stale.Height * 4);
+            stale.Unload();
+            details.Scaled = null;
+        }
+
+        var scaled = details.Image.Copy();
+        scaled.Resize(width, height);
+        details.Scaled = scaled;
+        details.ScaledWidth = width;
+        details.ScaledHeight = height;
+        _cachedBytes += Math.Max(0L, (long)width * height * 4);
+        return scaled;
+    }
 
     /// <summary>
     /// Drops the coldest tiles until the cache is inside its budget, never
@@ -129,7 +172,7 @@ public class TileTextureCache
             {
                 _mapTileTextures[key.MapIndex][key.X, key.Y] = null;
                 Forget(key, cached);
-                cached.Image.Unload();
+                cached.Unload();
             }
             else if (cached == null)
             {
@@ -206,7 +249,7 @@ public class TileTextureCache
         if (previous != null)
         {
             Forget(key, previous);
-            previous.Image.Unload();
+            previous.Unload();
         }
 
         var replacement = MapImage.MakeTileGraphic(tile, tile.Map, _tileSets[mapIndex], _parentScreen.Game, civilizationId);
@@ -221,7 +264,7 @@ public class TileTextureCache
         {
             foreach (var details in mapTextures)
             {
-                details?.Image.Unload();
+                details?.Unload();
             }
         }
         _seenMaps.Clear();

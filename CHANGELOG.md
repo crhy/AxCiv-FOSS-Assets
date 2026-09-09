@@ -5,6 +5,69 @@ Notable changes to rhYciv. Entries reference the issue they close.
 The AppStream release notes in `packaging/flatpak/io.github.crhy.rhYciv.metainfo.xml`
 carry a shorter, user-facing summary of each release; this file is the full record.
 
+## [Unreleased]
+
+Responsiveness: the turn comes back to the player, and the map keeps up.
+
+### The turn
+
+- **One press of End Turn plays one turn, not one civilisation.** Starting a
+  civilisation's turn returned to the caller and waited, which is right for the
+  player and wrong for everybody else: a computer civilisation has nothing that
+  will come back later and ask it to carry on, so it moved its first unit and
+  stopped, holding the turn. With eight rivals on the board the player had to
+  press Enter eight times, into a game that appeared to be ignoring them, before
+  they could move again. Each computer civilisation now plays its whole turn and
+  hands the world on.
+- **Computer civilisations move their whole army, and their orders resolve.**
+  Following on from the same fault, only the first unit of each rival ever moved,
+  and none of their end-of-turn orders ran — a computer unit told to fortify never
+  became fortified, and their settlers never finished a road or an irrigation
+  ditch they had started.
+- **A request for the next unit made from inside the last one is served, not
+  dropped.** Choosing a unit tells the interface, the interface moves it, and
+  finishing its move asks for the next one — from inside the call that is still
+  choosing. That request was thrown away to stop the recursion; it is now
+  remembered and served as soon as the call in progress finishes.
+
+### Keyboard and mouse
+
+- **A keypress is never lost, however long the frame took.** Keys were read by
+  asking about every key on the keyboard once a frame. A key pressed and let go
+  between two frames is already back up by the time it is asked about, so on a
+  long frame the press simply never happened — the other half of having to press
+  Enter several times. Keys now come from the window's queue of what was actually
+  pressed.
+- **The side panel keeps answering the mouse.** Almost everything in it is rebuilt
+  whenever the active unit changes, and the screen went on delivering the mouse to
+  the controls that had been replaced, so clicks in the panel did nothing until
+  the pointer was moved away and back.
+
+### The map
+
+- **Redrawing the map is about ten times faster.** A screenful of map was composed
+  by handing every tile to raylib's general-purpose image drawing, which resampled
+  the tile to the size it is drawn at and threw the result away, once per tile per
+  redraw. A full redraw took between seventeen and forty milliseconds and now
+  takes two or three. Resampled tiles are kept beside the tiles they came from,
+  and the blend is a straight run over rows.
+- **A redraw happens when it is asked for.** The static view of the map ticks once
+  every two seconds, and a redraw waited for that tick — so ground coming into
+  view, a city founded, a unit lost or the grid being switched on could sit unseen
+  for two seconds. A move being played out is still left to finish.
+- **A rival's turn cannot queue up minutes of watching.** Every move the player can
+  see is composed into a short animation the moment it happens; now that rivals
+  play their whole turn at once, a turn spent in sight of a dozen units would have
+  built and then played a dozen of them. Past a limit the move is drawn rather
+  than animated.
+
+### Diagnostics
+
+- `RHYCIV_FRAME_LOG=<seconds>` reports how many frames the game is drawing and how
+  long the worst one took. A game that stops answering the keyboard is nearly
+  always a game whose frames have grown long enough to swallow a keypress between
+  polls, which is hard to judge by eye.
+
 ## [0.1.4] — 2026-09-07
 
 Saving, and the fixes from the 0.1.3 beta test (#113).

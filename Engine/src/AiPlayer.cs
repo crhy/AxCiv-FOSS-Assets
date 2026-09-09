@@ -284,6 +284,17 @@ namespace RhyCiv.Engine
                     break;
                 }
             }
+
+            // The unit has had its go. If it is somehow still awaiting orders -- it
+            // used its moves up on actions that left it with points it cannot spend,
+            // or the loop above ran out of attempts -- its turn is ended here. The
+            // selector offers whatever is still awaiting orders, so a unit that came
+            // back from this unfinished would be offered again, and again, and the
+            // computer civilisation's turn would never end.
+            if (!unit.Dead && unit.AwaitingOrders)
+            {
+                unit.SkipTurn();
+            }
         }
 
         private UnitAction? GetScriptedAction(Unit unit)

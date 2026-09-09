@@ -107,6 +107,12 @@ namespace RhyCiv.Engine
                     continue;
                 }
 
+                if (_activeCiv.PlayerType == PlayerType.Ai)
+                {
+                    RunComputerTurn(activePlayer);
+                    continue;
+                }
+
                 StartPlayerTurn(activePlayer);
                 return;
             }
@@ -179,6 +185,85 @@ namespace RhyCiv.Engine
             {
                 Players[winner.Id].CivilizationVictorious();
             }
+        }
+
+        /// <summary>
+        /// How many times over its own size a computer civilisation's army may be
+        /// walked in one turn. Each round either moves a unit or ends its turn, so
+        /// a bound several times the size of the army can only be reached by a
+        /// player that is not making progress.
+        /// </summary>
+        private const int ComputerUnitRounds = 4;
+
+        /// <summary>
+        /// How many times end-of-turn orders are resolved for a computer
+        /// civilisation. Each pass that reports back has moved one more unit, and a
+        /// handful is far more than a turn ever needs.
+        /// </summary>
+        private const int ComputerEndOfTurnPasses = 4;
+
+        /// <summary>
+        /// Plays a computer civilisation's whole turn, then hands the world on.
+        /// <para>
+        /// A computer player is not interactive. Nothing comes back later to ask it
+        /// for its next unit, so its turn has to be driven from here. This used to
+        /// go through <see cref="StartPlayerTurn"/> and <see cref="ChooseNextUnit"/>,
+        /// which offer exactly one unit and then return -- so a computer
+        /// civilisation moved its first unit and stopped, holding the turn for
+        /// good. Every press of End Turn moved the world on by one civilisation
+        /// instead of one turn, which is why a player had to press Enter once per
+        /// rival before they could move again.
+        /// </para>
+        /// </summary>
+        private void RunComputerTurn(IPlayer activePlayer)
+        {
+            SessionLog.Record(
+                $"turn {TurnNumber} played by {activePlayer.Civilization.TribeName} " +
+                $"({activePlayer.Civilization.Cities.Count} cities, " +
+                $"{activePlayer.Civilization.Units.Count(u => !u.Dead)} units)");
+
+            activePlayer.TurnStart(TurnNumber);
+
+            var round = 0;
+            var limit = 16 + _activeCiv.Units.Count * ComputerUnitRounds;
+            while (round++ < limit)
+            {
+                var unit = _activeCiv.Units.FirstOrDefault(u => u.AwaitingOrders);
+                if (unit == null)
+                {
+                    break;
+                }
+
+                activePlayer.SetUnitActive(unit, true);
+
+                // A unit that comes back still awaiting orders would be picked
+                // again on the next pass and the turn would never end, so its turn
+                // is ended here whatever the player did or did not do with it.
+                if (unit.AwaitingOrders)
+                {
+                    unit.SkipTurn();
+                }
+            }
+
+            // Orders that resolve at the end of a turn -- fortifying, following a
+            // GoTo, finishing a road -- belong to a computer civilisation as much as
+            // to the player. Nothing ran them before, so a computer unit told to
+            // fortify never became fortified and its settlers never finished
+            // anything they started. ProcessEndOfTurn reports false when it has
+            // handed a unit back for a decision, which for a computer player means
+            // it has just moved it, so it is run again to finish the rest.
+            for (var pass = 0; pass < ComputerEndOfTurnPasses && !ProcessEndOfTurn(); pass++)
+            {
+            }
+
+            activePlayer.SetUnitActive(null, false);
+
+            // The end-of-turn notification, which is where the scripted AI raises
+            // its TurnEnd event. Its answer is to ask for the next civilisation --
+            // which is what the loop this returns into is about to do anyway, so
+            // that request is taken back rather than being served twice.
+            activePlayer.WaitingAtEndOfTurn();
+            _chooseNextCivAgain = false;
         }
 
         public void StartPlayerTurn(IPlayer activePlayer)

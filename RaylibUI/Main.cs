@@ -76,6 +76,20 @@ namespace RaylibUI
 
         private List<TimedEvent> _events = new List<TimedEvent>();
 
+        // Frame-time reporting, on when RHYCIV_FRAME_LOG is set to a number of
+        // seconds. A game that stops answering the keyboard is nearly always a game
+        // whose frames have grown long enough to swallow a keypress between polls,
+        // and that is very hard to judge by eye, so the loop can be asked to say how
+        // long its frames are actually taking.
+        private readonly double _frameLogInterval =
+            double.TryParse(Environment.GetEnvironmentVariable("RHYCIV_FRAME_LOG"), out var seconds) && seconds > 0
+                ? seconds
+                : 0;
+        private double _nextFrameReport;
+        private int _framesSinceReport;
+        private double _frameTimeSinceReport;
+        private double _worstFrameSinceReport;
+
         public void RunLoop()
         {
             var counter = pulseTime;
@@ -85,6 +99,7 @@ namespace RaylibUI
             {
                 DisplayScale.Update();
                 var frameTime = Time.GetFrameTime();
+                ReportFrameTime(frameTime);
 
                 if (Input.IsKeyPressed(KeyboardKey.F11))
                 {
@@ -140,6 +155,40 @@ namespace RaylibUI
             }
 
             ShutdownApp();
+        }
+
+        private void ReportFrameTime(float frameTime)
+        {
+            if (_frameLogInterval <= 0)
+            {
+                return;
+            }
+
+            _framesSinceReport++;
+            _frameTimeSinceReport += frameTime;
+            _worstFrameSinceReport = Math.Max(_worstFrameSinceReport, frameTime);
+
+            var now = Time.GetTime();
+            if (_nextFrameReport == 0)
+            {
+                _nextFrameReport = now + _frameLogInterval;
+                return;
+            }
+
+            if (now < _nextFrameReport)
+            {
+                return;
+            }
+
+            var average = _frameTimeSinceReport / Math.Max(1, _framesSinceReport);
+            Console.WriteLine(
+                $"frames: {_framesSinceReport} in {_frameTimeSinceReport:0.00}s " +
+                $"(avg {average * 1000:0.0} ms, worst {_worstFrameSinceReport * 1000:0.0} ms)");
+
+            _nextFrameReport = now + _frameLogInterval;
+            _framesSinceReport = 0;
+            _frameTimeSinceReport = 0;
+            _worstFrameSinceReport = 0;
         }
 
         // Press F10 to write a PNG of the current frame. Handy for bug reports and

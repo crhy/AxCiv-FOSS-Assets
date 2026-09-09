@@ -30,28 +30,48 @@ namespace RhyCiv.Engine
 
         // Choose next unit for orders. If all units ended turn, update cities.
         private bool _choosingNextUnit;
+        private bool _chooseNextUnitAgain;
+
+        /// <summary>
+        /// Most rounds of the deferred-request loop below. Each round either gives a
+        /// unit its orders or ends a civilisation's turn, so a bound well past the
+        /// number of units on the board can only be reached by a selector that is
+        /// not making progress.
+        /// </summary>
+        private const int SelectionRounds = 512;
 
         public void ChooseNextUnit()
         {
-            // Defence in depth against re-entry. Choosing a unit tells the player,
-            // the player changes the interface mode, and a mode is entitled to ask
-            // for the next unit when it has none -- a cycle that recurses until the
-            // stack overflows and kills the process outright, with no exception any
-            // handler can catch. One such cycle has already shipped. Whatever the
-            // interface does in response, asking again while an answer is already in
-            // progress is never what was meant.
+            // Re-entry is normal here rather than exceptional. Choosing a unit tells
+            // the player, the player moves it, and moving it to the end of its turn
+            // asks for the next one -- from inside the call that is still choosing.
+            // Recursing on that would run the whole turn down the stack and overflow
+            // it, which .NET cannot catch and which has already killed one release.
+            //
+            // A nested request is therefore remembered and served by the loop below
+            // once the current one has finished. It must not simply be dropped: a
+            // dropped request is a computer civilisation that moves one unit and
+            // then stops, and a turn that never comes back round to the player, who
+            // is left pressing Enter at a game that appears to ignore them.
             if (_choosingNextUnit)
             {
+                _chooseNextUnitAgain = true;
                 return;
             }
 
             _choosingNextUnit = true;
             try
             {
-                ChooseNextUnitCore();
+                var rounds = 0;
+                do
+                {
+                    _chooseNextUnitAgain = false;
+                    ChooseNextUnitCore();
+                } while (_chooseNextUnitAgain && ++rounds < SelectionRounds);
             }
             finally
             {
+                _chooseNextUnitAgain = false;
                 _choosingNextUnit = false;
             }
         }

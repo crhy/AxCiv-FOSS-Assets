@@ -124,6 +124,17 @@ public abstract class BaseGameView : IGameView
             var dim = _gameScreen.TileCache.GetDimensions(map, gameScreen.Zoom);
             var ypos = -_offsets.Y;
 
+            // Every tile in this picture is drawn into a square of the same size, so
+            // the size is worked out once rather than per tile, and the grid overlay
+            // is looked up once rather than being re-extracted for every square it is
+            // drawn over.
+            var drawnWidth = (int)(dim.TileWidth * RenderScale);
+            var drawnHeight = (int)(dim.TileHeight * RenderScale);
+            var fastCompose = TileCompositor.CanCompose(image) && drawnWidth > 0 && drawnHeight > 0;
+            var gridOverlay = _gameScreen.ShowGrid
+                ? Images.ExtractBitmap(activeInterface.PicSources["gridlines"][0])
+                : (Image?)null;
+
             for (var row = 0; row < map.YDim; row++)
             {
                 if (ypos >= -dim.TileHeight)
@@ -166,18 +177,14 @@ public abstract class BaseGameView : IGameView
                             if (tile.IsVisible(civilizationId) || map.MapRevealed)
                             {
                                 var tileDetails = _gameScreen.TileCache.GetTileDetails(tile, civilizationId);
-                                image.Draw(tileDetails.Image,
-                                    new Rectangle(0, 0, tileDetails.Image.Width, tileDetails.Image.Height),
-                                    ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight)),
-                                    Color.White);
+                                var target = ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight));
+                                DrawTileInto(image, tileDetails.Image, target, drawnWidth, drawnHeight,
+                                    fastCompose, _gameScreen.TileCache, tileDetails);
 
-                                if (_gameScreen.ShowGrid)
+                                if (gridOverlay is { } grid)
                                 {
-                                    var grid = Images.ExtractBitmap(activeInterface.PicSources["gridlines"][0]);
                                     image.Draw(grid, new Rectangle(0, 0, grid.Width, grid.Height),
-                                        ScaleRectangle(new Rectangle(xpos, ypos, dim.TileWidth, dim.TileHeight)),
-                                        Color.White);
-
+                                        target, Color.White);
                                 }
 
                                 var posVector = new Vector2(xpos, ypos);
@@ -212,6 +219,37 @@ public abstract class BaseGameView : IGameView
         }
     }
 
+
+    /// <summary>
+    /// Puts one map tile into the picture being composed.
+    /// <para>
+    /// Both steps this replaces were done inside raylib's own image drawing, once
+    /// per tile per redraw: resampling the tile to the size it is drawn at, and
+    /// blending it a pixel at a time through a general-purpose path. Between them
+    /// they accounted for practically the whole cost of redrawing the map. The
+    /// resampled tile is now kept by the tile cache and the blend is a straight run
+    /// over rows, and raylib is still used for anything the fast path cannot
+    /// handle.
+    /// </para>
+    /// </summary>
+    private static void DrawTileInto(Image destination, Image tile, Rectangle target,
+        int drawnWidth, int drawnHeight, bool fastCompose, TileTextureCache cache, TileDetails details)
+    {
+        if (!fastCompose)
+        {
+            destination.Draw(tile, new Rectangle(0, 0, tile.Width, tile.Height), target, Color.White);
+            return;
+        }
+
+        var drawable = cache.DrawableImage(details, drawnWidth, drawnHeight);
+        if (!TileCompositor.CanCompose(drawable))
+        {
+            destination.Draw(tile, new Rectangle(0, 0, tile.Width, tile.Height), target, Color.White);
+            return;
+        }
+
+        TileCompositor.Blend(destination, drawable, (int)target.X, (int)target.Y);
+    }
 
     private static int GetCitySizeIndexForStyle(int cityStyleIndex, int citySize)
     {
