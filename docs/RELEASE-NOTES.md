@@ -1,16 +1,19 @@
-**Saving, and a turn that ends when you press Enter.**
+**The game answers the keyboard and the mouse again.**
 
-Everything here was reported against 0.1.3 in issue #113, or found while fixing it.
+The main thing reported against 0.1.4 in issue #114 was that the interface felt
+unresponsive: Enter had to be pressed several times before a turn would end, and
+selecting a unit or clicking a city often did nothing. There were two separate
+causes, and both are fixed. Everything else here was found while measuring them.
 
 ## Install
 
 | Platform | Download |
 |---|---|
-| **Windows** (x64) | `rhYciv-0.1.4-win-x64.zip` — unzip, run `RaylibUI.exe` |
-| **macOS** (Apple silicon) | `rhYciv-0.1.4-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
-| **macOS** (Intel) | `rhYciv-0.1.4-osx-x64.zip` — same |
-| **Linux** (x64) | `rhYciv-0.1.4-linux-x64.tar.gz` — extract, run `./RaylibUI` |
-| **Linux** (Flatpak) | `rhYciv-0.1.4-x86_64.flatpak` |
+| **Windows** (x64) | `rhYciv-0.1.5-win-x64.zip` — unzip, run `RaylibUI.exe` |
+| **macOS** (Apple silicon) | `rhYciv-0.1.5-osx-arm64.zip` — unzip, drag `rhYciv.app` to Applications |
+| **macOS** (Intel) | `rhYciv-0.1.5-osx-x64.zip` — same |
+| **Linux** (x64) | `rhYciv-0.1.5-linux-x64.tar.gz` — extract, run `./RaylibUI` |
+| **Linux** (Flatpak) | `rhYciv-0.1.5-x86_64.flatpak` |
 
 Nothing else is needed. No commercial Civilization II installation, no runtime to install — each download carries its own .NET runtime and the complete art set.
 
@@ -29,51 +32,43 @@ xattr -dr com.apple.quarantine /Applications/rhYciv.app
 **Linux Flatpak**:
 
 ```
-flatpak install --user ./rhYciv-0.1.4-x86_64.flatpak
+flatpak install --user ./rhYciv-0.1.5-x86_64.flatpak
 flatpak run io.github.crhy.rhYciv
 ```
 
-## Saving
+## Pressing Enter over and over
 
-**Save Game and Load Game work from the menu.** Both entries carried no command id, so they were drawn and did nothing when clicked. The commands behind them existed and were bound to Ctrl+S and Ctrl+L, so saving worked — but only if you already knew the shortcut, which is not where anyone looks for it.
+**One press of End Turn plays one turn, not one civilisation.**
 
-**Autosave each turn actually saves.** It has been a checkbox in Game Options for as long as the dialog has existed, and nothing ever read it. It writes at the start of your turn, before anything has moved, so the newest autosave is always a position that can be picked up cleanly. Three slots rotate, and a failure part way through cannot destroy the one it is writing over.
+Starting a civilisation's turn handed control back and waited. That is right for you and wrong for everybody else: a computer civilisation is not interactive, so nothing ever came back to ask it for its next unit. Each rival moved a single unit and then stopped, holding the turn. One press of End Turn advanced the world by one civilisation rather than one turn — so with eight rivals on the board you had to press Enter eight times, into a game that appeared to be ignoring you, before you could move again.
 
-**Opening the Save dialog could take the game down.** The name it offers is built from the leader's initials, taken with `Substring(0, 2)` — which throws on a one-letter leader, or a custom civilisation saved with the name left blank. It crashed before the dialog drew, so nothing on screen said why.
+Two things followed from the same fault, and are fixed with it. Rival civilisations only ever moved their **first** unit, all game; they now move their whole armies. And none of their end-of-turn orders ever ran, so a computer unit told to fortify never became fortified and their settlers never finished a road or an irrigation ditch they had started.
 
-## The turn
+**A keypress is no longer lost because a frame ran long.**
 
-**Enter ends the turn on the first press.** Ending a turn walks every unit giving it its end-of-turn processing, and it returned the moment it met one that needed a decision from you — a GoTo whose route no longer exists, a settler freed by finishing what it was building — abandoning the rest of the list. So each press got only as far as the next such unit.
+Keys were read by asking about every key on the keyboard once a frame. A key pressed and let go between two frames is already back up by the time it is asked about, so on any frame that ran long the press simply never happened. That is the other half of having to press Enter several times, and it is why a quick click sometimes did nothing. Keys now come from the window's own queue of what was actually pressed, which cannot lose one however briefly it was held.
 
-It was not only slow. The units behind the one that stopped the walk were **never processed at all**, so a unit told to fortify did not become fortified, and did not get its defensive bonus, until whatever preceded it in the list had been dealt with.
+## Speed
 
-## Diplomats
+**Redrawing the map is about ten times faster.** A screenful of map is a thousand tiles or more, and the whole picture is composed again whenever the view moves or anything on it changes. Every tile was handed to raylib's general-purpose image drawing, which resamples the tile to the size it is drawn at and then throws the answer away — once per tile, every redraw. Measured on a revealed map: seventeen to forty milliseconds before, two to three now.
 
-A Diplomat has no attack strength, so walking one into an enemy unit or city was refused outright: the unit could be researched, built and marched across the map, and then did nothing whatever.
+That mattered for more than smoothness. A hundred-millisecond frame is long enough to swallow the click that follows it, which is why clicking a city sometimes had to be done twice.
 
-Moving one onto somebody else's unit or city now offers to buy it. A lone unit in the open can be bribed; a stack cannot, which is the point of standing a second unit beside a valuable one, and nor can a garrison inside a city — that is bought by inciting the city, which brings its defenders over with it. A capital cannot be bought at any price. Both prices rise with the treasury the owner is sitting on and fall away with distance from the seat of their government.
+**A redraw happens when it is asked for.** The static view of the map ticks once every two seconds, and a requested redraw waited for that tick — so ground coming into view, a city founded, a unit lost, or the grid being switched on could sit unseen for two seconds. A move being played out is still allowed to finish.
 
-## Rules
+**The side panel keeps answering the mouse.** Almost everything in it is built again whenever the active unit changes, and the screen went on delivering the mouse to the controls that had just been replaced, so clicks in the panel did nothing until the pointer was moved away and back.
 
-**Huts use the original game's measured odds.** There are five outcomes, equally likely — tribes, gold, mercenaries, scrolls, barbarians — and an empty village is **not one of them**. It exists only as a consolation when one of the five cannot be delivered. It was a sixth outcome here, drawn as often as the rest. Tribes and barbarians are also withheld in favour of mercenaries near a city, or before you have founded one.
+**A rival's turn cannot queue up minutes of watching.** Every move you can see is composed into a short animation the moment it happens. Now that rivals play a whole turn at once, a turn spent in sight of a dozen units would have built and then played a dozen of them; past a limit the move is drawn rather than animated.
 
-**Switching production says what it will cost.** Changing between a unit, a building and a wonder forfeits a share of the work already done. The engine has always charged it; nothing said so, and the shields simply disappeared.
+## Research
 
-## The map
+**Choose Your Research has a Goal button.** Name an advance to work towards — anything you do not already have, however far off — and the chooser will list only the research that leads there: the goal's outstanding prerequisites, and the goal itself once everything it needs is known. When nothing you can begin now brings the goal any nearer, it says so plainly rather than showing you an empty list. The goal is kept in saved games and retires itself when you reach it.
 
-**The coastline.** It ran through saturated turquoise from 48 pixels out with a wide cream beach behind it, which drew a lit outline round every island. Measured against a photograph of a real fjord coast instead: the sea is nearly black up to the rock, the lightening at the shore is slight, and the beach is a thread. The shoreline also wanders further, so a coast is lobed rather than a chain of straight facets, and the water inside an enclosed square is lopsided instead of the perfect circle it was.
+**The chooser no longer asks the same question twice.** The guard against a second chooser stacking behind the first was being cancelled every turn by the backstop meant to protect it: the engine asks for research from the start of the turn's bookkeeping, which runs before you are told the turn has begun, so the flag was cleared on the same turn it was set. It now lasts until the question has actually been answered.
 
-**The generation matte is gone.** The art is drawn on magenta and cut out, and cutting sets the alpha without touching the colour underneath — so citizens in the city window were outlined and veiled in pink, and several city sprites had magenta specks on the roofs.
+## For bug reports
 
-**The marker for a unit killed in combat appears.** It worked out who had died from the per-round hitpoint series, which records each unit's health at the *start* of a round, before that round's damage. The loser's last entry is therefore its health just before the fatal blow — always above zero — so it never once decided anybody had died, and the pause and the marker never happened at all.
-
-**Production shields are an even block**, every row the same length and as near square as the cost allows, rather than filling to the panel's width and stranding a single shield on the last row. **The flag over a city is three times the size**, and **special resources sit high in their square**, so a whale breaches out of water rather than sand.
-
-## Elsewhere
-
-- **Left and right step between cities** from inside the city window.
-- The caret in a text box is clamped rather than trusted, so a key arriving with it out of range cannot end a session.
-
+`RHYCIV_FRAME_LOG=<seconds>` makes the game report how many frames it is drawing and how long the worst one took. A game that stops answering the keyboard is nearly always a game whose frames have grown long enough to swallow a keypress, and that is very hard to judge by eye.
 
 ## Known limitations
 
